@@ -342,6 +342,10 @@ oscheck_add_expunges_for_quick_tests()
 		oscheck_add_expunge_if_exists "${OSCHECK_EXCLUDE_PREFIX}/any/large-disk.txt"
 		oscheck_add_expunge_if_exists "${OSCHECK_EXCLUDE_PREFIX}/any/$FSTYP/large-disk.txt"
 	fi
+
+	if [ "$FSTESTS_SKIP_NOTRUN_TESTS" == "True" ]; then
+		oscheck_add_expunge_if_exists "${OSCHECK_EXCLUDE_PREFIX}/any/$FSTYP/notrun.txt"
+	fi
 }
 
 oscheck_process_non_failure_expunges()

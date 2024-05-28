@@ -94,6 +94,7 @@ oscheck_usage()
 	echo "--custom-kernel - Only checks if the kernel detected is a distro kernel or not, does not run any tests"
 	echo "--fast-tests    - Run oscheck's interpretation of what fast test are"
 	echo "--large-disk    - Include tests that require a large disk"
+	echo "--skip-notrun   - Skip tests that do not run"
 	echo "--print-start   - Echo into /dev/kmsg when we've started with run fstests fstestsstart/000 at time'"
 	echo "--print-done    - Echo into /dev/kmsg when we're done with run fstests fstestsdone/000 at time'"
 	echo "--verbose       - Be verbose when debugging"
@@ -156,6 +157,10 @@ parse_args()
 			;;
 		--large-disk)
 			FSTESTS_RUN_LARGE_DISK_TESTS="y"
+			shift
+			;;
+		--skip-notrun)
+			FSTESTS_SKIP_NOTRUN_TESTS="True"
 			shift
 			;;
 		--journal)
@@ -573,6 +578,10 @@ fi
 
 if [ -z "$FSTESTS_RUN_LARGE_DISK_TESTS" ]; then
 	FSTESTS_RUN_LARGE_DISK_TESTS="n"
+fi
+
+if [ -z "$FSTESTS_SKIP_NOTRUN_TESTS" ]; then
+	FSTESTS_SKIP_NOTRUN_TESTS="True"
 fi
 
 if [[ "$LIMIT_TESTS" == "" ]]; then

@@ -1247,6 +1247,7 @@
     FSTESTS_SPARSE_FILE_SIZE: "{{ sparsefiles_size }}"
     FSTESTS_SPARSE_FILENAME_PREFIX: "{{ sparsefiles_filename_prefix }}"
     FSTESTS_RUN_LARGE_DISK_TESTS: "{{ run_large_disk_tests | default ('') }}"
+    FSTESTS_SKIP_NOTRUN_TESTS: "{{ skip_notrun_tests | default ('True') }}"
     FSTESTS_RUN_AUTO_GROUP_TESTS: "{{ run_auto_group_tests }}"
     FSTESTS_RUN_CUSTOM_GROUP_TESTS: "{{ run_custom_group_tests }}"
     FSTESTS_EXCLUDE_TEST_GROUPS: "{{ exclude_test_groups }}"

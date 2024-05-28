@@ -792,6 +792,14 @@ config FSTESTS_RUN_LARGE_DISK_TESTS
 	  to run. The "large disk" requirement is test dependent, but
 	  typically, it means a disk with capacity of at several 10G.
 
+config FSTESTS_SKIP_NOTRUN_TESTS
+	bool "Skip fstests that do not run for the testing filesystem"
+	depends on FSTESTS_RUN_TESTS
+	default y
+	help
+	  Enable this to avoid running tests that do not apply for your filesystem and
+	  do report "[notrun]" with a specific reason.
+
 config FSTESTS_ENABLE_SOAK_DURATION
 	bool "Enable custom soak duration time"
 	help

@@ -1,0 +1,504 @@
+# The following tests do not run for tmpfs
+generic/008  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/009  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/010  # [not run] /data/fstests-install/xfstests/src/dbtest not built
+generic/012  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/014  # [not run] Sparse files are not supported or do not work as expected
+generic/016  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/017  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/018  # [not run] defragmentation not supported for fstype "tmpfs"
+generic/021  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/022  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/026  # [not run] tmpfs does not define maximum ACL count
+generic/031  # [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+generic/032  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/033  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/034  # [not run] require /media/scratch to be valid block disk
+generic/039  # [not run] require /media/scratch to be valid block disk
+generic/040  # [not run] require /media/scratch to be valid block disk
+generic/041  # [not run] require /media/scratch to be valid block disk
+generic/042  # [not run] tmpfs does not support shutdown
+generic/043  # [not run] tmpfs does not support shutdown
+generic/044  # [not run] tmpfs does not support shutdown
+generic/045  # [not run] tmpfs does not support shutdown
+generic/046  # [not run] tmpfs does not support shutdown
+generic/047  # [not run] tmpfs does not support shutdown
+generic/049  # [not run] tmpfs does not support shutdown
+generic/050  # [not run] tmpfs does not support shutdown
+generic/051  # [not run] tmpfs does not support shutdown
+generic/052  # [not run] tmpfs does not support shutdown
+generic/054  # [not run] tmpfs does not support shutdown
+generic/055  # [not run] tmpfs does not support shutdown
+generic/056  # [not run] require /media/scratch to be valid block disk
+generic/057  # [not run] require /media/scratch to be valid block disk
+generic/058  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/059  # [not run] require /media/scratch to be valid block disk
+generic/060  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/061  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/063  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/064  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/065  # [not run] require /media/scratch to be valid block disk
+generic/066  # [not run] require /media/scratch to be valid block disk
+generic/067  # [not run] require /media/scratch to be valid block disk
+generic/068  # [not run] tmpfs does not support freezing
+generic/072  # [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+generic/073  # [not run] require /media/scratch to be valid block disk
+generic/076  # [not run] require /media/scratch to be local device
+generic/081  # [not run] require /media/scratch to be valid block disk
+generic/082  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/085  # [not run] require /media/scratch to be valid block disk
+generic/090  # [not run] require /media/scratch to be valid block disk
+generic/092  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/094  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/096  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/101  # [not run] require /media/scratch to be valid block disk
+generic/104  # [not run] require /media/scratch to be valid block disk
+generic/106  # [not run] require /media/scratch to be valid block disk
+generic/107  # [not run] require /media/scratch to be valid block disk
+generic/108  # [not run] require /media/scratch to be valid block disk
+generic/110  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/111  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/114  # [not run] Sparse files are not supported or do not work as expected
+generic/115  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/116  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/118  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/119  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/121  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/122  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/129  # [not run] Sparse files are not supported or do not work as expected
+generic/130  # [not run] Sparse files are not supported or do not work as expected
+generic/134  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/136  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/137  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/138  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/139  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/140  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/142  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/143  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/144  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/145  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/146  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/147  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/148  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/149  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/150  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/151  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/152  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/153  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/154  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/155  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/156  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/157  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/158  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/159  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/160  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/161  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/162  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/163  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/164  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/165  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/166  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/167  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/168  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/170  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/171  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/172  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/173  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/174  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/175  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/176  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/177  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/178  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/179  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/180  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/181  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/182  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/183  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/185  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/186  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/187  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/188  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/189  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/190  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/191  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/194  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/195  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/196  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/197  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/199  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/200  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/201  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/202  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/203  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/205  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/206  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/216  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/217  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/218  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/219  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/220  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/222  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/223  # [not run] can't mkfs tmpfs with geometry
+generic/227  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/229  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/230  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/231  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/232  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/233  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/234  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/235  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/238  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/239  # [not run] Sparse files are not supported or do not work as expected
+generic/240  # [not run] Sparse files are not supported or do not work as expected
+generic/241  # [not run] dbench not found
+generic/242  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/243  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/244  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/250  # [not run] require /media/scratch to be valid block disk
+generic/251  # [not run] FITRIM not supported on /media/scratch
+generic/252  # [not run] require /media/scratch to be valid block disk
+generic/253  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/254  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/255  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/259  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/260  # [not run] FITRIM not supported on /media/scratch
+generic/261  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/262  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/264  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/265  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/266  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/267  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/268  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/270  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/271  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/272  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/276  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/278  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/279  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/280  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/281  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/282  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/283  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/284  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/287  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/288  # [not run] FITRIM not supported on /media/scratch
+generic/289  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/290  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/291  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/292  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/293  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/295  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/296  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/297  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/298  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/299  # [not run] require /media/scratch to be valid block disk
+generic/300  # [not run] require /media/scratch to be valid block disk
+generic/301  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/302  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/303  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/304  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/305  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/311  # [not run] require /media/scratch to be valid block disk
+generic/316  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/321  # [not run] require /media/scratch to be valid block disk
+generic/322  # [not run] require /media/scratch to be valid block disk
+generic/324  # [not run] defragmentation not supported for fstype "tmpfs"
+generic/325  # [not run] require /media/scratch to be valid block disk
+generic/326  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/327  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/328  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/329  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/330  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/331  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/332  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/333  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/334  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/335  # [not run] require /media/scratch to be valid block disk
+generic/336  # [not run] require /media/scratch to be valid block disk
+generic/338  # [not run] require /media/scratch to be valid block disk
+generic/341  # [not run] require /media/scratch to be valid block disk
+generic/342  # [not run] require /media/scratch to be valid block disk
+generic/343  # [not run] require /media/scratch to be valid block disk
+generic/348  # [not run] require /media/scratch to be valid block disk
+generic/352  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/353  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/356  # [not run] swapfiles are not supported
+generic/357  # [not run] swapfiles are not supported
+generic/358  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/359  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/361  # [not run] require /media/scratch to be valid block disk
+generic/362  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/363  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/364  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/365  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/366  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/367  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/368  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/369  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/370  # [not run] this test requires richacl support on $SCRATCH_DEV
+generic/372  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/373  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/374  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/376  # [not run] require /media/scratch to be valid block disk
+generic/379  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/380  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/381  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/382  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/383  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/384  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/385  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/386  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/387  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/388  # [not run] require /media/scratch to be local device
+generic/390  # [not run] tmpfs does not support freezing
+generic/392  # [not run] tmpfs does not support shutdown
+generic/395  # [not run] No encryption support for tmpfs
+generic/396  # [not run] No encryption support for tmpfs
+generic/397  # [not run] No encryption support for tmpfs
+generic/398  # [not run] No encryption support for tmpfs
+generic/399  # [not run] No encryption support for tmpfs
+generic/400  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/402  # [not run] filesystem tmpfs timestamp bounds are unknown
+generic/404  # [not run] xfs_io finsert  failed (old kernel/wrong fs?)
+generic/405  # [not run] require /media/scratch to be valid block disk
+generic/407  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/408  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/409  # [not run] require /media/scratch to be local device
+generic/410  # [not run] require /media/scratch to be local device
+generic/411  # [not run] require /media/scratch to be local device
+generic/413  # [not run] mount /media/scratch with dax failed
+generic/414  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/415  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/417  # [not run] tmpfs does not support shutdown
+generic/418  # [not run] require /media/test to be valid block disk
+generic/419  # [not run] No encryption support for tmpfs
+generic/421  # [not run] No encryption support for tmpfs
+generic/425  # [not run] xfs_io fiemap -a failed (old kernel/wrong fs?)
+generic/429  # [not run] No encryption support for tmpfs
+generic/435  # [not run] No encryption support for tmpfs
+generic/440  # [not run] No encryption support for tmpfs
+generic/441  # [not run] require /media/scratch to be valid block disk
+generic/447  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/449  # [not run] require /media/scratch to be valid block disk
+generic/450  # [not run] Only test on sector size < half of block size
+generic/453  # [not run] tmpfs does not allow unrestricted byte streams for names
+generic/454  # [not run] tmpfs does not allow unrestricted byte streams for names
+generic/455  # [not run] This test requires a valid $LOGWRITES_DEV
+generic/456  # [not run] require /media/scratch to be valid block disk
+generic/457  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/458  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/459  # [not run] require /media/scratch to be valid block disk
+generic/461  # [not run] tmpfs does not support shutdown
+generic/462  # [not run] mount /media/scratch with dax failed
+generic/463  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/466  # [not run] require /media/scratch to be valid block disk
+generic/468  # [not run] tmpfs does not support shutdown
+generic/469  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/470  # [not run] This test requires a valid $LOGWRITES_DEV
+generic/472  # [not run] swapfiles are not supported
+generic/474  # [not run] tmpfs does not support shutdown
+generic/475  # [not run] require /media/scratch to be valid block disk
+generic/479  # [not run] require /media/scratch to be valid block disk
+generic/480  # [not run] require /media/scratch to be valid block disk
+generic/481  # [not run] require /media/scratch to be valid block disk
+generic/482  # [not run] This test requires a valid $LOGWRITES_DEV
+generic/483  # [not run] require /media/scratch to be valid block disk
+generic/484  # [not run] require /media/scratch to be valid block disk
+generic/485  # [not run] xfs_io finsert  failed (old kernel/wrong fs?)
+generic/487  # [not run] This test requires a valid $SCRATCH_LOGDEV
+generic/489  # [not run] require /media/scratch to be valid block disk
+generic/491  # [not run] tmpfs does not support freezing
+generic/492  # [not run] xfs_io label  failed (old kernel/wrong fs?)
+generic/493  # [not run] swapfiles are not supported
+generic/494  # [not run] swapfiles are not supported
+generic/495  # [not run] swapfiles are not supported
+generic/496  # [not run] swapfiles are not supported
+generic/497  # [not run] swapfiles are not supported
+generic/498  # [not run] require /media/scratch to be valid block disk
+generic/499  # [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+generic/500  # [not run] require /media/scratch to be valid block disk
+generic/501  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/502  # [not run] require /media/scratch to be valid block disk
+generic/503  # [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+generic/505  # [not run] tmpfs does not support shutdown
+generic/506  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/507  # [not run] file system doesn't support chattr +ASai
+generic/508  # [not run] tmpfs does not support shutdown
+generic/509  # [not run] require /media/scratch to be valid block disk
+generic/510  # [not run] require /media/scratch to be valid block disk
+generic/511  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/512  # [not run] require /media/scratch to be valid block disk
+generic/513  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/514  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/515  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/516  # [not run] Dedupe not supported by test filesystem type: tmpfs
+generic/517  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/518  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/519  # [not run] FIBMAP not supported by this filesystem
+generic/520  # [not run] require /media/scratch to be valid block disk
+generic/526  # [not run] require /media/scratch to be valid block disk
+generic/527  # [not run] require /media/scratch to be valid block disk
+generic/530  # [not run] tmpfs does not support shutdown
+generic/534  # [not run] require /media/scratch to be valid block disk
+generic/535  # [not run] require /media/scratch to be valid block disk
+generic/536  # [not run] tmpfs does not support shutdown
+generic/537  # [not run] tmpfs does not support metadata journaling
+generic/538  # [not run] Need device logical block size(4096) < fs block size(4096)
+generic/540  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/541  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/542  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/543  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/544  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/546  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/547  # [not run] require /media/scratch to be valid block disk
+generic/548  # [not run] No encryption support for tmpfs
+generic/549  # [not run] No encryption support for tmpfs
+generic/550  # [not run] No encryption support for tmpfs
+generic/552  # [not run] require /media/scratch to be valid block disk
+generic/554  # [not run] swapfiles are not supported
+generic/556  # [not run] tmpfs does not support casefold feature
+generic/557  # [not run] require /media/scratch to be valid block disk
+generic/559  # [not run] duperemove utility required, skipped this test
+generic/560  # [not run] duperemove utility required, skipped this test
+generic/561  # [not run] duperemove utility required, skipped this test
+generic/562  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/563  # [not run] require /media/scratch to be valid block disk
+generic/565  # [not run] tmpfs does not support cross-device copy_file_range
+generic/566  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/569  # [not run] swapfiles are not supported
+generic/570  # [not run] require /media/scratch to be valid block disk
+generic/572  # [not run] fsverity utility required, skipped this test
+generic/573  # [not run] fsverity utility required, skipped this test
+generic/574  # [not run] fsverity utility required, skipped this test
+generic/575  # [not run] fsverity utility required, skipped this test
+generic/576  # [not run] fsverity utility required, skipped this test
+generic/577  # [not run] fsverity utility required, skipped this test
+generic/578  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/579  # [not run] fsverity utility required, skipped this test
+generic/580  # [not run] No encryption support for tmpfs
+generic/581  # [not run] No encryption support for tmpfs
+generic/582  # [not run] No encryption support for tmpfs
+generic/583  # [not run] No encryption support for tmpfs
+generic/584  # [not run] No encryption support for tmpfs
+generic/587  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/588  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/589  # [not run] require /media/scratch to be local device
+generic/590  # [not run] This test requires at least 8GB free on /media/scratch to run
+generic/592  # [not run] No encryption support for tmpfs
+generic/593  # [not run] No encryption support for tmpfs
+generic/594  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/595  # [not run] No encryption support for tmpfs
+generic/596  # [not run] accton utility required, skipped this test
+generic/599  # [not run] tmpfs does not support shutdown
+generic/600  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/601  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/602  # [not run] No encryption support for tmpfs
+generic/603  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/605  # [not run] mount /media/scratch with dax=always failed
+generic/606  # [not run] mount /media/scratch with dax=always failed
+generic/607  # [not run] xfs_io chattr +x failed (old kernel/wrong fs?)
+generic/608  # [not run] mount /media/scratch with dax=always failed
+generic/610  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/612  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/613  # [not run] No encryption support for tmpfs
+generic/614  # [not run] test requires delayed allocation buffered writes
+generic/616  # [not run] kernel does not support IO_URING
+generic/617  # [not run] kernel does not support IO_URING
+generic/620  # [not run] require /media/scratch to be valid block disk
+generic/621  # [not run] No encryption support for tmpfs
+generic/622  # [not run] tmpfs does not support shutdown
+generic/623  # [not run] tmpfs does not support shutdown
+generic/624  # [not run] fsverity utility required, skipped this test
+generic/625  # [not run] fsverity utility required, skipped this test
+generic/627  # [not run] require /media/scratch to be valid block disk
+generic/628  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/629  # [not run] require /media/scratch to be valid block disk
+generic/630  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/631  # [not run] this test requires overlay support
+generic/635  # [not run] tmpfs does not support shutdown
+generic/636  # [not run] swapfiles are not supported
+generic/640  # [not run] require /media/scratch to be valid block disk
+generic/641  # [not run] swapfiles are not supported
+generic/643  # [not run] swapfiles are not supported
+generic/646  # [not run] tmpfs does not support shutdown
+generic/648  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/649  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/651  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/652  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/653  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/654  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/655  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/657  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/658  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/659  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/660  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/661  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/662  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/663  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/664  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/665  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/666  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/667  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/668  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/669  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/670  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/671  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/672  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/673  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/674  # [not run] Dedupe not supported by scratch filesystem type: tmpfs
+generic/675  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/677  # [not run] require /media/scratch to be valid block disk
+generic/678  # [not run] kernel does not support IO_URING
+generic/679  # [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
+generic/681  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/682  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/685  # [not run] xfs_io fzero  failed (old kernel/wrong fs?)
+generic/686  # [not run] xfs_io finsert  failed (old kernel/wrong fs?)
+generic/687  # [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+generic/690  # [not run] require /media/scratch to be valid block disk
+generic/691  # [not run] disk quotas not supported by this filesystem type: tmpfs
+generic/692  # [not run] fsverity utility required, skipped this test
+generic/693  # [not run] No encryption support for tmpfs
+generic/694  # [not run] This test requires at least 4GB free on /media/test to run
+generic/695  # [not run] require /media/scratch to be valid block disk
+generic/695  # [not run] require /media/scratch to be valid block disk
+generic/699  # [not run] this test requires overlay support
+generic/700  # [not run] Require selinux to be enabled
+generic/701  # [not run] This test requires at least 5GB free on /media/test to run
+generic/702  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/703  # [not run] kernel does not support IO_URING
+generic/704  # [not run] require /media/test to be valid block disk
+generic/705  # [not run] tmpfs does not support shutdown
+generic/709  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/710  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/711  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/712  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/713  # [not run] xfs_io swapext -v exchrange -s 64k -l 64k not supported on tmpfs
+generic/714  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/715  # [not run] xfs_io swapext -v exchrange -s 64k -l 64k not supported on tmpfs
+generic/716  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/717  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/718  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/719  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/720  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/721  # [not run] xfs_io startupdate  support is missing
+generic/722  # [not run] xfs_io swapext -v exchrange -a not supported on tmpfs
+generic/723  # [not run] xfs_io swapext -v exchrange not supported on tmpfs
+generic/724  # [not run] xfs_io swapext -v exchrange -a not supported on tmpfs
+generic/725  # [not run] xfs_io swapext -v exchrange -a not supported on tmpfs
+generic/726  # [not run] xfs_io swapext -v exchrange -a not supported on tmpfs
+generic/727  # [not run] xfs_io swapext -v exchrange -a not supported on tmpfs
+generic/730  # [not run] require /media/test to be valid block disk
+generic/731  # [not run] require /media/test to be valid block disk
+generic/733  # [not run] Reflink not supported by scratch filesystem type: tmpfs
+generic/734  # [not run] Reflink not supported by test filesystem type: tmpfs
+generic/735  # [not run] xfs_io finsert  failed (old kernel/wrong fs?)
+generic/737  # [not run] tmpfs does not support shutdown
+generic/738  # [not run] tmpfs does not support freezing
+generic/739  # [not run] No encryption support for tmpfs
+generic/741  # [not run] require /media/scratch to be valid block disk
+generic/743  # [not run] xfs_io madvise doesn't support -R
+generic/744  # [not run] tmpfs does not support duplicate fsid
+shared/002   # [not run] not suitable for this filesystem type: tmpfs
+shared/032   # [not run] not suitable for this filesystem type: tmpfs
+shared/298   # [not run] not suitable for this filesystem type: tmpfs

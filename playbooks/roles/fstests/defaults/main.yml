@@ -64,6 +64,7 @@ fstests_debug: False
 
 compile_dbench: False
 run_large_disk_tests:
+skip_notrun_tests: True
 
 kdevops_fstests_setup_name: "kdevops_fstests_setup"
 kdevops_fstests_setup: ".{{ kdevops_fstests_setup_name }}"

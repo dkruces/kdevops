@@ -62,6 +62,7 @@ export FSTESTS_SPARSE_FILENAME_PREFIX='{{ sparsefiles_filename_prefix }}'
 {% if fstests_uses_no_devices -%}
 export FSTESTS_USES_NO_DEVICES='True'
 {% endif %}
+export FSTESTS_SKIP_NOTRUN TESTS='{{ skip_notrun_tests }}'
 export FSTESTS_RUN_LARGE_DISK_TESTS='{{ run_large_disk_tests }}'
 export FSTESTS_RUN_AUTO_GROUP_TESTS='{{ run_auto_group_tests }}'
 export FSTESTS_RUN_CUSTOM_GROUP_TESTS='{{ run_custom_group_tests }}'

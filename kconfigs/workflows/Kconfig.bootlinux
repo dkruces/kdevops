@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+config HAVE_BOOTLINUX_TREE_LINUS_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-linus-gitref)
+
+config HAVE_BOOTLINUX_TREE_NEXT_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-next-gitref)
+
+config HAVE_BOOTLINUX_TREE_STABLE_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-stable-gitref)
+
+config HAVE_BOOTLINUX_TREE_MCGROF_LINUS_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-mcgrof-linus-gitref)
+
+config HAVE_BOOTLINUX_TREE_MCGROF_NEXT_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-mcgrof-next-gitref)
+
+config HAVE_BOOTLINUX_TREE_BTRFS_DEVEL_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-btrfs-devel-gitref)
+
+config HAVE_BOOTLINUX_TREE_CEL_LINUX_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-cel-linux-gitref)
+
+config HAVE_BOOTLINUX_TREE_JLAYTON_LINUX_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-jlayton-linux-gitref)
+
+config HAVE_BOOTLINUX_TREE_KDEVOPS_LINUS_GITREF
+	bool
+	default $(shell, scripts/check_file_empty.sh workflows/linux/Kconfig.refs-kdevops-linus-gitref)

@@ -5,6 +5,8 @@
 
 mainmenu "$(PROJECT) $(PROJECTRELEASE)"
 
+source "kconfigs/workflows/Kconfig.bootlinux"
+
 config HAVE_KDEVOPS_CUSTOM_DEFAULTS
 	bool
 	default n

@@ -1,8 +1,7 @@
 if BOOTLINUX_TREE_NEXT
 
-config BOOTLINUX_TREE_NEXT_TAG
-	string "linux-next tag to pull"
-	default "next-20240424"
+source "workflows/linux/Kconfig.refs-next"
+source "workflows/linux/Kconfig.refs-next-gitref"
 
 config BOOTLINUX_TREE_NEXT_NAME
 	string

@@ -177,6 +177,9 @@ endif
 
 include scripts/gen-hosts.Makefile
 include scripts/gen-nodes.Makefile
+ifneq ($(MAKECMDGOALS),dynconfig)
+	include scripts/gen-kreleases.Makefile
+endif
 
 # disable built-in rules for this
 .SUFFIXES:

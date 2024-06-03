@@ -1,8 +1,6 @@
 if BOOTLINUX_TREE_BTRFS_DEVEL
 
-config BOOTLINUX_TREE_BTRFS_DEVEL_TAG
-	string
-	default "btrfs-devel"
+source "workflows/linux/Kconfig.refs-btrfs-devel"
 
 config BOOTLINUX_TREE_BTRFS_DEVEL_NAME
 	string

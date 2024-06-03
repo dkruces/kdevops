@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+# Automatically generated file
+choice
+	prompt "Tag or branch to use"
+
+config BOOTLINUX_CEL_LINUX_NEXT
+	bool "nfsd-next"
+	help
+		Pull the nfsd-next branch.
+
+config BOOTLINUX_CEL_LINUX_FIXES
+	bool "nfsd-fixed"
+	help
+		Pull the nfsd-fixed branch.
+
+config BOOTLINUX_CEL_LINUX_CUSTOM
+	bool "custom"
+	help
+		Use a custom branch name.
+
+endchoice
+
+config BOOTLINUX_TREE_CEL_LINUX_REF
+	string
+	default "nfsd-next" if BOOTLINUX_CEL_LINUX_NEXT
+	default "nfsd-fixed" if BOOTLINUX_CEL_LINUX_FIXES
+	default BOOTLINUX_CEL_LINUX_CUSTOM_NAME if BOOTLINUX_CEL_LINUX_CUSTOM

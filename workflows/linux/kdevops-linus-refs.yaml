@@ -1,0 +1,6 @@
+---
+configs:
+  - minorder:
+    config: BOOTLINUX_KDEVOPS_LINUS_LBS_MINORDER
+    ref: "large-block-minorder"
+    help: "Use the latest LBS branch based on Linus's tree"

@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+# Automatically generated file
+choice
+	prompt "Tag or branch to use"
+
+config BOOTLINUX_BTRFS_DEVEL
+	bool "btrfs-devel"
+	help
+		Use development branch.
+
+endchoice
+
+config BOOTLINUX_TREE_BTRFS_DEVEL_REF
+	string
+	default "btrfs-devel" if BOOTLINUX_BTRFS_DEVEL

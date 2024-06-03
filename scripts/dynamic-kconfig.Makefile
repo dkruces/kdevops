@@ -17,6 +17,10 @@ dynamic-kconfig-help:
 
 PHONY += dynamic-kconfig-help
 
+ifeq ($(MAKECMDGOALS),dynconfig)
+	include scripts/gen-gitrefs.Makefile
+endif
+
 dynconfig:
 	$(Q)$(MAKE) dynconfig-pci
 

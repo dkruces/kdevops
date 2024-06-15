@@ -78,6 +78,9 @@ ANSIBLE_EXTRA_ARGS += kdevops_version='$(PROJECTRELEASE)'
 export KDEVOPS_HOSTS_TEMPLATE := $(KDEVOPS_HOSTFILE).j2
 export KDEVOPS_HOSTS := $(KDEVOPS_HOSTFILE)
 
+include Makefile.kdevops
+DEFAULT_DEPS += kdevops-deps
+
 LOCAL_DEVELOPMENT_ARGS	:=
 ifeq (y,$(CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH))
 include Makefile.local

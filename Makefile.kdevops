@@ -68,7 +68,7 @@ kdevops_libvirt_storage_pool_create:
 PHONY += kdevops_libvirt_storage_pool_create
 KDEVOPS_VAGRANT_WORK += kdevops_libvirt_storage_pool_create
 
-kdevops_deps: kdevops_terraform_deps $(KDEVOPS_VAGRANT_WORK) $(KDEVOPS_DEPS)
+kdevops_deps: $(BINARY_DEPS) $(BINARY_DEP_VCHECKS) menuconfig-deps kdevops_terraform_deps $(KDEVOPS_VAGRANT_WORK) $(KDEVOPS_DEPS)
 	@echo Installed dependencies
 PHONY += kdevops_deps
 

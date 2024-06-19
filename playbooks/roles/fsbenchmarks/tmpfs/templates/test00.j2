@@ -1,0 +1,36 @@
+#!/bin/bash
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+logfile=/tmp/log-$(uname --kernel-release)-{{ file }}
+
+rm -rf $logfile
+
+loop() {
+	bs=$1
+
+	{{ mount }}
+	echo "bs=$bs" | tee --append $logfile
+	fio \
+		-name=test00-{{ file }} \
+		--nrfiles={{ nrfiles }} \
+		-bs=$bs -direct=1 \
+		-ioengine=io_uring \
+		--group_reporting=1 \
+		--filesize=1G \
+		--readwrite=write --fallocate=none \
+		--numjobs={{ numjobs }} --create_on_open=1 \
+		--directory=/mnt-tmpfs | tee --append $logfile
+
+	sudo umount --verbose /mnt-tmpfs
+}
+
+loop 4k
+loop 8k
+loop 16k
+loop 32k
+loop 64k
+loop 128k
+loop 256k
+loop 512k
+loop 1M
+loop 2M

@@ -58,6 +58,11 @@ WORKFLOW_ARGS += kdevops_workflow_enable_nfstest='True'
 include workflows/nfstest/Makefile
 endif # CONFIG_KDEVOPS_WORKFLOW_ENABLE_NFSTEST == y
 
+ifeq (y,$(CONFIG_KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS))
+WORKFLOW_ARGS += kdevops_workflow_enable_fsbenchmarks='True'
+include workflows/fsbenchmarks/Makefile
+endif # CONFIG_KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS == y
+
 ANSIBLE_EXTRA_ARGS += $(WORKFLOW_ARGS)
 ANSIBLE_EXTRA_ARGS_SEPARATED += $(WORKFLOW_ARGS_SEPARATED)
 ANSIBLE_EXTRA_ARGS_DIRECT += $(WORKFLOW_ARGS_DIRECT)

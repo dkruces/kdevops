@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+if KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
+
+config FSBENCHMARKS_TMPFS_ENABLE
+	bool
+
+choice
+	prompt "Target filesystem to benchmark"
+
+config FSBENCHMARKS_TMPFS
+	bool "tmpfs"
+	select FSBENCHMARKS_TMPFS_ENABLE
+	help
+	  This will target tmpfs benchmarks.
+
+endchoice
+
+config FBENCHMARKS_FSTYP
+	string
+	default "tmpfs" if FSBENCHMARKS_TMPFS
+	help
+	  The filesystem to test. This will be automatically set depending on
+	  the above choice, you however can override this manually.
+
+if FSBENCHMARKS_TMPFS
+
+menu "Configure tmpfs benchmarks"
+source "workflows/fsbenchmarks/tmpfs/Kconfig"
+endmenu
+
+endif # FSBENCHMARKS_TMPFS
+
+endif # KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS

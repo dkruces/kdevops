@@ -1,0 +1,26 @@
+---
+mount_command:
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G tmpfs /mnt-tmpfs --verbose
+    - file: default
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,noswap tmpfs /mnt-tmpfs
+    - file: noswap
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,noswap,huge=always tmpfs /mnt-tmpfs
+    - file: noswap-always
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,noswap,huge=within_size tmpfs /mnt-tmpfs
+    - file: noswap-within_size
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,noswap,huge=advise tmpfs /mnt-tmpfs
+    - file: noswap-advise
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,huge=always tmpfs /mnt-tmpfs
+    - file: always
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,huge=within_size tmpfs /mnt-tmpfs
+    - file: within_size
+  - command:
+    - mount: sudo mount -t tmpfs -o size=512G,huge=advise tmpfs /mnt-tmpfs
+    - file: advise

@@ -1,0 +1,8 @@
+---
+- name: Task in fsbenchmarks role (PARENT)
+  debug:
+    msg: "This is a task in the fsbenchmarks role"
+
+- name: Execute tmpfs role tasks
+  include_tasks: "../tmpfs/tasks/main.yml"
+  tags: tmpfs

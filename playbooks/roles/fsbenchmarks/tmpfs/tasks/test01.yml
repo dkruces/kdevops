@@ -1,0 +1,3 @@
+- name: tmpfs/test01 !!!
+  debug:
+    msg: "tmpfs/test01 task"

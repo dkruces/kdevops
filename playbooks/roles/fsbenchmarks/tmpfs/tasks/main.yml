@@ -1,0 +1,13 @@
+---
+- name: Task in fsbenchmarks/tmpfs role (CHILD)
+  debug:
+    msg: "This is a task in the fsbenchmarks/tmpfs role"
+
+- name: Execute tmpfs test00
+  include_tasks: "test00.yml"
+  tags: tmpfs_test00
+
+- name: Execute tmpfs test01
+  include_tasks: "test01.yml"
+  tags: tmpfs_test01
+

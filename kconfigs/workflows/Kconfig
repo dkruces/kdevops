@@ -154,6 +154,12 @@ config KDEVOPS_WORKFLOW_DEDICATE_SELFTESTS
 	  selftests work. Note that you will need at least 8 GiB of RAM
 	  for your target guests.
 
+config KDEVOPS_WORKFLOW_DEDICATE_FSBENCHMARKS
+	bool "Filesystem benchmarks"
+	select KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
+	help
+	  A kdevops collection of filesystem benchmarks.
+
 config KDEVOPS_WORKFLOW_DEDICATE_GITR
 	bool "gitr"
 	select KDEVOPS_WORKFLOW_ENABLE_GITR
@@ -232,6 +238,12 @@ config KDEVOPS_WORKFLOW_NOT_DEDICATED_ENABLE_SELFTESTS
 	  Select this option if you are doing Linux kernel developent and
 	  testing with sefltests.
 
+config KDEVOPS_WORKFLOW_NOT_DEDICATED_ENABLE_FSBENCHMARKS
+	bool "Filesystem benchmarks"
+	select KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
+	help
+	  Select this option if you are doing filesystem benchmarks.
+
 config KDEVOPS_WORKFLOW_NOT_DEDICATED_ENABLE_GITR
 	bool "gitr"
 	select KDEVOPS_WORKFLOW_ENABLE_GITR
@@ -308,6 +320,16 @@ menu "Enable Linux kernel selftests"
 source "workflows/selftests/Kconfig"
 endmenu
 endif # KDEVOPS_WORKFLOW_ENABLE_SELFTESTS
+
+config KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
+	bool
+	default y if KDEVOPS_WORKFLOW_NOT_DEDICATED_ENABLE_FSBENCHMARKS || KDEVOPS_WORKFLOW_DEDICATE_FSBENCHMARKS
+
+if KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
+menu "Enable filesystem benchmarks"
+source "workflows/fsbenchmarks/Kconfig"
+endmenu
+endif # KDEVOPS_WORKFLOW_ENABLE_FSBENCHMARKS
 
 config KDEVOPS_WORKFLOW_ENABLE_GITR
 	bool

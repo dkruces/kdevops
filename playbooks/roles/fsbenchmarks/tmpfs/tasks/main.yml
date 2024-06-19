@@ -1,0 +1,4 @@
+---
+- name: Execute tmpfs test00
+  include_tasks: "test00.yml"
+  tags: tmpfs_test00

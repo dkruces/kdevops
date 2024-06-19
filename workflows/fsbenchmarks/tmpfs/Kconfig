@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+choice
+	prompt "Test to run"
+
+config FSBENCHMARKS_TMPFS_TEST00
+	bool "Test 00 (fio)"
+	help
+	  Test00 loops over different tmpfs mount types and runs fio
+	  for different block sizes (4k - 2M) using the configured
+	  parameters. Here an example for the default mount profile:
+
+	  mount -t tmpfs -o size=$MOUNTSIZE tmpfs /mnt/tmpfs
+
+	  fio \
+	      -name=test00 \
+	      --nrfiles=$NRFILES -bs=$BS -direct=1 \
+	      -ioengine=io_uring \
+	      --group_reporting=1 \
+	      --filesize=$FILESIZE \
+	      --readwrite=write --fallocate=none \
+	      --numjobs=$NUMJOBS --create_on_open=1 \
+	      --directory=/mnt/tmpfs
+
+	  Example: NRFILES=4; NUMJOBS=128; FILESIZE=1G will require
+	  a mount size of 512G.
+
+endchoice
+
+if FSBENCHMARKS_TMPFS_TEST00
+
+menu "Configure test00"
+
+config FSBENCHMARKS_TMPFS_TEST00_NRFILES
+	int "nrfiles"
+	default 4
+
+config FSBENCHMARKS_TMPFS_TEST00_FILESIZE
+	string "Filesize"
+	default 1G
+
+config FSBENCHMARKS_TMPFS_TEST00_NUMJOBS
+	int "Number of jobs"
+	default 128
+
+config FSBENCHMARKS_TMPFS_TEST00_MOUNTSIZE
+	string "Mount size"
+	default 512G
+
+endmenu
+
+config FSBENCHMARKS_TMPFS_TEST
+	string
+	default "test00" if FSBENCHMARKS_TMPFS_TEST00
+
+endif

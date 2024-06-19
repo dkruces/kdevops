@@ -1,0 +1,4 @@
+---
+- name: Execute tmpfs role tasks
+  include_tasks: "../tmpfs/tasks/main.yml"
+  tags: tmpfs

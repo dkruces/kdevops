@@ -21,6 +21,7 @@ kdevops_workflows_dedicated_workflow: False
 kdevops_workflow_enable_fstests: False
 kdevops_workflow_enable_blktests: False
 kdevops_workflow_enable_selftests: False
+kdevops_workflow_enable_fsbenchmarks: False
 
 kdevops_workflow_enable_cxl: False
 kdevops_workflow_enable_pynfs: False

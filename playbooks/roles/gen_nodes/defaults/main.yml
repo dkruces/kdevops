@@ -85,6 +85,7 @@ libvirt_largeio_pow_limit: 12
 kdevops_workflows_dedicated_workflow: False
 kdevops_workflow_enable_fstests: False
 kdevops_workflow_enable_blktests: False
+kdevops_workflow_enable_fsbenchmarks: False
 
 iscsi_nodes: []
 

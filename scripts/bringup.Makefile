@@ -37,7 +37,7 @@ HELP_TARGETS+=bringup-help-menu
 
 bringup-setup-help-menu:
 	@echo "Generic bring up set up targets:"
-	@echo "kdevops-deps        - Installs what we need on the localhost"
+	@echo "kdevops-deps            - Installs what we need on the localhost"
 
 HELP_TARGETS += bringup-setup-help-menu
 

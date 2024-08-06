@@ -5,11 +5,12 @@
 # have something more elaborate, like a version check add it to its
 # own file as we do with scripts/version_check/ansible-playbook
 
-BINARY_DEPS :=
-BINARY_DEPS += sudo
-BINARY_DEPS += make
-BINARY_DEPS += nc
-BINARY_DEPS += ansible-playbook
+BINARY_DEPS := sudo make ansible-playbook pipx
+DEBIAN_PACKAGE_DEPS := sudo make netcat-traditional pipx
+SUSE_PACKAGE_DEPS := sudo make nc pipx
+REDHAT_PACKAGE_DEPS := sudo make nc pipx
+PIPX_DEPS :=
+PIPX_DEPS += ansible-playbook
 ifneq (y,$(CONFIG_KDEVOPS_FIRST_RUN))
 ifeq (y,$(CONFIG_GUESTFS))
 BINARY_DEPS += virt-builder
@@ -36,7 +37,39 @@ $(BINARY_DEPS):
 	$(Q)echo Verifying $@ ...
 	$(Q)set -e ; which $@ > /dev/null || ( \
 		echo Missing dependency: $@ ;\
+		echo Run 'make kdevops-install-deps' to install missing dependencies ;\
 	false)
+
+install_package_deps:
+	@echo "Detecting Linux distribution..."
+	@if [ -f /etc/debian_version ]; then \
+		echo "Detected Debian-based distro."; \
+		sudo apt update && sudo apt install -y $(DEBIAN_PACKAGE_DEPS); \
+	elif [ -f /etc/redhat-release ]; then \
+		echo "Detected Red Hat-based distro."; \
+		sudo yum install -y $(REDHAT_PACKAGE_DEPS); \
+	elif [ -f /etc/SuSE-release ]; then \
+		echo "Detected SUSE-based distro."; \
+		sudo zypper install -y $(SUSE_PACKAGE_DEPS); \
+	else \
+		echo "Unsupported Linux distribution."; \
+		exit 1; \
+	fi
+
+pipx_install_ansible_full:
+	$(Q)pipx install --force --include-deps ansible
+
+pipx_update_ansible_full:
+	$(Q)pipx upgrade --include-injected ansible
+
+kdevops-install-deps: install_package_deps pipx_install_ansible_full
+PHONY += kdevops-install-deps
+
+install-ansible-full: pipx_install_ansible_full
+PHONY += install-ansible-full
+
+update-ansible-full: pipx_update_ansible_full
+PHONY += update-ansible-full
 
 $(KDEVOPS_DEPCHECK): $(DYNAMIC_DEPS)
 	$(Q)echo The current minimum kdevops expected dependencies are met.

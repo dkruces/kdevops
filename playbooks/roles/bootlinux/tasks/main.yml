@@ -60,6 +60,18 @@
 
 # Distro agnostic stuff to build and boot Linux goes below
 
+- name: Check bootlinux 9p is mounted
+  become: yes
+  become_flags: 'su - -c'
+  become_method: sudo
+  ansible.builtin.shell: |
+    mount | grep --quiet {{ target_linux_dir_path }}
+  register: _bootlinux_9p_is_mounted
+  ignore_errors: true
+  tags: [ 'data_partition', '9p_mount' ]
+  when:
+    - bootlinux_9p|bool
+
 - name: Mount bootlinux 9p and add to fstab if it does not exist
   become: yes
   become_flags: 'su - -c'
@@ -73,6 +85,7 @@
   tags: [ 'data_partition', '9p_mount' ]
   when:
     - bootlinux_9p|bool
+    - _bootlinux_9p_is_mounted.rc != 0
 
 - name: git clone {{ target_linux_tree }} on the client side
   git:

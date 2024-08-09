@@ -33,7 +33,6 @@
       - mdadm
       - rpcbind
       - portmap
-      - hwinfo
       - open-iscsi
       - python3-pip
       - zstd
@@ -41,3 +40,11 @@
       - b4
     state: present
   tags: linux
+
+- name: Install hwinfo for Debian stable and unstable
+  become: yes
+  become_method: sudo
+  apt:
+    name:
+      - hwinfo
+  when: ansible_distribution == 'Debian' and ansible_distribution_version != 'Trixie'

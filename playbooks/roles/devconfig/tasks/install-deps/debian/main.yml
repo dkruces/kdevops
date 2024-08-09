@@ -9,6 +9,8 @@
   tags: [ 'apt', 'release-info-change' ]
   when:
     - devconfig_try_upgrade|bool
+  retries: 3
+  delay: 5
 
 - name: Update apt cache and do dist-upgrade
   become: yes

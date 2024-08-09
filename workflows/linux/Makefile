@@ -88,14 +88,27 @@ linux-help-end:
 
 LINUX_HELP_EXTRA :=
 
+run_ansible_playbook = \
+	$1 --list-tasks; \
+	$1
+
+AP_LINUX_BOOTLINUX_LOCAL =  \
+	ansible-playbook $(ANSIBLE_VERBOSE) \
+		--inventory '127.0.0.1,' \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux-local.yml
+
+AP_LINUX_BOOTLINUX = \
+	ansible-playbook $(ANSIBLE_VERBOSE) \
+		--inventory $(KDEVOPS_HOSTFILE) \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS) \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml
+
 PHONY += linux
 linux: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		'127.0.0.1,' $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux-local.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)"
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+	$(Q)$(call run_ansible_playbook, $(AP_LINUX_BOOTLINUX_LOCAL))
+	$(Q)$(call run_ansible_playbook, $(AP_LINUX_BOOTLINUX))
 
 PHONY += linux-mount
 linux-mount:

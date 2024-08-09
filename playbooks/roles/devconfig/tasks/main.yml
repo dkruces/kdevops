@@ -12,6 +12,7 @@
 
 - name: Wait for {{ ansible_host }} to be available
   wait_for_connection:
+    timeout: 30
 
 - name: Gathering facts
   setup:

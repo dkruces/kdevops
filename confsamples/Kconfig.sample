@@ -1,0 +1,5 @@
+config KDEVOPS_SANDBOX
+	bool "##SANDBOXDIR##?"
+	default n
+	help
+	  Hello ##SANDBOXDIR##!

@@ -5,6 +5,22 @@
 
 mainmenu "$(PROJECT) $(PROJECTRELEASE)"
 
+config HAVE_KDEVOPS_RUNCONF
+	bool
+	default $(shell, ./scripts/check_runconf.sh --presence)
+	help
+	  Do we have runconf to check?
+
+if HAVE_KDEVOPS_RUNCONF
+config KDEVOPS_RUNCONF_PATH
+	string "The runconf path"
+	default $(shell, ./scripts/check_runconf.sh --dirname)
+	help
+	  The runconf path.
+endif
+
+source "kconfigs/Kconfig.runconf"
+
 config HAVE_KDEVOPS_CUSTOM_DEFAULTS
 	bool
 	default n

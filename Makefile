@@ -12,7 +12,8 @@ export KCONFIG_DIR=$(CURDIR)/scripts/kconfig
 include $(KCONFIG_DIR)/kconfig.Makefile
 include Makefile.subtrees
 
-export KDEVOPS_EXTRA_VARS ?=			extra_vars.yaml
+export RUNCONFDIR ?= scripts
+export KDEVOPS_EXTRA_VARS ?= extra_vars.yaml
 export KDEVOPS_PLAYBOOKS_DIR :=			playbooks
 export KDEVOPS_HOSTFILE ?=			hosts
 export KDEVOPS_NODES :=
@@ -175,6 +176,9 @@ endif
 include scripts/gen-hosts.Makefile
 include scripts/gen-nodes.Makefile
 include scripts/refs.Makefile
+
+$(info RUNCONFDIR=$(RUNCONFDIR))
+include $(RUNCONFDIR)/Makefile.playbooks
 
 # disable built-in rules for this
 .SUFFIXES:

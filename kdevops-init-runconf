@@ -1,0 +1,33 @@
+#!/bin/bash
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# Run source kdevops-init-runconf <runconfdir>
+
+usage() {
+    echo "Usage: $0 <runconfdir>"
+    exit 1
+}
+
+if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
+    usage
+    exit 2
+fi
+
+RUNCONFDIR=$1
+PLAYBOOK=$2
+
+mkdir -p $RUNCONFDIR
+KDEVOPS_RUNCONF_ANSIBLECFG=ansible.cfg
+KDEVOPS_RUNCONF_KCONFIG=Kconfig
+KDEVOPS_RUNCONF_MAKEFILE=Makefile
+KDEVOPS_RUNCONF_MAKEFILE_PLAYBOOKS=Makefile.playbooks
+cp --verbose confsamples/$KDEVOPS_RUNCONF_ANSIBLECFG.sample $RUNCONFDIR/$KDEVOPS_RUNCONF_ANSIBLECFG
+cp --verbose confsamples/$KDEVOPS_RUNCONF_KCONFIG.sample $RUNCONFDIR/$KDEVOPS_RUNCONF_KCONFIG
+cp --verbose confsamples/$KDEVOPS_RUNCONF_MAKEFILE.sample $RUNCONFDIR/$KDEVOPS_RUNCONF_MAKEFILE
+cp --verbose confsamples/$KDEVOPS_RUNCONF_MAKEFILE_PLAYBOOKS.sample $RUNCONFDIR/$KDEVOPS_RUNCONF_MAKEFILE_PLAYBOOKS
+
+sed --in-place "s/##RUNCONFDIR##/$RUNCONFDIR/g" $RUNCONFDIR/$KDEVOPS_RUNCONF_KCONFIG
+sed --in-place "s/##PLAYBOOK##/$PLAYBOOK/g" $RUNCONFDIR/$KDEVOPS_RUNCONF_KCONFIG
+sed --in-place "s/##PLAYBOOK##/$PLAYBOOK/g" $RUNCONFDIR/$KDEVOPS_RUNCONF_MAKEFILE_PLAYBOOKS
+
+cd ./$RUNCONFDIR

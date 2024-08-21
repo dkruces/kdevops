@@ -85,6 +85,8 @@ workflows/linux/refs/default/Kconfig.next
 workflows/linux/refs/default/Kconfig.stable
 workflows/linux/refs/user
 
+Kconfig.runconf
+
 .kernel-ci.*
 .kotd.*
 

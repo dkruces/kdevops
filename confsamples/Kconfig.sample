@@ -1,0 +1,9 @@
+config KDEVOPS_RUNCONF
+	bool "##RUNCONFDIR##?"
+	default n
+	help
+	  Hello ##RUNCONFDIR##!
+
+menu "My Playbook"
+source "./##RUNCONFDIR##/##PLAYBOOK##/Kconfig"
+endmenu

@@ -1,0 +1,9 @@
+config KDEVOPS_RUNCONF
+	bool "runconf?"
+	default n
+	help
+	  Hello runconf!
+
+menu "Misc Playbook"
+source "./runconf/misc-playbook/Kconfig"
+endmenu

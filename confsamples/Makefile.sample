@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+CONFIG_DIR := $(CURDIR)
+CONFIG_FILE := $(CONFIG_DIR)/.config
+export SANDBOXDIR := ./$(shell basename $(CONFIG_DIR))
+EXTRA_VARS_FILE := $(SANDBOXDIR)/extra_vars.yaml
+
+# Debugging
+$(info CONFIG_DIR=$(CONFIG_DIR))
+$(info CONFIG_FILE=$(CONFIG_FILE))
+$(info SANDBOXDIR=$(SANDBOXDIR))
+$(info EXTRA_VARS_FILE=$(EXTRA_VARS_FILE))
+
+extra_vars.yaml:
+	KCONFIG_CONFIG=$(CONFIG_FILE) KDEVOPS_EXTRA_VARS=$(EXTRA_VARS_FILE) $(MAKE) -C .. $(EXTRA_VARS_FILE)
+
+%:
+	KCONFIG_CONFIG=$(CONFIG_FILE) KDEVOPS_EXTRA_VARS=$(EXTRA_VARS_FILE) $(MAKE) -C .. $@

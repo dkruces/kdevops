@@ -1,0 +1,26 @@
+#!/bin/bash
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# Run source kdevops-init-sandbox <sandboxdir>
+
+usage() {
+    echo "Usage: $0 <sandboxdir>"
+    exit 1
+}
+
+if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
+    usage
+    exit 2
+fi
+
+SANDBOXDIR=$1
+
+mkdir --parent --verbose $SANDBOXDIR
+KDEVOPS_SANDBOX_ANSIBLECFG=ansible.cfg
+KDEVOPS_SANDBOX_MAKEFILE=Makefile
+cp --verbose confsamples/$KDEVOPS_SANDBOX_ANSIBLECFG.sample $SANDBOXDIR/$KDEVOPS_SANDBOX_ANSIBLECFG
+cp --verbose confsamples/$KDEVOPS_SANDBOX_MAKEFILE.sample $SANDBOXDIR/$KDEVOPS_SANDBOX_MAKEFILE
+
+sed --in-place "s/##SANDBOXDIR##/$SANDBOXDIR/g" $SANDBOXDIR/$KDEVOPS_SANDBOX_MAKEFILE
+
+cd ./$SANDBOXDIR

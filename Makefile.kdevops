@@ -24,6 +24,7 @@ kdevops_vagrant_install_vagrant:
 kdevops_install_libvirt:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_user.yml -e "skip_configuration=True" \
 		-e 'ansible_python_interpreter=/usr/bin/python3'
 
@@ -31,6 +32,7 @@ kdevops_configure_libvirt:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_user.yml -e "skip_install=True" \
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		-e 'running_user=$(USER)' \
 		-e 'ansible_python_interpreter=/usr/bin/python3'
 
@@ -53,6 +55,7 @@ KDEVOPS_VAGRANT_WORK += kdevops_vagrant_boxes
 kdevops_verify_libvirt_user:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_user.yml -e "only_verify_user=True" \
 		-e 'ansible_python_interpreter=/usr/bin/python3'
 
@@ -62,6 +65,7 @@ KDEVOPS_VAGRANT_WORK += kdevops_verify_libvirt_user
 kdevops_libvirt_storage_pool_create:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_storage_pool_create.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3'
 

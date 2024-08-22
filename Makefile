@@ -64,6 +64,10 @@ ANSIBLE_EXTRA_ARGS_SEPARATED :=
 ANSIBLE_EXTRA_ARGS_DIRECT :=
 include Makefile.extra_vars
 
+ANSIBLE_EXTRA_ARGS += kdevops_extra_vars_yaml='$(CONFIG_KDEVOPS_EXTRA_VARS_YAML)'
+ANSIBLE_EXTRA_ARGS += kdevops_extra_vars_yml='$(CONFIG_KDEVOPS_EXTRA_VARS_YML)'
+ANSIBLE_EXTRA_ARGS += kdevops_extra_vars_json='$(CONFIG_KDEVOPS_EXTRA_VARS_JSON)'
+
 LIMIT_HOSTS :=
 ifneq (,$(HOSTS))
 LIMIT_HOSTS := '-l $(subst ${space},$(comma),$(HOSTS))'

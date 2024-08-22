@@ -188,3 +188,17 @@ endmenu
 menu "Kernel continous integration configuration"
 source "kconfigs/Kconfig.kernel-ci"
 endmenu
+
+menu "Kdevops extra vars configuration"
+config KDEVOPS_EXTRA_VARS_YAML
+	string "extra_vars.yaml"
+	default "./extra_vars.yaml"
+
+config KDEVOPS_EXTRA_VARS_YML
+	string "extra_vars.yml"
+	default "./extra_vars.yml"
+
+config KDEVOPS_EXTRA_VARS_JSON
+	string "extra_vars.json"
+	default "./extra_vars.json"
+endmenu

@@ -4,9 +4,9 @@
   ignore_errors: yes
   with_first_found:
     - files:
-      - "../extra_vars.yml"
-      - "../extra_vars.yaml"
-      - "../extra_vars.json"
+      - "{{ kdevops_extra_vars_yml }}"
+      - "{{ kdevops_extra_vars_yaml }}"
+      - "{{ kdevops_extra_vars_json }}"
       skip: true
   tags: vars
   when:

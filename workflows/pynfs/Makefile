@@ -31,9 +31,9 @@ pynfs:
 
 pynfs-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/pynfs.yml --tags vars,first_run,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/pynfs.yml --tags vars,first_run,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/pynfs.yml --tags vars,run_tests,copy_results --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/pynfs.yml --tags vars,run_tests,copy_results --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 # Once you know the baseline works, you may want to run the baseline in a loop
 # up to the number of times you define. We define this goal in kdevops as
@@ -49,9 +49,9 @@ pynfs-baseline-kernelci:
 # Below are the corresponding dev targets
 pynfs-dev-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,first_run,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,first_run,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,run_tests,copy_results --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,run_tests,copy_results --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 pynfs-dev-loop:
 	$(Q)$(PYNFS_KERNEL_CI_LOOP) dev
@@ -61,7 +61,7 @@ pynfs-dev-kernelci:
 
 pynfs-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 pynfs-help-menu:
 	@echo "pynfs options:"

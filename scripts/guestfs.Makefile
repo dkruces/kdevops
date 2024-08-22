@@ -70,7 +70,7 @@ $(KDEVOPS_PROVISIONED_SSH):
 		ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 			--inventory localhost, \
 			playbooks/update_ssh_config_guestfs.yml \
-			--extra-vars=@./extra_vars.yaml \
+			--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 			-e 'ansible_python_interpreter=/usr/bin/python3' ;\
 		LIBVIRT_DEFAULT_URI=$(CONFIG_LIBVIRT_URI) $(TOPDIR)/scripts/update_ssh_config_guestfs.py; \
 	fi

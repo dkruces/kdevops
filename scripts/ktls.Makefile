@@ -1,7 +1,7 @@
 ifeq (y,$(CONFIG_KDEVOPS_SETUP_KTLS))
 
 ktls:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --extra-vars=@./extra_vars.yaml \
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		-f 30 -i hosts playbooks/ktls.yml
 
 ktls-destroy:

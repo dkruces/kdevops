@@ -12,7 +12,7 @@ export KCONFIG_DIR=$(CURDIR)/scripts/kconfig
 include $(KCONFIG_DIR)/kconfig.Makefile
 include Makefile.subtrees
 
-export KDEVOPS_EXTRA_VARS ?=			extra_vars.yaml
+export KDEVOPS_EXTRA_VARS ?=			./extra_vars.yaml
 export KDEVOPS_PLAYBOOKS_DIR :=			playbooks
 export KDEVOPS_HOSTFILE ?=			hosts
 export KDEVOPS_NODES :=
@@ -221,7 +221,7 @@ $(KDEVOPS_HOSTS): .config $(KDEVOPS_HOSTS_TEMPLATE)
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 DEFAULT_DEPS += $(KDEVOPS_NODES)
 $(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(KDEVOPS_NODES_TEMPLATE)
@@ -229,7 +229,7 @@ $(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(KDEVOPS_NODES_TEMPLATE)
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 DEFAULT_DEPS += $(LOCALHOST_SETUP_WORK)
 

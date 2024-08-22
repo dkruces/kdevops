@@ -25,7 +25,7 @@ REBOOT_LIMIT_TEST_TYPE :=$(subst ",,$(CONFIG_REBOOT_LIMIT_TEST_TYPE))
 # into the file extra_vars.yaml. The extra_vars.yaml file is always used as an
 # argument to ansible so that it reads our manually converted kconfig varibles
 # in ansible. We typically call a playbook with something like:
-# ansible-playbook -f 30 -i hosts -l baseline playbooks/foo.yml --tags bar --extra-vars=@./extra_vars.yaml
+# ansible-playbook -f 30 -i hosts -l baseline playbooks/foo.yml --tags bar --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 #
 # Likewise most playbooks also have something like the following as their first
 # task in their playbooks, so that they don't have to be specifying the
@@ -37,7 +37,7 @@ REBOOT_LIMIT_TEST_TYPE :=$(subst ",,$(CONFIG_REBOOT_LIMIT_TEST_TYPE))
 #  with_first_found:
 #  - files:
 #    - "../extra_vars.yml"
-#    - "../extra_vars.yaml"
+#    - ".$(KDEVOPS_EXTRA_VARS)"
 #    - "../extra_vars.json"
 #  skip: true
 #  tags: vars
@@ -133,9 +133,9 @@ reboot-limit:
 # fly.
 reboot-limit-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,first_run,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,first_run,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,run_tests,copy_results --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,run_tests,copy_results --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 # Once you know the baseline works, you may want to run the baseline in a loop
 # up to the number of times you define. We define this goal in kdevops as
@@ -151,14 +151,14 @@ reboot-limit-baseline-kernelci:
 # Resets the boot counters so we start from scratch
 reboot-limit-baseline-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/reboot-limit.yml --tags vars,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 # Below are the corresponding dev targets
 reboot-limit-dev-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,first_run,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,first_run,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,run_tests,copy_results --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,run_tests,copy_results --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 reboot-limit-dev-loop:
 	$(Q)$(REBOOT_LIMIT_KERNEL_CI_LOOP) dev
@@ -168,7 +168,7 @@ reboot-limit-dev-kernelci:
 
 reboot-limit-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/reboot-limit.yml --tags vars,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 reboot-limit-help-menu:
 	@echo "reboot-limit options:"

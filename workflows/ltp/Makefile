@@ -104,7 +104,7 @@ ltp-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l baseline playbooks/ltp.yml \
 		--tags vars,run_tests,copy_results \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 ltp-baseline-loop:
 	$(Q)$(LTP_KERNEL_CI_LOOP) baseline
@@ -115,7 +115,7 @@ ltp-baseline-kernelci:
 ltp-dev-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/ltp.yml \
-		--tags vars,run_tests,copy_results --extra-vars=@./extra_vars.yaml
+		--tags vars,run_tests,copy_results --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 ltp-dev-loop:
 	$(Q)$(LTP_KERNEL_CI_LOOP) dev
@@ -126,7 +126,7 @@ ltp-dev-kernelci:
 ltp-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/ltp.yml \
-		--tags vars,reset --extra-vars=@./extra_vars.yaml
+		--tags vars,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 ltp-help-menu:
 	@echo "ltp options:"

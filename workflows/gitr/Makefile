@@ -79,7 +79,7 @@ gitr-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l baseline playbooks/gitr.yml \
 		--tags $(GITR_PLAY_TAGS) \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 gitr-baseline-loop:
 	$(Q)$(GITR_KERNEL_CI_LOOP) baseline
@@ -91,7 +91,7 @@ gitr-dev-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/gitr.yml \
 		--tags $(GITR_PLAY_TAGS) \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 gitr-dev-loop:
 	$(Q)$(GITR_KERNEL_CI_LOOP) dev
@@ -101,7 +101,7 @@ gitr-dev-kernelci:
 
 gitr-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/gitr.yml --tags vars,reset --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/gitr.yml --tags vars,reset --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 gitr-help-menu:
 	@echo "gitr options:"

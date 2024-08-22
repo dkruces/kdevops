@@ -174,4 +174,4 @@ $(KDEVOPS_TFVARS): $(KDEVOPS_TFVARS_TEMPLATE) .config
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_tfvars.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)

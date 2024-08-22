@@ -11,15 +11,15 @@ ANSIBLE_CMD_KOTD_ENABLE :=
 
 kotd: $(KDEVOPS_HOSTS) .config
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts playbooks/devconfig.yml --tags vars,kotd --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 kotd-baseline: $(KDEVOPS_HOSTS) .config
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l baseline playbooks/devconfig.yml --tags vars,kotd --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l baseline playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 kotd-dev: $(KDEVOPS_HOSTS) .config
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
-		-f 30 -i hosts -l dev playbooks/devconfig.yml --tags vars,kotd --extra-vars=@./extra_vars.yaml
+		-f 30 -i hosts -l dev playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 kotd-help-menu:
 	@echo "kotd options:"

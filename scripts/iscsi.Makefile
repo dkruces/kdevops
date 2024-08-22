@@ -8,7 +8,7 @@ ISCSI_EXTRA_ARGS += kdevops_enable_iscsi=true
 ANSIBLE_EXTRA_ARGS += $(ISCSI_EXTRA_ARGS)
 
 iscsi:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --extra-vars=@./extra_vars.yaml \
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --extra-vars=@$(KDEVOPS_EXTRA_VARS) \
 		-f 30 -i hosts -l iscsi playbooks/iscsi.yml
 
 KDEVOPS_BRING_UP_DEPS += iscsi

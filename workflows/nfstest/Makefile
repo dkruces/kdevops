@@ -62,7 +62,7 @@ nfstest-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l baseline playbooks/nfstest.yml \
 		--tags vars,run_tests,copy_results \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 nfstest-baseline-loop:
 	$(Q)$(NFSTEST_KERNEL_CI_LOOP) baseline
@@ -74,7 +74,7 @@ nfstest-dev-baseline:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/nfstest.yml \
 		--tags vars,run_tests,copy_results \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 nfstest-dev-loop:
 	$(Q)$(NFSTEST_KERNEL_CI_LOOP) dev
@@ -86,7 +86,7 @@ nfstest-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/nfstest.yml \
 		--tags vars,reset \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 nfstest-help-menu:
 	@echo "nfstest options:"

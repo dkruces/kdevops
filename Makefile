@@ -20,6 +20,10 @@ export KDEVOPS_VAGRANT :=
 export PYTHONUNBUFFERED=1
 export TOPDIR=./
 export TOPDIR_PATH = $(shell readlink -f $(TOPDIR))
+$(info TOPDIR=$(TOPDIR))
+$(info TOPDIR_PATH=$(TOPDIR_PATH))
+export KCONFIG_CONFIG ?= $(TOPDIR).config
+$(info KCONFIG_CONFIG=$(KCONFIG_CONFIG))
 
 KDEVOPS_NODES_ROLE_TEMPLATE_DIR :=		$(KDEVOPS_PLAYBOOKS_DIR)/roles/gen_nodes/templates
 export KDEVOPS_NODES_TEMPLATE :=
@@ -179,7 +183,7 @@ include scripts/refs.Makefile
 # disable built-in rules for this
 .SUFFIXES:
 
-.config:
+$(KCONFIG_CONFIG):
 	@(								\
 	echo "/--------------"						;\
 	echo "| $(PROJECT) isn't configured, please configure it" 	;\
@@ -193,7 +197,7 @@ include scripts/refs.Makefile
 
 PHONY += $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
 
-$(KDEVOPS_EXTRA_VARS): .config $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
+$(KDEVOPS_EXTRA_VARS): $(KCONFIG_CONFIG) $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
 
 playbooks/secret.yml:
 	@if [[ "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" == "" ]]; then \
@@ -205,7 +209,7 @@ playbooks/secret.yml:
 	@echo "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE_VAR): $(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" >> $@
 
 ifeq (y,$(CONFIG_KDEVOPS_ENABLE_DISTRO_EXTRA_ADDONS))
-$(KDEVOPS_EXTRA_ADDON_DEST): .config $(KDEVOPS_EXTRA_ADDON_SOURCE)
+$(KDEVOPS_EXTRA_ADDON_DEST): $(KCONFIG_CONFIG) $(KDEVOPS_EXTRA_ADDON_SOURCE)
 	@$(Q)cp $(KDEVOPS_EXTRA_ADDON_SOURCE) $(KDEVOPS_EXTRA_ADDON_DEST)
 endif
 
@@ -216,7 +220,7 @@ include scripts/bringup.Makefile
 endif
 
 DEFAULT_DEPS += $(KDEVOPS_HOSTS)
-$(KDEVOPS_HOSTS): .config $(KDEVOPS_HOSTS_TEMPLATE)
+$(KDEVOPS_HOSTS): $(KCONFIG_CONFIG) $(KDEVOPS_HOSTS_TEMPLATE)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
@@ -224,7 +228,7 @@ $(KDEVOPS_HOSTS): .config $(KDEVOPS_HOSTS_TEMPLATE)
 		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
 DEFAULT_DEPS += $(KDEVOPS_NODES)
-$(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(KDEVOPS_NODES_TEMPLATE)
+$(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): $(KCONFIG_CONFIG) $(KDEVOPS_NODES_TEMPLATE)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
@@ -250,7 +254,7 @@ mrproper:
 	$(Q)rm -f terraform/*/terraform.tfvars
 	$(Q)rm -f $(KDEVOPS_NODES)
 	$(Q)rm -f $(KDEVOPS_HOSTFILE) $(KDEVOPS_MRPROPER)
-	$(Q)rm -f .config .config.old extra_vars.yaml
+	$(Q)rm -f $(KCONFIG_CONFIG) $(KCONFIG_CONFIG).old extra_vars.yaml
 	$(Q)rm -f playbooks/secret.yml $(KDEVOPS_EXTRA_ADDON_DEST)
 	$(Q)rm -rf include
 

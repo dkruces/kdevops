@@ -10,7 +10,7 @@ PHONY += mrproper
 mrproper:
 	@$(Q)rm -rf $(CURDIR)/include/config/
 	@$(Q)rm -rf $(CURDIR)/include/generated/
-	@$(Q)rm -f .config
+	@$(Q)rm -f $(KCONFIG_CONFIG)
 
 version-check: include/config/project.release
 	@$(Q)echo Version: $(PROJECTVERSION)

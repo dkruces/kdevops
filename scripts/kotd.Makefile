@@ -9,15 +9,15 @@ endif # HAVE_DISTRO_CUSTOM_KOTD_REPO
 
 ANSIBLE_CMD_KOTD_ENABLE :=
 
-kotd: $(KDEVOPS_HOSTS) .config
+kotd: $(KDEVOPS_HOSTS) $(KCONFIG_CONFIG)
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
-kotd-baseline: $(KDEVOPS_HOSTS) .config
+kotd-baseline: $(KDEVOPS_HOSTS) $(KCONFIG_CONFIG)
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l baseline playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 
-kotd-dev: $(KDEVOPS_HOSTS) .config
+kotd-dev: $(KDEVOPS_HOSTS) $(KCONFIG_CONFIG)
 	$(Q)$(ANSIBLE_CMD_KOTD_ENABLE)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/devconfig.yml --tags vars,kotd --extra-vars=@$(KDEVOPS_EXTRA_VARS)
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
 
-ifeq (,$(wildcard $(CURDIR)/.config))
+ifeq (,$(wildcard $(CURDIR)/$(KCONFIG_CONFIG)))
 else
 # stage-2-y targets gets called after all local config files have been generated
 stage-2-$(CONFIG_TERRAFORM)			+= kdevops_terraform_deps
@@ -11,7 +11,7 @@ stage-2-$(CONFIG_VAGRANT_INSTALL_PRIVATE_BOXES)	+= kdevops_vagrant_boxes
 stage-2-$(CONFIG_LIBVIRT_VERIFY)	+= kdevops_verify_libvirt_user
 stage-2-$(CONFIG_LIBVIRT_STORAGE_POOL_CREATE)	+= kdevops_libvirt_storage_pool_create
 
-kdevops_stage_2: .config
+kdevops_stage_2: $(KCONFIG_CONFIG)
 	$(Q)$(MAKE) -f Makefile.kdevops $(stage-2-y)
 
 ifneq (,$(stage-2-y))

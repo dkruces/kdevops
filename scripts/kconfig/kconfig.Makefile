@@ -10,9 +10,17 @@
 # its part of a dependency chain listing. To do this we have to avoid doing
 # the optional include unless it actually exists, so we re-invent an optional
 # include which doesn't get used unless actually used as a target.
-ifeq (,$(wildcard $(CURDIR)/.config))
+KCONFIG_CONFIG ?= .config
+$(info "checking...")
+$(info CURDIR=$(CURDIR))
+$(info KCONFIG_CONFIG=$(KCONFIG_CONFIG))
+$(info WILDCARD=$(wildcard $(CURDIR)/$(KCONFIG_CONFIG)))
+
+ifeq (,$(wildcard $(CURDIR)/$(KCONFIG_CONFIG)))
+$(info "here...")
 else
-include .config
+$(info "else...")
+include $(KCONFIG_CONFIG)
 endif
 
 # Kconfig filechk magic helper

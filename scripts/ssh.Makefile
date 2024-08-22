@@ -20,7 +20,7 @@ remove-ssh-key:
 	$(Q)rm -f $(KDEVOPS_SSH_PRIVKEY)
 	$(Q)rm -f $(KDEVOPS_SSH_PUBKEY)
 
-$(KDEVOPS_SSH_PRIVKEY): .config
+$(KDEVOPS_SSH_PRIVKEY): $(KCONFIG_CONFIG)
 	$(NQ) Generating new private key: $(KDEVOPS_SSH_PRIVKEY)
 	$(NQ) Generating new public key: $(KDEVOPS_SSH_PUBKEY)
 	$(Q)$(TOPDIR)/scripts/gen_ssh_key.sh

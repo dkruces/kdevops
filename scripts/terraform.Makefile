@@ -169,7 +169,7 @@ destroy_terraform:
 	$(Q)$(TOPDIR)/scripts/destroy_terraform.sh
 	$(Q)rm -f $(KDEVOPS_PROVISIONED_DEVCONFIG)
 
-$(KDEVOPS_TFVARS): $(KDEVOPS_TFVARS_TEMPLATE) .config
+$(KDEVOPS_TFVARS): $(KDEVOPS_TFVARS_TEMPLATE) $(KCONFIG_CONFIG)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_tfvars.yml \

@@ -1,9 +1,9 @@
 USER_SYSTEM := ~/.config/systemd/user/
 MIRROR_PATH := /mirror
 
-ifeq (,$(wildcard $(TOPDIR_PATH)/.config))
+ifeq (,$(wildcard $(TOPDIR_PATH)/$(KCONFIG_CONFIG)))
 else
-include $(TOPDIR_PATH)/.config
+include $(TOPDIR_PATH)/$(KCONFIG_CONFIG)
 endif
 
 export STABLE		:= $(subst ",,$(CONFIG_MIRROR_STABLE_URL))

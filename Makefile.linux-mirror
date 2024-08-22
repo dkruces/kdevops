@@ -15,7 +15,7 @@ kdevops_linux_mirror: $(KDEVOPS_EXTRA_VARS)
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/linux-mirror.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 PHONY += kdevops_linux_mirror
 
 mirror: $(KDEVOPS_EXTRA_VARS) kdevops_linux_mirror

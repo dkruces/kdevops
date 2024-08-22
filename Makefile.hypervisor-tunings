@@ -18,7 +18,7 @@ kdevops_hypervisor_tunning: $(KDEVOPS_EXTRA_VARS)
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/hypervisor-tuning.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		--extra-vars=@./extra_vars.yaml
+		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
 PHONY += kdevops_hypervisor_tunning
 
 ANSIBLE_EXTRA_ARGS += $(HYPERVISOR_TUNING_ARGS)

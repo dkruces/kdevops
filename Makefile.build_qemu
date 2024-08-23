@@ -20,10 +20,8 @@ QEMU_BUILD_SETUP_ARGS += qemu_target="ppc64-softmmu"
 endif
 
 qemu: $(KDEVOPS_EXTRA_VARS)
-	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/build_qemu.yml \
-		--extra-vars=@./extra_vars.yaml
+	$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/build_qemu.yml)
+
 PHONY += qemu
 
 qemu-install: $(KDEVOPS_EXTRA_VARS)

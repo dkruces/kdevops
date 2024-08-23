@@ -18,10 +18,7 @@ journal-client:
 		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml
 
 journal-server:
-	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/install_systemd_journal_remote.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3'
+	$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/install_systemd_journal_remote.yml)
 
 journal-restart:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -l baseline,dev \

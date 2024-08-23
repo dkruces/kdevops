@@ -60,10 +60,7 @@ KDEVOPS_PROVISION_DESTROY_METHOD	:= destroy_guestfs
 	$(Q)make linux-clone
 
 libvirt_pcie_passthrough_permissions:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		playbooks/libvirt_pcie_passthrough.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3'
+	$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/libvirt_pcie_passthrough.yml)
 
 $(KDEVOPS_PROVISIONED_SSH):
 	$(Q)if [[ "$(CONFIG_KDEVOPS_SSH_CONFIG_UPDATE)" == "y" ]]; then \

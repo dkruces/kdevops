@@ -11,10 +11,8 @@ LINUX_MIRROR_ARGS += mirror_torvalds_url='$(subst ",,$(CONFIG_MIRROR_TORVALDS_UR
 MIRROR_CODE      := $(TOPDIR)/playbooks/roles/linux-mirror/linux-mirror-systemd/
 
 kdevops_linux_mirror: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/linux-mirror.yml \
-		--extra-vars=@./extra_vars.yaml
+	$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/linux_mirror.yml)
+
 PHONY += kdevops_linux_mirror
 
 mirror: $(KDEVOPS_EXTRA_VARS) kdevops_linux_mirror

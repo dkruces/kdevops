@@ -60,6 +60,8 @@ ANSIBLE_EXTRA_ARGS_SEPARATED :=
 ANSIBLE_EXTRA_ARGS_DIRECT :=
 include Makefile.extra_vars
 
+include scripts/ansible.Makefile
+
 ANSIBLE_EXTRA_ARGS += ansible_python_interpreter='$(CONFIG_KDEVOPS_PYTHON_INTERPRETER)'
 
 LIMIT_HOSTS :=
@@ -219,17 +221,11 @@ endif
 
 DEFAULT_DEPS += $(KDEVOPS_HOSTS)
 $(KDEVOPS_HOSTS): .config $(KDEVOPS_HOSTS_TEMPLATE)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
-		--extra-vars=@./extra_vars.yaml
+		$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml)
 
 DEFAULT_DEPS += $(KDEVOPS_NODES)
 $(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(KDEVOPS_NODES_TEMPLATE)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
-		--extra-vars=@./extra_vars.yaml
+		$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml)
 
 DEFAULT_DEPS += $(LOCALHOST_SETUP_WORK)
 

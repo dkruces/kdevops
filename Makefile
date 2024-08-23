@@ -25,6 +25,14 @@ KDEVOPS_NODES_ROLE_TEMPLATE_DIR :=		$(KDEVOPS_PLAYBOOKS_DIR)/roles/gen_nodes/tem
 export KDEVOPS_NODES_TEMPLATE :=
 export KDEVOPS_MRPROPER :=
 
+run_ansible_playbook = \
+	ansible-playbook \
+		$(ANSIBLE_VERBOSE) \
+		--inventory $(1) \
+		--extra-vars=$(2) \
+		$(3) \
+		$(if $(4),$(4))
+
 KDEVOPS_INSTALL_TARGETS :=
 
 DEFAULT_DEPS :=

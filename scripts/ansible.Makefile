@@ -16,3 +16,17 @@ run_ansible_playbook_local_noq = \
 		--connection=local \
 		$(1) \
 		$(if $(2),$(2))
+
+run_ansible_playbook_hosts = \
+	$(Q)ansible-playbook \
+		$(ANSIBLE_VERBOSE) \
+		--inventory $(KDEVOPS_HOSTFILE) \
+		$(1) \
+		$(if $(2),$(2))
+
+run_ansible_playbook_hosts_noq = \
+	ansible-playbook \
+		$(ANSIBLE_VERBOSE) \
+		--inventory $(KDEVOPS_HOSTFILE) \
+		$(1) \
+		$(if $(2),$(2))

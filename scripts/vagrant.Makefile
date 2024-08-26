@@ -87,8 +87,7 @@ extend-extra-args-vagrant:
 	fi
 
 vagrant_private_box_install:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/install_vagrant_boxes.yml
+	$(call run_ansible_playbook_hosts, $(KDEVOPS_PLAYBOOKS_DIR)/install_vagrant_boxes.yml)
 
 vagrant_9p_linux_clone:
 	$(Q)make linux-clone

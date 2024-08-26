@@ -30,3 +30,11 @@ run_ansible_playbook_hosts_noq = \
 		--inventory $(KDEVOPS_HOSTFILE) \
 		$(1) \
 		$(if $(2),$(2))
+
+run_ansible_playbook_hosts_extravars = \
+	$(Q)ansible-playbook \
+		$(ANSIBLE_VERBOSE) \
+		--inventory $(KDEVOPS_HOSTFILE) \
+		--extra-vars=@./$(KDEVOPS_EXTRA_VARS) \
+		$(1) \
+		$(if $(2),$(2))

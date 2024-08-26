@@ -1,0 +1,14 @@
+[defaults]
+deprecation_warnings = {{ kdevops_ansible_cfg_deprecation_warnings }}
+stdout_callback = {{ kdevops_ansible_cfg_callback_plugin_string }}
+check_mode_markers = {{ kdevops_ansible_cfg_callback_plugin_check_mode_markers }}
+display_failed_stderr = {{ kdevops_ansible_cfg_callback_plugin_display_failed_stderr }}
+display_ok_hosts = {{ kdevops_ansible_cfg_callback_plugin_display_ok_hosts }}
+display_skipped_hosts = {{ kdevops_ansible_cfg_callback_plugin_display_skipped_hosts }}
+show_custom_stats = {{ kdevops_ansible_cfg_callback_plugin_show_custom_stats }}
+show_per_host_start = {{ kdevops_ansible_cfg_callback_plugin_show_per_host_start }}
+show_task_path_on_failure = {{ kdevops_ansible_cfg_callback_plugin_show_task_path_on_failure }}
+{% if ansible_facts['distribution'] == 'openSUSE' %}
+[connection]
+retries = {{ kdevops_ansible_cfg_reconnection_retries }}
+{% endif %}

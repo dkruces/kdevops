@@ -5,6 +5,14 @@ KDEVOPS_PLAYBOOKS_DIR ?=	playbooks
 KDEVOPS_HOSTFILE ?=		hosts
 KDEVOPS_LOCAL_WORK :=
 
+ifeq ($(V),1) # If V=1 then, Q is empty -> $(Q)<command> prints command
+export Q= # Empty Q allows to print the command
+export NQ=true
+else
+export Q=@ # Do not print command
+export NQ=echo
+endif
+
 # scripts/bringup.Makefile calls this Makefile with kdevops_stage_2 callback
 # include Ansible Makefile helper
 include scripts/ansible.Makefile

@@ -59,9 +59,8 @@ help:
 	@echo "defconfig-*        - If you have files in the defconfig directory use default config from there"
 	@echo
 	@echo "Variable options:"
-	@echo "make V=n [targets] 1: verbose build (Makefile)"
-	@echo "                   2: verbose playbooks (Ansible)"
-	@echo "                   V=1 and V=2 can be combined with V=12"
+	@echo "make V=n [targets] 1:      verbose build (Makefile)"
+	@echo "make AV=n [targets] 0-6:   verbose build (Ansible)"
 
 .PHONY: clean
 clean:

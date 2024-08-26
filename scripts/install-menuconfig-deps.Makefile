@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
 
 menuconfig-deps:
-	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/install-menuconfig-deps.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3' \
-		-e 'kdevops_first_run=True'
+	$(call run_ansible_playbook_local, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/install-menuconfig-deps.yml, \
+		--extra-vars "kdevops_first_run=True")
+
 PHONY += menuconfig-deps
 
 menuconfig-deps-help-menu:

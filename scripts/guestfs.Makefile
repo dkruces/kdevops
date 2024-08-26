@@ -64,10 +64,7 @@ libvirt_pcie_passthrough_permissions:
 
 $(KDEVOPS_PROVISIONED_SSH):
 	$(Q)if [[ "$(CONFIG_KDEVOPS_SSH_CONFIG_UPDATE)" == "y" ]]; then \
-		ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-			--inventory localhost, \
-			playbooks/update_ssh_config_guestfs.yml \
-			--extra-vars=@./extra_vars.yaml ;\
+		$(call run_ansible_playbook_local_noq, $(KDEVOPS_PLAYBOOKS_DIR)/update_ssh_config_guestfs.yml); \
 		LIBVIRT_DEFAULT_URI=$(CONFIG_LIBVIRT_URI) $(TOPDIR)/scripts/update_ssh_config_guestfs.py; \
 	fi
 	$(Q)ansible $(ANSIBLE_VERBOSE) -i hosts all -e 'ansible_python_interpreter=/usr/bin/python3' -m wait_for_connection

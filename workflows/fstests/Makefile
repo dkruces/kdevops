@@ -212,12 +212,10 @@ fstests-config: $(KDEVOPS_EXTRA_VARS)
 		$(LIMIT_HOSTS)
 
 fstests-config-debug: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		playbooks/fstests.yml \
-		-e 'fstests_debug_localhost=True' \
-		--tags vars,generate-fstests-config \
-		--extra-vars=@./extra_vars.yaml
+	$(call run_ansible_playbook_local, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/fstests.yml, \
+		--extra-vars "fstests_debug_localhost=True" \
+		--tags vars,generate-fstests-config)
 
 fstests-dev: $(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \

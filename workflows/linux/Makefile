@@ -134,12 +134,10 @@ linux-clone-clients: $(KDEVOPS_NODES)
 
 PHONY += linux-clone-9p
 linux-clone-9p: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3' \
+	$(call run_ansible_playbook_local, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
 		--extra-vars="$(BOOTLINUX_ARGS)" \
-		--tags vars,deps,clone
+		--tags vars,deps,clone)
 
 PHONY += linux-clone
 linux-clone: $(KDEVOPS_NODES) $(LINUX_CLONE_DEFAULT_TYPE)

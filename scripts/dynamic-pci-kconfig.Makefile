@@ -42,11 +42,9 @@ endif # CONFIG_KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH
 HELP_TARGETS += dynamic-kconfig-pci-help
 
 dynamic_pcipassthrough_kconfig:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		playbooks/gen-pci-kconfig.yml \
-		--extra-vars '{ $(PCIE_RUNTIME_VARS) }' \
-		-e 'ansible_python_interpreter=/usr/bin/python3'
+	$(call run_ansible_playbook_local, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/gen-pci-kconfig.yml, \
+		--extra-vars '{ $(PCIE_RUNTIME_VARS) }')
 
 dynamic-kconfig-pci-help:
 	@echo "dynconfig-pci      - enables only pci dynamically generated kconfig content"

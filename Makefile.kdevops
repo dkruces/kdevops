@@ -5,6 +5,10 @@ KDEVOPS_PLAYBOOKS_DIR ?=	playbooks
 KDEVOPS_HOSTFILE ?=		hosts
 KDEVOPS_LOCAL_WORK :=
 
+# scripts/bringup.Makefile calls this Makefile with kdevops_stage_2 callback
+# include Ansible Makefile helper
+include scripts/ansible.Makefile
+
 kdevops_all: kdevops_deps
 PHONY := kdevops_all
 

@@ -56,12 +56,12 @@ extend-extra-args-devconfig:
 
 PHONY += devconfig
 devconfig: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i $(KDEVOPS_HOSTFILE) \
-		-l all,nfsd \
-		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml \
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml, \
+		--limit all,nfsd \
 		--extra-vars="$(BOOTLINUX_ARGS)" \
 		--extra-vars '{ kdevops_cli_install: True }' \
-		$(LIMIT_HOSTS)
+		$(LIMIT_HOSTS))
 
 devconfig-generic-help-menu:
 	@echo "devconfig          - Ensures generic system setup and is up to date"
@@ -71,10 +71,12 @@ HELP_TARGETS+=devconfig-generic-help-menu
 ifeq (y,$(CONFIG_SYSCTL_TUNING))
 PHONY += sysctl-tunings
 sysctl-tunings: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i $(KDEVOPS_HOSTFILE) \
-		-l all,nfsd \
-		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) --tags vars,sysctl
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml, \
+		--limit all,nfsd \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		--tags vars,sysctl \
+		$(LIMIT_HOSTS))
 
 devconfig-help-menu:
 	@echo "Target node configuration options"

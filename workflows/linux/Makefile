@@ -91,44 +91,48 @@ LINUX_HELP_EXTRA :=
 PHONY += linux
 linux: $(KDEVOPS_NODES)
 	$(call run_ansible_playbook_local, $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux-local.yml)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS))
 
 PHONY += linux-mount
 linux-mount:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
 		--tags vars,9p_mount \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS))
 
 PHONY += linux-deploy
 linux-deploy:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
 		--tags vars,build-linux,install-linux,manual-update-grub,saved,vars,reboot \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS))
 
 PHONY += linux-install
 linux-install:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
 		--tags vars,build-linux,install-linux \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS))
 
 PHONY += linux-uninstall
 linux-uninstall:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--tags uninstall-linux,vars \
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--tags uninstall-linux,vars, \
 		--extra-vars '{ "uninstall_kernel_enable": "True", $(DYNAMIC_RUNTIME_VARS) }' \
-		$(LIMIT_HOSTS)
+		$(LIMIT_HOSTS))
 
 linux-clone-clients: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) \
-		--tags vars,deps,clone
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS) \
+		--tags vars,deps,clone)
 
 PHONY += linux-clone-9p
 linux-clone-9p: $(KDEVOPS_NODES)
@@ -142,29 +146,36 @@ linux-clone: $(KDEVOPS_NODES) $(LINUX_CLONE_DEFAULT_TYPE)
 
 PHONY += linux-grub-setup
 linux-grub-setup:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) --tags manual-update-grub,saved,vars
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS) \
+		 --tags manual-update-grub,saved,vars)
 
 PHONY += linux-reboot
 linux-reboot:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) --tags vars,reboot
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS) \
+		--tags vars,reboot)
 
 PHONY += uname
 uname:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) --tags uname,vars
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS) \
+		--tags uname,vars)
 
 ifeq (y,$(CONFIG_KDEVOPS_WORKFLOW_ENABLE_CXL))
 PHONY += linux-cxl
 linux-cxl: $(KDEVOPS_NODES)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--tags 'vars,cxl-build,cxl-install'                             \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+	$(call run_ansible_playbook_hosts, \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml, \
+		--tags 'vars,cxl-build,cxl-install' \
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(LIMIT_HOSTS))
 
 PHONY += linux-help-cxl
 linux-help-cxl:

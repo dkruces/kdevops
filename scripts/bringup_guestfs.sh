@@ -250,7 +250,7 @@ _EOT
 	# For the life of me I can't get the following line to work with
 	# the virt-builder command and so we do a full edit of the file for now
 	# edit /etc/nsswitch.conf:'s/\[!UNAVAIL=return\]//'
-	if [[ "$CONFIG_GUESTFS_DEBIAN_TRIXIE" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_DEBIAN_TRIXIE+x}" && "$CONFIG_GUESTFS_DEBIAN_TRIXIE" == "y" ]]; then
 		cat <<_EOT >>$cmdfile
 write /etc/nsswitch.conf: # kdevops generated /etc/nsswitch.conf
 append-line /etc/nsswitch.conf:passwd:         files
@@ -274,7 +274,7 @@ firstboot-command DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=tru
 firstboot-command systemctl stop ssh
 firstboot-command systemctl start ssh
 _EOT
-		if [[ "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
+		if [[ "${CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST+x}" && "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
 		cat <<_EOT >>$cmdfile
 delete /etc/apt/sources.list.d/debian.sources
 _EOT
@@ -300,7 +300,7 @@ fi
 cmdfile=$(mktemp)
 
 if [ ! -f $BASE_IMAGE ]; then
-	if [[ "$CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE+x}" && "$CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE" == "y" ]]; then
 		build_custom_image
 	fi
 
@@ -313,7 +313,7 @@ if [ ! -f $BASE_IMAGE ]; then
 		copy_yum_repo
 	fi
 
-	if [[ "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST+x}" && "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
 		copy_host_sources
 	fi
 

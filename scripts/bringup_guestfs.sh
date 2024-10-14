@@ -208,8 +208,7 @@ _EOT
 pre_install_customizations()
 {
 	KDEVOPS_UID=""
-	id -u kdevops 2>&1 > /dev/null
-	if [ $? -eq 0 ]; then
+	if getent passwd kdevops > /dev/null 2>&1; then
 		KDEVOPS_UID="-u `id -u kdevops`"
 	fi
 	if echo $OS_VERSION | grep -qE "^(rhel|fedora|centos)"; then

@@ -6,7 +6,7 @@
 {% if guestfs_requires_uefi %}
   <os firmware='efi'>
      <type arch='x86_64' machine='q35'>hvm</type>
-     <loader readonly='yes' secure='no'/>
+     <loader/>
      <boot dev='hd'/>
   </os>
 {% else %}

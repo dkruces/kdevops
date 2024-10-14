@@ -247,7 +247,7 @@ _EOT
 	# hosts:          files myhostname resolve [!UNAVAIL=return] dns
 	#
 	# We need DNS to be used so virb0 will be used for a DNS request
-	if [[ "$CONFIG_GUESTFS_DEBIAN_TRIXIE" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_DEBIAN_TRIXIE+x}" && "$CONFIG_GUESTFS_DEBIAN_TRIXIE" == "y" ]]; then
 		cat <<_EOT >>$cmdfile
 edit /etc/nsswitch.conf:'s/^hosts:.*UNAVAIL=return.*dns/hosts: files myhostname resolve dns/'
 uninstall cloud-init
@@ -286,7 +286,7 @@ fi
 cmdfile=$(mktemp)
 
 if [ ! -f $BASE_IMAGE ]; then
-	if [[ "$CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE+x}" && "$CONFIG_GUESTFS_HAS_CUSTOM_RAW_IMAGE" == "y" ]]; then
 		build_custom_image
 	fi
 
@@ -299,7 +299,7 @@ if [ ! -f $BASE_IMAGE ]; then
 		copy_yum_repo
 	fi
 
-	if [[ "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
+	if [[ "${CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST+x}" && "$CONFIG_GUESTFS_COPY_SOURCES_FROM_HOST_TO_GUEST" == "y" ]]; then
 		copy_host_sources
 	fi
 

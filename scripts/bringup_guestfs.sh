@@ -342,8 +342,8 @@ do
 	# If the guest is already defined, then just stop what we're doing
 	# and plead to the developer to clean things up.
 	#
-	output_domstate=$(virsh domstate $name 2>/dev/null)
-	if [ $? -eq 0 ]; then
+	if virsh list --all | grep --quiet --word-regexp "$name"; then
+		output_domstate=$(virsh domstate $name 2>/dev/null)
 		echo "Domain $name is already defined. (state: $output_domstate)"
 		if [ "$output_domstate" != "running" ]; then
 			virsh start $name

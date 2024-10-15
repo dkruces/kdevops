@@ -34,3 +34,7 @@
 - name: MySQL Docker
   ansible.builtin.import_tasks: mysql-docker/main.yml
   when: sysbench_type_mysql_docker | bool
+
+- name: PostgreSQL Native
+  ansible.builtin.import_tasks: postgresql-native/main.yaml
+  when: sysbench_type_postgresql_native | bool

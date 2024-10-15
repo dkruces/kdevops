@@ -1,0 +1,62 @@
+choice
+	prompt "What type of sysbench do you want to use?"
+	default SYSBENCH_TYPE_POSTGRESQL_NATIVE
+
+config SYSBENCH_TYPE_POSTGRESQL_NATIVE
+	bool "Use PostgreSQL natively for Sysbench"
+	output yaml
+	select SYSBENCH_DB_TYPE_POSTGRESQL
+	help
+	  Enable this option to run sysbench using MySQL natively 
+	  in the Guest OS.
+
+endchoice
+
+if SYSBENCH_TYPE_POSTGRESQL_NATIVE
+
+choice
+	prompt "Which PostgreSQL version to use?"
+	default SYSBENCH_POSTGRESQL_VERSION_REL_17
+
+config SYSBENCH_POSTGRESQL_VERSION_REL_17
+	bool "PostgreSQL 17.m"
+	output yaml
+	help
+	  Uses latest 17 release available (e.g. 17.0).
+
+config SYSBENCH_POSTGRESQL_VERSION_REL_16
+	bool "PostgreSQL 16.m"
+	output yaml
+	help
+	  Uses latest 16 release available (e.g. 16.4).
+
+config SYSBENCH_POSTGRESQL_VERSION_REL_15
+	bool "PostgreSQL 15.m"
+	output yaml
+	help
+	  Uses latest 15 release available (e.g. 15.8).
+
+endchoice
+
+config SYSBENCH_POSTGRESQL_REF_STRING
+	string
+	output yaml
+	default "REL_17" if SYSBENCH_POSTGRESQL_VERSION_REL_17
+	default "REL_16" if SYSBENCH_POSTGRESQL_VERSION_REL_16
+	default "REL_15" if SYSBENCH_POSTGRESQL_VERSION_REL_15
+
+config SYSBENCH_POSTGRESQL_LOGDIR
+	string "PostgreSQL Log Directory"
+	default "/var/log/postgresql"
+	output yaml
+	help
+	  Where to place the database logs.
+
+config SYSBENCH_POSTGRESQL_USER
+	string "PostgreSQL User"
+	default "postgres"
+	output yaml
+	help
+	  PostgreSQL user running database daemon.
+
+endif # SYSBENCH_TYPE_POSTGRESQL_NATIVE

@@ -2,6 +2,10 @@ config SYSBENCH_DB_TYPE_MYSQL
 	bool
 	output yaml
 
+config SYSBENCH_DB_TYPE_POSTGRESQL
+	bool
+	output yaml
+
 source "workflows/sysbench/Kconfig.fs"
 
 choice
@@ -15,16 +19,28 @@ config SYSBENCH_DOCKER
 	help
 	  Run sysbench inside Docker containers.
 
+config SYSBENCH_NATIVE
+	bool "Run Sysbench natively in the Guest OS"
+	output yaml
+	select SYSBENCH_TYPE_POSTGRESQL_NATIVE
+	help
+	  Run sysbench natively in the Guest OS.
+
 endchoice
 
 if SYSBENCH_DOCKER
 source "workflows/sysbench/Kconfig.docker"
 endif # SYSBENCH_DOCKER
 
+if SYSBENCH_NATIVE
+source "workflows/sysbench/Kconfig.native"
+endif # SYSBENCH_NATIVE
+
 config SYSBENCH_DB_TYPE
 	string
 	output yaml
 	default "mysql" if SYSBENCH_DB_TYPE_MYSQL
+	default "postgresql" if SYSBENCH_DB_TYPE_POSTGRESQL
 
 if SYSBENCH_DB_TYPE_MYSQL
 

@@ -30,6 +30,11 @@ TAGS_SYSBENCH_RESULTS += results
 sysbench:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-i hosts playbooks/sysbench.yml \
+		--list-tasks \
+		--skip-tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_RUN))
+
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
+		-i hosts playbooks/sysbench.yml \
 		--skip-tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_RUN))
 
 # Target to run sysbench tests (including telemetry)

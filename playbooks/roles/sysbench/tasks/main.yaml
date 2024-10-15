@@ -31,6 +31,118 @@
     name: create_data_partition
   tags: [ 'mkfs' ]
 
+# Sysbench PostgreSQL Native
+#
+#
+- name: Get the latest PostgreSQL ref
+  ansible.builtin.shell: |
+    git ls-remote --tags --sort="-version:refname" \
+    https://git.postgresql.org/git/postgresql.git {{ sysbench_postgresql_ref_string }}* \
+    | grep -E 'refs/tags/REL_[0-9]+_[0-9]+$' \
+    | head -n 1 \
+    | awk '{print $2}' \
+    | sed 's#refs/tags/##'
+  register: sysbench_postgresql_ref
+  changed_when: false
+  tags: ['setup']
+
+- name: Git clone PostgreSQL
+  tags: ['setup']
+  environment:
+    GIT_SSL_NO_VERIFY:  true
+  ansible.builtin.git:
+    repo: "https://git.postgresql.org/git/postgresql.git"
+    dest: "{{ sysbench_postgresql_repo_path }}"
+    update: yes
+    version: "{{ sysbench_postgresql_ref.stdout }}"
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Get number of processing units available
+  ansible.builtin.command: nproc --all
+  register: sysbench_punits
+
+- name: Set threads using nproc output
+  ansible.builtin.set_fact:
+    _sysbench_threads: "{{ sysbench_punits.stdout }}"
+  when:
+    - sysbench_threads == 0
+
+- name: Set threads manually
+  ansible.builtin.set_fact:
+    _sysbench_threads: "{{ sysbench_threads }}"
+  when:
+    - sysbench_threads != 0
+
+# - name: DEBUG TASK
+#   ansible.builtin.debug:
+#     msg: "sysbench_threads: {{ sysbench_threads }}; _sysbench_threads: {{ _sysbench_threads }}; sysbench_punits.stdout: {{ sysbench_punits.stdout }}"
+
+# - name: Force a failure to stop the playbook
+#   fail:
+#     msg: "This task has failed intentionally, stopping the playbook execution."
+
+
+- name: Check if clean is required for PostgreSQL builddir
+  stat:
+    path: "{{ sysbench_postgresql_repo_path }}/GNUmakefile"
+  register: sysbench_postgresql_cleanup
+  when: 'sysbench_type_postgresql_native|bool'
+  tags: ['setup']
+
+- name: Clean PostgreSQL builddir
+  ansible.builtin.command:
+    cmd: |
+      make clean
+      make distclean
+  args:
+    chdir: "{{ sysbench_postgresql_repo_path }}"
+  when:
+    - sysbench_type_postgresql_native|bool
+    - sysbench_postgresql_cleanup.stat.exists|bool
+  ignore_errors: true
+  tags: ['setup']
+
+- name: Configure PostgreSQL
+  ansible.builtin.command:
+    cmd: >
+      ./configure
+      --with-blocksize={{ sysbench_postgresql_blocksize }}
+      --with-wal-blocksize={{ sysbench_postgresql_wal_blocksize }}
+  args:
+    chdir: "{{ sysbench_postgresql_repo_path }}"
+  when: 'sysbench_type_postgresql_native|bool'
+  tags: ['setup']
+
+- name: Build PostgreSQL
+  ansible.builtin.make:
+    jobs: "{{ sysbench_punits.stdout }}"
+  args:
+    chdir: "{{ sysbench_postgresql_repo_path }}"
+  when: 'sysbench_type_postgresql_native|bool'
+  tags: ['setup']
+
+- name: Install PostgreSQL
+  become: yes
+  become_method: sudo
+  ansible.builtin.make:
+    target: install
+  args:
+    chdir: "{{ sysbench_postgresql_repo_path }}"
+  when: 'sysbench_type_postgresql_native|bool'
+  tags: ['setup']
+
+- name: Create PostgreSQL benchmark user
+  become: yes
+  become_method: sudo
+  ansible.builtin.user:
+    name: "{{ sysbench_postgresql_user }}"
+  when: 'sysbench_type_postgresql_native|bool'
+  tags: ['setup']
+
+#
+#
+# Sysbench PostgreSQL Native
+
 - name: Ensure telemetry data directory exists
   become: yes
   become_flags: 'su - -c'
@@ -39,8 +151,39 @@
     path: "{{ sysbench_telemetry_path }}"
     state: directory
     mode: "u=rwx,g=rx,o=rx"
-  when: 'sysbench_type_mysql_docker|bool'
+  when:
+    - sysbench_type_mysql_docker|bool
+    - sysbench_type_postgresql_native|bool
   tags: ['setup']
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Check if PostgreSQL Server is Running
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.stat:
+    path: "{{ sysbench_postgresql_pgdata }}/postmaster.pid"
+  register: sysbench_postgresql_stop
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Stop the PostgreSQL Server
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_ctl
+    --pgdata={{ sysbench_postgresql_pgdata }}
+    --log={{ sysbench_postgresql_logfile }}
+    stop
+    --mode=immediate
+  retries: 5
+  delay: 10
+  when:
+    - sysbench_postgresql_stop.stat.exists | bool
+    - sysbench_type_postgresql_native | bool
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Ensure MySQL root user directory exists
   become: yes
@@ -71,6 +214,27 @@
     sysbench_fs_opts_without_sector_size: "{{ fs_cmd | regex_replace('^[^ ]+ ', '')  }}"
     sysbench_db_page_size: "{{ db_page_size }}"
   tags: ['vars' ]
+  when: 'sysbench_type_mysql_docker|bool'
+
+- name: Determine filesystem setting used and db page size
+  vars:
+    fs_type_variable: "{{ ansible_host | regex_replace('^' + kdevops_host_prefix + '-', '')  | regex_replace('-.+', '') }}"
+    fs_command_variable_simple: "sysbench_{{ ansible_host | regex_replace('^' + kdevops_host_prefix + '-', '') | regex_replace('-dev$', '') }}_cmd"
+    fs_command_variable: "{{ fs_command_variable_simple | regex_replace('-', '_') | regex_replace('^sysbench_' + fs_type_variable, fs_type_variable + '_section') }}"
+    db_page_size_simple: "sysbench_{{ ansible_host | regex_replace('^' + kdevops_host_prefix + '-', '') | regex_replace('-dev$', '') }}_db_page_size"
+    db_page_size_variable: "{{ db_page_size_simple | regex_replace('-', '_') | regex_replace('^sysbench_' + fs_type_variable, fs_type_variable + '_section') }}"
+    fs_sector_size_variable: "sysbench_{{ fs_type_variable }}_sector_size"
+    fs_cmd: "{{  lookup('vars', 'sysbench_' + fs_command_variable) }}"
+    sect_size: "{{  lookup('vars', fs_sector_size_variable) }}"
+    db_page_size: "{{ sysbench_postgresql_blocksize }}"
+  set_fact:
+    filesystem_command_for_host: "{{ fs_cmd }}"
+    sysbench_fs_sector_size: "{{ sect_size }}"
+    sysbench_fstype: "{{ fs_type_variable }}"
+    sysbench_fs_opts_without_sector_size: "{{ fs_cmd | regex_replace('^[^ ]+ ', '')  }}"
+    sysbench_db_page_size: "{{ db_page_size }}"
+  tags: ['vars' ]
+  when: 'sysbench_type_postgresql_native|bool'
 
 - name: Set filesystem options for XFS with sector size
   set_fact:
@@ -166,20 +330,76 @@
     disk_setup_env: "{{ sysbench_fs_env }}"
   tags: ['clean', 'mkfs']
 
+# Sysbench PostgreSQL Native
+#
+#
+- name: Change ownership of PostgreSQL database under test mount directory
+  become: yes
+  become_method: sudo
+  ansible.builtin.file:
+    path: "{{ sysbench_mnt }}"
+    owner: "{{ sysbench_postgresql_user }}"
+    group: "{{ sysbench_postgresql_user }}"
+    recurse: yes
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Initialize the PostgreSQL Database
+  become: yes
+  become_method: sudo
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/initdb
+    --pgdata={{ sysbench_postgresql_pgdata }}
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
+
 - name: Set sysbench_mysql_innodb_doublewrite based on ansible_host
   tags: ['vars' ]
   set_fact:
     sysbench_host_is_baseline: "{{ False if ansible_host is search('-dev$') else True }}"
     sysbench_mysql_innodb_doublewrite: "{{ '0' if ansible_host is search('-dev$') else '1' }}"
   when:
-    - 'sysbench_disable_doublewrite_auto|bool'
+    - sysbench_type_mysql_docker|bool
+    - sysbench_disable_doublewrite_auto|bool
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Set sysbench_postgresql_full_page_writes based on ansible_host
+  tags: ['vars']
+  set_fact:
+    sysbench_host_is_baseline: "{{ False if ansible_host is search('-dev$') else True }}"
+    sysbench_postgresql_full_page_writes: "{{ 'off' if ansible_host is search('-dev$') else 'on' }}"
+  when:
+    - sysbench_type_postgresql_native|bool
+    - sysbench_disable_full_page_writes_auto|bool
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Set sysbench_mysql_innodb_doublewrite based on ansible_host
   tags: ['vars' ]
   set_fact:
     sysbench_mysql_innodb_doublewrite: '0'
   when:
-    - 'sysbench_disable_doublewrite_always|bool'
+    - sysbench_type_mysql_docker|bool
+    - sysbench_disable_doublewrite_always|bool
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Set sysbench_postgresql_full_page_writes based on ansible_host
+  tags: ['vars']
+  set_fact:
+    sysbench_postgresql_full_page_writes: 'off'
+  when:
+    - sysbench_type_postgresql_native|bool
+    - sysbench_disable_full_page_writes_always|bool
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Generate MySQL client configuration file from template
   tags: ['setup']
@@ -188,6 +408,23 @@
     dest: "{{ sysbench_mysql_container_host_client_config_path }}"
     mode: "u=rw,g=r,o=r"
   when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Generate PostgreSQL configuration file from template
+  tags: ['setup']
+  become: yes
+  become_method: sudo
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.template:
+    src: "{{ sysbench_postgresql_configuration }}.j2"
+    dest: "{{ sysbench_postgresql_pgdata }}/postgresql.conf"
+    mode: "u=rw,g=r,o=r"
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Generate MySQL server configuration file from template
   tags: ['setup']
@@ -207,6 +444,7 @@
     state: directory
   with_items:
     - "{{ sysbench_mysql_container_host_root_path }}/.mysqlsh/"
+  when: 'sysbench_type_mysql_docker|bool'
 
 - name: git clone our mysqlsh plugin for telemetry
   tags: ['setup']
@@ -256,10 +494,28 @@
 - name: Document double write buffer setting on node
   local_action: "shell echo {{ sysbench_mysql_innodb_doublewrite }} > {{ topdir_path }}/workflows/sysbench/results/{{ inventory_hostname }}/innodb_doublewrite.txt"
   tags: ['db_start']
+  when: 'sysbench_type_mysql_docker|bool'
 
 - name: Document db page size setting on node
   local_action: "shell echo {{ sysbench_db_page_size }} > {{ topdir_path }}/workflows/sysbench/results/{{ inventory_hostname }}/innodb_page_size.txt"
   tags: ['db_start']
+  when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Document full_page_writes setting on node
+  local_action: "shell echo {{ sysbench_postgresql_full_page_writes }} > {{ topdir_path }}/workflows/sysbench/results/{{ inventory_hostname }}/full_page_writes.txt"
+  tags: ['db_start']
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Document db blocksize setting on node
+  local_action: "shell echo {{ sysbench_db_page_size }} > {{ topdir_path }}/workflows/sysbench/results/{{ inventory_hostname }}/postgresql_blocksize.txt"
+  tags: ['db_start']
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Start MySQL Docker container
   tags: ['db_start']
@@ -344,6 +600,22 @@
     dest: "{{ sysbench_docker_telemetry_path }}/root-setup-mysql-client-test.txt"
   when: 'sysbench_type_mysql_docker|bool'
 
+# Sysbench PostgreSQL Native
+#
+#
+- name: Start the PostgreSQL Server
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_ctl
+    --pgdata={{ sysbench_postgresql_pgdata }}
+    --log={{ sysbench_postgresql_logfile }}
+    start
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
+
 - name: Add sysbench test user using the MySQL container
   tags: ['post_entrypoint']
   become: yes
@@ -393,6 +665,67 @@
     container: "{{ sysbench_mysql_container_name }}"
     command: mysql -e "FLUSH PRIVILEGES;"
   when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Create PostgreSQL database USER
+  tags: ['post_entrypoint']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/psql
+    --command="CREATE USER {{ sysbench_db_username }} WITH PASSWORD '{{ sysbench_db_password }}';"
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Create PostgreSQL database DATABASE
+  tags: ['post_entrypoint']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/psql
+    --command="CREATE DATABASE {{ sysbench_db_name }};"
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Grant USER privileges to DATABASE
+  tags: ['post_entrypoint']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/psql
+    --command="GRANT ALL PRIVILEGES ON DATABASE {{ sysbench_db_name }}.* TO {{ sysbench_db_username }}@'%';"
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Grant ALL public Privileges to DATABASE
+  tags: ['post_entrypoint']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/psql
+    --host=localhost
+    --port={{ sysbench_local_db_port }}
+    --dbname={{ sysbench_db_name }}
+    --username={{ sysbench_postgresql_user }}
+    --no-password
+    --command="GRANT ALL ON SCHEMA public TO {{ sysbench_db_name }};"
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Test and Ensure Permissions are Set Correctly
+  tags: ['post_entrypoint']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/psql
+    --host=localhost
+    --port={{ sysbench_local_db_port }}
+    --dbname={{ sysbench_db_name }}
+    --username={{ sysbench_postgresql_user }}
+    --no-password
+    --command="create table xyz(a varchar(100));"
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Install pip using MySQL container
   tags: ['post_entrypoint']
@@ -505,7 +838,7 @@
       --mysql-table-engine={{ sysbench_mysql_table_engine }}
       --oltp-table-size={{ sysbench_oltp_table_size }}
       --oltp-tables-count={{ sysbench_oltp_table_count }}
-      --threads=1
+      --threads={{ _sysbench_threads }}
       --mysql-auth-plugin=mysql_native_password
       --mysql-host=127.0.0.1
       --mysql-port={{ sysbench_local_db_port }}
@@ -515,6 +848,32 @@
   register: sysbench_init_pop
   when: 'sysbench_type_mysql_docker|bool'
 
+# Sysbench PostgreSQL Native
+#
+#
+- name: Populate sysbench database
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    sysbench
+    --db-driver={{ sysbench_db_type }}
+    --table-size={{ sysbench_oltp_table_size }}
+    --tables={{ sysbench_oltp_table_count }}
+    --threads={{ _sysbench_threads }}
+    --pgsql-host=127.0.0.1
+    --pgsql-port={{ sysbench_local_db_port }}
+    --pgsql-user={{ sysbench_db_username }}
+    --pgsql-password={{ sysbench_db_password }}
+    --pgsql-db={{ sysbench_db_name }}
+    --db-debug
+    --verbosity=5
+    /usr/share/sysbench/oltp_read_write.lua prepare
+  register: sysbench_postgresql_prepare_output
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
+
 - name: Save the output of popuating the initial sysench database
   tags: ['post_entrypoint']
   become: yes
@@ -523,6 +882,22 @@
     content: "{{ sysbench_init_pop.stdout }}"
     dest: "{{ sysbench_docker_telemetry_path }}/sysbench_populate.txt"
   when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Save the output of populating the initial sysench database
+  tags: ['post_entrypoint']
+  become: yes
+  become_method: sudo
+  copy:
+    content: "{{ sysbench_init_pop.stdout }}"
+    dest: "{{ sysbench_telemetry_path }}/sysbench_populate.txt"
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
+
 
 # We use a shell here to be able to directly output to a file instad
 # of saving to an ansible variable with register because we expect this
@@ -542,7 +917,7 @@
       --mysql-table-engine={{ sysbench_mysql_table_engine }}
       --oltp-table-size={{ sysbench_oltp_table_size }}
       --oltp-tables-count={{ sysbench_oltp_table_count }}
-      --threads={{ sysbench_threads }}
+      --threads={{ _sysbench_threads }}
       --time={{ sysbench_test_duration }}
       --mysql-host=127.0.0.1
       --mysql-port={{ sysbench_local_db_port }}
@@ -555,6 +930,40 @@
   poll: 0 # Run in the background
   register: sysbench_job # Register the job ID
   when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Start sysbench run
+  tags: ['run_sysbench']
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    sysbench
+    --db-driver={{ sysbench_db_type }}
+    --table-size={{ sysbench_oltp_table_size }}
+    --tables={{ sysbench_oltp_table_count }}
+    --threads={{ _sysbench_threads }}
+    --pgsql-host=127.0.0.1
+    --pgsql-port={{ sysbench_local_db_port }}
+    --pgsql-user={{ sysbench_db_username }}
+    --pgsql-password={{ sysbench_db_password }}
+    --pgsql-db={{ sysbench_db_name }}
+    --debug=on
+    --db-debug
+    --verbosity=5
+    --time={{ sysbench_test_duration }}
+    --report-interval={{ sysbench_report_interval }}
+    --histogram=on
+    /usr/share/sysbench/oltp_read_write.lua run >
+    {{ sysbench_telemetry_path }}/sysbench_tps.txt
+  async: "{{ sysbench_test_duration | int + 10 }}" # Maximum allowed time to complete
+  poll: 0 # Run in the background
+  register: sysbench_job # Register the job ID
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Collect MySQL telemetry inside the Docker MySQL container at the same time
   tags: ['telemetry', 'tel' ]
@@ -584,6 +993,71 @@
   retries: "{{ sysbench_test_duration | int // 60 }}"  # Retries every minute
   delay: 60  # Delay between retries (in seconds)
 
+# Sysbench PostgreSQL Native
+#
+#
+- name: Stop the PostgreSQL server (Smart Mode)
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_ctl
+    --pgdata={{ sysbench_postgresql_pgdata }}
+    --log={{ sysbench_postgresql_logfile }}
+    stop
+    --mode=smart
+    --timeout=6000
+  register: _sysbench_postgresql_stop_smart
+  retries: 100
+  delay: 60
+  ignore_errors: yes
+  when: 'sysbench_type_postgresql_native|bool'
+
+- name: Stop the PostgreSQL server (Fast Mode)
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_ctl
+    --pgdata={{ sysbench_postgresql_pgdata }}
+    --log={{ sysbench_postgresql_logfile }}
+    stop
+    --mode=fast
+  register: _sysbench_postgresql_stop_fast
+  retries: 1
+  delay: 10
+  when:
+    - _sysbench_postgresql_stop_smart.rc != 0
+    - sysbench_type_postgresql_native|bool
+  ignore_errors: yes
+
+- name: Stop the PostgreSQL server (Immediate Mode)
+  become: yes
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_ctl
+    --pgdata={{ sysbench_postgresql_pgdata }}
+    --log={{ sysbench_postgresql_logfile }}
+    stop
+    --mode=immediate
+  register: _sysbench_postgresql_stop_immediate
+  retries: 1
+  delay: 10
+  when:
+    - _sysbench_postgresql_stop_fast.rc | default(0) != 0
+    - sysbench_type_postgresql_native|bool
+
+- name: Collect PostgreSQL database cluster control information
+  become: yes
+  become_method: sudo
+  become_user: "{{ sysbench_postgresql_user }}"
+  ansible.builtin.command: >
+    /usr/local/pgsql/bin/pg_controldata
+    --pgdata={{ sysbench_postgresql_pgdata }}
+  register: sysbench_postgresql_controldata_output
+  when: 'sysbench_type_postgresql_native|bool'
+#
+#
+# Sysbench PostgreSQL Native
+
 - name: Move sysbench async results file to telemetry
   tags: ['run_sysbench']
   become: yes
@@ -610,6 +1084,24 @@
     content: "{{ sysbench_logs.stdout }}"
     dest: "{{ sysbench_telemetry_path }}/docker-sysbench-results-{{ ansible_date_time.iso8601 }}.log"
   when: 'sysbench_type_mysql_docker|bool'
+
+# Sysbench PostgreSQL Native
+#
+#
+- name: Write PostgreSQL database cluster control information to log file
+  become: yes
+  become_method: sudo
+  become_user: root
+  ansible.builtin.copy:
+    content: "{{ sysbench_postgresql_controldata_output.stdout }}"
+    dest: "{{ sysbench_postgresql_controldata_logfile }}"
+    mode: '0755'
+    owner: "{{ sysbench_postgresql_user }}"
+    group: "{{ sysbench_postgresql_user }}"
+    remote_src: yes
+#
+#
+# Sysbench PostgreSQL Native
 
 - name: Collect sysbench docker logs for MySQL container
   tags: ['logs']

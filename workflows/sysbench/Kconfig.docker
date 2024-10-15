@@ -40,7 +40,7 @@ config SYSBENCH_MYSQL_CONTAINER_NAME
 	  Set the name for the MySQL Docker container.
 
 config SYSBENCH_MYSQL_CONTAINER_PYTHON_PATH
-	string "The MySQL container pytyhon path"
+	string "The MySQL container python path"
 	default "/usr/local/lib/python3.9/site-packages" if SYSBENCH_MYSQL_CONTAINER_IMAGE_8_0
 	output yaml
 	help

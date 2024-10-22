@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 DEBIAN_VERSION_FILE="/etc/debian_version"
 ACCEPTABLE_HOPS=1
 

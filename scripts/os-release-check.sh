@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# set -euxo pipefail
+
 OS_FILE="/etc/os-release"
 
 if [[ ! -f $OS_FILE ]]; then
@@ -54,6 +56,16 @@ check_distro_ubuntu()
 	exit
 }
 
+check_distro_nixos()
+{
+	grep -qi nixos $OS_FILE
+	if [[ $? -eq 0 ]]; then
+		echo y
+		exit
+	fi
+	echo n
+	exit
+}
 
 case $1 in
 debian)
@@ -73,6 +85,9 @@ suse)
 	;;
 ubuntu)
 	check_distro_ubuntu $1
+	;;
+nixos)
+	check_distro_nixos $1
 	;;
 *)
 	echo n

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DISTRO=$1
 VIRT_TYPE=$2

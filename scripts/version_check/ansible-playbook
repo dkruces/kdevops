@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 MIN_REQ="2.13.4"
 OWN_BIN="ansible-playbook"

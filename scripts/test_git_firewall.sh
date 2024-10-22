@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 CUR_VAL=$1
 which nc &> /dev/null

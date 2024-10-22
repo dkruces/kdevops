@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tries to infer your preferred libvirt storage pool name.
 # If you are using kdevops in a directory like say /data1/next/kdevops
 # this will look to see if /data1/ is the path of a storage pool name

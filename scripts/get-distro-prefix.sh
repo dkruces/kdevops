@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DEFAULT_DISTRO="debian"
 DISTROS="debian"
@@ -7,9 +7,10 @@ DISTROS="$DISTROS opensuse"
 DISTROS="$DISTROS redhat"
 DISTROS="$DISTROS suse"
 DISTROS="$DISTROS ubuntu"
+DISTROS="$DISTROS nixos"
 
 for i in $DISTROS; do
-	if [[ "./scripts/os-release-check.sh $i" == "y" ]]; then
+	if [[ $(./scripts/os-release-check.sh $i) == "y" ]]; then
 		echo $i
 		exit
 	fi

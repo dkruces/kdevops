@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Let's us use advanced heuristics for lazy developers where sudo is already
 # set. These heuristics are typically for lage deployments of kdevops where
 # you may use different libvirt storage pools for different nvme drives and

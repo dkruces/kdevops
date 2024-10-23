@@ -1,0 +1,51 @@
+---
+- name: Ensure the kdevops directory exists
+  file:
+    path: /etc/nixos/kdevops
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Get the list of all .nix files in kdevops
+  ansible.builtin.find:
+    paths: /etc/nixos/kdevops
+    recurse: yes
+    patterns: "*.nix"
+    excludes: "default.nix"
+  register: libvirt_user_nixos_conf_found_files
+
+- name: Generate list of found .nix files
+  set_fact:
+    nix_imports: "{{ libvirt_user_nixos_conf_found_files.files | map(attribute='path') | map('basename') | default([]) | list }}"
+
+- name: Debug nix_imports
+  ansible.builtin.debug:
+    var: nix_imports
+
+- name: Generate /etc/nixos/kdevops/default.nix
+  become: yes
+  become_method: sudo
+  ansible.builtin.template:
+    src: default.nix.j2
+    dest: /etc/nixos/kdevops/default.nix
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    nix_imports: "{{ nix_imports }}"
+
+- name: Copy libvirt Nix configuration
+  become: yes
+  become_method: sudo
+  ansible.builtin.template:
+    src: libvirt.nix.j2
+    dest: /etc/nixos/kdevops/libvirt.nix
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Apply new NixOS configuration
+  become: yes
+  become_method: sudo
+  ansible.builtin.command: nixos-rebuild switch

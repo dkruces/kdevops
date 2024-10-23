@@ -18,3 +18,9 @@
   when:
     - ansible_os_family == 'RedHat'
     - ansible_facts['distribution'] == "Fedora"
+
+- name: NixOS-specific set up
+  ansible.builtin.import_tasks: enable-user/nixos/main.yml
+  when:
+    - ansible_os_family == 'NixOS'
+    - ansible_facts['distribution'] == "NixOS"

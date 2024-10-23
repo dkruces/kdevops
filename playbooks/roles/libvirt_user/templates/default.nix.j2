@@ -1,0 +1,10 @@
+{ config, pkgs, ... }:
+
+{
+  imports =
+    [
+  {% for file in nix_imports %}
+    ./{{ file }}
+  {% endfor %}
+    ];
+}

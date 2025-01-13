@@ -77,6 +77,7 @@ bringup_guestfs: $(GUESTFS_BRINGUP_DEPS)
 		--inventory localhost, \
 		playbooks/bringup_guestfs.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \
+		-e 'running_user=$(USER)' \
 		--extra-vars=@./extra_vars.yaml \
 		--tags config-check,network,build-deps
 	$(Q)$(TOPDIR)/scripts/bringup_guestfs.sh

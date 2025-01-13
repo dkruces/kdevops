@@ -38,6 +38,18 @@
   when: guestfs_subdirectories.matched == 0
   tags: [ 'config-check' ]
 
+- name: Use install-dep tasks from libvirt_user role to install libvirt deps
+  include_role:
+    name: libvirt_user
+    tasks_from: install-deps/main.yml
+  tags: [ 'network' ]
+
+- name: Use enable-user tasks from libvirt_user role to enable user
+  include_role:
+    name: libvirt_user
+    tasks_from: enable-user/main.yml
+  tags: [ 'network' ]
+
 - name: Check for dnsmasq configuration files
   stat:
     path: "{{ item }}"

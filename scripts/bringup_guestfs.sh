@@ -34,7 +34,7 @@ build_custom_source()
 	SOURCE_TMP=$(mktemp)
 	cat <<_EOT >$SOURCE_TMP
 [local]
-uri=file:///${CUSTOM_INDEX}
+uri=file:///${REAL_CUSTOM_INDEX}
 proxy=off
 _EOT
 	sudo mv $SOURCE_TMP $CUSTOM_SOURCE
@@ -111,6 +111,7 @@ build_custom_image()
 	CUSTOM_IMAGE_OK="${CUSTOM_IMAGE_DIR}.ok"
 	CUSTOM_SOURCE="/etc/virt-builder/repos.d/kdevops-custom-images-${OS_VERSION}.conf"
 	CUSTOM_INDEX="${CUSTOM_IMAGE_DIR}/index"
+	REAL_CUSTOM_INDEX="$(realpath $CUSTOM_INDEX)"
 
 	mkdir -p ${CUSTOM_IMAGE_DIR}
 

@@ -59,7 +59,6 @@
 
 - name: Check dnsmasq service status
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   command: systemctl is-enabled dnsmasq
   register: dnsmasq_enabled
@@ -72,7 +71,6 @@
 
 - name: Check if dnsmasq service is active
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   command: systemctl is-active dnsmasq
   register: dnsmasq_active
@@ -94,7 +92,6 @@
 
 - name: Check if libvirt default network is running
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   shell: virsh net-list | grep -q default
   register: libvirt_default_net
@@ -106,7 +103,6 @@
 - name: Start the libvirt default network if not running
   command: virsh net-start default
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   when:
     - 'libvirt_uri_system|bool'
@@ -123,7 +119,6 @@
 
 - name: Look for console.log files in guestfs subdirectories to check for CI enablement
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   find:
     paths: "{{ topdir_path }}/guestfs"
@@ -137,7 +132,6 @@
 
 - name: Ensure console.log files are owned by the main user for CI monitoring
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   file:
     path: "{{ item.path }}"

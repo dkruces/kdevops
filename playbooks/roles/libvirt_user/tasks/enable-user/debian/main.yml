@@ -49,7 +49,6 @@
 - name: Ensure our user is part of the libvirt/kvm groups
   tags: [ 'journal', 'build-deps' ]
   become: yes
-  become_flags: 'su - -c'
   become_method: sudo
   ansible.builtin.user:
     name:  "{{ ansible_user_id }}"

@@ -73,7 +73,7 @@ $(KDEVOPS_PROVISIONED_SSH):
 	$(Q)touch $(KDEVOPS_PROVISIONED_SSH)
 
 bringup_guestfs: $(GUESTFS_BRINGUP_DEPS)
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
+	$(Q)ansible-playbook -K $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		playbooks/bringup_guestfs.yml \
 		-e 'ansible_python_interpreter=/usr/bin/python3' \

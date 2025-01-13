@@ -13,6 +13,8 @@ BINARY_DEPS += ansible-playbook
 ifneq (y,$(CONFIG_KDEVOPS_FIRST_RUN))
 ifeq (y,$(CONFIG_GUESTFS))
 BINARY_DEPS += virt-builder
+BINARY_DEPS += virsh
+BINARY_DEPS += libvirtd
 endif
 endif
 

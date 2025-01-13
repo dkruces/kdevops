@@ -13,10 +13,12 @@
     name:
       - libvirt-daemon
       - libvirt-daemon-system
+      - libvirt-daemon-config-network
       - libvirt-clients
       - qemu-kvm
       - qemu-system-x86
       - qemu-utils
+      - guestfs-tools
     state: present
   tags: install
 

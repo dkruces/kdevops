@@ -11,11 +11,18 @@
 - name: Distribution specific setup
   import_tasks: debian/main.yml
   when: ansible_facts['os_family']|lower == 'debian'
+  tags: [ 'build-deps' ]
+
 - import_tasks: suse/main.yml
   when: ansible_facts['os_family']|lower == 'suse'
+  tags: [ 'build-deps' ]
+
 - import_tasks: redhat/main.yml
   when:
     - ansible_facts['os_family']|lower == 'redhat'
     - ansible_facts['distribution']|lower != "fedora"
+  tags: [ 'build-deps' ]
+
 - import_tasks: fedora/main.yml
   when: ansible_facts['distribution']|lower == "fedora"
+  tags: [ 'build-deps' ]

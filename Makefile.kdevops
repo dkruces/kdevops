@@ -9,22 +9,25 @@ kdevops_all: kdevops_deps
 PHONY := kdevops_all
 
 kdevops_terraform_deps:
-	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/install_terraform.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3'
+	@$(Q) echo "skipping kdevops_terraform_deps..."
+	# @$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
+	# 	--inventory localhost, \
+	# 	$(KDEVOPS_PLAYBOOKS_DIR)/install_terraform.yml \
+	# 	-e 'ansible_python_interpreter=/usr/bin/python3'
 PHONY += kdevops_terraform_deps
 
 kdevops_vagrant_install_vagrant:
-	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/install_vagrant.yml \
-		-e 'ansible_python_interpreter=/usr/bin/python3'
+	@$(Q) echo "skipping kdevops_terraform_deps..."
+	# @$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
+	# 	--inventory localhost, \
+	# 	$(KDEVOPS_PLAYBOOKS_DIR)/install_vagrant.yml \
+	# 	-e 'ansible_python_interpreter=/usr/bin/python3'
 
 kdevops_install_libvirt:
 	@$(Q)ansible-playbook $(ANSIBLE_VERBOSE) --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_user.yml -e "skip_configuration=True" \
+		--ask-become-pass \
 		-e 'ansible_python_interpreter=/usr/bin/python3'
 
 kdevops_configure_libvirt:

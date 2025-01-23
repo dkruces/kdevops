@@ -55,6 +55,7 @@ install_package_deps:
 		echo "Unsupported Linux distribution."; \
 		exit 1; \
 	fi
+	@echo "You may need to run menuconfig-deps && kdevops-deps"
 
 kdevops-install-min-deps: install_package_deps
 PHONY += kdevops-install-min-deps

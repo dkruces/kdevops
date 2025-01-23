@@ -25,9 +25,65 @@
     cmd: /usr/sbin/apparmor_status --enabled
   register: apparmor_check
   failed_when: apparmor_check.rc == 0
+  ignore_errors: yes
   when:
     - 'only_verify_user|bool'
     - 'apparmor_file_stat_result.stat.exists'
+  tags: [ 'build-deps' ]
+
+- name: Disabling AppArmor -> Create directory for grub settings
+  become: yes
+  become_method: sudo
+  ansible.builtin.file:
+    path: /etc/default/grub.d
+    state: directory
+    mode: '0755'
+  when:
+    - 'only_verify_user|bool'
+    - 'apparmor_file_stat_result.stat.exists'
+    - apparmor_check.rc == 0
+  tags: [ 'build-deps' ]
+
+- name: Disabling AppArmor -> Add apparmor=0 to grub configuration
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    content: 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT apparmor=0"'
+    dest: /etc/default/grub.d/apparmor.cfg
+    mode: '0644'
+  when:
+    - 'only_verify_user|bool'
+    - 'apparmor_file_stat_result.stat.exists'
+    - apparmor_check.rc == 0
+  tags: [ 'build-deps' ]
+
+- name: Disabling AppArmor -> Update grub
+  become: yes
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: update-grub
+  when:
+    - 'only_verify_user|bool'
+    - 'apparmor_file_stat_result.stat.exists'
+    - apparmor_check.rc == 0
+  tags: [ 'build-deps' ]
+
+- name: Disabling AppArmor -> Ask user to reboot the system
+  debug:
+    msg: |
+      AppArmor has been disabled. To apply the changes, please reboot your system.
+  when:
+    - 'only_verify_user|bool'
+    - 'apparmor_file_stat_result.stat.exists'
+    - apparmor_check.rc == 0
+  tags: [ 'build-deps' ]
+
+- name: Disabling AppArmor -> Terminate playbook
+  ansible.builtin.meta: end_play
+  when:
+    - 'only_verify_user|bool'
+    - 'apparmor_file_stat_result.stat.exists'
+    - apparmor_check.rc == 0
   tags: [ 'build-deps' ]
 
 - name: Verifies user's effective group allows to run libvirt/kvm without being root

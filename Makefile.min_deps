@@ -5,17 +5,15 @@
 # have something more elaborate, like a version check add it to its
 # own file as we do with scripts/version_check/ansible-playbook
 
-BINARY_DEPS := sudo make ansible-playbook pipx
-DEBIAN_PACKAGE_DEPS := sudo make netcat-traditional pipx
-SUSE_PACKAGE_DEPS := sudo make nc python-pipx
-REDHAT_PACKAGE_DEPS := sudo make ncat pipx
-PIPX_DEPS :=
-PIPX_DEPS += ansible-playbook
+BINARY_DEPS := sudo make ansible-playbook
+DEBIAN_PACKAGE_DEPS := sudo make netcat-traditional ansible
+SUSE_PACKAGE_DEPS := sudo make nc ansible
+REDHAT_PACKAGE_DEPS := sudo make ncat ansible
 ifneq (y,$(CONFIG_KDEVOPS_FIRST_RUN))
 ifeq (y,$(CONFIG_GUESTFS))
-BINARY_DEPS += virt-builder
-BINARY_DEPS += virsh
-BINARY_DEPS += libvirtd
+# BINARY_DEPS += virt-builder
+# BINARY_DEPS += virsh
+# BINARY_DEPS += libvirtd
 endif
 endif
 
@@ -39,7 +37,7 @@ $(BINARY_DEPS):
 	$(Q)echo Verifying $@ ...
 	$(Q)set -e ; which $@ > /dev/null || ( \
 		echo Missing dependency: $@ ;\
-		echo Run 'make kdevops-install-deps' to install missing dependencies ;\
+		echo Run 'make kdevops-install-min-deps' to install missing dependencies ;\
 	false)
 
 install_package_deps:
@@ -58,20 +56,8 @@ install_package_deps:
 		exit 1; \
 	fi
 
-pipx_install_ansible_full:
-	$(Q)pipx install --force --include-deps ansible
-
-pipx_update_ansible_full:
-	$(Q)pipx upgrade --include-injected ansible
-
-kdevops-install-deps: install_package_deps pipx_install_ansible_full
-PHONY += kdevops-install-deps
-
-install-ansible-full: pipx_install_ansible_full
-PHONY += install-ansible-full
-
-update-ansible-full: pipx_update_ansible_full
-PHONY += update-ansible-full
+kdevops-install-min-deps: install_package_deps
+PHONY += kdevops-install-min-deps
 
 $(KDEVOPS_DEPCHECK): $(DYNAMIC_DEPS)
 	$(Q)echo The current minimum kdevops expected dependencies are met.

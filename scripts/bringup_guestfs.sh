@@ -208,7 +208,8 @@ pre_install_customizations()
 		UPDATE_GRUB_CMD="/usr/sbin/update-grub2"
 	fi
 	cat <<_EOT >>$cmdfile
-install sudo,qemu-guest-agent,python3,bash
+install sudo,python3,bash
+firstboot-install qemu-guest-agent
 run-command useradd ${KDEVOPS_UID} -s /bin/bash -m kdevops
 append-line /etc/sudoers.d/kdevops:kdevops   ALL=(ALL)       NOPASSWD: ALL
 edit /etc/default/grub:s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0"/

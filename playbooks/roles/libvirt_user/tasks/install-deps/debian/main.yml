@@ -18,6 +18,7 @@
       - qemu-kvm
       - qemu-system-x86
       - qemu-utils
+      - qemu-guest-agent
       - guestfs-tools
     state: present
   tags: install

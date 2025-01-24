@@ -198,9 +198,9 @@ _EOT
 
 pre_install_customizations()
 {
-	KDEVOPS_UID=""
+	KDEVOPS_UID="--uid 1001"
 	if getent passwd kdevops > /dev/null 2>&1; then
-		KDEVOPS_UID="-u `id -u kdevops`"
+		KDEVOPS_UID="--uid `id -u kdevops`"
 	fi
 	if echo $OS_VERSION | grep -qE "^(rhel|fedora|centos)"; then
 		UPDATE_GRUB_CMD="/usr/sbin/grub2-mkconfig -o /boot/grub2/grub.cfg"
@@ -210,7 +210,9 @@ pre_install_customizations()
 	cat <<_EOT >>$cmdfile
 install sudo,python3,bash
 firstboot-install qemu-guest-agent
-run-command useradd ${KDEVOPS_UID} -s /bin/bash -m kdevops
+# run-command useradd ${KDEVOPS_UID} -s /bin/bash -m kdevops
+# firstboot-command useradd -m -p "" kdevops ; chage -d 0 kdevops'
+firstboot-command useradd ${KDEVOPS_UID} --shell /bin/bash --create-home kdevops
 append-line /etc/sudoers.d/kdevops:kdevops   ALL=(ALL)       NOPASSWD: ALL
 edit /etc/default/grub:s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0"/
 run-command $UPDATE_GRUB_CMD
@@ -223,11 +225,13 @@ _EOT
 debian_pre_install_hacks()
 {
 	cat <<_EOT >>$cmdfile
-install isc-dhcp-client,ifupdown
-mkdir /etc/network/interfaces.d/
-append-line /etc/network/interfaces.d/enp1s0:auto enp1s0
-append-line /etc/network/interfaces.d/enp1s0:allow-hotplug enp1s0
-append-line /etc/network/interfaces.d/enp1s0:iface enp1s0 inet dhcp
+firstboot-install isc-dhcp-client,ifupdown
+mkdir /etc/systemd/network/
+write /etc/systemd/network/20-enp1s0.network:[Match]
+append-line /etc/systemd/network/20-enp1s0.network:Name=enp1s0
+append-line /etc/systemd/network/20-enp1s0.network:
+append-line /etc/systemd/network/20-enp1s0.network:[Network]
+append-line /etc/systemd/network/20-enp1s0.network:DHCP=yes
 firstboot-command systemctl stop ssh
 firstboot-command DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true dpkg-reconfigure -p low --force openssh-server
 firstboot-command systemctl start ssh
@@ -357,7 +361,6 @@ do
 	ROOTIMG="$STORAGEDIR/$name/root.raw"
 	cp --reflink=auto $BASE_IMAGE $ROOTIMG
 	TZ="$(timedatectl show -p Timezone --value)"
-	$USE_SUDO virt-sysprep -a $ROOTIMG --hostname $name --ssh-inject "kdevops:file:$SSH_KEY.pub" --timezone $TZ
 
 	if [[ "${CONFIG_LIBVIRT_ENABLE_LARGEIO+x}" && "$CONFIG_LIBVIRT_ENABLE_LARGEIO" == "y" ]]; then
 		lbs_idx=0
@@ -397,4 +400,9 @@ do
 		echo "Failed to start $name"
 		exit 1
 	fi
+	sleep 60
+	virsh shutdown $name
+	sleep 10
+	$USE_SUDO virt-sysprep -a $ROOTIMG --hostname $name --ssh-inject "kdevops:file:$SSH_KEY.pub" --timezone $TZ
+	virsh start $name
 done

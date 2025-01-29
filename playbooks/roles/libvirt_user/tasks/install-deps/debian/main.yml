@@ -19,6 +19,7 @@
       - qemu-system-x86
       - qemu-utils
       - guestfs-tools
+      - isc-dhcp-client
     state: present
   tags: install
 

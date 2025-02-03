@@ -8,6 +8,7 @@
       -o Acquire::Check-Valid-Until=false update
   when:
     - ansible_os_family == "Debian"
+    - ansible_distribution_release == "trixie"
   tags: vars_simple
   register: apt_update_result
   retries: 5
@@ -23,15 +24,20 @@
       python3-setuptools libapt-pkg-dev python3-pip git
   when:
     - ansible_os_family == "Debian"
+    - ansible_distribution_release == "trixie"
   tags: vars_simple
 
 - name: Install python-apt from Git with pip3
   become: true
   become_method: sudo
   ansible.builtin.shell:
-    cmd: pip3 install git+https://salsa.debian.org/apt-team/python-apt.git@2.9.6 --break-system-packages
+    cmd: >
+      pip3 install
+      git+https://salsa.debian.org/apt-team/python-apt.git@2.9.6
+      --break-system-packages
   when:
     - ansible_os_family == "Debian"
+    - ansible_distribution_release == "trixie"
   tags: vars_simple
 
 - name: Hold python3-apt package version

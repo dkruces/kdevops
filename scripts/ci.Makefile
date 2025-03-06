@@ -3,7 +3,7 @@
 # Collection of CI build targets per kernel repo
 
 ifeq (y,$(CONFIG_BOOTLINUX))
-BOOTLINUX_BASENAME := $(shell basename $(CONFIG_BOOTLINUX_TREE) | sed 's/\.git$$//')
+BOOTLINUX_BASENAME := $(shell basename $(CI_REPO) | sed 's/\.git$$//')
 ifneq ($(wildcard .ci/build-test/$(BOOTLINUX_BASENAME)),)
 ifneq ($(wildcard .ci/test/$(BOOTLINUX_BASENAME)),)
 ifneq ($(wildcard .ci/results/$(BOOTLINUX_BASENAME)),)

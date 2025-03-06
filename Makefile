@@ -8,6 +8,7 @@ EXTRAVERSION =
 
 all: deps
 
+export CI_REPO ?= "default"
 export KCONFIG_DIR=$(CURDIR)/scripts/kconfig
 export KCONFIG_YAMLCFG=$(CURDIR)/.extra_vars_auto.yaml
 include $(KCONFIG_DIR)/kconfig.Makefile

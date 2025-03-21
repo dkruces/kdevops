@@ -7,11 +7,10 @@ Linux trees: Linus' tree, linux-next and stable trees. We refer to these as
 the Linux canon trees.
 
 When you run `make menuconfig` the latest Linux releases from the Linux canon
-trees are updated updated automatically to ensure you can always build and boot
-the latest major Linux kernels. If [kernel.org](kernel.org) is unreachable
-the existing static Kconfig files are used. By default, the files which define
-the refs for the canon trees are not updated if they are they are less than
-24 hours old.
+trees are updated automatically to ensure you can always build and boot the
+latest major Linux kernels. If [kernel.org](kernel.org) is unreachable the
+existing static Kconfig files are used. By default, the files which define the
+refs for the canon trees are not updated if they are are less than 24 hours old.
 
 To support more development trees kdevops supports static references defined in
 yaml files, used to dynamically generate Kconfig files to support trees other
@@ -40,6 +39,7 @@ Don't use this unless you are a developer working on a supported user ref
 and know that you always want to scrape for your custom latest tree refs
 dynamically.
 
+
 ## How all this works
 
 Most users should just use:
@@ -58,16 +58,15 @@ make refs-default
 ```
 
 The Kconfig files under `workflows/linux/refs/default/Kconfig` are automatically
-generated for you by kdevops developers using the command above. It is our
-job to update these for you whenever we update the static refs defined in yaml
-files under the directory `workflows/linux/refs/static/`.
+generated for you by kdevops developers using the command above. It is our job
+to update these for you whenever we update the static refs defined in yaml files
+under the directory `workflows/linux/refs/static/`.
 
-
-Users of kdevops need to decide if the static refs suffice for their
-needs and if not use user refs. Users of user refs are likely kernel
-developers which want to use kdevops against bleeding edge refs they
-may have just pushed onto their development trees and which there is
-at least a respective user yaml defined for them in kdevops.
+Users of kdevops need to decide if the static refs suffice for their needs and
+if not use user refs. Users of user refs are likely kernel developers which want
+to use kdevops against bleeding edge refs they may have just pushed onto their
+development trees and which there is at least a respective user yaml defined for
+them in kdevops.
 
 To use user refs you'd use:
 
@@ -81,7 +80,7 @@ back to the default refs with:
 
 
 ```bash
-make refs-user-clean` or
+make refs-user-clean`
 ```
 
 or
@@ -89,6 +88,7 @@ or
 ```bash
 make refs-default
 ```
+
 
 ### Default References Mode
 
@@ -120,9 +120,10 @@ update.
 
 ### Default References for Linus, Next and Stable trees: Forced Update
 
-Running `make refs-default` forces the update of `workflows/linux/refs/default/Kconfig.*`
-files using their corresponding YAML files and [kernel.org](kernel.org) release
-information.
+Running `make refs-default` forces the update of
+`workflows/linux/refs/default/Kconfig.*` files using their corresponding YAML
+files and [kernel.org](kernel.org) release information.
+
 
 ### Default References for Development trees: Static References
 
@@ -143,23 +144,23 @@ upstream. The Kconfig menu uses these new files until switching back to Default
 References Mode.
 
 
-## More elaborate details
+## More Elaborate Details
 
 kdevops facilitates the automatic generation of
 [Git References](https://git-scm.com/book/en/v2/Git-Internals-Git-References)
 (or refs), ensuring that repositories used for
-[bootlinux](../playbooks/roles/bootlinux/README.md) are always up to date with the
-latest refs available in Kconfig.
+[bootlinux](../playbooks/roles/bootlinux/README.md) are always up to date with
+the latest refs available in Kconfig.
 
 The automation of this process is integrated into Make through `menuconfig`, and
 the following targets: `refs-default` and `refs-user`.
 
-These targets ensure that the files `refs/default/Kconfig.*` and `refs/user/Kconfig.*`
-are automatically generated using the
+These targets ensure that the files `refs/default/Kconfig.*` and
+`refs/user/Kconfig.*` are automatically generated using the
 [`scripts/generate_refs.py`](../scripts/generate_refs.py) script file.
 
-The `refs/default/Kconfig.*` files contain both statically defined references and
-the latest release version references for the Linus, Next, and Stable trees.
+The `refs/default/Kconfig.*` files contain both statically defined references
+and the latest release version references for the Linus, Next, and Stable trees.
 Since these three trees are subject to change, their `refs/default/Kconfig.*`
 files are not included in the repository and are generated every time `make
 menuconfig` or `make refs-default` is run. Note that with `menuconfig`, files
@@ -167,8 +168,8 @@ are only generated if 24 hours have passed since last update.
 
 Files that usually remain unchanged, such as the one for the Mcgrof Next tree
 ([`workflows/linux/Kconfig.kreleases-mcgrof-next`](../workflows/linux/Kconfig.kreleases-mcgrof-next)),
-(or any other Development tree) are included in the kdevops tree as they only
-contain statically defined references. To update these, the accompanying
+(or any other Development tree) are included in the kdevops tree as they
+only contain statically defined references. To update these, the accompanying
 YAML file is used as input. These files are generated automatically, enabling
 kdevops to augment them when `make refs-user` is run (see more below in the
 user paragraph).
@@ -177,17 +178,17 @@ For example, the
 [`workflows/linux/Kconfig.kreleases-mcgrof-next`](../workflows/linux/Kconfig.kreleases-mcgrof-next)
 autogenerated file uses
 [`workflows/linux/mcgrof-next-refs.yaml`](../workflows/linux/mcgrof-next-refs.yaml)
-as an input. Extending that file is encourage when including new static references
-that kdevops needs to keep track, followed by running `make refs-default` for
-the `refs/default/Kconfig.mcgrof-next` to be generated.
+as an input. Extending that file is encourage when including new static
+references that kdevops needs to keep track, followed by running `make
+refs-default` for the `refs/default/Kconfig.mcgrof-next` to be generated.
 
 The `refs/user/Kconfig.*` files are user-generated files containing both
 statically defined references and the last 15 references found upstream for
 Linus, Stable, Next and Development trees. These files will be created empty
 when `make` is invoked, as they are required for Kconfig to function. However,
-when `make refs-user` is run, the Kconfig menu would use these instead of
-the default ones until they are manually cleared with `make refs-user-clean`.
-or `make refs-default` is run.
+when `make refs-user` is run, the Kconfig menu would use these instead of the
+default ones until they are manually cleared with `make refs-user-clean`. or
+`make refs-default` is run.
 
 Finally, if [kernel.org](kernel.org) is unreachable, `make refs-default` will
 use only static references and `make refs-user` will produce no output.

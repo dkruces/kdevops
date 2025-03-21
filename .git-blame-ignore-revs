@@ -1,0 +1,12 @@
+#
+# List of code-formatting clean ups the git blame can ignore
+#
+#   git blame --ignore-revs-file .git-blame-ignore-revs
+#
+# or
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+
+# devconfig: ansible lint fixes
+943ecfbe7a06d236c673d22a74209548017e4d6f

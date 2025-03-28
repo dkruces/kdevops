@@ -69,6 +69,9 @@ help:
 	@echo "allyesconfig       - enables all bells and whistles"
 	@echo "allnoconfig        - disables all bells and whistles"
 	@echo "randconfig         - random configuration"
+	@echo "oldconfig          - update a configuration using provided .config as base"
+	@echo "olddefconfig       - Same as oldconfig but sets new symbosl to their default"
+
 	@echo "defconfig-*        - If you have files in the defconfig directory use default config from there"
 
 .PHONY: clean

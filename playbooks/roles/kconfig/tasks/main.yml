@@ -1,0 +1,15 @@
+---
+- name: Checksum
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "{{ topdir_path }}" | sha256sum | awk '{print $1}'
+  register: kconfig_checksum
+  changed_when: false
+
+- name: Create env.config
+  ansible.builtin.copy:
+    dest: "{{ topdir_path }}/.env.config"
+    mode: "0755"
+    content: |
+      CONFIG_TOPDIR_PATH_SHA256SUM="{{ kconfig_checksum.stdout }}"
+  changed_when: true

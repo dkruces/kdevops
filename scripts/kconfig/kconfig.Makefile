@@ -36,8 +36,8 @@ $(KCONFIG_DIR)/mconf:
 	$(MAKE) -C $(KCONFIG_DIR)/ mconf
 
 PHONY += menuconfig
-menuconfig: $(KCONFIG_DIR)/mconf include/config/project.release Kconfig
-	@$< Kconfig
+menuconfig: $(KCONFIG_DIR)/mconf include/config/project.release Kconfig kconfig-env
+	$< Kconfig
 
 $(KCONFIG_DIR)/nconf:
 	$(MAKE) -C $(KCONFIG_DIR)/ nconf

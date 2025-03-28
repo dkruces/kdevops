@@ -2,6 +2,8 @@
 *.o
 *.retry
 
+.env.config
+
 .kdevops\.depcheck
 .provisioned_once*
 

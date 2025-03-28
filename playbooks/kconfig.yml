@@ -1,0 +1,6 @@
+---
+- name: Kconfig
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - role: kconfig

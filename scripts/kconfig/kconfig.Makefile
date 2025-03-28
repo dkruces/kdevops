@@ -51,7 +51,7 @@ $(KCONFIG_DIR)/conf:
 
 # More are supported, however we only list the ones tested on this top
 # level Makefile.
-simple-targets := allnoconfig allyesconfig alldefconfig randconfig
+simple-targets := allnoconfig allyesconfig alldefconfig randconfig oldconfig olddefconfig
 PHONY += $(simple-targets)
 
 $(simple-targets): $(KCONFIG_DIR)/conf Kconfig

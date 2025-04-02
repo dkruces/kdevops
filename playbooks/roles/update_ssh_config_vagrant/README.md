@@ -21,7 +21,7 @@ The code upstream on that tree is used to publish a terraform module:
 
 To learn how to make changes to the shared code read:
 
-  * [update_ssh_config documentation](playbooks/roles/update_ssh_config_vagrant/update_ssh_config/README.md)
+  * [update_ssh_config documentation](README.md)
 
 Requirements
 ------------

@@ -1,6 +1,6 @@
 # Running kdevops for the first time
 
-See [kdevops requirements](docs/requirements.md) first and install that.
+See [kdevops requirements](requirements.md) first and install that.
 
 If you're using virtualization with guestfs we just need to verify your user can
 run guests, and setting this up varies distro-by-distro.

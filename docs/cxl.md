@@ -9,7 +9,7 @@ will rely on using a python script to dynamically create XML requirements.
 The documentation below assumes vagrant will be used for now.
 
 You can either use virtualized CXL devices or you can use
-[PCIe passthrough](docs/libvirt-pcie-passthrough.md) to passthrough real
+[PCIe passthrough](libvirt-pcie-passthrough.md) to passthrough real
 devices onto your guests. kdevops support different CXL topologies and allows
 you to easily build new ones.
 

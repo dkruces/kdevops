@@ -8,7 +8,7 @@ make
 
 If this is your first run and you enabled `CONFIG_KDEVOPS_FIRST_RUN` then
 some more things will be done for you as documented in
-[kdevops first run](docs/kdevops-first-run.md).
+[kdevops first run](kdevops-first-run.md).
 
 You should however disable `CONFIG_KDEVOPS_FIRST_RUN` after you first run.
 

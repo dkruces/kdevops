@@ -1,6 +1,6 @@
 # kdevops Linux kernel mirror support
 
-Be sure to read [kdevops first run](docs/kdevops-first-run.md) before this
+Be sure to read [kdevops first run](kdevops-first-run.md) before this
 document.
 
 Part of doing Linux kernel development is git cloning Linux or some

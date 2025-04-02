@@ -16,11 +16,11 @@ each cloud provider can define its own other variables.
 ## Dependency on gen_nodes ansible role
 
 The `gen_tfvars` ansible has a dependency on the
-[gen_nodes](docs/the-gen-nodes-ansible-role.md) ansible role as well
+[gen_nodes](the-gen-nodes-ansible-role.md) ansible role as well
 to generate the terraform variable `kdevops_nodes`. See the docs:
 
-  * [What are and how to generate the kdevops nodes files](docs/the-gen-nodes-ansible-role.md)
-    * [gen_nodes for terraform](docs/the-gen-nodes-ansible-role-terraform.md)
+  * [What are and how to generate the kdevops nodes files](the-gen-nodes-ansible-role.md)
+    * [gen_nodes for terraform](the-gen-nodes-ansible-role-terraform.md)
 
 ## TODO
 

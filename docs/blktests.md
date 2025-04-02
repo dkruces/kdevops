@@ -28,5 +28,5 @@ supported block target we want to support and test.
 
 # Seeing kdevops community fstests results
 
-See [viewing kdevops archived results](docs/viewing-fstests-results.md) to see
+See [viewing kdevops archived results](viewing-fstests-results.md) to see
 how you can look at existing results file inside kdevops.

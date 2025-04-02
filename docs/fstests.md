@@ -42,7 +42,7 @@ More details for each of these follow.
 # kdevops sparse file testing
 
 kdevops supports testing using sparse or
-[truncated files with loopback block devices](docs/testing-with-loopback.md)
+[truncated files with loopback block devices](testing-with-loopback.md)
 so to minimize disk usage and requirements. With this mechanism you only use
 disk space for the actual required test, nothing more.
 
@@ -56,11 +56,11 @@ NVMe drive support relies on the symlinks:
   * `/dev/disk/by-id/nvme`
   * `/dev/disk/by-id/nvme`$model-$serial as an optional fallback
 
-For more details refer to [test using real NVMe drives](docs/testing-with-nvme.md).
+For more details refer to [test using real NVMe drives](testing-with-nvme.md).
 The symlinks are used to ensure the same drives are used upon reboot.
 
 You can use real NVMe drives on nodes which are on baremetal, the cloud,
-or virtualization using [PCIe passthrough](docs/libvirt-pcie-passthrough.md).
+or virtualization using [PCIe passthrough](libvirt-pcie-passthrough.md).
 kdevops supports all these and automates it setup for you.
 
 # Running fstests

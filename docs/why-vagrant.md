@@ -50,7 +50,7 @@ boxes already come set up with, so you as a developer don't have to do this:
   * 8) GRUB disk setup with UUID
 
 If you'd like to learn more about this read the
-[making custom vagrant boxes documentation](docs/custom-vagrant-boxes.md)
+[making custom vagrant boxes documentation](custom-vagrant-boxes.md)
 
 ## Supporting different virtualization technologies
 

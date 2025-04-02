@@ -20,7 +20,7 @@ Your workflow can override this to something different if needed.
 ### Dynamic vagrant/kdevops_nodes.yaml file
 
 Although the top level ansible hosts file is already dynamic
-(see [dynamic kdevops ansible hosts file)](docs/the-gen-hosts-ansible-role.md))
+(see [dynamic kdevops ansible hosts file)](the-gen-hosts-ansible-role.md))
 we currently also generate another yaml file which is used by both local
 virtualizaition and cloud environment for node definitions. This file
 is a bit more complex given we also extend it with a set of libvirt options
@@ -50,7 +50,7 @@ the node with PCIe passthrough options.
 
 #### Hyper dynamic qemu feature
 
-Support for [PCIe passthrough support docs](docs/libvirt-pcie-passthrough.md) is
+Support for [PCIe passthrough support docs](libvirt-pcie-passthrough.md) is
 accomplished by scraping your host system and generating dynamic Kconfig files.
 These files are unique to your host and because of this kdevops is
 `hyper dynamic`. kdevops uses this support to let you pick which target

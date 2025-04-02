@@ -30,7 +30,7 @@ sensible defaults are used.
 
 ### Mirror setup
 
-Consider enabling the local [kdevops mirror](docs/kdevops-mirror.md) if you
+Consider enabling the local [kdevops mirror](kdevops-mirror.md) if you
 think you're going to be using kdevops a bit.
 
 ### First manual check
@@ -72,7 +72,7 @@ is that leaving the enabled does a bit of sanity checks which are not needed
 after your first run, and simply slow down your user experience.
 
 If you want to set up a git mirror for Linux for personal use read
-[kdevops mirror support](docs/kdevops-mirror.md). You may want to set up this
+[kdevops mirror support](kdevops-mirror.md). You may want to set up this
 mirror if you are going to deploy multiple instances of kdevops on a same
 system or network. If you are using a cloud environment you could still use
 kdevops to set up a mirror but you'd run kdevops on an already instantiated

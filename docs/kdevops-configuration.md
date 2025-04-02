@@ -31,4 +31,4 @@ make menuconfig
 
 # Dynamic Kconfig
 
-Refer to [kdevops dynamic configuration](docs/kdevops-dynamic-configuration.md)
+Refer to [kdevops dynamic configuration](kdevops-dynamic-configuration.md)

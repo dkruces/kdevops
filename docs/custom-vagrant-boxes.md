@@ -293,7 +293,7 @@ This section documents how to do that.
 
 First you'd install a guest using virt-install, an example script which
 you can extend to your own needs is the
-[virt-install-demo.sh](docs/virt-install-demo.sh).
+[virt-install-demo.sh](virt-install-demo.sh).
 There are a a series of adjustments that needed to be made for guests
 to work for older kernel releases, should you need that. This is all
 documented below.

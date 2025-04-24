@@ -36,10 +36,13 @@ config BOOTLINUX_PURE_IOMAP
 
 endif # HAVE_SUPPORTS_PURE_IOMAP
 
+choice
+	prompt "Type of kernel boot"
+	default BOOTLINUX_9P
+
 config BOOTLINUX_9P
 	bool "Use 9p to build Linux"
 	depends on LIBVIRT && !GUESTFS_LACKS_9P
-	default LIBVIRT
 	help
 	  This will let you choose use 9p to build Linux. What this does is
 	  use your localhost to git clone Linux under the assumption your
@@ -52,6 +55,16 @@ config BOOTLINUX_9P
 	  You should not have to modify any default 9p settings except maybe
 	  where your localhost path for your git tree is. You should keep
 	  the other settings as-is unless you know what you are doing.
+
+config BOOTLINUX_DIRECT
+	bool "Use direct kernel boot"
+	output yaml
+	help
+	  This will let you choose use direct kernel boot.
+
+	  https://libvirt.org/formatdomain.html#direct-kernel-boot
+
+endchoice
 
 if BOOTLINUX_9P
 
@@ -110,6 +123,23 @@ config BOOTLINUX_9P_MOUNT_TAG
 endmenu
 
 endif # BOOTLINUX_9P
+
+if BOOTLINUX_DIRECT
+
+menu "Modify default direct kernel boot configuration"
+
+config BOOTLINUX_DIRECT_CMDLINE
+	string "cmdline"
+	output yaml
+	default "root=/dev/vda3 console=ttyS0,115200 audit=0"
+	help
+	  This sets the kernel boot command line.
+
+	  https://libvirt.org/formatdomain.html#direct-kernel-boot
+
+endmenu
+
+endif # BOOTLINUX_DIRECT
 
 choice
 	prompt "Type of development version of Linux to use"

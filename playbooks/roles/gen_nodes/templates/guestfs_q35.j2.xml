@@ -3,7 +3,13 @@
   <memory unit='MiB'>{{ libvirt_mem_mb }}</memory>
   <currentMemory unit='MiB'>{{ libvirt_mem_mb }}</currentMemory>
   <vcpu placement='static'>{{ libvirt_vcpus_count }}</vcpu>
-{% if guestfs_requires_uefi %}
+{% if bootlinux_direct %}
+  <os>
+    <type arch='x86_64' machine='q35'>hvm</type>
+    <kernel>{{ target_linux_dir_path }}/arch/x86_64/boot/bzImage</kernel>
+    <cmdline>{{ bootlinux_direct_cmdline }}</cmdline>
+  </os>
+{% elif guestfs_requires_uefi %}
   <os firmware='efi'>
      <type arch='x86_64' machine='q35'>hvm</type>
      <loader readonly='yes' secure='no'/>

@@ -309,6 +309,7 @@ if [ ! -f $BASE_IMAGE ]; then
 	fi
 
 	echo "Generating new base image for ${OS_VERSION}"
+	cat $cmdfile
 	$USE_SUDO virt-builder ${OS_VERSION} --arch `uname -m` -o $BASE_IMAGE --size 20G --format raw --commands-from-file $cmdfile
 	if [[ $? -ne 0 ]]; then
 		echo "Failed to build custom image $BASE_IMAGE"

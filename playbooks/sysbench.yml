@@ -1,5 +1,5 @@
 ---
 - name: sysbench
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: sysbench

@@ -1,5 +1,5 @@
 ---
 - name: kdc
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: kdc

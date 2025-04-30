@@ -4,6 +4,6 @@
   roles:
     - role: fstests_prep_localhost
 
-- hosts: all
+- hosts: all:!localhost
   roles:
     - role: fstests

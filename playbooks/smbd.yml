@@ -1,5 +1,5 @@
 ---
 - name: smbd
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: smbd

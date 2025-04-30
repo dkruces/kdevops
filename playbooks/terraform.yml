@@ -1,6 +1,6 @@
 ---
 - name: terraform
-  hosts: all
+  hosts: all:!localhost
   gather_facts: false
   roles:
     - role: terraform

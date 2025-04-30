@@ -1,5 +1,5 @@
 ---
 - name: reboot-limit
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: reboot-limit

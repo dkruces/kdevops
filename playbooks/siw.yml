@@ -1,5 +1,5 @@
 ---
 - name: siw
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: siw

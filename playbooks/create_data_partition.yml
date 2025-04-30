@@ -1,5 +1,5 @@
 ---
 - name: create_data_partition
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: create_data_partition

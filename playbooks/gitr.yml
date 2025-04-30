@@ -1,5 +1,5 @@
 ---
 - name: gitr
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: gitr

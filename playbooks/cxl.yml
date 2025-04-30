@@ -1,5 +1,5 @@
 ---
 - name: cxl
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: cxl

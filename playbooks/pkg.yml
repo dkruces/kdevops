@@ -1,5 +1,5 @@
 ---
 - name: pkg
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: pkg

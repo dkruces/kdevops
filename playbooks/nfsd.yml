@@ -1,5 +1,5 @@
 ---
 - name: nfsd
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: nfsd

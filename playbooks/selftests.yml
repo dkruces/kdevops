@@ -1,5 +1,5 @@
 ---
 - name: selftests
-  hosts: all
+  hosts: all:!localhost
   roles:
     - role: selftests

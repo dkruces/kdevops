@@ -207,6 +207,11 @@ config ANSIBLE_CFG_FORKS
 
 endif # !ANSIBLE_CFG_FORKS_CUSTOM
 
+config ANSIBLE_CFG_INVENTORY
+	string "Ansible Inventory"
+	output yaml
+	default "$(TOPDIR_PATH)/hosts"
+
 if DISTRO_OPENSUSE
 
 config ANSIBLE_CFG_RECONNECTION_RETRIES

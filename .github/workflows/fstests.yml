@@ -34,6 +34,11 @@ jobs:
           git config --global user.name "kdevops"
           git config --global user.email "kdevops@lists.linux.dev"
 
+      - name: pre-commit codespell docs/
+        run: |
+          pre-commit run codespell --files docs/*
+        continue-on-error: true
+
       - name: Run kdevops make defconfig-repo
         run: |
           KDEVOPS_TREE_REF="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}"

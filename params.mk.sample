@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+# Makefile Parameters
+#
+# Enable Makefile Verbosity
+# V = 1
+#
+# Configure Ansible Verbosity Level (V = {1..6})
+# AV = 1
+#
+# Run command on defined targets
+# HOSTS="host1 host2"
+#
+# Ansible Configuration
+#
+# ANSIBLE_CFG_CALLBACK_PLUGIN = "dense"
+# ANSIBLE_CFG_ = "dense"
+# ANSIBLE_CFG_INTERPRETER_PYTHON = "/usr/bin/env python3"
+# ANSIBLE_CFG_FORKS = "5"
+# KDEVOPS_HOSTS = "$(TOPDIR_PATH)/hosts"

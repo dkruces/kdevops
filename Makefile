@@ -22,6 +22,9 @@ export TOPDIR=./
 export TOPDIR_PATH = $(shell readlink -f $(TOPDIR))
 include scripts/refs.Makefile
 
+$(shell touch params.mk)
+include ./params.mk
+
 KDEVOPS_NODES_ROLE_TEMPLATE_DIR :=		$(KDEVOPS_PLAYBOOKS_DIR)/roles/gen_nodes/templates
 export KDEVOPS_NODES_TEMPLATE :=
 export KDEVOPS_MRPROPER :=

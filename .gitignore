@@ -5,6 +5,8 @@
 .kdevops\.depcheck
 .provisioned_once*
 
+params.mk
+
 guestfs/
 
 linux/

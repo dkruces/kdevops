@@ -32,6 +32,11 @@ export ANSIBLE_CONFIG := $(ANSIBLE_CFG_FILE)
 endif
 ANSIBLE_INVENTORY_FILE := $(shell echo $(CONFIG_ANSIBLE_CFG_INVENTORY) | tr --delete '"')
 
+ifeq (y,$(CONFIG_ENABLE_KDEVOPS_PARAMS))
+KDEVOPS_PARAMS := $(shell echo $(CONFIG_KDEVOPS_PARAMS) | tr --delete '"')
+-include $(KDEVOPS_PARAMS)
+endif
+
 KDEVOPS_INSTALL_TARGETS :=
 
 DEFAULT_DEPS :=
@@ -203,6 +208,9 @@ $(ANSIBLE_CFG_FILE): .config
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/ansible_cfg.yml \
 		--extra-vars=@./.extra_vars_auto.yaml
+
+$(KDEVOPS_PARAMS):
+	$(Q)cp --verbose $(TOPDIR_PATH)/params.mk.sample $(KDEVOPS_PARAMS)
 
 PHONY += $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
 

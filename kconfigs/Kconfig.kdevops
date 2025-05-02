@@ -199,3 +199,17 @@ endmenu
 menu "Ansible Configuration"
 source "kconfigs/Kconfig.ansible_cfg"
 endmenu
+
+config ENABLE_KDEVOPS_PARAMS
+	bool "Enable Kdevops User Makefile Parameters File"
+	default y
+
+if ENABLE_KDEVOPS_PARAMS
+
+config KDEVOPS_PARAMS
+	string "Enable Makefile Parameters File"
+	default "$(TOPDIR_PATH)/params.mk"
+	help
+	  Create user params.mk
+
+endif # ENABLE_KDEVOPS_PARAMS

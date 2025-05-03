@@ -1,0 +1,5 @@
+runtime	10.154s
+description	test if we're sending keep-alives to a discovery controller
+exit_status	0
+date	2025-05-03 21:01:00
+status	pass

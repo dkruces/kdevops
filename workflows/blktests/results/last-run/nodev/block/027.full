@@ -1,0 +1,478 @@
+jobsda: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdb: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdk: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdl: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdm: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdn: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdo: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdp: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdq: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdr: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsds: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdt: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdc: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdu: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdd: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsde: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdf: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdg: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdh: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdi: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+jobsdj: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=2048
+...
+fio-3.39
+Starting 84 processes
+fio: io_u error on file /dev/sda: No such device: read offset=87860695040, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=88133513216, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=89679441920, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=89708150784, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=90596614144, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=91106750464, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=92797407232, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94392131584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=95494209536, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=95820644352, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=96025309184, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=96046571520, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=97374412800, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=98574532608, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=99734839296, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=102519750656, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=102730215424, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=104570531840, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=104705236992, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=106427539456, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=107349827584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=107644329984, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=108263960576, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=108413050880, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=108554809344, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=109170343936, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=110382702592, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=110761455616, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=110897254400, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=111541448704, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=111614500864, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=112691245056, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=113268228096, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=113635733504, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=114609721344, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=114733367296, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=115392532480, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=115530264576, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=115605975040, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=117133561856, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=117458546688, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=118032543744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=118140882944, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=119430631424, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=119705264128, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=120712069120, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=121102213120, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=121749057536, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=123046670336, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=124611256320, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=128173559808, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=129273856000, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=129772339200, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=131041103872, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=131702706176, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=131711975424, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=132102983680, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=134369775616, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=884064256, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1091362816, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1541705728, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1568083968, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1713627136, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1738588160, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1795231744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1803845632, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1885970432, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1887158272, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2061131776, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2099646464, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2133856256, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2139729920, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2208055296, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=3218972672, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=3344924672, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=4398891008, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=4399284224, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=5332688896, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=5435146240, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=5792641024, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=8182558720, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=8314159104, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=8447062016, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=8832147456, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=9850322944, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=11449937920, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=12460871680, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=14250180608, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=14713470976, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=15502798848, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=17062379520, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=17764651008, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=17786806272, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=18814906368, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=19799801856, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=22056792064, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=25352286208, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=25977696256, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=27656863744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=27782373376, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=28566663168, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=29322534912, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=31852003328, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=32841113600, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=34389164032, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=34965000192, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=38158508032, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=40035008512, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=40284557312, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=41767436288, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=42343071744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=47242203136, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=51196080128, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=53647839232, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=53800493056, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=54625394688, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=56306364416, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=59326296064, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=60264493056, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=62901510144, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=66546495488, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=68640964608, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=68717490176, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=72366841856, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=72462024704, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=73783468032, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=75748265984, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=76627140608, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=76751171584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=83443372032, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=515588096, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=645849088, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=90268733440, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=26725064704, buflen=4096
+fio: pid=13178, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sda: No such device: read offset=692830208, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=1673830400, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=2288365568, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=43165986816, buflen=4096
+fio: pid=13176, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sda: No such device: read offset=88025436160, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=88353271808, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=88649408512, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=88986820608, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=90686545920, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=91402838016, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=92015509504, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=92403052544, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=92742205440, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94047502336, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94489067520, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94513582080, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94703271936, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=94998822912, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=95159463936, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=95405137920, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=95805472768, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=96617832448, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=96868200448, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=99206864896, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=99944022016, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=100512546816, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=100657168384, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=101392715776, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=102351261696, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=103806173184, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=104090116096, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=104849715200, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=106051948544, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=106234761216, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=107010211840, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=107062554624, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=107613515776, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=111507279872, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=112603574272, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=112622120960, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=113063342080, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=113778106368, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=113822183424, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=114178355200, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=114439917568, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=114797821952, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=115286171648, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=118384160768, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=119544606720, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=120513847296, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=121308217344, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=121461059584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=121552146432, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=122457907200, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=122973794304, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=123394572288, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=125023444992, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=126263668736, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=126702399488, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=129704652800, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=130186801152, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=130305949696, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=131220717568, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=131960520704, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=132178984960, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=132600545280, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=132748091392, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=132966367232, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=133413490688, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=133934997504, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=134706569216, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=135253045248, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=135811342336, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=136051036160, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=136759615488, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=136885571584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=137084301312, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=5727797248, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=5876895744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=6889324544, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=7392346112, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=14067580928, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=16712863744, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=16842985472, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=17441763328, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=18774781952, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=23101169664, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=24945475584, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=26700132352, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=27375038464, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=28805951488, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=30493716480, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=31209058304, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=31292674048, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=34463580160, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=39231320064, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=39456501760, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=43587960832, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=46839746560, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=52285095936, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=54828064768, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=56926560256, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=61968900096, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=88212594688, buflen=4096
+fio: io_u error on file /dev/sda: No such device: read offset=44603662336, buflen=4096
+fio: pid=13177, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sda: Input/output error: read offset=98730524672, buflen=4096
+fio: pid=13175, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdb: Input/output error: read offset=8073162752, buflen=4096
+fio: pid=13182, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdb: Input/output error: read offset=78943854592, buflen=4096
+fio: pid=13180, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdk: Input/output error: read offset=17276624896, buflen=4096
+fio: pid=13186, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdk: Input/output error: read offset=92799614976, buflen=4096
+fio: pid=13183, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdl: Input/output error: read offset=67958865920, buflen=4096
+fio: pid=13187, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdm: No such device: read offset=81339092992, buflen=4096
+fio: pid=13192, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdm: Input/output error: read offset=31819853824, buflen=4096
+fio: pid=13191, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdm: Input/output error: read offset=80441004032, buflen=4096
+fio: pid=13193, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdn: No such device: read offset=13645213696, buflen=4096
+fio: pid=13196, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdo: Input/output error: read offset=110180675584, buflen=4096
+fio: pid=13202, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdp: Input/output error: read offset=4574785536, buflen=4096
+fio: pid=13206, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdp: Input/output error: read offset=49873997824, buflen=4096
+fio: pid=13205, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdp: Input/output error: read offset=61653704704, buflen=4096
+fio: pid=13204, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdq: Input/output error: read offset=81652789248, buflen=4096
+fio: pid=13210, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdq: Input/output error: read offset=16598626304, buflen=4096
+fio: pid=13209, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdr: Input/output error: read offset=15506694144, buflen=4096
+fio: pid=13212, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sds: Input/output error: read offset=75611897856, buflen=4096
+fio: pid=13216, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdt: No such device: read offset=39144353792, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=68239482880, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=73198473216, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=66990170112, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=16948875264, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=99610370048, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=45922136064, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=95734841344, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=98783846400, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=122295861248, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=98702217216, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=82404081664, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=69689413632, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=39538241536, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=2784227328, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=32497070080, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=76714962944, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=88773971968, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=72572157952, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=63928766464, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=118590431232, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=123210612736, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=62742089728, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=21430177792, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=106075389952, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=46667116544, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=65093169152, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=21729644544, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=77031243776, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=80084508672, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=108602273792, buflen=4096
+fio: io_u error on file /dev/sdt: No such device: read offset=110049341440, buflen=4096
+fio: pid=13219, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdt: Input/output error: read offset=86046494720, buflen=4096
+fio: pid=13221, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdc: No such device: read offset=137093423104, buflen=4096
+fio: pid=13225, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdu: Input/output error: read offset=37563047936, buflen=4096
+fio: io_u error on file /dev/sdu: Input/output error: read offset=45673095168, buflen=4096
+fio: pid=13227, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: pid=13228, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdd: No such device: read offset=98356019200, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=111184908288, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=137018925056, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=7827816448, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=45305921536, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=106314403840, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=89588658176, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=1942798336, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=62396624896, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=41027739648, buflen=4096
+fio: io_u error on file /dev/sdd: Input/output error: read offset=49125408768, buflen=4096
+fio: pid=13234, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdd: No such device: read offset=27629649920, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=92785491968, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=38752395264, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=65997930496, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=26342719488, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=80515710976, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=53660209152, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=101864345600, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=94209990656, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=119225110528, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=18806636544, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=100428849152, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=124524417024, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=14053593088, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=106228338688, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=85101637632, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=97932918784, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=47914127360, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=79744425984, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=8990453760, buflen=4096
+fio: io_u error on file /dev/sdd: No such device: read offset=72265158656, buflen=4096
+fio: pid=13231, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdd: Input/output error: read offset=63181733888, buflen=4096
+fio: pid=13232, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sde: No such device: read offset=92687536128, buflen=4096
+fio: pid=13237, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sde: No such device: read offset=104207564800, buflen=4096
+fio: pid=13235, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdf: Input/output error: read offset=6363049984, buflen=4096
+fio: pid=13241, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdg: Input/output error: read offset=103852150784, buflen=4096
+fio: pid=13244, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdg: No such device: read offset=33319600128, buflen=4096
+fio: pid=13243, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdh: No such device: read offset=25752489984, buflen=4096
+fio: pid=13247, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdh: Input/output error: read offset=114120380416, buflen=4096
+fio: pid=13248, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdi: No such device: read offset=135294701568, buflen=4096
+fio: io_u error on file /dev/sdi: Input/output error: read offset=48679698432, buflen=4096
+fio: pid=13251, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: pid=13253, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdi: No such device: read offset=84205522944, buflen=4096
+fio: pid=13254, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+fio: io_u error on file /dev/sdj: Input/output error: read offset=129816629248, buflen=4096
+fio: pid=13257, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdj: Input/output error: read offset=91276595200, buflen=4096
+fio: pid=13256, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdj: Input/output error: read offset=89966956544, buflen=4096
+fio: pid=13258, err=5/file:io_u.c:1976, func=io_u error, error=Input/output error
+fio: io_u error on file /dev/sdj: No such device: read offset=105732022272, buflen=4096
+fio: pid=13255, err=19/file:io_u.c:1976, func=io_u error, error=No such device
+
+jobsda: (groupid=0, jobs=84): err= 5 (file:io_u.c:1976, func=io_u error, error=Input/output error): pid=13175: Sat May  3 21:07:21 2025
+  read: IOPS=906k, BW=1590MiB/s (1667MB/s)(18.6GiB/12010msec)
+    slat (nsec): min=1015, max=260018k, avg=68790.37, stdev=1917811.38
+    clat (usec): min=4, max=1193.4k, avg=159277.14, stdev=207041.58
+     lat (usec): min=5, max=1193.4k, avg=159345.78, stdev=207125.28
+    clat percentiles (msec):
+     |  1.00th=[    5],  5.00th=[    8], 10.00th=[   11], 20.00th=[   23],
+     | 30.00th=[   39], 40.00th=[   52], 50.00th=[   72], 60.00th=[   92],
+     | 70.00th=[  142], 80.00th=[  279], 90.00th=[  472], 95.00th=[  642],
+     | 99.00th=[  911], 99.50th=[  986], 99.90th=[ 1083], 99.95th=[ 1116],
+     | 99.99th=[ 1150]
+   bw (  MiB/s): min=  511, max= 7831, per=100.00%, avg=2185.45, stdev=27.77, samples=1444
+   iops        : min=134223, max=4642582, avg=937458.24, stdev=18336.13, samples=1680
+  lat (usec)   : 10=0.01%, 20=0.01%, 50=0.01%, 100=0.01%, 250=0.01%
+  lat (usec)   : 500=0.01%, 750=0.03%, 1000=0.03%
+  lat (msec)   : 2=0.11%, 4=0.32%, 10=7.70%, 20=9.62%, 50=21.08%
+  lat (msec)   : 100=23.96%, 250=15.14%, 500=13.04%, 750=6.18%, 1000=2.32%
+  lat (msec)   : 2000=0.43%
+  cpu          : usr=1.48%, sys=9.95%, ctx=193964, majf=0, minf=44229
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%, >=64=100.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.1%
+     issued rwts: total=10877058,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=2048
+
+Run status group 0 (all jobs):
+   READ: bw=1590MiB/s (1667MB/s), 1590MiB/s-1590MiB/s (1667MB/s-1667MB/s), io=18.6GiB (20.0GB), run=12010-12010msec
+
+Disk stats (read/write):
+  sda: ios=164982/0, sectors=1319888/0, merge=4/0, ticks=1033274/0, in_queue=1033274, util=63.83%
+  sdb: ios=160520/0, sectors=1284160/0, merge=0/0, ticks=5526/0, in_queue=5526, util=51.73%
+  sdk: ios=149479/0, sectors=1195832/0, merge=0/0, ticks=9669/0, in_queue=9669, util=58.43%
+  sdl: ios=173945/0, sectors=1391560/0, merge=0/0, ticks=4135/0, in_queue=4135, util=56.51%
+  sdm: ios=167800/0, sectors=1342400/0, merge=0/0, ticks=4301/0, in_queue=4301, util=54.58%
+  sdn: ios=142269/0, sectors=1138152/0, merge=0/0, ticks=3599/0, in_queue=3599, util=51.67%
+  sdo: ios=210847/0, sectors=1686776/0, merge=0/0, ticks=4991/0, in_queue=4991, util=56.30%
+  sdp: ios=258340/0, sectors=2066720/0, merge=0/0, ticks=5029/0, in_queue=5029, util=59.76%
+  sdq: ios=206417/0, sectors=1651336/0, merge=0/0, ticks=5154/0, in_queue=5154, util=60.23%
+  sdr: ios=175366/0, sectors=1402928/0, merge=0/0, ticks=4665/0, in_queue=4665, util=58.38%
+  sds: ios=194903/0, sectors=1559224/0, merge=0/0, ticks=4877/0, in_queue=4877, util=54.42%
+  sdt: ios=236243/0, sectors=1889944/0, merge=0/0, ticks=5372/0, in_queue=5372, util=60.21%
+  sdc: ios=313697/0, sectors=2509576/0, merge=0/0, ticks=6562/0, in_queue=6562, util=61.49%
+  sdu: ios=292110/0, sectors=2336880/0, merge=0/0, ticks=6014/0, in_queue=6014, util=54.57%
+  sdd: ios=276709/0, sectors=2213672/0, merge=0/0, ticks=6442/0, in_queue=6442, util=57.48%
+  sde: ios=243480/0, sectors=1947840/0, merge=0/0, ticks=5374/0, in_queue=5374, util=58.32%
+  sdf: ios=197422/0, sectors=1579376/0, merge=0/0, ticks=6283/0, in_queue=6283, util=56.90%
+  sdg: ios=330721/0, sectors=2645768/0, merge=0/0, ticks=6832/0, in_queue=6832, util=58.88%
+  sdh: ios=297730/0, sectors=2381840/0, merge=0/0, ticks=7358/0, in_queue=7358, util=58.42%
+  sdi: ios=307683/0, sectors=2461464/0, merge=0/0, ticks=6808/0, in_queue=6808, util=59.67%
+  sdj: ios=318650/0, sectors=2549200/0, merge=0/0, ticks=7017/0, in_queue=7017, util=59.48%

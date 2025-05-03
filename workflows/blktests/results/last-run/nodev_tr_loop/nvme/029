@@ -1,0 +1,5 @@
+runtime	0.624s
+description	test userspace IO via nvme-cli read/write interface
+exit_status	0
+date	2025-05-03 21:04:34
+status	pass

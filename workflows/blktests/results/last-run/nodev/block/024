@@ -1,0 +1,5 @@
+runtime	2.964s
+description	do I/O faster than a jiffy and check iostats times
+exit_status	0
+date	2025-05-03 21:06:56
+status	pass

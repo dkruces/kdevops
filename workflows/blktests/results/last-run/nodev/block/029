@@ -1,0 +1,5 @@
+runtime	30.674s
+description	trigger blk_mq_update_nr_hw_queues()
+exit_status	0
+date	2025-05-03 21:07:41
+status	pass

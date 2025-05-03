@@ -1,0 +1,5 @@
+runtime	21.101s
+description	stress device hotplugging with running fio jobs and different schedulers
+exit_status	0
+date	2025-05-03 21:07:05
+status	pass

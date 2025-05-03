@@ -1,0 +1,7 @@
+runtime	177.279s
+Shared tags read iops	786085
+description	run I/O on null_blk with shared and non-shared tags
+Individual tags read iops	788986
+exit_status	0
+date	2025-05-03 21:02:01
+status	pass

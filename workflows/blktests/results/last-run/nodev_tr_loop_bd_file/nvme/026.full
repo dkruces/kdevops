@@ -1,0 +1,5 @@
+NVME Namespace Identification Descriptors NS 1:
+uuid    : 91fdba0d-f87b-4c25-b80f-db7be1418b9e
+csi     : 0
+NQN:blktests-subsystem-1 disconnected 1 controller(s)
+disconnected 1 controller(s)

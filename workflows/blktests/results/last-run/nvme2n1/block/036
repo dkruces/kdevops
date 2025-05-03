@@ -1,0 +1,5 @@
+runtime	0.033s
+description	test return EIO from BLKRRPART for whole-dev
+exit_status	0
+date	2025-05-03 21:09:27
+status	pass

@@ -1,0 +1,3 @@
+description	test nvme pci adapter rescan/reset/remove during I/O
+date	2025-05-03 21:04:41
+status	not run

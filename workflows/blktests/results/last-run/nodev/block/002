@@ -1,0 +1,5 @@
+runtime	2.036s
+description	remove a device while running blktrace
+exit_status	0
+date	2025-05-03 21:00:36
+status	pass

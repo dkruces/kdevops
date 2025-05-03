@@ -1,0 +1,5 @@
+runtime	1.729s
+description	remove one mounted device
+exit_status	0
+date	2025-05-03 21:08:52
+status	pass

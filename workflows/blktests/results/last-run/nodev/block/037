@@ -1,0 +1,5 @@
+runtime	1.406s
+description	test cgroup vs. scsi_debug rebind
+exit_status	0
+date	2025-05-03 21:09:28
+status	pass

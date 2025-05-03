@@ -1,0 +1,5 @@
+runtime	1.094s
+description	check page-cache coherency after BLKDISCARD
+exit_status	0
+date	2025-05-03 21:02:00
+status	pass

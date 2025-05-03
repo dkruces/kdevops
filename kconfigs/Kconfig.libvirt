@@ -526,7 +526,7 @@ config LIBVIRT_HOST_PASSTHROUGH
 
 choice
 	prompt "Libvirt extra storage driver to use"
-	default LIBVIRT_EXTRA_STORAGE_DRIVE_VIRTIO
+	default LIBVIRT_EXTRA_STORAGE_DRIVE_NVME
 
 config LIBVIRT_EXTRA_STORAGE_DRIVE_NVME
 	bool "NVMe"

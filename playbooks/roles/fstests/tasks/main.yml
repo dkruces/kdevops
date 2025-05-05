@@ -880,6 +880,7 @@
   become_method: sudo
   reboot:
     post_reboot_delay: 10
+  when: inventory_hostname != 'localhost'
 
 - name: Make sure loop device support is loaded
   tags: [ 'oscheck', 'fstests', 'run_tests' ]

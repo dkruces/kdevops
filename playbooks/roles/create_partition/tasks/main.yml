@@ -55,6 +55,7 @@
     follow: yes
   register: stat_result
   when: >
+    (disk_setup_device | default('', true)) | length > 0 and
     mountpoint_stat.rc != 0 and
     fstab_grep_stat.rc != 0 and
     label_grep.rc != 0
@@ -70,11 +71,19 @@
     dev: "{{ disk_setup_device }}"
     opts: "{{ disk_setup_fs_opts }}"
   when: >
+    (disk_setup_device | default('', true)) | length > 0 and
     fstab_grep_stat.rc != 0 and
     (mountpoint_stat.rc != 0 and
      label_grep.rc != 0)
   register: create_data_fs
   tags: [ 'partition' ]
+
+- name: debugme
+  pause:
+    prompt: "Proceed with partition creation using the above parameters? (Ctrl+C to abort)"
+    echo: yes
+  tags: [ 'partition' ]
+
 
 - name: Partitions | Read {{ disk_setup_device }} partitions and mountpoints
   shell: |
@@ -82,6 +91,7 @@
     lsblk -npr -oNAME,MOUNTPOINT {{ disk_setup_device }}
   register: result
   when: >
+    (disk_setup_device | default('', true)) | length > 0 and
     stat_result is success and
     stat_result.stat is defined and
     stat_result.stat.isblk is defined and
@@ -113,6 +123,7 @@
     opts: "{{ disk_setup_fs_opts }}"
   environment: "{{ disk_setup_env }}"
   when: >
+    (disk_setup_device | default('', true)) | length > 0 and
     (mountpoint_stat.rc != 0 and
      label_grep.rc != 0) and
     ((result is success and
@@ -136,6 +147,7 @@
     opts: "{{ disk_setup_mount_opts }}"
     state: mounted
   when: >
+    (disk_setup_device | default('', true)) | length > 0 and
     mountpoint_stat.rc != 0 and
     (label_grep.rc == 0 or
      (create_data_fs is success and

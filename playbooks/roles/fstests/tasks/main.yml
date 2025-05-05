@@ -467,7 +467,7 @@
   become_method: sudo
   template:
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
-    dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
+    dest: "{{ fstests_data_target }}/configs/{{ ansible_hostname }}.config"
     force: yes
   when:
     - fstests_generate_simple_config_enable|bool

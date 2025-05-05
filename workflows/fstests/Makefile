@@ -85,6 +85,10 @@ ifneq (,$(RUN_FAILURES))
 FSTESTS_DYNAMIC_RUNTIME_VARS += , "run_tests_on_failures": True
 endif
 
+ifeq (y,$(CONFIG_SKIP_BRINGUP))
+FSTESTS_DYNAMIC_RUNTIME_VARS += , "fstests_section": "tmpfs_default"
+endif
+
 ifneq (,$(SKIP_RUN))
 FSTESTS_DYNAMIC_RUNTIME_VARS += , "fstests_skip_run": True
 endif

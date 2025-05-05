@@ -937,6 +937,7 @@
   when:
     - kdevops_run_fstests|bool
     - fstests_section != "all"
+    - inventory_hostname != 'localhost'
 
 # We have to set the environment variables explicitly because some distros
 # or systems might have on /etc/sudoers env_reset enabled, which gives us

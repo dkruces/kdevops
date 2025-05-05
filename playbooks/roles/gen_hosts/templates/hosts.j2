@@ -25,9 +25,16 @@ localhost ansible_connection=local
 [all:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [baseline]
+{% if not skip_bringup %}
 {{ kdevops_hosts_prefix }}
+{% else %}
+localhost ansible_connection=local
+{% endif %}
 [baseline:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
+{% if skip_bringup %}
+localhost ansible_connection=local
+{% endif %}
 [dev]
 {% if kdevops_baseline_and_dev %}
 {{ kdevops_hosts_prefix }}-dev

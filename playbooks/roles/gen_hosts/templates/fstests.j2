@@ -14,6 +14,7 @@ localhost ansible_connection=local
 [all:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [baseline]
+{% if not skip_bringup %}
 {% for s in fstests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ s }}
 {% endfor %}
@@ -21,6 +22,9 @@ ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 {% if kdevops_loopback_nfs_enable %}
 {{ kdevops_hosts_prefix }}-nfsd
 {% endif %}
+{% endif %}
+{% else %}
+localhost ansible_connection=local
 {% endif %}
 [baseline:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"

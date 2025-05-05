@@ -41,6 +41,7 @@ config TERRAFORM
 
 config SKIP_BRINGUP
 	bool "Skip bring up - bare metal or existing nodes"
+	output yaml
 	select EXTRA_STORAGE_SUPPORTS_512
 	select EXTRA_STORAGE_SUPPORTS_1K
 	select EXTRA_STORAGE_SUPPORTS_2K

@@ -9,9 +9,13 @@ localhost ansible_connection=local
 [all:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [baseline]
+{% if not skip_bringup %}
 {% for test_type in enabled_sysbench_tests %}
 {{ kdevops_host_prefix }}-{{ test_type }}
 {% endfor %}
+{% else %}
+localhost ansible_connection=local
+{% endif %}
 [baseline:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [dev]

@@ -1,6 +1,6 @@
-runtime	0.435s
-trim iops	3266
+runtime	0.434s
+trim iops	3500
 description	run various discard sizes
 exit_status	0
-date	2025-05-06 10:06:33
+date	2025-05-06 10:47:11
 status	pass

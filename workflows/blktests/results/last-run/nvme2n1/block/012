@@ -1,5 +1,5 @@
-runtime	0.181s
+runtime	0.069s
 description	check that a read-only block device fails writes
 exit_status	0
-date	2025-05-06 10:11:17
+date	2025-05-06 10:52:00
 status	pass

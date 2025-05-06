@@ -1,5 +1,5 @@
-runtime	5.718s
+runtime	5.063s
 description	test deletion of NVMeOF controllers immediately after setup
 exit_status	0
-date	2025-05-06 10:10:31
+date	2025-05-06 10:51:12
 status	pass

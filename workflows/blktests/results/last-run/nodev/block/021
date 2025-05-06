@@ -1,5 +1,5 @@
-runtime	6.340s
+runtime	9.258s
 description	read/write nr_requests on null-blk with different schedulers
 exit_status	0
-date	2025-05-06 10:12:28
+date	2025-05-06 10:53:17
 status	pass

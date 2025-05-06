@@ -1,11 +1,11 @@
-runtime	29.955s
-classic poll read lat mean	57.947890
-no poll read lat mean	52.378646
-classic poll system cpu	24.071177%
-no poll read iops	18851
+runtime	30.338s
+classic poll read lat mean	54.142569
+no poll read lat mean	57.239637
+classic poll system cpu	23.867280%
+no poll read iops	17270
 description	test classic and hybrid IO polling
-no poll system cpu	27.357066%
-classic poll read iops	17085
+no poll system cpu	22.723679%
+classic poll read iops	18271
 exit_status	0
-date	2025-05-06 10:07:21
+date	2025-05-06 10:48:04
 status	pass

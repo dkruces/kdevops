@@ -1,5 +1,5 @@
-runtime	2.951s
+runtime	2.954s
 description	do I/O faster than a jiffy and check iostats times
 exit_status	0
-date	2025-05-06 10:13:06
+date	2025-05-06 10:53:58
 status	pass

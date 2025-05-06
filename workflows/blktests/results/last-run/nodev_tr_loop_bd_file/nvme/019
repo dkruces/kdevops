@@ -1,5 +1,5 @@
-runtime	0.522s
+runtime	0.493s
 description	test NVMe DSM Discard command
 exit_status	0
-date	2025-05-06 10:10:14
+date	2025-05-06 10:50:55
 status	pass

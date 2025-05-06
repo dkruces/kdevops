@@ -1,6 +1,6 @@
-runtime	31.205s
-write iops	532
+runtime	36.673s
+write iops	455
 description	run lots of flushes
 exit_status	0
-date	2025-05-06 10:06:33
+date	2025-05-06 10:47:11
 status	pass

@@ -1,13 +1,13 @@
 wrote 2097152/2097152 bytes at offset 0
-2 MiB, 1 ops; 0.1069 sec (18.696 MiB/sec and 9.3482 ops/sec)
+2 MiB, 1 ops; 0.0203 sec (98.121 MiB/sec and 49.0605 ops/sec)
 1+0 records in
 1+0 records out
-2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.00404495 s, 518 MB/s
+2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.00511187 s, 410 MB/s
 1+0 records in
 1+0 records out
-2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.00416324 s, 504 MB/s
+2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.00386377 s, 543 MB/s
 wrote 2097152/2097152 bytes at offset 0
-2 MiB, 1 ops; 0.0146 sec (136.621 MiB/sec and 68.3107 ops/sec)
+2 MiB, 1 ops; 0.0060 sec (331.510 MiB/sec and 165.7550 ops/sec)
 1+0 records in
 1+0 records out
-2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.0051392 s, 408 MB/s
+2097152 bytes (2.1 MB, 2.0 MiB) copied, 0.00406008 s, 517 MB/s

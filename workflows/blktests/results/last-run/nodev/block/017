@@ -1,5 +1,5 @@
-runtime	2.609s
+runtime	2.519s
 description	do I/O and check the inflight counter
 exit_status	0
-date	2025-05-06 10:11:57
+date	2025-05-06 10:52:47
 status	pass

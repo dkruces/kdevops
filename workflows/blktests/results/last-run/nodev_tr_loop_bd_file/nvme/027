@@ -1,5 +1,5 @@
-runtime	0.500s
+runtime	0.492s
 description	test NVMe ns-rescan command
 exit_status	0
-date	2025-05-06 10:10:26
+date	2025-05-06 10:51:07
 status	pass

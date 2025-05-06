@@ -1,5 +1,5 @@
-runtime	1.242s
+runtime	1.279s
 description	check page-cache coherency after BLKDISCARD
 exit_status	0
-date	2025-05-06 10:08:22
+date	2025-05-06 10:49:05
 status	pass

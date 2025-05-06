@@ -1,5 +1,5 @@
-runtime	0.468s
+runtime	0.408s
 description	test NVMe list-subsys
 exit_status	0
-date	2025-05-06 10:10:28
+date	2025-05-06 10:51:09
 status	pass

@@ -1,5 +1,5 @@
-runtime	31.969s
+runtime	31.790s
 description	stress device hotplugging
 exit_status	0
-date	2025-05-06 10:05:58
+date	2025-05-06 10:46:36
 status	pass

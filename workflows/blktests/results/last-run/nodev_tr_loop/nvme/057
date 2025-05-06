@@ -1,5 +1,5 @@
-runtime	27.267s
+runtime	26.759s
 description	test nvme fabrics controller ANA failover during I/O
 exit_status	0
-date	2025-05-06 10:12:10
+date	2025-05-06 10:52:54
 status	pass

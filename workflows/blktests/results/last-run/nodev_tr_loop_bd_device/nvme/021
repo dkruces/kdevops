@@ -1,5 +1,5 @@
-runtime	0.615s
+runtime	0.629s
 description	test NVMe list command
 exit_status	0
-date	2025-05-06 10:10:15
+date	2025-05-06 10:50:56
 status	pass

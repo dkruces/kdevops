@@ -1,5 +1,5 @@
-runtime	10.166s
+runtime	10.265s
 description	send a signal to a process waiting on a frozen queue
 exit_status	0
-date	2025-05-06 10:11:47
+date	2025-05-06 10:52:36
 status	pass

@@ -1,5 +1,5 @@
-runtime	0.061s
+runtime	0.046s
 description	create an NVMeOF target
 exit_status	0
-date	2025-05-06 10:07:12
+date	2025-05-06 10:47:53
 status	pass

@@ -1,5 +1,5 @@
-runtime	10.121s
+runtime	9.633s
 description	flush a command from host
 exit_status	0
-date	2025-05-06 10:08:50
+date	2025-05-06 10:49:27
 status	pass

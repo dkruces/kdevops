@@ -1,5 +1,5 @@
-runtime	0.608s
+runtime	0.573s
 description	do I/O on all null_blk queue modes
 exit_status	0
-date	2025-05-06 10:13:05
+date	2025-05-06 10:53:57
 status	pass

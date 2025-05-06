@@ -1,6 +1,6 @@
-runtime	31.360s
+runtime	30.372s
 description	do IO while hotplugging CPUs
-read iops	67917
+read iops	70038
 exit_status	0
-date	2025-05-06 10:07:51
+date	2025-05-06 10:48:35
 status	pass

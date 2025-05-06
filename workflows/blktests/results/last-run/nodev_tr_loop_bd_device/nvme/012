@@ -1,5 +1,5 @@
-runtime	24.349s
+runtime	23.720s
 description	run mkfs and data verification fio
 exit_status	0
-date	2025-05-06 10:07:47
+date	2025-05-06 10:48:26
 status	pass

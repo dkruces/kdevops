@@ -1,5 +1,5 @@
-runtime	23.404s
+runtime	21.572s
 description	Test null-blk concurrent power/submit_queues operations
 exit_status	0
-date	2025-05-06 10:15:43
+date	2025-05-06 10:56:31
 status	pass

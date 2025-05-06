@@ -1,5 +1,5 @@
-runtime	57.274s
+runtime	60.198s
 description	create many subsystems and test discovery
 exit_status	0
-date	2025-05-06 10:05:59
+date	2025-05-06 10:46:36
 status	pass

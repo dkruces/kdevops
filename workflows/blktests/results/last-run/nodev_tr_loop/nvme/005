@@ -1,5 +1,5 @@
-runtime	1.035s
+runtime	1.004s
 description	reset local loopback target
 exit_status	0
-date	2025-05-06 10:07:10
+date	2025-05-06 10:47:50
 status	pass

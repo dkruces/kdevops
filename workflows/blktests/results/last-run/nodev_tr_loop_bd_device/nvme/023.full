@@ -5,9 +5,9 @@ available_spare				: 0%
 available_spare_threshold		: 0%
 percentage_used				: 0%
 endurance group critical warning summary: 0
-Data Units Read				: 11 (5.63 MB)
+Data Units Read				: 12 (6.14 MB)
 Data Units Written			: 0 (0.00 B)
-host_read_commands			: 338
+host_read_commands			: 378
 host_write_commands			: 0
 controller_busy_time			: 0
 power_cycles				: 0

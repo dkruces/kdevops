@@ -1,5 +1,5 @@
-runtime	1.789s
+runtime	1.947s
 description	load/unload null_blk memory_backed=1 to check memleak
 exit_status	0
-date	2025-05-06 10:15:08
+date	2025-05-06 10:55:56
 status	pass

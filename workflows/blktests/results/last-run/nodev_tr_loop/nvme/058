@@ -1,5 +1,5 @@
-runtime	5.308s
+runtime	6.881s
 description	test rapid namespace remapping
 exit_status	0
-date	2025-05-06 10:12:38
+date	2025-05-06 10:53:22
 status	pass

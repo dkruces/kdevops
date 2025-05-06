@@ -1,5 +1,5 @@
-runtime	0.598s
+runtime	0.666s
 description	test NVMe smart-log command
 exit_status	0
-date	2025-05-06 10:10:19
+date	2025-05-06 10:51:01
 status	pass

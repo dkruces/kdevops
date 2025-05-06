@@ -1,5 +1,5 @@
-runtime	10.706s
+runtime	10.934s
 description	test race between set_blocksize and read paths
 exit_status	0
-date	2025-05-06 10:16:07
+date	2025-05-06 10:56:53
 status	pass

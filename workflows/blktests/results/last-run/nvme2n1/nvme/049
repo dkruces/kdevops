@@ -1,0 +1,5 @@
+runtime	7.671s
+description	basic test for uring-passthrough I/O on /dev/ngX
+exit_status	0
+date	2025-05-06 10:10:49
+status	pass

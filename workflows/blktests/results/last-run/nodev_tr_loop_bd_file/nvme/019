@@ -1,0 +1,5 @@
+runtime	0.522s
+description	test NVMe DSM Discard command
+exit_status	0
+date	2025-05-06 10:10:14
+status	pass

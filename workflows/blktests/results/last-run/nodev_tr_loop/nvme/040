@@ -1,0 +1,5 @@
+runtime	6.938s
+description	test nvme fabrics controller reset/disconnect operation during I/O
+exit_status	0
+date	2025-05-06 10:10:39
+status	pass

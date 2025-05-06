@@ -1,0 +1,5 @@
+runtime	60.424s
+description	test controller rescan under I/O load
+exit_status	0
+date	2025-05-06 10:11:07
+status	pass

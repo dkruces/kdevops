@@ -1,0 +1,5 @@
+runtime	0.640s
+description	test NVMe effects-log
+exit_status	0
+date	2025-05-06 10:10:21
+status	pass

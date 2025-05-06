@@ -1,0 +1,6 @@
+runtime	0.435s
+trim iops	3266
+description	run various discard sizes
+exit_status	0
+date	2025-05-06 10:06:33
+status	pass

@@ -1,0 +1,5 @@
+runtime	14.519s
+description	do I/O on scsi_debug with DIF/DIX enabled
+exit_status	0
+date	2025-05-06 10:13:41
+status	pass

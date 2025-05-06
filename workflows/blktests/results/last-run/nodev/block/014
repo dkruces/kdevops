@@ -1,0 +1,5 @@
+runtime	24.813s
+description	run null-blk with blk-mq and timeout injection configured
+exit_status	0
+date	2025-05-06 10:11:18
+status	pass

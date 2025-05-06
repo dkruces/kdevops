@@ -1,0 +1,18 @@
+Thread 0 failed read of /sys/kernel/debug/block/sda/trace0: 5/Input/output error
+Thread 6 failed read of /sys/kernel/debug/block/sda/trace6: 5/Input/output error
+Thread 1 failed read of /sys/kernel/debug/block/sda/trace1: 5/Input/output error
+Thread 5 failed read of /sys/kernel/debug/block/sda/trace5: 5/Input/output error
+Thread 4 failed read of /sys/kernel/debug/block/sda/trace4: 5/Input/output error
+Thread 3 failed read of /sys/kernel/debug/block/sda/trace3: 5/Input/output error
+Thread 2 failed read of /sys/kernel/debug/block/sda/trace2: 5/Input/output error
+Thread 7 failed read of /sys/kernel/debug/block/sda/trace7: 5/Input/output error
+=== sda ===
+  CPU  0:                    1 events,        1 KiB data
+  CPU  1:                    0 events,        0 KiB data
+  CPU  2:                    0 events,        0 KiB data
+  CPU  3:                    0 events,        0 KiB data
+  CPU  4:                    0 events,        0 KiB data
+  CPU  5:                    0 events,        0 KiB data
+  CPU  6:                    0 events,        0 KiB data
+  CPU  7:                    0 events,        0 KiB data
+  Total:                     1 events (dropped 0),        1 KiB data

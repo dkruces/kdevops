@@ -1,0 +1,5 @@
+runtime	32.378s
+description	create/delete many file-ns and test discovery
+exit_status	0
+date	2025-05-06 10:09:39
+status	pass

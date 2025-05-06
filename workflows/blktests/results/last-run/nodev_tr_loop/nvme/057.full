@@ -1,0 +1,17 @@
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=849195008, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=484380672, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=913137664, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=215523328, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=31461376, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=37916672, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=846848000, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=61087744, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=630116352, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=772927488, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=971927552, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=359653376, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=947748864, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=498278400, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=313155584, buflen=4096
+fio: io_u error on file /dev/nvme4n1: Input/output error: write offset=720465920, buflen=4096
+NQN:blktests-subsystem-1 disconnected 4 controller(s)

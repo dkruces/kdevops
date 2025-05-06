@@ -1,0 +1,5 @@
+runtime	0.572s
+description	test NVMe ns-descs
+exit_status	0
+date	2025-05-06 10:10:24
+status	pass

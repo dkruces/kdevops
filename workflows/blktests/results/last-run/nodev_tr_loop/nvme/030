@@ -1,0 +1,5 @@
+runtime	0.468s
+description	ensure the discovery generation counter is updated appropriately
+exit_status	0
+date	2025-05-06 10:10:30
+status	pass

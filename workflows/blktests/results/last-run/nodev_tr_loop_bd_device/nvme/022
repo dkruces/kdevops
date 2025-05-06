@@ -1,0 +1,5 @@
+runtime	1.032s
+description	test NVMe reset command
+exit_status	0
+date	2025-05-06 10:10:17
+status	pass

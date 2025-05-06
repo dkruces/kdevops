@@ -1,0 +1,49 @@
+ZNS Command Set Log Page
+--------------------------------------------------------------------------------
+Admin Commands
+ACS2     [Get Log Page                    ] 00000001
+ACS6     [Identify                        ] 00000001
+ACS8     [Abort                           ] 00000001
+ACS9     [Set Features                    ] 00000001
+ACS10    [Get Features                    ] 00000001
+ACS12    [Asynchronous Event Request      ] 00000001
+ACS24    [Keep Alive                      ] 00000001
+
+I/O Commands
+IOCS0    [Flush                           ] 00000001
+IOCS1    [Write                           ] 00000003
+IOCS2    [Read                            ] 00000001
+IOCS8    [Write Zeroes                    ] 00000003
+IOCS9    [Dataset Management              ] 00000001
+IOCS13   [Reservation Register            ] 00000001
+IOCS14   [Reservation Report              ] 00000001
+IOCS17   [Reservation Acquire             ] 00000001
+IOCS21   [Reservation Release             ] 00000001
+IOCS121  [Zone Management Send            ] 00000003
+IOCS122  [Zone Management Receive         ] 00000001
+IOCS125  [Zone Append                     ] 00000003
+
+NVM Command Set Log Page
+--------------------------------------------------------------------------------
+Admin Commands
+ACS2     [Get Log Page                    ] 00000001
+ACS6     [Identify                        ] 00000001
+ACS8     [Abort                           ] 00000001
+ACS9     [Set Features                    ] 00000001
+ACS10    [Get Features                    ] 00000001
+ACS12    [Asynchronous Event Request      ] 00000001
+ACS24    [Keep Alive                      ] 00000001
+
+I/O Commands
+IOCS0    [Flush                           ] 00000001
+IOCS1    [Write                           ] 00000003
+IOCS2    [Read                            ] 00000001
+IOCS8    [Write Zeroes                    ] 00000003
+IOCS9    [Dataset Management              ] 00000001
+IOCS13   [Reservation Register            ] 00000001
+IOCS14   [Reservation Report              ] 00000001
+IOCS17   [Reservation Acquire             ] 00000001
+IOCS21   [Reservation Release             ] 00000001
+
+NQN:blktests-subsystem-1 disconnected 1 controller(s)
+disconnected 1 controller(s)

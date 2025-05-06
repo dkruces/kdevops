@@ -1,0 +1,5 @@
+runtime	6.309s
+description	do I/O and check iostats times
+exit_status	0
+date	2025-05-06 10:12:00
+status	pass

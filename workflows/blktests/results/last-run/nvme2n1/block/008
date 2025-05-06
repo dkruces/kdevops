@@ -1,0 +1,6 @@
+runtime	31.360s
+description	do IO while hotplugging CPUs
+read iops	67917
+exit_status	0
+date	2025-05-06 10:07:51
+status	pass

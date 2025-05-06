@@ -1,0 +1,7 @@
+runtime	31.454s
+IOPS for   1 ms completion time	29477
+description	shared tag set fairness
+exit_status	0
+date	2025-05-06 10:15:10
+IOPS for 100 ms completion time	318
+status	pass

@@ -1,0 +1,5 @@
+runtime	0.594s
+description	test nvme and nvmet UUID NS descriptors
+exit_status	0
+date	2025-05-06 10:07:09
+status	pass

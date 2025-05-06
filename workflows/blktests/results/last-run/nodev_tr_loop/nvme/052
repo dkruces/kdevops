@@ -1,0 +1,5 @@
+runtime	5.816s
+description	Test file-ns creation/deletion under one subsystem
+exit_status	0
+date	2025-05-06 10:11:01
+status	pass

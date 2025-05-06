@@ -1,0 +1,6 @@
+runtime	15.287s
+description	run null-blk in blocking mode
+read iops	811654
+exit_status	0
+date	2025-05-06 10:07:05
+status	pass

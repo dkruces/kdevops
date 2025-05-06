@@ -16,3 +16,9 @@
     src: "ansible.cfg.j2"
     dest: "{{ ansible_cfg_file }}"
     mode: '0755'
+
+- name: Update ansible.cfg access modification time so make sees it updated
+  ansible.builtin.file:
+    path: "{{ ansible_cfg_file }}"
+    state: touch
+    mode: '0755'

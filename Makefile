@@ -30,7 +30,7 @@ ifneq ($(strip $(CONFIG_ANSIBLE_CFG_FILE)),)
 ANSIBLE_CFG_FILE := $(shell echo $(CONFIG_ANSIBLE_CFG_FILE) | tr --delete '"')
 export ANSIBLE_CONFIG := $(ANSIBLE_CFG_FILE)
 endif
-ANSIBLE_INVENTORY_FILE := $(shell echo $(CONFIG_ANSIBLE_CFG_INVENTORY) | tr --delete '"')
+ANSIBLE_CFG_INVENTORY := $(shell echo $(CONFIG_ANSIBLE_CFG_INVENTORY) | tr --delete '"')
 
 # ifneq ($(strip $(CONFIG_KDEVOPS_PARAMS)),)
 ifeq (y,$(CONFIG_ENABLE_KDEVOPS_PARAMS))
@@ -143,6 +143,9 @@ ifneq (,$(ANSIBLE_EXTRA_ARGS))
 DEFAULT_DEPS += $(KDEVOPS_EXTRA_VARS)
 endif
 
+DEFAULT_DEPS += $(ANSIBLE_CFG_FILE)
+DEFAULT_DEPS += $(ANSIBLE_CFG_INVENTORY)
+
 ifeq (y,$(CONFIG_VAGRANT))
 DEFAULT_DEPS += $(KDEVOPS_VAGRANT)
 endif
@@ -205,7 +208,7 @@ include scripts/gen-nodes.Makefile
 	make -f scripts/build.Makefile help                             ;\
 	false)
 
-$(ANSIBLE_CFG_FILE):
+$(ANSIBLE_CFG_FILE): .config
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/ansible_cfg.yml \
 		--extra-vars=@./.extra_vars_auto.yaml
@@ -215,7 +218,7 @@ $(KDEVOPS_PARAMS):
 
 PHONY += $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
 
-$(KDEVOPS_EXTRA_VARS): .config $(ANSIBLE_CFG_FILE) $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
+$(KDEVOPS_EXTRA_VARS): .config $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
 
 playbooks/secret.yml:
 	@if [[ "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" == "" ]]; then \
@@ -237,17 +240,17 @@ ifneq (,$(KDEVOPS_BRING_UP_DEPS))
 include scripts/bringup.Makefile
 endif
 
-DEFAULT_DEPS += $(ANSIBLE_INVENTORY_FILE)
-$(ANSIBLE_INVENTORY_FILE): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_HOSTS_TEMPLATE)
+$(ANSIBLE_CFG_INVENTORY): .config
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
 		--extra-vars=@./extra_vars.yaml
 
 DEFAULT_DEPS += $(KDEVOPS_NODES)
-$(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_NODES_TEMPLATE)
+$(KDEVOPS_NODES) $(KDEVOPS_VAGRANT): .config $(ANSIBLE_CFG_FILE) $(ANSIBLE_CFG_INVENTORY) $(KDEVOPS_NODES_TEMPLATE)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
 		--extra-vars=@./extra_vars.yaml
+	touch $(KDEVOPS_NODES)
 
 DEFAULT_DEPS += $(LOCALHOST_SETUP_WORK)
 

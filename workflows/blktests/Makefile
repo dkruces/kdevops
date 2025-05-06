@@ -60,6 +60,28 @@ ifneq (,$(SKIP_RUN))
 BLKTESTS_DYNAMIC_RUNTIME_VARS += , "blktests_skip_run": True
 endif
 
+ifndef LAST_KERNEL
+LAST_KERNEL := $(shell cat workflows/blktests/results/last-kernel.txt 2>/dev/null)
+endif
+
+ifeq ($(LAST_KERNEL), $(shell cat workflows/blktests/results/last-kernel.txt 2>/dev/null))
+FIND_PATH := workflows/blktests/results/last-run
+else
+FIND_PATH := workflows/blktests/results/$(LAST_KERNEL)
+endif
+
+ifndef PATTERN
+PATTERN := -name xunit_results.txt
+endif
+
+ifndef XARGS_ARGS
+ifeq (-name xunit_results.txt,$(PATTERN))
+XARGS_ARGS := cat
+else
+XARGS_ARGS := -I {} bash -c 'echo "{}:"; cat {}; echo;'
+endif
+endif
+
 extend-extra-args-blktests:
 	@if [[ "$(CONFIG_KDEVOPS_WORKFLOW_ENABLE_BLKTESTS)" == "y" ]]; then \
 		echo "blktests_test_devs: '$(CONFIG_BLKTESTS_TEST_DEVS)'" >> $(KDEVOPS_EXTRA_VARS) ;\
@@ -126,6 +148,11 @@ blktests-dev-results:
 		--tags copy_results,print_results \
 		--extra-vars '{ kdevops_run_blktests: True }' \
 		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+
+blktests-show-results:
+	$(Q)find $(FIND_PATH) -type f $(PATTERN) \
+		| xargs $(XARGS_ARGS) \
+		| sed '$${/^$$/d;}'
 
 blktests-help-menu:
 	@echo "blktests options:"

@@ -1,7 +1,42 @@
 ---
-# Main destroy task - currently only supports targeted cleanup
-# This maintains backward compatibility with existing behavior
+# Main destroy task - handles targeted, pattern-based, and comprehensive cleanup
+# Mode is determined by Kconfig settings (GUESTFS_DESTROY_*)
 
-- name: Include targeted destroy tasks
+- name: Determine destroy mode from configuration
+  ansible.builtin.set_fact:
+    guestfs_destroy_mode: >-
+      {{
+        'comprehensive' if guestfs_purge_comprehensive|default(false)|bool
+        else 'pattern' if (guestfs_destroy_vm_pattern is defined or guestfs_destroy_pool_pattern is defined)
+        else 'targeted'
+      }}
+
+- name: Include host-specific destroy tasks (targeted mode)
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/destroy/hosts.yml"
+  when:
+    - guestfs_destroy_mode == 'targeted'
+
+- name: Include VM cleanup tasks (pattern-based and comprehensive modes)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/destroy/vms.yml"
+  when:
+    - guestfs_destroy_mode in ['pattern', 'comprehensive']
+
+- name: Include storage cleanup tasks (pattern-based and comprehensive modes)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/destroy/storage.yml"
+  when:
+    - guestfs_destroy_mode in ['pattern', 'comprehensive']
+
+- name: Include network cleanup tasks (pattern-based and comprehensive modes)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/destroy/networks.yml"
+  when:
+    - guestfs_destroy_mode in ['pattern', 'comprehensive']
+
+- name: Include comprehensive cleanup tasks (comprehensive mode only)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/destroy/comprehensive.yml"
+  when:
+    - guestfs_destroy_mode == 'comprehensive'

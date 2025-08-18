@@ -1,0 +1,113 @@
+---
+# Comprehensive cleanup - additional cleanup tasks for complete purge
+# Only runs when guestfs_purge_comprehensive is true
+# Includes cleanup of configuration files, logs, and other artifacts
+
+- name: Remove kdevops configuration artifacts
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ansible_cfg_inventory }}"
+    - "{{ topdir_path }}/{{ kdevops_nodes }}"
+    - "{{ kdevops_ssh_config }}"
+  ignore_errors: true
+  when: item is defined
+
+- name: Remove guestfs directories and artifacts
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ guestfs_path }}"
+    - "{{ topdir_path }}/.kdevops"
+    - "{{ topdir_path }}/qemu.log"
+  ignore_errors: true
+
+- name: Clean up libvirt logs and temporary files
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    # Clean up libvirt logs for destroyed VMs
+    find /var/log/libvirt/qemu/ -name "*kdevops*" -type f -delete 2>/dev/null || true
+    find /var/log/libvirt/qemu/ -name "*demo*" -type f -delete 2>/dev/null || true
+    
+    # Clean up temporary libvirt files
+    find /tmp -name "*libvirt*" -name "*kdevops*" -type f -delete 2>/dev/null || true
+    find /tmp -name "*qemu*" -name "*kdevops*" -type f -delete 2>/dev/null || true
+  when:
+    - ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+  changed_when: false
+  ignore_errors: true
+
+- name: Clean up user-specific libvirt artifacts (session mode)
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    # Clean up user session libvirt artifacts
+    rm -rf ~/.cache/libvirt/qemu/log/*kdevops* 2>/dev/null || true
+    rm -rf ~/.cache/libvirt/qemu/log/*demo* 2>/dev/null || true
+    rm -rf ~/.local/share/libvirt/images/*kdevops* 2>/dev/null || true
+    rm -rf ~/.local/share/libvirt/images/*demo* 2>/dev/null || true
+  when:
+    - not libvirt_uri_system|default(true)|bool
+  changed_when: false
+  ignore_errors: true
+
+- name: Remove kdevops storage directories (be very careful)
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    # Only remove directories that clearly contain kdevops/demo in their path
+    find {{ kdevops_storage_pool_path | default('/var/lib/libvirt/images') }} -type d -name "*kdevops*" -exec rm -rf {} + 2>/dev/null || true
+    find {{ kdevops_storage_pool_path | default('/var/lib/libvirt/images') }} -type d -name "*demo*" -exec rm -rf {} + 2>/dev/null || true
+  when:
+    - kdevops_storage_pool_path is defined
+    - kdevops_storage_pool_path != "/"
+    - kdevops_storage_pool_path | length > 10  # Safety check
+  changed_when: false
+  ignore_errors: true
+
+- name: Clean up SSH known_hosts entries
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    # Remove SSH known_hosts entries for destroyed VMs
+    if [[ -f ~/.ssh/known_hosts ]]; then
+      sed -i '/kdevops/d' ~/.ssh/known_hosts 2>/dev/null || true
+      sed -i '/demo-/d' ~/.ssh/known_hosts 2>/dev/null || true
+    fi
+  changed_when: false
+  ignore_errors: true
+
+- name: Display comprehensive cleanup summary
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: |
+      Comprehensive cleanup completed:
+      - All VMs matching patterns have been destroyed and undefined
+      - Storage pools and volumes have been cleaned up
+      - Networks have been removed
+      - Configuration files and artifacts have been purged
+      - Logs and temporary files have been cleaned
+      
+      Note: This was a comprehensive cleanup. All kdevops-related 
+      infrastructure has been removed from this system.
+  when:
+    - guestfs_debug_destroy|default(false)|bool
+
+- name: Restart libvirt service to clean up any stale connections
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.service:
+    name: "{{ libvirt_service_name | default('libvirtd') }}"
+    state: restarted
+  when:
+    - guestfs_restart_libvirt|default(false)|bool
+    - libvirt_uri_system|default(true)|bool
+  become: true
+  ignore_errors: true

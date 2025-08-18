@@ -1,0 +1,74 @@
+---
+# Network cleanup - removes networks based on patterns
+# Idempotent: only acts on networks that actually exist
+
+- name: Gather list of all networks
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} net-list --all --name 2>/dev/null | grep -v '^$' || true
+  register: all_networks
+  changed_when: false
+
+- name: Filter networks to destroy based on patterns
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.set_fact:
+    networks_to_destroy: >-
+      {{
+        all_networks.stdout_lines | 
+        reject('match', '^default$') |
+        select('match', guestfs_network_destroy_pattern) | 
+        list if not guestfs_purge_comprehensive|default(false)|bool
+        else all_networks.stdout_lines | 
+        reject('match', '^default$') | 
+        reject('match', guestfs_network_preserve_pattern) |
+        list
+      }}
+  vars:
+    # Default pattern for network cleanup
+    guestfs_network_destroy_pattern: "{{ guestfs_destroy_network_pattern | default('.*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*|.*vm.*|.*guest.*|.*temp.*|.*vagrant.*') }}"
+    # Networks to preserve even in comprehensive mode
+    guestfs_network_preserve_pattern: "{{ guestfs_preserve_network_pattern | default('(management|admin|production|prod)') }}"
+
+- name: Display networks that will be destroyed
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "Networks to be destroyed: {{ networks_to_destroy | join(', ') if networks_to_destroy else 'none' }}"
+  when:
+    - guestfs_debug_destroy|default(false)|bool
+
+- name: Check network states
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} net-info {{ item }} 2>/dev/null | grep "Active:" | awk '{print $2}' || echo "inactive"
+  register: network_states
+  loop: "{{ networks_to_destroy }}"
+  when:
+    - networks_to_destroy | length > 0
+  changed_when: false
+
+- name: Destroy active networks
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} net-destroy {{ item.item }} 2>/dev/null || true
+  loop: "{{ network_states.results }}"
+  when:
+    - networks_to_destroy | length > 0
+    - item.stdout == "yes"
+  changed_when: false
+  ignore_errors: true
+
+- name: Undefine networks
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} net-undefine {{ item }} 2>/dev/null || true
+  loop: "{{ networks_to_destroy }}"
+  when:
+    - networks_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true

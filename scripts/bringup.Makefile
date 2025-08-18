@@ -26,7 +26,7 @@ bringup-help-menu:
 	@echo "Bringup targets:"
 	@echo "bringup            - Brings up target hosts"
 	@echo "status             - Reports the status of target hosts"
-	@echo "destroy            - Destroy all target hosts"
+	@echo "destroy            - Destroy target hosts (level configured via menuconfig)"
 	@echo "cleancache	  - Remove all cached images"
 	@echo ""
 

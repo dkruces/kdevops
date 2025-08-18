@@ -1,0 +1,7 @@
+---
+# Main destroy task - currently only supports targeted cleanup
+# This maintains backward compatibility with existing behavior
+
+- name: Include targeted destroy tasks
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/destroy/hosts.yml"

@@ -75,5 +75,5 @@
   tags:
     - destroy
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/destroy.yml"
+    file: "{{ role_path }}/tasks/destroy/main.yml"
   delegate_to: localhost

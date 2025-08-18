@@ -248,4 +248,126 @@ config GUESTFS_BRINGUP_DEBUG_1
 
 endchoice
 
+choice
+	prompt "Guestfs destroy mode"
+	default GUESTFS_DESTROY_TARGETED
+	help
+	  Configure the level of destruction when running 'make destroy'.
+	  Different modes provide varying levels of cleanup from targeted
+	  host destruction to comprehensive system purge.
+
+config GUESTFS_DESTROY_TARGETED
+	bool "Targeted cleanup (hosts file)"
+	help
+	  Default destroy mode that only removes VMs, volumes, and networks
+	  defined in the current hosts file. This is the safest option and
+	  preserves any manually created VMs or storage outside of kdevops.
+
+	  This mode:
+	  - Only destroys VMs listed in the current hosts file
+	  - Removes associated storage volumes and networks
+	  - Preserves manually created libvirt resources
+	  - Maintains backward compatibility with existing behavior
+
+config GUESTFS_DESTROY_PATTERN_BASED
+	bool "Pattern-based cleanup"
+	help
+	  Destroys VMs, storage pools, and networks matching configurable
+	  patterns. By default matches kdevops-style naming conventions
+	  but can be customized for specific environments.
+
+	  This mode:
+	  - Uses regex patterns to identify resources to destroy
+	  - Allows customization of VM, pool, and network patterns
+	  - Provides more flexibility than targeted mode
+	  - Still preserves resources that don't match patterns
+
+config GUESTFS_DESTROY_COMPREHENSIVE
+	bool "Complete cleanup"
+	help
+	  WARNING: This mode destroys ALL VMs, storage pools, and networks
+	  except those explicitly preserved. Use with extreme caution.
+
+	  This mode:
+	  - Destroys all VMs except 'default'
+	  - Removes all storage pools except 'default' and preserved patterns
+	  - Cleans up all networks except 'default' and 'virbr0'
+	  - Removes orphaned storage directories
+	  - Cleans up kdevops artifacts and logs
+
+	  This provides the most thorough cleanup possible.
+
+endchoice
+
+if GUESTFS_DESTROY_PATTERN_BASED || GUESTFS_DESTROY_COMPREHENSIVE
+
+config GUESTFS_DESTROY_VM_PATTERN
+	string "VM destruction pattern (regex)"
+	output yaml
+	default ".*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*"
+	help
+	  Regular expression pattern for matching VMs to destroy in pattern-based
+	  mode. The default pattern matches VMs with 'kdevops' or 'demo' in the name
+	  (case insensitive).
+
+	  Examples:
+	  - ".*test.*" - matches VMs with 'test' in the name
+	  - "^vm-.*" - matches VMs starting with 'vm-'
+	  - ".*" - matches all VMs (use with caution)
+
+config GUESTFS_DESTROY_POOL_PATTERN
+	string "Storage pool destruction pattern (regex)"
+	output yaml
+	default ".*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*|.*vm.*|.*guest.*|.*temp.*"
+	help
+	  Regular expression pattern for matching storage pools to destroy.
+	  The default pattern matches pools with common development/testing names.
+
+config GUESTFS_DESTROY_NETWORK_PATTERN
+	string "Network destruction pattern (regex)"
+	output yaml
+	default ".*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*|.*vm.*|.*guest.*|.*temp.*"
+	help
+	  Regular expression pattern for matching networks to destroy.
+	  The default pattern matches networks with common development/testing names.
+
+endif
+
+if GUESTFS_DESTROY_COMPREHENSIVE
+
+config GUESTFS_PRESERVE_POOL_PATTERN
+	string "Storage pools to preserve (regex)"
+	output yaml
+	default "(home|users|data|backup|important)"
+	help
+	  Regular expression pattern for storage pools to preserve even in
+	  comprehensive mode. These pools will never be destroyed regardless
+	  of other settings.
+
+	  The default preserves pools that typically contain user data.
+
+endif
+
+config GUESTFS_DEBUG_DESTROY
+	bool "Enable destroy debug output"
+	output yaml
+	default n
+	help
+	  Enable verbose debug output during destroy operations. This will
+	  show detailed information about what resources are being destroyed
+	  and any errors encountered.
+
+	  Useful for troubleshooting destroy operations or understanding
+	  what resources would be affected before running the actual destroy.
+
+config GUESTFS_PURGE_COMPREHENSIVE
+	bool
+	output yaml
+	default y if GUESTFS_DESTROY_COMPREHENSIVE
+	default n
+	help
+	  Internal variable that enables comprehensive purge mode when
+	  comprehensive destroy is selected.
+
+
 endif # GUESTFS

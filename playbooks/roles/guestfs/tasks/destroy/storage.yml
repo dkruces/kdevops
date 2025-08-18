@@ -1,0 +1,133 @@
+---
+# Comprehensive storage cleanup - removes volumes and pools
+# Idempotent: only acts on storage that actually exists
+
+- name: Gather list of all storage pools
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} pool-list --all --name 2>/dev/null | grep -v '^$' || true
+  register: all_storage_pools
+  changed_when: false
+
+- name: Filter storage pools to destroy based on patterns or safety rules
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.set_fact:
+    pools_to_destroy: >-
+      {{
+        all_storage_pools.stdout_lines | 
+        select('match', guestfs_pool_destroy_pattern) | 
+        list if not guestfs_purge_comprehensive|default(false)|bool
+        else all_storage_pools.stdout_lines | 
+        reject('match', '^default$') | 
+        reject('match', guestfs_pool_preserve_pattern) | 
+        list
+      }}
+  vars:
+    # Default pattern for targeted cleanup - only kdevops-related pools
+    guestfs_pool_destroy_pattern: "{{ guestfs_destroy_pool_pattern | default('.*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*|.*vm.*|.*guest.*|.*temp.*') }}"
+    # Pools to preserve even in comprehensive mode (can be overridden)
+    guestfs_pool_preserve_pattern: "{{ guestfs_preserve_pool_pattern | default('(home|users|data|backup|important)') }}"
+
+- name: Display storage pools that will be destroyed
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "Storage pools to be destroyed: {{ pools_to_destroy | join(', ') if pools_to_destroy else 'none' }}"
+  when:
+    - guestfs_debug_destroy|default(false)|bool
+
+- name: Get volumes for each pool to be destroyed
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} vol-list --pool {{ item }} --name 2>/dev/null | grep -v '^$' || true
+  register: pool_volumes
+  loop: "{{ pools_to_destroy }}"
+  when:
+    - pools_to_destroy | length > 0
+  changed_when: false
+
+- name: Filter volumes to destroy based on patterns
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.set_fact:
+    volumes_to_destroy: >-
+      {{
+        pool_volumes.results | map(attribute='stdout_lines') | flatten |
+        select('match', guestfs_volume_destroy_pattern) | list
+        if not guestfs_purge_comprehensive|default(false)|bool
+        else pool_volumes.results | map(attribute='stdout_lines') | flatten
+      }}
+  vars:
+    # Default pattern for volume cleanup
+    guestfs_volume_destroy_pattern: "{{ guestfs_destroy_volume_pattern | default('.*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*|.*vm.*|.*guest.*|.*temp.*') }}"
+  when:
+    - pools_to_destroy | length > 0
+
+- name: Delete individual volumes (attempt standard deletion)
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    for pool in {{ pools_to_destroy | join(' ') }}; do
+      virsh -c {{ libvirt_uri }} vol-list --pool $pool --name 2>/dev/null | while read vol; do
+        [[ -n "$vol" ]] && virsh -c {{ libvirt_uri }} vol-delete "$vol" --pool "$pool" 2>/dev/null || true
+      done
+    done
+  when:
+    - pools_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true
+
+- name: Force delete stubborn volumes with snapshots
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    for pool in {{ pools_to_destroy | join(' ') }}; do
+      virsh -c {{ libvirt_uri }} vol-list --pool $pool --name 2>/dev/null | while read vol; do
+        [[ -n "$vol" ]] && virsh -c {{ libvirt_uri }} vol-delete "$vol" --pool "$pool" --delete-snapshots 2>/dev/null || true
+      done
+    done
+  when:
+    - pools_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true
+
+- name: Destroy active storage pools
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} pool-destroy {{ item }} 2>/dev/null || true
+  loop: "{{ pools_to_destroy }}"
+  when:
+    - pools_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true
+
+- name: Undefine storage pools
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} pool-undefine {{ item }} 2>/dev/null || true
+  loop: "{{ pools_to_destroy }}"
+  when:
+    - pools_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true
+
+- name: Clean up orphaned storage directories (comprehensive mode only)
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    for pool in {{ pools_to_destroy | join(' ') }}; do
+      pool_path=$(virsh -c {{ libvirt_uri }} pool-dumpxml "$pool" 2>/dev/null | grep -o '<path>.*</path>' | sed 's/<[^>]*>//g' 2>/dev/null || true)
+      if [[ -n "$pool_path" && "$pool_path" != "/" && "$pool_path" =~ (kdevops|demo|vm|guest|temp) ]]; then
+        rm -rf "$pool_path" 2>/dev/null || true
+      fi
+    done
+  when:
+    - guestfs_purge_comprehensive|default(false)|bool
+    - pools_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true

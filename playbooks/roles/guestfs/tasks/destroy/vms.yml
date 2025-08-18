@@ -1,0 +1,121 @@
+---
+# Comprehensive VM destruction - removes VMs based on patterns or all VMs
+# Idempotent: only acts on VMs that actually exist
+
+- name: Gather list of all defined VMs
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    command: list_vms
+    uri: "{{ libvirt_uri }}"
+  register: all_defined_vms
+
+- name: Gather list of running VMs
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    command: list_vms
+    state: running
+    uri: "{{ libvirt_uri }}"
+  register: all_running_vms
+
+- name: Filter VMs to destroy based on patterns
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.set_fact:
+    vms_to_destroy: >-
+      {{
+        all_defined_vms.list_vms | select('match', guestfs_vm_destroy_pattern) | list
+        if not guestfs_purge_comprehensive|default(false)|bool
+        else all_defined_vms.list_vms | reject('match', '^default$') | list
+      }}
+  vars:
+    # Default pattern matches kdevops-style VMs, can be overridden
+    guestfs_vm_destroy_pattern: "{{ guestfs_destroy_vm_pattern | default('.*[Kk][Dd][Ee][Vv][Oo][Pp][Ss].*|.*demo.*') }}"
+
+- name: Display VMs that will be destroyed
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "VMs to be destroyed: {{ vms_to_destroy | join(', ') if vms_to_destroy else 'none' }}"
+  when:
+    - guestfs_debug_destroy|default(false)|bool
+
+- name: Destroy running VMs
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    name: "{{ item }}"
+    command: destroy
+    uri: "{{ libvirt_uri }}"
+  loop: "{{ vms_to_destroy }}"
+  when:
+    - item in all_running_vms.list_vms
+    - vms_to_destroy | length > 0
+  ignore_errors: true
+
+- name: Wait for VMs to fully shut down
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.pause:
+    seconds: 2
+  when:
+    - vms_to_destroy | length > 0
+
+- name: Remove VM snapshots
+  run_once: true
+  delegate_to: localhost
+  ansible.builtin.shell: |
+    virsh -c {{ libvirt_uri }} snapshot-list --name {{ item }} 2>/dev/null | while read snapshot; do
+      [[ -n "$snapshot" ]] && virsh -c {{ libvirt_uri }} snapshot-delete {{ item }} "$snapshot" 2>/dev/null || true
+    done
+  loop: "{{ vms_to_destroy }}"
+  when:
+    - vms_to_destroy | length > 0
+  changed_when: false
+  ignore_errors: true
+
+- name: Undefine VMs with comprehensive cleanup
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    name: "{{ item }}"
+    command: undefine
+    flags:
+      - "remove_all_storage"
+      - "managed_save"
+      - "snapshots_metadata"
+      - "checkpoints_metadata"
+      - "nvram"
+    uri: "{{ libvirt_uri }}"
+  loop: "{{ vms_to_destroy }}"
+  when:
+    - vms_to_destroy | length > 0
+  ignore_errors: true
+
+- name: Fallback - undefine VMs with basic cleanup (for older libvirt)
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    name: "{{ item }}"
+    command: undefine
+    flags:
+      - "managed_save"
+      - "nvram"
+    uri: "{{ libvirt_uri }}"
+  loop: "{{ vms_to_destroy }}"
+  when:
+    - vms_to_destroy | length > 0
+  ignore_errors: true
+
+- name: Final fallback - basic undefine
+  run_once: true
+  delegate_to: localhost
+  community.libvirt.virt:
+    name: "{{ item }}"
+    command: undefine
+    uri: "{{ libvirt_uri }}"
+  loop: "{{ vms_to_destroy }}"
+  when:
+    - vms_to_destroy | length > 0
+  ignore_errors: true

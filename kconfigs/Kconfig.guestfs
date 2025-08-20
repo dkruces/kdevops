@@ -30,6 +30,9 @@ config GUESTFS_CUSTOM_RAW_IMAGE_URL
 	depends on GUESTFS_HAS_CUSTOM_RAW_IMAGE_URL
 	string
 	output yaml
+	default "https://cloud.debian.org/images/cloud/forky/daily/latest/debian-14-generic-amd64-daily.raw" if GUESTFS_DEBIAN_FORKY_GENERIC_AMD64
+	default "https://cloud.debian.org/images/cloud/forky/daily/latest/debian-14-genericcloud-amd64-daily.raw" if GUESTFS_DEBIAN_FORKY_GENERIC_CLOUD_AMD64
+	default "https://cloud.debian.org/images/cloud/forky/daily/latest/debian-14-nocloud-amd64-daily.raw" if GUESTFS_DEBIAN_FORKY_NOCLOUD_AMD64
 	default "https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-generic-amd64-daily.raw" if GUESTFS_DEBIAN_TRIXIE_GENERIC_AMD64
 	default "https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-genericcloud-amd64-daily.raw" if GUESTFS_DEBIAN_TRIXIE_GENERIC_CLOUD_AMD64
 	default "https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-nocloud-amd64-daily.raw" if GUESTFS_DEBIAN_TRIXIE_NOCLOUD_AMD64
@@ -42,6 +45,7 @@ config GUESTFS_CUSTOM_RAW_IMAGE_SHA512SUMS_URL
 	string
 	depends on GUESTFS_HAS_CUSTOM_RAW_IMAGE_SHA512SUMS
 	output yaml
+	default "https://cloud.debian.org/images/cloud/forky/daily/latest/SHA512SUMS" if GUESTFS_DEBIAN_FORKY
 	default "https://cloud.debian.org/images/cloud/trixie/daily/latest/SHA512SUMS" if GUESTFS_DEBIAN_TRIXIE
 
 config GUESTFS_HAS_CUSTOM_RAW_IMAGE_ROLLING
@@ -101,6 +105,22 @@ if GUESTFS_DEBIAN
 choice
 	prompt "Debian version"
 	default GUESTFS_DEBIAN_TRIXIE
+
+config GUESTFS_DEBIAN_FORKY
+	bool "Debian 14 - Forky"
+	select GUESTFS_REQUIRES_UEFI
+	select GUESTFS_HAS_CUSTOM_RAW_IMAGE
+	select GUESTFS_HAS_CUSTOM_RAW_IMAGE_URL
+	select GUESTFS_HAS_CUSTOM_RAW_IMAGE_SHA512SUMS
+	select GUESTFS_HAS_CUSTOM_RAW_IMAGE_ROLLING
+	help
+	  Select this for debian forky, debian 14. Since debian does not yet
+	  provide a virt-builder repo, we must download mock up our own URL
+	  for forky release, as the default guestfs repo only has debian buster.
+	  We download the image for you once, and once its there we don't refresh
+	  it. We can later add support to force a refresh using the latest URL,
+	  as forky is debian-unstable and debian unstable always has a new
+	  up to date image release, that is, its a rolling distribution release.
 
 config GUESTFS_DEBIAN_TRIXIE
 	bool "Debian 13 - Trixie"
@@ -163,9 +183,47 @@ endchoice
 
 endif # GUESTFS_DEBIAN_TRIXIE
 
+if GUESTFS_DEBIAN_FORKY
+
+choice
+	prompt "Debian forky flavor"
+	default GUESTFS_DEBIAN_FORKY_GENERIC_AMD64
+
+config GUESTFS_DEBIAN_FORKY_GENERIC_AMD64
+	bool "debian-14-generic-amd64-daily"
+	help
+	  Should run in any environment using cloud-init, for e.g. OpenStack,
+	  DigitalOcean and also on bare metal. This is the image you should
+	  try to use and stick to for kernel testing.
+
+config GUESTFS_DEBIAN_FORKY_GENERIC_CLOUD_AMD64
+	bool "debian-14-genericcloud-amd64-daily"
+	help
+	  Similar to generic. Should run in any virtualised environment. Is
+	  smaller than generic by excluding drivers for physical hardware.
+	  Note that the 9p client filesystem module will not be available to
+	  you with this image and so you cannot leverage 9p for building
+	  Linux on the host. This image also requires a EFI boot loader
+	  and secure boot is enabled by default which means your custom
+	  kernels will need to be signed and this plumbing is not supported
+	  yet so you are on your own.
+
+config GUESTFS_DEBIAN_FORKY_NOCLOUD_AMD64
+	bool "debian-14-nocloud-amd64-daily"
+	help
+	  Mostly useful for testing the build process itself. Doesn't have
+	  cloud-init installed, but instead allows root login without a
+	  password.
+
+endchoice
+
+endif # GUESTFS_DEBIAN_FORKY
+
 config GUESTFS_DEBIAN_HOST_UPDATES_GUEST
 	bool
 	default y if GUESTFS_DEBIAN_BUSTER && DISTRO_DEBIAN_TRIXIE
+	default y if GUESTFS_DEBIAN_BUSTER && DISTRO_DEBIAN_FORKY
+	default y if GUESTFS_DEBIAN_TRIXIE && DISTRO_DEBIAN_FORKY
 	select KDEVOPS_TRY_REFRESH_REPOS
 	select KDEVOPS_TRY_UPDATE_SYSTEMS
 
@@ -173,18 +231,23 @@ config GUESTFS_DEBIAN_HOST_GUEST_MATCH
 	bool
 	default y if GUESTFS_DEBIAN_BUSTER && DISTRO_DEBIAN_BUSTER
 	default y if GUESTFS_DEBIAN_TRIXIE && DISTRO_DEBIAN_TRIXIE
+	default y if GUESTFS_DEBIAN_FORKY && DISTRO_DEBIAN_FORKY
 
 config GUESTFS_DEBIAN_IMAGE_NAME
 	string
+	default "debian-14-generic-amd64-daily" if GUESTFS_DEBIAN_FORKY_GENERIC_AMD64
+	default "debian-14-genericcloud-amd64-daily" if GUESTFS_DEBIAN_FORKY_GENERIC_CLOUD_AMD64
+	default "debian-14-nocloud-amd64-daily" if GUESTFS_DEBIAN_FORKY_NOCLOUD_AMD64
 	default "debian-13-generic-amd64-daily" if GUESTFS_DEBIAN_TRIXIE_GENERIC_AMD64
 	default "debian-13-genericcloud-amd64-daily" if GUESTFS_DEBIAN_TRIXIE_GENERIC_CLOUD_AMD64
 	default "debian-13-nocloud-amd64-daily" if GUESTFS_DEBIAN_TRIXIE_NOCLOUD_AMD64
 	default "debian-12" if GUESTFS_DEBIAN_BUSTER
 
 config GUESTFS_DEBIAN_BOX_SHORT
-        string
-        default "debian13" if GUESTFS_DEBIAN_TRIXIE
-        default "debian12" if GUESTFS_DEBIAN_BUSTER
+	      string
+	      default "debian14" if GUESTFS_DEBIAN_FORKY
+	      default "debian13" if GUESTFS_DEBIAN_TRIXIE
+	      default "debian12" if GUESTFS_DEBIAN_BUSTER
 
 config GUESTFS_DEBIAN_COPY_HOST_SOURCES
 	bool
@@ -211,14 +274,14 @@ config GUESTFS_DEBIAN_COPY_HOST_SOURCES
 endif # GUESTFS_DEBIAN
 
 config VIRT_BUILDER_OS_VERSION
-       string "virt-builder os-version"
-       default "fedora-39" if GUESTFS_FEDORA
-       default GUESTFS_DEBIAN_IMAGE_NAME if GUESTFS_DEBIAN
-       help
-         Have virt-builder use this os-version string to
-         build a root image for the guest. Run "virt-builder -l"
-         to get a list of operating systems and versions supported
-         by guestfs.
+	     string "virt-builder os-version"
+	     default "fedora-39" if GUESTFS_FEDORA
+	     default GUESTFS_DEBIAN_IMAGE_NAME if GUESTFS_DEBIAN
+	     help
+	       Have virt-builder use this os-version string to
+	       build a root image for the guest. Run "virt-builder -l"
+	       to get a list of operating systems and versions supported
+	       by guestfs.
 
 choice
 	prompt "Guestfs bringup debug mode"

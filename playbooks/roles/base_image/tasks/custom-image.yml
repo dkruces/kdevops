@@ -46,16 +46,6 @@
     - not custom_image_stat.stat.exists
     - guestfs_has_custom_raw_image_url|bool
 
-- name: Resize custom image to match configured size
-  become: true
-  become_method: ansible.builtin.sudo
-  ansible.builtin.command:
-    cmd: "qemu-img resize {{ custom_image }} {{ libvirt_image_size }}"
-  changed_when: true
-  when:
-    - custom_image_download is changed or custom_image_stat.stat.exists
-    - guestfs_has_custom_raw_image_url|bool
-
 - name: Check if the custom image sentinel file already exists
   ansible.builtin.stat:
     path: "{{ custom_image_ok }}"
@@ -123,6 +113,15 @@
       when:
         - not sentinel_stat.stat.exists
         - id_output.rc != 0
+
+    - name: Resize custom image to match configured size
+      become: true
+      become_method: ansible.builtin.sudo
+      ansible.builtin.command:
+        cmd: "qemu-img resize -f raw {{ custom_image }} {{ libvirt_image_size }}"
+      changed_when: true
+      when:
+        - not sentinel_stat.stat.exists
 
     - name: Create a temporary file for virt-customize commands
       ansible.builtin.tempfile:

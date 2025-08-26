@@ -873,8 +873,47 @@ The comprehensive script now provides **complete clarity** during application/ap
 - **Rule transparency**: Understand what each rule does before applying
 - **Professional presentation**: Rich UI with clear rule attribution
 
+#### Phase 5 Complete Summary & Important Usage Note:
+
+**✅ Rule Source Location Clarification**
+
+**Critical User Discovery**: The fix_ansible_lint.py rules are only applied when using `--enable-manual-fixes` flag.
+
+**Without `--enable-manual-fixes` (User's original command):**
+```bash
+./scripts/ansible-lint-comprehensive-fixer.py --auto --recursive playbooks/
+# Result: Only 11 ansible-lint rules processed (no internal fixes)
+```
+
+**With `--enable-manual-fixes` (Complete integration):**
+```bash
+./scripts/ansible-lint-comprehensive-fixer.py --auto --recursive --enable-manual-fixes playbooks/
+# Result: 17 total rules (11 ansible-lint + 6 internal from fix_ansible_lint.py)
+```
+
+**The 6 Internal Rules from fix_ansible_lint.py:**
+1. **`yaml[brackets]`** - Fix spacing inside brackets (was `fix_yaml_brackets`)
+2. **`yaml[truthy]`** - Convert yes/no to true/false (was `fix_yaml_truthy`) 
+3. **`jinja[spacing]`** - Fix Jinja2 template spacing (was `fix_jinja_spacing`)
+4. **`fqcn[action-core]`** - Use FQCN for core modules (was `fix_fqcn`)
+5. **`ignore-errors`** - Convert ignore_errors to failed_when (was `fix_ignore_errors`)
+6. **`role-path`** - Fix relative role path references (was `fix_role_path`)
+
+**Processing Architecture:**
+- **Phase 1**: Official ansible-lint rules (always applied)
+- **Phase 2**: Internal manual fixes (only with `--enable-manual-fixes`)
+
+**Discovery Commands:**
+```bash
+# List all available rules including internal ones
+./scripts/ansible-lint-comprehensive-fixer.py --list-rules --enable-manual-fixes
+
+# Explain specific internal rule
+./scripts/ansible-lint-comprehensive-fixer.py --explain-rule "yaml[truthy]" --enable-manual-fixes
+```
+
 ---
 
-**Document Status**: Phases 1-5 Complete + Compatibility - Production Solution v2.0  
+**Document Status**: Phases 1-5 Complete + Usage Clarification - Production Solution v2.0  
 **Last Updated**: Current session  
-**Next Action**: Continue with remaining enhancements (profiles, optimization, documentation)
+**Next Action**: Address remaining enhancement phases and ensure proper documentation of flag requirements

@@ -100,69 +100,9 @@
     get_mime: false
   register: sentinel_stat
 
-- name: Check if template file is newer than sentinel (template updated)
-  ansible.builtin.stat:
-    path: "{{ role_path }}/templates/virt-builder.j2"
-  register: template_stat
-  when: sentinel_stat.stat.exists
-
-- name: Generate current configuration hash for workflow packages
-  ansible.builtin.set_fact:
-    current_config_hash: "{{ (kdevops_workflow_enable_selftests | default(false) | string +
-                              kdevops_workflow_enable_fstests | default(false) | string +
-                              kdevops_workflow_enable_blktests | default(false) | string +
-                              kdevops_workflow_enable_mmtests | default(false) | string +
-                              kdevops_workflow_enable_cxl | default(false) | string +
-                              kdevops_workflow_enable_pynfs | default(false) | string +
-                              kdevops_workflow_enable_sysbench | default(false) | string +
-                              distro_debian_based | default(false) | string) | hash('sha256') }}"
-
-- name: Check if configuration hash file exists and matches current config
-  ansible.builtin.slurp:
-    src: "{{ custom_image_ok }}.hash"
-  register: stored_hash_file
-  ignore_errors: true
-  when: sentinel_stat.stat.exists
-
-- name: Determine if base image needs updating
-  ansible.builtin.set_fact:
-    needs_base_image_update: "{{ not sentinel_stat.stat.exists or
-                                 (sentinel_stat.stat.exists and template_stat.stat.exists and 
-                                  template_stat.stat.mtime > sentinel_stat.stat.mtime) or
-                                 (sentinel_stat.stat.exists and 
-                                  (stored_hash_file is failed or 
-                                   (stored_hash_file.content | b64decode | trim) != current_config_hash)) or
-                                 (guestfs_has_custom_raw_image_rolling | default(false) and
-                                  sentinel_stat.stat.exists and
-                                  (ansible_date_time.epoch | int - sentinel_stat.stat.mtime > 86400)) }}"
-
-- name: Debug base image update decision
-  ansible.builtin.debug:
-    msg: |
-      Base image update analysis:
-      - Sentinel exists: {{ sentinel_stat.stat.exists }}
-      - Template newer: {{ (template_stat.stat.exists and template_stat.stat.mtime > sentinel_stat.stat.mtime) if sentinel_stat.stat.exists else 'N/A' }}
-      - Config changed: {{ (stored_hash_file is failed or (stored_hash_file.content | b64decode | trim) != current_config_hash) if sentinel_stat.stat.exists else 'N/A' }}
-      - Rolling release daily: {{ (guestfs_has_custom_raw_image_rolling and (ansible_date_time.epoch | int - sentinel_stat.stat.mtime > 86400)) if sentinel_stat.stat.exists else 'N/A' }}
-      - Update needed: {{ needs_base_image_update }}
-      - Current hash: {{ current_config_hash[:16] }}
-
-- name: Remove sentinel file when update is needed
-  become: true
-  become_method: ansible.builtin.sudo
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - "{{ custom_image_ok }}"
-    - "{{ custom_image_ok }}.hash"
-  when:
-    - needs_base_image_update
-    - sentinel_stat.stat.exists
-
 - name: Setup custom image for virt-customize
   when:
-    - needs_base_image_update
+    - not sentinel_stat.stat.exists
   block:
 
     - name: Get the UID of the kdevops user on the control host
@@ -172,20 +112,20 @@
       changed_when: false
       failed_when: false
       when:
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Set the kdevops UID for custom image
       ansible.builtin.set_fact:
         kdevops_uid: "-u {{ id_output.stdout }}"
       when:
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
         - id_output.rc == 0
 
     - name: Set default kdevops UID for custom image if user doesn't exist
       ansible.builtin.set_fact:
         kdevops_uid: ""
       when:
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
         - id_output.rc != 0
 
     - name: Create a temporary file for virt-customize commands
@@ -193,7 +133,7 @@
         state: file
       register: custom_command_file
       when:
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Construct the virt-customize command file for custom image
       ansible.builtin.template:
@@ -201,7 +141,7 @@
         dest: "{{ custom_command_file.path }}"
         mode: "u=rw"
       when:
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Customize the downloaded image with kdevops user and settings
       become: true
@@ -215,7 +155,7 @@
           - "{{ custom_command_file.path }}"
       when:
         - libvirt_uri_system|bool
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Customize the downloaded image with kdevops user and settings (non-root)
       ansible.builtin.command:
@@ -227,7 +167,7 @@
           - "{{ custom_command_file.path }}"
       when:
         - not libvirt_uri_system|bool
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Clean up the virt-customize command file
       ansible.builtin.file:
@@ -235,7 +175,7 @@
         state: absent
       when:
         - custom_command_file.path is defined
-        - needs_base_image_update
+        - not sentinel_stat.stat.exists
 
     - name: Touch the custom image sentinel
       become: true
@@ -243,14 +183,6 @@
       ansible.builtin.file:
         path: "{{ custom_image_ok }}"
         state: touch
-        mode: "u=rw,g=r,o=r"
-    
-    - name: Save configuration hash for future update detection
-      become: true
-      become_method: ansible.builtin.sudo
-      ansible.builtin.copy:
-        content: "{{ current_config_hash }}"
-        dest: "{{ custom_image_ok }}.hash"
         mode: "u=rw,g=r,o=r"
 
 - name: Check if the custom source exists

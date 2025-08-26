@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -84,7 +85,7 @@
   ansible.builtin.file:
     path: "/var/log/journal/remote/"
     owner: systemd-journal-remote
-    group: systemd-journal-remote
+    ansible.builtin.group: systemd-journal-remote
     mode: u=rwx,g=rwx,o=rx,g+s
     recurse: true
     state: directory

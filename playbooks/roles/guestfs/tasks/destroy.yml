@@ -2,7 +2,7 @@
 - name: Gather the list of running libvirt guests
   run_once: true
   community.libvirt.virt:
-    command: list_vms
+    ansible.builtin.command: list_vms
     state: running
     uri: "{{ libvirt_uri }}"
   register: running_vms
@@ -10,7 +10,7 @@
 - name: Shut down each running target node
   community.libvirt.virt:
     name: "{{ inventory_hostname }}"
-    command: destroy
+    ansible.builtin.command: destroy
     uri: "{{ libvirt_uri }}"
   changed_when: true
   when:
@@ -19,14 +19,14 @@
 - name: Gather the list of stopped libvirt guests
   run_once: true
   community.libvirt.virt:
-    command: list_vms
+    ansible.builtin.command: list_vms
     state: shutdown
     uri: "{{ libvirt_uri }}"
   register: shutdown_vms
 
 - name: Undefine each stopped target node
   community.libvirt.virt:
-    command: "undefine"
+    ansible.builtin.command: "undefine"
     flags:
       - "nvram"
       - "snapshots_metadata"
@@ -36,14 +36,16 @@
   changed_when: true
   when:
     - inventory_hostname in shutdown_vms.list_vms
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Clean up storage volumes for target nodes
   ansible.builtin.shell: |
     virsh -c {{ libvirt_uri }} vol-delete --pool {{ kdevops_storage_pool_path }} {{ inventory_hostname }}/root.raw 2>/dev/null || true
     virsh -c {{ libvirt_uri }} vol-delete --pool {{ kdevops_storage_pool_path }} {{ inventory_hostname }}.raw 2>/dev/null || true
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Remove per-node configuration files
   ansible.builtin.file:

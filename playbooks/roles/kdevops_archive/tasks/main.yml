@@ -54,7 +54,7 @@
   become: true
   ansible.builtin.shell: |
     for item in {{ ci_results.stdout_lines | join(' ') }}; do
-      if [ -e "$item" ] || compgen -G "$item" > /dev/null; then
+      if [-e "$item"] || compgen -G "$item" > /dev/null; then
         find "$item" -type d -exec chmod 755 {} +
         find "$item" -type f -exec chmod 644 {} +
         chown -R {{ current_user.stdout }}:{{ current_user.stdout }} "$item"
@@ -67,7 +67,7 @@
 - name: Copy files and directories to the our archive/
   ansible.builtin.shell: |
     for item in {{ ci_results.stdout_lines | join(' ') }}; do
-      if [ -e "$item" ] || compgen -G "$item" > /dev/null; then
+      if [-e "$item"] || compgen -G "$item" > /dev/null; then
         rsync -a --relative "$item" "{{ kdevops_results_local }}"
       fi
     done
@@ -114,7 +114,7 @@
 - name: Copy files and directories to the archive/
   ansible.builtin.shell: |
     for item in {{ ci_results.stdout_lines | join(' ') }}; do
-      if [ -e "$item" ]; then
+      if [-e "$item"]; then
         cp -R --parents "$item" "{{ kdevops_results_local }}"
       fi
     done
@@ -465,7 +465,8 @@
     GIT_LFS_SKIP_SMUDGE: "0"
     GIT_LFS_FORCE: "1"
   register: git_push_result
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Display push error if it failed
   ansible.builtin.debug:

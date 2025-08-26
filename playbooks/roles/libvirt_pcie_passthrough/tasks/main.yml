@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -30,7 +31,7 @@
   become_method: sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
-    group: "{{ libvirt_qemu_group }}"
+    ansible.builtin.group: "{{ libvirt_qemu_group }}"
     mode: "0664"
   with_items: "{{ sysfs_driver_override_file_stats.results }}"
   loop_control:
@@ -60,7 +61,7 @@
   become_method: sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
-    group: "{{ libvirt_qemu_group }}"
+    ansible.builtin.group: "{{ libvirt_qemu_group }}"
     mode: "0220"
   with_items: "{{ sysfs_driver_unbind_file_stats.results }}"
   loop_control:

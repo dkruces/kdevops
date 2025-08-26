@@ -19,7 +19,7 @@
     src: nfs.conf.j2
     dest: /etc/nfs.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
 
 - name: Set up an iSCSI initiator
@@ -62,7 +62,7 @@
     src: "{{ playbook_dir }}/roles/nfsd/templates/nfsd_policy.te"
     dest: "/root/nfsd_policy.te"
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
   when: selinux_status.rc == 0
 

@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars:
-    file: "{{ item }}"
+    ansible.builtin.file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -198,7 +198,7 @@
     src: nfs.conf.j2
     dest: /etc/nfs.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "u=rw,g=r,o=r"
 
 - name: Start the NFSD service

@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -310,7 +311,7 @@
 
 - name: Run oscheck-get-failures.sh to get list of known failed tests
   vars:
-    group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    ansible.builtin.group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
   tags: ["blktests", "run_tests"]
   ansible.builtin.command: "{{ kdevops_data }}/workflows/blktests/scripts/oscheck-get-failures.sh --test-group {{ group }}"
   args:
@@ -355,13 +356,14 @@
 
 - name: Run blktests using oscheck.sh
   vars:
-    group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    ansible.builtin.group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
   tags: ["blktests", "run_tests"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.command: "./oscheck.sh --print-start --print-done --test-group {{ group }} {{ oscheck_extra_args }} {{ all_limit_tests }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   no_log: true
   args:
     chdir: "{{ blktests_data_target }}"

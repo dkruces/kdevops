@@ -3,19 +3,19 @@
   tags:
     - install-deps
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/install-deps/main.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/install-deps/main.yml"
 
 - name: Ensure a storage pool for guestfs exists
   tags:
     - pool
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/storage-pool-path.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/bringup/storage-pool-path.yml"
 
 - name: Ensure libvirt networking has started
   tags:
     - network
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/network.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/bringup/network.yml"
 
 - name: Set the pathname of storage pool directory
   tags:
@@ -59,14 +59,14 @@
   tags:
     - bringup
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/main.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/bringup/main.yml"
   delegate_to: localhost
 
 - name: Set up target node console permissions
   tags:
     - console
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/console-permissions.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/bringup/console-permissions.yml"
   when:
     - libvirt_uri_system|bool
   delegate_to: localhost
@@ -75,5 +75,5 @@
   tags:
     - destroy
   ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/destroy.yml"
+    ansible.builtin.file: "{{ role_path }}/tasks/destroy.yml"
   delegate_to: localhost

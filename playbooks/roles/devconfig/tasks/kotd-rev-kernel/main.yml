@@ -1,7 +1,8 @@
 ---
 - name: Import optional user secret specific variables
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "secret.yml"
@@ -10,7 +11,8 @@
 
 - name: Import optional distribution specific variables
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "{{ ansible_facts['os_family'] | lower }}.yml"

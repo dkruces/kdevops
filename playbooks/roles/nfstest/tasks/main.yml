@@ -1,7 +1,7 @@
 ---
 - name: Include optional extra_vars
   ansible.builtin.include_vars:
-    file: "{{ item }}"
+    ansible.builtin.file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -86,7 +86,7 @@
     state: directory
     path: "{{ nfstest_mnt }}"
     owner: "root"
-    group: "root"
+    ansible.builtin.group: "root"
     mode: "u=rwx,g=rwx,o=rwx"
   tags: nfstest
 

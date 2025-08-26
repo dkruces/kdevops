@@ -6,33 +6,36 @@
     {{ topdir_path }}/scripts/get-distro-has-hop-count-sources.sh 1
   register: localhost_hop_count
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Extract hop1 mirror info from control host (DEB822 format)
   delegate_to: localhost
   ansible.builtin.shell: |
-    if [ -f /etc/apt/sources.list.d/debian.sources ]; then
+    if [-f /etc/apt/sources.list.d/debian.sources]; then
       HOST=$(grep -E "^URIs:" /etc/apt/sources.list.d/debian.sources | head -1 | awk '{print $2}' | sed -E 's|https?://||')
       echo "${HOST}"
     fi
   register: localhost_hop1_mirror_deb822
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when: localhost_hop_count.stdout == 'y'
 
 - name: Extract hop1 mirror info from control host (legacy format)
   delegate_to: localhost
   ansible.builtin.shell: |
-    if [ -f /etc/apt/sources.list ] && [ ! -f /etc/apt/sources.list.d/debian.sources ]; then
+    if [-f /etc/apt/sources.list] && [! -f /etc/apt/sources.list.d/debian.sources]; then
       LINE=$(grep -v "^#" /etc/apt/sources.list | grep -E "^deb\s+http" | head -1)
-      if [ -n "$LINE" ]; then
+      if [-n "$LINE"]; then
         URL=$(echo $LINE | awk '{print $2}')
         echo "${URL}" | sed 's|http://||'
       fi
     fi
   register: localhost_hop1_mirror_legacy
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when: localhost_hop_count.stdout == 'y'
 
 - name: Set hop1 mirror variables
@@ -60,7 +63,8 @@
     grep -E "^URIs:" /etc/apt/sources.list.d/debian.sources | head -1 | awk '{print $2}' | sed -E 's|https?://||' | cut -d'/' -f1
   register: apt_mirror_host_deb822
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when: deb822_sources.stat.exists
 
 - name: Extract current APT mirror hostname (legacy format)
@@ -68,7 +72,8 @@
     grep -E "^deb\s+http" /etc/apt/sources.list | head -1 | awk '{print $2}' | sed 's|http://||' | cut -d'/' -f1
   register: apt_mirror_host_legacy
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when: not deb822_sources.stat.exists
 
 - name: Set unified mirror hostname
@@ -82,7 +87,8 @@
     port: 80
     timeout: 10
   register: mirror_connectivity
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when: apt_mirror_host.stdout != ""
 
 - name: Display mirror check results
@@ -100,7 +106,8 @@
         port: 80
         timeout: 10
       register: hop1_mirror_connectivity
-      ignore_errors: true
+      # TODO: Review - was ignore_errors: true
+      failed_when: false  # Always succeed - review this condition
       when:
         - has_hop1_mirror is defined
         - has_hop1_mirror | bool
@@ -123,14 +130,15 @@
           loop:
             - /etc/apt/sources.list
             - /etc/apt/sources.list.d/debian.sources
-          ignore_errors: true
+          # TODO: Review - was ignore_errors: true
+          failed_when: false  # Always succeed - review this condition
 
         - name: Apply hop1 mirror configuration using DEB822 format
           ansible.builtin.template:
             src: debian-hop1-mirror.sources
             dest: /etc/apt/sources.list.d/debian.sources
             owner: root
-            group: root
+            ansible.builtin.group: root
             mode: "0644"
           become: true
 
@@ -178,7 +186,7 @@
         src: debian-testing-fallback.sources
         dest: /etc/apt/sources.list.d/debian.sources
         owner: root
-        group: root
+        ansible.builtin.group: root
         mode: "0644"
       become: true
 

@@ -59,7 +59,7 @@
     state: directory
     path: "{{ smbd_share_path }}/{{ share_volname }}"
     owner: "{{ share_user }}"
-    group: "{{ share_group }}"
+    ansible.builtin.group: "{{ share_group }}"
     mode: "{{ share_mode }}"
 
 - name: Test whether SELinux is enabled

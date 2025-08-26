@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -35,7 +36,7 @@
   ansible.builtin.file:
     path: "{{ topdir_path }}/{{ kdevops_terraform_tfvars }}"
     owner: "{{ my_user.stdout }}"
-    group: "{{ my_group.stdout }}"
+    ansible.builtin.group: "{{ my_group.stdout }}"
   when:
     - kdevops_tfvars_dest.stat.exists
 

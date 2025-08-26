@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars:
-    file: "{{ item }}"
+    ansible.builtin.file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -72,7 +72,7 @@
 - name: Install dependencies for the git regression tests
   tags: gitr
   ansible.builtin.include_tasks:
-    file: install-deps/main.yml
+    ansible.builtin.file: install-deps/main.yml
 
 - name: Set up an iSCSI initiator on the target node
   tags: gitr
@@ -300,14 +300,14 @@
 - name: Save test summary output to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ gitr_results.stdout_lines|join('\n') }}\n"
+    content: "{{ gitr_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.summary"
     mode: "u=rw,g=r,o=r"
 
 - name: Save standard error to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ gitr_results.stderr_lines|join('\n') }}\n"
+    content: "{{ gitr_results.stderr_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.stderr"
     mode: "u=rw,g=r,o=r"
   when: gitr_results.rc != 0
@@ -315,7 +315,7 @@
 - name: Save RPC statistics to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ rpc_results.stdout_lines|join('\n') }}\n"
+    content: "{{ rpc_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.rpc"
     mode: "u=rw,g=r,o=r"
   when:
@@ -325,7 +325,7 @@
 - name: Save RPC transport statistics to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ xprt_results.stdout_lines|join('\n') }}\n"
+    content: "{{ xprt_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.xprt"
     mode: "u=rw,g=r,o=r"
   when:

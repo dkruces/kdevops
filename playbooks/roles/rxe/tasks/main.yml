@@ -1,7 +1,7 @@
 ---
 - name: Include optional extra_vars
   ansible.builtin.include_vars:
-    file: "{{ item }}"
+    ansible.builtin.file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -18,7 +18,7 @@
     src: "udev-rule.j2"
     dest: "/usr/lib/udev/rules.d/99-rxe.rules"
     owner: "root"
-    group: "root"
+    ansible.builtin.group: "root"
     mode: "0644"
     force: false
 

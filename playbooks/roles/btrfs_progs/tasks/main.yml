@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -34,13 +35,13 @@
 - name: Set bindir for debian systems
   ansible.builtin.set_fact:
     bindir: "/usr/bin"
-  when: ansible_facts['os_family']|lower == 'debian'
+  when: ansible_facts['os_family'] | lower == 'debian'
   tags: vars
 
 - name: Set bindir for non-debian systems
   ansible.builtin.set_fact:
     bindir: "/usr/sbin"
-  when: ansible_facts['os_family']|lower != 'debian'
+  when: ansible_facts['os_family'] | lower != 'debian'
   tags: vars
 
 - name: Git clone btrfs_progs
@@ -57,7 +58,8 @@
   community.general.make:
     chdir: "{{ btrfs_progs_data }}"
     target: clean-all
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Run autogen.sh for btrfs_progs
   ansible.builtin.command: "./autogen.sh"

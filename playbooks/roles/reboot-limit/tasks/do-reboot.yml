@@ -178,7 +178,8 @@
   become: true
   become_method: sudo
   ansible.builtin.shell: echo c > /proc/sysrq-trigger
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   tags: ["run_tests", "read_count", "vars", "crash-check"]
   when:
     - reboot_limit_boot_count_crash_enable

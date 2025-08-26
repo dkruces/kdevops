@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -47,7 +48,7 @@
     state: directory
     mode: "0755"
     owner: root
-    group: root
+    ansible.builtin.group: root
   when:
     - install_linux_mirror|bool
 
@@ -98,7 +99,7 @@
 
 - name: Load variables from yaml file
   ansible.builtin.include_vars:
-    file: "{{ topdir_path }}/playbooks/roles/linux-mirror/linux-mirror-systemd/mirrors.yaml"
+    ansible.builtin.file: "{{ topdir_path }}/playbooks/roles/linux-mirror/linux-mirror-systemd/mirrors.yaml"
     name: mirrors
   tags: ["mirror", "status-check"]
   when:
@@ -251,7 +252,7 @@
     path: /mirror/
     state: directory
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0755"
   when:
     - ansible_user_id == 'root'
@@ -312,7 +313,7 @@
 - name: Ensure NFS firewall rules are set (for root user and if NFS is enabled)
   become: true
   ansible.posix.firewalld:
-    service: "{{ item }}"
+    ansible.builtin.service: "{{ item }}"
     permanent: true
     state: enabled
     immediate: true

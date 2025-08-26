@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -93,4 +94,4 @@
       - libpcre2-dev
       - pkg-config
       - libblkid-dev
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"

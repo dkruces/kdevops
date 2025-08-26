@@ -23,7 +23,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     owner: "{{ reg_user.stdout }}"
-    group: "{{ reg_user.stdout }}"
+    ansible.builtin.group: "{{ reg_user.stdout }}"
   loop: "{{ console_log_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace('^.*guestfs/', 'guestfs/') }}"

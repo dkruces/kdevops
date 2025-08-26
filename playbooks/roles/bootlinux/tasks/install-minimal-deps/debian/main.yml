@@ -8,7 +8,8 @@
   ansible.builtin.command:
     cmd: apt-get update --allow-releaseinfo-change
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Update apt cache
   become: true

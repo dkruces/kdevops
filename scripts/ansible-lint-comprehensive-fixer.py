@@ -129,16 +129,30 @@ class UserInterface:
 
             for rule in rules:
                 # Use rule's description if available, otherwise fallback to static descriptions
-                description = rule.description if hasattr(rule, 'description') and rule.description else rule_descriptions.get(rule.id, "Unknown rule")
-                source_display = "🔧 ansible-lint" if rule.source == "ansible-lint" else "🏠 internal" 
+                description = (
+                    rule.description
+                    if hasattr(rule, "description") and rule.description
+                    else rule_descriptions.get(rule.id, "Unknown rule")
+                )
+                source_display = (
+                    "🔧 ansible-lint"
+                    if rule.source == "ansible-lint"
+                    else "🏠 internal"
+                )
                 table.add_row(rule.id, source_display, description)
 
             self.console.print(table)
         else:
             print(f"\n=== Rules to Process ({len(rules)} total) ===")
             for i, rule in enumerate(rules, 1):
-                description = rule.description if hasattr(rule, 'description') and rule.description else rule_descriptions.get(rule.id, "Unknown rule")
-                source_indicator = "[ansible-lint]" if rule.source == "ansible-lint" else "[internal]"
+                description = (
+                    rule.description
+                    if hasattr(rule, "description") and rule.description
+                    else rule_descriptions.get(rule.id, "Unknown rule")
+                )
+                source_indicator = (
+                    "[ansible-lint]" if rule.source == "ansible-lint" else "[internal]"
+                )
                 print(f"{i:2d}. {rule.id:25s} {source_indicator:13s} - {description}")
 
     def show_final_summary(
@@ -755,15 +769,33 @@ class AnsibleLintProcessor:
 
 class ManualFixProcessor:
     """Handles manual fixes for rules ansible-lint can't auto-fix."""
-    
+
     # Internal rules that we provide manual fixes for
     INTERNAL_RULES = [
-        RuleInfo("yaml[brackets]", "Fix spacing inside brackets", ["formatting"], "internal"),
-        RuleInfo("yaml[truthy]", "Convert yes/no to true/false", ["formatting"], "internal"), 
-        RuleInfo("jinja[spacing]", "Fix Jinja2 template spacing", ["formatting"], "internal"),
-        RuleInfo("fqcn[action-core]", "Use Fully Qualified Collection Names for core modules", ["idiom"], "internal"),
-        RuleInfo("ignore-errors", "Convert ignore_errors to failed_when", ["idiom"], "internal"),
-        RuleInfo("role-path", "Fix relative role path references", ["idiom"], "internal"),
+        RuleInfo(
+            "yaml[brackets]", "Fix spacing inside brackets", ["formatting"], "internal"
+        ),
+        RuleInfo(
+            "yaml[truthy]", "Convert yes/no to true/false", ["formatting"], "internal"
+        ),
+        RuleInfo(
+            "jinja[spacing]", "Fix Jinja2 template spacing", ["formatting"], "internal"
+        ),
+        RuleInfo(
+            "fqcn[action-core]",
+            "Use Fully Qualified Collection Names for core modules",
+            ["idiom"],
+            "internal",
+        ),
+        RuleInfo(
+            "ignore-errors",
+            "Convert ignore_errors to failed_when",
+            ["idiom"],
+            "internal",
+        ),
+        RuleInfo(
+            "role-path", "Fix relative role path references", ["idiom"], "internal"
+        ),
     ]
 
     # Map of short module names to their FQCN (from fix_ansible_lint.py)
@@ -838,7 +870,7 @@ class ManualFixProcessor:
 
     def __init__(self, change_filter: ChangeFilter = None):
         self.change_filter = change_filter
-    
+
     @classmethod
     def get_internal_rules(cls) -> List[RuleInfo]:
         """Get list of rules that can be fixed by internal manual fixes."""
@@ -1225,13 +1257,13 @@ class ComprehensiveLintFixer:
 
         # Get fixable rules from ansible-lint
         ansible_rules = self.ansible_processor.get_fixable_rules()
-        
+
         # Combine with internal rules if manual fixes enabled
         all_rules = ansible_rules[:]
         if self.enable_manual_fixes and self.manual_processor:
             internal_rules = self.manual_processor.get_internal_rules()
             all_rules.extend(internal_rules)
-        
+
         total_rules = len(all_rules)
 
         # Show summary with source information
@@ -1250,12 +1282,16 @@ class ComprehensiveLintFixer:
                 )
             if self.enable_manual_fixes and self.manual_processor:
                 internal_rules = self.manual_processor.get_internal_rules()
-                self.ui.print_message(f"  + {len(internal_rules)} internal manual fixes:", "dim")
+                self.ui.print_message(
+                    f"  + {len(internal_rules)} internal manual fixes:", "dim"
+                )
                 for rule in internal_rules:
-                    self.ui.print_message(f"    🏠 {rule.id}: {rule.description}", "dim")
+                    self.ui.print_message(
+                        f"    🏠 {rule.id}: {rule.description}", "dim"
+                    )
             return
 
-        # Ask for confirmation  
+        # Ask for confirmation
         ansible_rules_count = len(ansible_rules)
         internal_rules_count = total_rules - ansible_rules_count
         should_process = self.ui.prompt_user(
@@ -1272,7 +1308,7 @@ class ComprehensiveLintFixer:
         total_phases = 1 + (
             1 if self.enable_manual_fixes else 0
         )  # ansible-lint + manual fixes
-        
+
         # Only process ansible-lint rules individually (internal rules handled in manual fixes phase)
 
         if self.ui.console:
@@ -1290,7 +1326,11 @@ class ComprehensiveLintFixer:
                 )
 
                 for rule in ansible_rules:
-                    rule_display = f"🔧 {rule.id}" if rule.source == "ansible-lint" else f"🏠 {rule.id}"
+                    rule_display = (
+                        f"🔧 {rule.id}"
+                        if rule.source == "ansible-lint"
+                        else f"🏠 {rule.id}"
+                    )
                     progress.update(
                         rules_task, description=f"Processing: {rule_display}"
                     )
@@ -1333,9 +1373,12 @@ class ComprehensiveLintFixer:
                         rules_task, description="Ansible-lint rules complete"
                     )
 
-                    internal_rules_count = len(self.manual_processor.get_internal_rules())
+                    internal_rules_count = len(
+                        self.manual_processor.get_internal_rules()
+                    )
                     manual_task = progress.add_task(
-                        f"Applying 🏠 internal fixes ({internal_rules_count} rules)...", total=100
+                        f"Applying 🏠 internal fixes ({internal_rules_count} rules)...",
+                        total=100,
                     )
 
                     progress.start()
@@ -1347,7 +1390,9 @@ class ComprehensiveLintFixer:
         else:
             # Fallback without rich
             for i, rule in enumerate(ansible_rules, 1):
-                print(f"\n[{i}/{ansible_rules_count}] Processing ansible-lint rule: {rule.id}")
+                print(
+                    f"\n[{i}/{ansible_rules_count}] Processing ansible-lint rule: {rule.id}"
+                )
                 print("=" * 50)
 
                 if self._process_single_rule(rule, target_files):

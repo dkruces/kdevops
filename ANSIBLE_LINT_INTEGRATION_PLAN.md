@@ -66,7 +66,7 @@ Signed-off-by: {name} <{email}>
 
 ```
 ├── Core Classes (from current script)
-│   ├── Config - Configuration constants  
+│   ├── Config - Configuration constants
 │   ├── RuleInfo - Rule metadata
 │   ├── UserInterface - Rich CLI with auto-accept
 │   └── GitManager - Safe atomic git operations
@@ -75,7 +75,7 @@ Signed-off-by: {name} <{email}>
 │   ├── AnsibleLintCommand - Build lint commands
 │   └── ManualFixCommand - Build manual fix commands
 │
-├── Dual Processing Engine  
+├── Dual Processing Engine
 │   ├── AnsibleLintProcessor - Official ansible-lint fixes
 │   └── ManualFixProcessor - Custom fixes for unsupported rules
 │
@@ -125,20 +125,20 @@ Signed-off-by: {name} <{email}>
 class RecursiveProcessor:
     def find_ansible_files(self, root_path: str, changes_only: bool = False) -> List[str]:
         """Find all ansible YAML files, optionally filtering to changed files."""
-        
+
     def apply_recursively(self, processor_func, files: List[str]) -> Dict[str, bool]:
         """Apply processing function to all discovered files."""
 ```
 
-### ChangeFilter Class  
+### ChangeFilter Class
 ```python
 class ChangeFilter:
     def __init__(self, commit_ref: str = 'HEAD~1'):
         self.changed_lines_cache: Dict[str, Set[int]] = {}
-    
+
     def get_changed_lines(self, file_path: str) -> Set[int]:
         """Get line numbers changed in specified commit."""
-        
+
     def should_process_file(self, file_path: str, rule: str) -> bool:
         """Determine if file should be processed for given rule."""
 ```
@@ -147,7 +147,7 @@ class ChangeFilter:
 ```python
 class ManualFixProcessor:
     """Integrates all manual fix methods from fix_ansible_lint.py"""
-    
+
     def fix_yaml_brackets(self, content: str, file_path: str) -> str:
     def fix_yaml_truthy(self, content: str, file_path: str) -> str:
     def fix_jinja_spacing(self, content: str, file_path: str) -> str:
@@ -230,7 +230,7 @@ class ManualFixProcessor:
 - Maintains existing rule-by-rule processing architecture
 - `--recursive` flag combines with existing single-rule workflow
 
-### ✅ "Combine both scripts' features"  
+### ✅ "Combine both scripts' features"
 - Integrates all classes from current ansible-lint-fix-rules.py
 - Ports all manual fix methods from fix_ansible_lint.py
 - Creates unified ManualFixProcessor for two-phase processing
@@ -301,14 +301,14 @@ class ManualFixProcessor:
 
 ### ✅ Phase 1: Core Integration - COMPLETED
 
-**Status**: Fully implemented and tested (Commit: 97510dcf)  
+**Status**: Fully implemented and tested (Commit: 97510dcf)
 **File**: `scripts/ansible-lint-comprehensive-fixer.py` (1,132 lines)
 
 #### What's Implemented:
 
 1. **✅ Base Structure Created** - 8 integrated classes:
    - `Config`, `RuleInfo`, `UserInterface`, `AnsibleLintCommand` (from current script)
-   - `GitManager`, `CommitMessageBuilder` (enhanced from current script)  
+   - `GitManager`, `CommitMessageBuilder` (enhanced from current script)
    - `ChangeFilter`, `RecursiveProcessor` (new functionality)
    - `AnsibleLintProcessor`, `ManualFixProcessor` (merged functionality)
    - `ComprehensiveLintFixer` (main orchestrator)
@@ -325,13 +325,13 @@ class ManualFixProcessor:
    ```bash
    # Test recursive discovery - Found 372 ansible files
    ./ansible-lint-comprehensive-fixer.py --recursive --dry-run
-   
+
    # Test with manual fixes - Shows "Manual fixes for remaining issues"
    ./ansible-lint-comprehensive-fixer.py --enable-manual-fixes --dry-run
-   
+
    # Test with specific role - Found 2 files, 11 fixable rules
    ./ansible-lint-comprehensive-fixer.py --recursive playbooks/roles/ansible_cfg/ --dry-run
-   
+
    # Test changes-only filtering
    ./ansible-lint-comprehensive-fixer.py --changes-only --dry-run
    ```
@@ -346,7 +346,7 @@ class ManualFixProcessor:
 
 #### Successfully Tested Features:
 - ✅ File discovery (found 372 ansible files in recursive mode)
-- ✅ Changes-only filtering (properly detects git diff changes)  
+- ✅ Changes-only filtering (properly detects git diff changes)
 - ✅ Rule processing workflow (11 fixable rules detected)
 - ✅ Dry-run functionality with detailed output
 - ✅ Rich CLI formatting and plain text fallback
@@ -394,7 +394,7 @@ Signed-off-by: {name} <{email}>
 
 ### ✅ Phase 2: Enhanced Processing - COMPLETED
 
-**Status**: Fully implemented and tested (Commit: 05658494)  
+**Status**: Fully implemented and tested (Commit: 05658494)
 **File**: `scripts/ansible-lint-comprehensive-fixer.py` (1,550+ lines)
 
 #### What's Implemented:
@@ -462,7 +462,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 
 #### Phase 2 Results:
 - **Complete feature parity** with all three original scripts
-- **Enhanced user experience** with Rich progress bars and tables  
+- **Enhanced user experience** with Rich progress bars and tables
 - **Professional quality assurance** with verification and reporting
 - **Comprehensive command-line interface** with 10 options
 - **1,550+ lines** of production-ready code
@@ -471,7 +471,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 
 ## 🎉 Phase 1 & 2 Summary - ALL USER REQUIREMENTS COMPLETED
 
-**Status**: Core integration objective fully achieved  
+**Status**: Core integration objective fully achieved
 **Production Ready**: ✅ Ready for immediate use in kdevops project
 
 ### **Complete Feature Parity Achieved:**
@@ -508,7 +508,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 ### **Proven Compatibility:**
 - ✅ Discovered 372 ansible files in kdevops repository
 - ✅ Detected 11 available autofix tags
-- ✅ Successfully tested with real playbook structures  
+- ✅ Successfully tested with real playbook structures
 - ✅ All dry-run functionality working across features
 
 ### **Command Interface:**
@@ -525,10 +525,10 @@ ComprehensiveLintFixer (Main Orchestrator)
 
 ---
 
-### ✅ Phase 3: Feature Enhancement - COMPLETED 
+### ✅ Phase 3: Feature Enhancement - COMPLETED
 
-**Status**: Advanced features implemented (Commit: c7303ed6)  
-**File**: `scripts/ansible-lint-comprehensive-fixer.py` (1,700+ lines)  
+**Status**: Advanced features implemented (Commit: c7303ed6)
+**File**: `scripts/ansible-lint-comprehensive-fixer.py` (1,700+ lines)
 **Config**: `ansible-lint-config.yml` (example configuration)
 
 #### What's Implemented:
@@ -549,7 +549,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 
 #### Successfully Tested Features:
 - ✅ Advanced filtering (369 files → 232 tasks-only → 1 without defaults)
-- ✅ Configuration file loading with proper CLI overrides  
+- ✅ Configuration file loading with proper CLI overrides
 - ✅ Professional directory-organized output display
 - ✅ Include/exclude pattern display for transparency
 - ✅ Complex pattern matching with directory segments
@@ -558,7 +558,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 
 **Enhanced File Discovery:**
 - Professional directory-organized file display
-- Show first 10 files per directory with "... and X more" summary  
+- Show first 10 files per directory with "... and X more" summary
 - Include/exclude pattern display for transparency
 - Sophisticated fnmatch-based pattern matching with relative/absolute path support
 
@@ -567,7 +567,7 @@ ComprehensiveLintFixer (Main Orchestrator)
 # Use configuration file
 ./ansible-lint-comprehensive-fixer.py --config ansible-lint-config.yml
 
-# Advanced filtering examples  
+# Advanced filtering examples
 ./ansible-lint-comprehensive-fixer.py --include "**/tasks/**" --exclude "**/defaults/**"
 
 # Test filters before processing
@@ -581,7 +581,7 @@ enable_manual_fixes: true
 verify: true
 exclude:
   - "**/node_modules/**"
-  - "**/defaults/**" 
+  - "**/defaults/**"
 include:
   - "**/*.yml"
   - "**/*.yaml"
@@ -590,11 +590,177 @@ include:
 #### Phase 3 Results:
 - **Enterprise-grade filtering** suitable for complex ansible repositories
 - **Professional configuration management** with file-based defaults
-- **Advanced testing utilities** for filter validation  
+- **Advanced testing utilities** for filter validation
 - **1,700+ lines** of production-ready code with comprehensive features
 
 ---
 
-**Document Status**: Phase 1, 2 & 3 Complete - Professional Solution v1.4
-**Last Updated**: Current session  
-**Next Action**: All core and advanced features complete - solution ready for production
+### ✅ Post-Phase 3: Testing/Lint Branch Compatibility - COMPLETED
+
+**Status**: Verified compatibility with testing/lint branch patterns (Commit: 6e0642e5)
+**Files**: `scripts/ansible-lint-comprehensive-fixer.py` (updated commit templates)
+
+#### What's Verified:
+
+1. **✅ --auto Flag Support** - Full unattended mode:
+   - Automatically accepts all prompts for rule-by-rule processing
+   - Same behavior as original testing/lint branch scripts
+   - No user interaction required when --auto enabled
+
+2. **✅ Rule-by-Rule Processing** - Atomic commit approach:
+   - Each rule processed individually with separate commits
+   - Maintains bisectability for easy rollback of problematic fixes
+   - Same processing order as ansible-lint reports rules
+
+3. **✅ Commit Message Templates** - Updated to minimal format:
+   - **Before**: Verbose "Fixed X violations across N files" messages
+   - **After**: Minimal `"playbooks: ansible-lint fix <rule>"` format
+   - **Matches exactly**: Same format as commits like `abf5c404 playbooks: ansible-lint fix jinja`
+   - **Proper tags**: Uses "Generated-by: Claude AI" + "Signed-off-by:" per CLAUDE.md
+
+4. **✅ Bisectability Support** - Production-ready workflow:
+   - Each rule creates separate atomic commit
+   - Easy to identify and revert problematic rule fixes
+   - Identical methodology to testing/lint branch approach
+
+#### Testing/Lint Branch Comparison:
+
+**Original testing/lint commands:**
+```bash
+scripts/ansible-lint-fix-rules.py --auto playbooks/
+# Results in commits like: abf5c404 playbooks: ansible-lint fix jinja
+```
+
+**New comprehensive script (same results):**
+```bash
+scripts/ansible-lint-comprehensive-fixer.py --auto playbooks/
+# Results in identical commit format with enhanced capabilities
+```
+
+#### Enhanced Beyond Original:
+
+- **Recursive processing**: `--recursive` for entire directory trees
+- **Manual fixes**: `--enable-manual-fixes` for rules ansible-lint can't handle
+- **Change filtering**: `--changes-only` to fix only last commit's changes
+- **Advanced filtering**: Include/exclude patterns for selective processing
+- **Configuration files**: YAML-based configuration with CLI overrides
+- **Rich progress**: Progress bars and tables (when not using --auto)
+- **Verification**: Post-fix validation with detailed issue reporting
+
+#### Commit Messages Examples:
+
+**Testing/lint branch format (preserved):**
+```
+playbooks: ansible-lint fix jinja
+
+Generated-by: Claude AI
+Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
+```
+
+#### Verification Commands:
+```bash
+# Show --auto flag documentation
+python3 scripts/ansible-lint-comprehensive-fixer.py --help | grep -A3 -B3 auto
+
+# Test dry-run with auto processing
+python3 scripts/ansible-lint-comprehensive-fixer.py --dry-run --auto playbooks/roles/fstests/handlers/main.yml
+```
+
+**Result**: ✅ Full compatibility confirmed - comprehensive script is complete superset of testing/lint functionality
+
+---
+
+### ✅ Phase 4: Rule Source Clarity Enhancement - COMPLETED
+
+**Status**: Enhanced rule source identification and display (Commit: 047d2ad1)
+**Files**: `scripts/ansible-lint-comprehensive-fixer.py` (updated RuleInfo and UI)
+
+#### What's Implemented:
+
+1. **✅ Enhanced RuleInfo Dataclass**:
+   - Added `source` field to distinguish "ansible-lint" vs "internal" rules
+   - Updated constructor to track rule origins for proper attribution
+   - Maintains backward compatibility with existing rule definitions
+
+2. **✅ Internal Rule Catalog**:
+   - Defined 6 internal manual fix rules with proper descriptions
+   - Clear rule naming: yaml[brackets], yaml[truthy], jinja[spacing], etc.
+   - Organized by functionality: formatting rules and idiom improvements
+   - Prevents naming conflicts with ansible-lint's built-in rules
+
+3. **✅ Enhanced Display System**:
+   - **Rich UI**: Table with "Source" column showing 🔧 ansible-lint / 🏠 internal
+   - **Fallback UI**: Clear [ansible-lint] / [internal] indicators
+   - **Progress bars**: Real-time display shows rule sources during processing
+   - **Dry-run output**: Detailed listing of both ansible-lint commands and internal fixes
+
+4. **✅ Improved User Experience**:
+   - Clear separation between automated ansible-lint fixes and custom manual fixes
+   - Transparent processing phases with rule counts per source
+   - Enhanced confirmation prompts: "Process 17 rules (11 ansible-lint + 6 internal)?"
+   - Professional display organization by rule type and source
+
+#### Technical Implementation:
+
+**Rule Source Tracking:**
+```python
+@dataclass
+class RuleInfo:
+    id: str
+    description: str
+    tags: List[str] = None
+    source: str = "ansible-lint"  # "ansible-lint" or "internal"
+```
+
+**Internal Rule Definitions:**
+```python
+INTERNAL_RULES = [
+    RuleInfo("yaml[brackets]", "Fix spacing inside brackets", ["formatting"], "internal"),
+    RuleInfo("yaml[truthy]", "Convert yes/no to true/false", ["formatting"], "internal"),
+    RuleInfo("jinja[spacing]", "Fix Jinja2 template spacing", ["formatting"], "internal"),
+    RuleInfo("fqcn[action-core]", "Use Fully Qualified Collection Names for core modules", ["idiom"], "internal"),
+    RuleInfo("ignore-errors", "Convert ignore_errors to failed_when", ["idiom"], "internal"),
+    RuleInfo("role-path", "Fix relative role path references", ["idiom"], "internal"),
+]
+```
+
+**Enhanced Display Examples:**
+
+*Rich UI Table:*
+```
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Rule          ┃ Source       ┃ Description             ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ fqcn          │ 🔧 ansible-… │ Use FQCN for builtins   │
+│ yaml[truthy]  │ 🏠 internal  │ Convert yes/no to bool  │
+└───────────────┴──────────────┴─────────────────────────┘
+```
+
+*Dry-run output:*
+```
+Commands that would be executed:
+  ansible-lint --fix=fqcn playbooks/roles/fstests/handlers/main.yml
+  + 6 internal manual fixes:
+    🏠 yaml[brackets]: Fix spacing inside brackets
+    🏠 yaml[truthy]: Convert yes/no to true/false
+```
+
+#### Testing Results:
+
+- ✅ **Rich UI**: Beautiful table with source column and icons
+- ✅ **Fallback UI**: Clear text-based source indicators
+- ✅ **Dry-run**: Comprehensive listing of both rule types
+- ✅ **Progress**: Real-time source identification during processing
+- ✅ **Integration**: Seamless combination of ansible-lint and internal rules
+
+**User Benefits:**
+- **Transparency**: Users clearly understand what each phase does
+- **Trust**: Clear attribution of fixes to proper sources
+- **Control**: Better decision-making about which rule types to enable
+- **Professional**: Enterprise-grade clarity and organization
+
+---
+
+**Document Status**: Phases 1-4 Complete + Compatibility - Production Solution v1.6
+**Last Updated**: Current session
+**Next Action**: Continue with remaining enhancement phases (rule configuration, performance optimization)

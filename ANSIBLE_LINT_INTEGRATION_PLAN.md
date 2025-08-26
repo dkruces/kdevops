@@ -759,8 +759,122 @@ Commands that would be executed:
 - **Control**: Better decision-making about which rule types to enable
 - **Professional**: Enterprise-grade clarity and organization
 
+#### Phase 4 Complete Summary:
+
+**✅ Full Rule Source Transparency Achieved**
+
+The comprehensive script now provides **complete clarity** during application/applied phases:
+
+**Before Application (Dry-Run Display):**
+```
+=== Rules to Process (17 total) ===
+ 1. command-instead-of-shell  [ansible-lint] - Use shell only when shell functionality is required
+ 2. fqcn                      [ansible-lint] - Use FQCN for builtin actions  
+12. yaml[brackets]            [internal]    - Fix spacing inside brackets
+13. yaml[truthy]              [internal]    - Convert yes/no to true/false
+```
+
+**During Application (Processing Display):**
+- Rich UI: Progress shows "Processing: 🔧 fqcn" and "Applying 🏠 internal fixes (6 rules)..."
+- Fallback UI: Clear "[1/11] Processing ansible-lint rule: fqcn" messages
+
+**Question Fully Addressed:**
+> "Does the new script provide the rules that are from ansible-lint and from internal implementation? it'd be good to be clear when applying/applied"
+
+**✅ YES** - Complete rule source transparency with:
+- **Visual indicators**: 🔧 ansible-lint vs 🏠 internal throughout UI
+- **Processing separation**: Phase 1 (ansible-lint rules) → Phase 2 (internal manual fixes)  
+- **Professional cataloging**: 6 internal rules with proper descriptions and naming
+- **Command transparency**: Shows exact `ansible-lint --fix=<rule>` commands + internal fix descriptions
+
+**Production Benefits:**
+- **User trust**: Clear attribution prevents confusion about fix sources
+- **Better decisions**: Users understand capabilities of each rule type
+- **Professional presentation**: Enterprise-grade clarity and organization
+- **Full transparency**: No hidden or unclear rule processing
+
 ---
 
-**Document Status**: Phases 1-4 Complete + Compatibility - Production Solution v1.6
-**Last Updated**: Current session
-**Next Action**: Continue with remaining enhancement phases (rule configuration, performance optimization)
+### ✅ Phase 5: Rule-Specific Configuration - COMPLETED
+
+**Status**: Advanced rule filtering and discovery implemented (Commit: c9e5faf3)  
+**Files**: `scripts/ansible-lint-comprehensive-fixer.py` (enhanced with rule filtering)
+
+#### What's Implemented:
+
+1. **✅ Rule Inclusion/Exclusion Patterns** - Complete selective processing:
+   - `--include-rules` and `--exclude-rules` for fine-grained control
+   - Wildcard pattern support (`--exclude-rules "yaml*,jinja*"`)
+   - Comma-separated rule lists (`--include-rules "fqcn,key-order,yaml"`)
+   - Configuration file support for default rule filtering
+   - Smart filtering applied to both ansible-lint and internal rules
+
+2. **✅ Enhanced Rule Discovery** - Professional rule management:
+   - `--list-rules`: Comprehensive catalog with sources, tags, and descriptions
+   - `--explain-rule <rule>`: Detailed information with usage examples
+   - Rich UI tables with rule source indicators and formatting
+   - Plain text fallback for all discovery features
+
+3. **✅ Advanced Filtering Architecture**:
+   - RuleFilter class with fnmatch pattern matching
+   - Integrated filtering throughout processing pipeline
+   - Rule-aware manual fix application based on patterns
+   - Dynamic rule counting and progress reporting
+
+#### Technical Achievements:
+
+**Rule Filtering System:**
+```bash
+# Include only YAML-related rules (3 rules: 1 ansible-lint + 2 internal)
+./ansible-lint-comprehensive-fixer.py --include-rules "yaml*" --enable-manual-fixes
+
+# Exclude specific problematic rules  
+./ansible-lint-comprehensive-fixer.py --exclude-rules "name,key-order"
+
+# Complex filtering combinations
+./ansible-lint-comprehensive-fixer.py --include-rules "fqcn,yaml*" --exclude-rules "yaml[truthy]"
+```
+
+**Enhanced Rule Discovery:**
+```bash
+# List all available rules with sources and tags
+./ansible-lint-comprehensive-fixer.py --list-rules
+
+# Get detailed information about specific rule
+./ansible-lint-comprehensive-fixer.py --explain-rule "yaml[truthy]"
+```
+
+**Smart Pattern Processing:**
+- Automatic comma-separated value splitting
+- Wildcard pattern matching with fnmatch
+- Configuration file integration for default patterns
+- Consistent behavior across include/exclude patterns
+
+#### Testing Results:
+
+**✅ Rule Filtering Verified:**
+- Include patterns: `yaml*` → 17 to 3 rules (1 ansible-lint + 2 internal)
+- Exclude patterns: `name,key-order` → 17 to 15 rules (excluded specific rules)
+- Multiple patterns: `fqcn,key-order,yaml` → 17 to 3 rules (specific selection)
+- Pattern display: Clear indication of active include/exclude patterns
+
+**✅ Rule Discovery Tested:**
+- `--list-rules`: Professional table with 17 rules, sources, and tags
+- `--explain-rule yaml[truthy]`: Detailed explanation with usage examples
+- Rich UI: Beautiful tables with formatting and icons
+- Fallback UI: Clear text-based information display
+
+#### Production Benefits:
+
+- **Selective processing**: Fix only problematic rule types  
+- **Workflow optimization**: Skip slow or unnecessary rules
+- **Development efficiency**: Focus on specific rule categories
+- **Enterprise flexibility**: Customize rule processing per environment
+- **Rule transparency**: Understand what each rule does before applying
+- **Professional presentation**: Rich UI with clear rule attribution
+
+---
+
+**Document Status**: Phases 1-5 Complete + Compatibility - Production Solution v2.0  
+**Last Updated**: Current session  
+**Next Action**: Continue with remaining enhancements (profiles, optimization, documentation)

@@ -767,6 +767,37 @@ class AnsibleLintProcessor:
             return {}
 
 
+class RuleFilter:
+    """Handles filtering rules based on include/exclude patterns."""
+    
+    def __init__(self, include_patterns: List[str] = None, exclude_patterns: List[str] = None):
+        self.include_patterns = include_patterns or []
+        self.exclude_patterns = exclude_patterns or []
+    
+    def _matches_pattern(self, rule_id: str, pattern: str) -> bool:
+        """Check if rule matches a pattern (supports wildcards)."""
+        import fnmatch
+        return fnmatch.fnmatch(rule_id, pattern)
+    
+    def should_process_rule(self, rule: RuleInfo) -> bool:
+        """Determine if a rule should be processed based on filters."""
+        # If include patterns specified, rule must match at least one
+        if self.include_patterns:
+            if not any(self._matches_pattern(rule.id, pattern) for pattern in self.include_patterns):
+                return False
+        
+        # If exclude patterns specified, rule must not match any
+        if self.exclude_patterns:
+            if any(self._matches_pattern(rule.id, pattern) for pattern in self.exclude_patterns):
+                return False
+        
+        return True
+    
+    def filter_rules(self, rules: List[RuleInfo]) -> List[RuleInfo]:
+        """Filter a list of rules based on include/exclude patterns."""
+        return [rule for rule in rules if self.should_process_rule(rule)]
+
+
 class ManualFixProcessor:
     """Handles manual fixes for rules ansible-lint can't auto-fix."""
 
@@ -1057,22 +1088,34 @@ class ManualFixProcessor:
 
         return "\n".join(lines)
 
-    def apply_manual_fixes(self, file_path: str) -> Tuple[bool, str]:
-        """Apply all manual fixes to a file."""
+    def apply_manual_fixes(self, file_path: str, rule_filter=None) -> Tuple[bool, str]:
+        """Apply all manual fixes to a file, optionally filtered by rules."""
         try:
             with open(file_path, "r") as f:
                 original_content = f.read()
         except Exception as e:
             return False, f"Error reading {file_path}: {e}"
 
-        # Apply all fixes
+        # Determine which fixes to apply based on filtering
+        fixes_to_apply = []
+        
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("yaml[brackets]", "", ["formatting"], "internal")):
+            fixes_to_apply.append(self.fix_yaml_brackets)
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("yaml[truthy]", "", ["formatting"], "internal")):
+            fixes_to_apply.append(self.fix_yaml_truthy)
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("jinja[spacing]", "", ["formatting"], "internal")):
+            fixes_to_apply.append(self.fix_jinja_spacing)
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("fqcn[action-core]", "", ["idiom"], "internal")):
+            fixes_to_apply.append(self.fix_fqcn)
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("ignore-errors", "", ["idiom"], "internal")):
+            fixes_to_apply.append(self.fix_ignore_errors)
+        if not rule_filter or rule_filter.should_process_rule(RuleInfo("role-path", "", ["idiom"], "internal")):
+            fixes_to_apply.append(self.fix_role_path)
+
+        # Apply selected fixes
         content = original_content
-        content = self.fix_yaml_brackets(content, file_path)
-        content = self.fix_yaml_truthy(content, file_path)
-        content = self.fix_jinja_spacing(content, file_path)
-        content = self.fix_fqcn(content, file_path)
-        content = self.fix_ignore_errors(content, file_path)
-        content = self.fix_role_path(content, file_path)
+        for fix_func in fixes_to_apply:
+            content = fix_func(content, file_path)
 
         # Check if anything changed
         if content != original_content:
@@ -1094,6 +1137,8 @@ class ComprehensiveLintFixer:
         verify: bool = True,
         include_patterns: List[str] = None,
         exclude_patterns: List[str] = None,
+        include_rules: List[str] = None,
+        exclude_rules: List[str] = None,
     ):
         self.target_path = target_path
         self.recursive = recursive
@@ -1103,11 +1148,14 @@ class ComprehensiveLintFixer:
         self.verify = verify
         self.include_patterns = include_patterns
         self.exclude_patterns = exclude_patterns
+        self.include_rules = include_rules
+        self.exclude_rules = exclude_rules
 
         # Initialize components
         self.ui = UserInterface(auto_accept)
         self.git_manager = GitManager()
         self.commit_builder = CommitMessageBuilder(self.git_manager)
+        self.rule_filter = RuleFilter(include_rules, exclude_rules)
 
         # Initialize processors
         self.change_filter = ChangeFilter() if changes_only else None
@@ -1264,6 +1312,26 @@ class ComprehensiveLintFixer:
             internal_rules = self.manual_processor.get_internal_rules()
             all_rules.extend(internal_rules)
 
+        # Apply rule filtering
+        if self.rule_filter.include_patterns or self.rule_filter.exclude_patterns:
+            filtered_rules = self.rule_filter.filter_rules(all_rules)
+            filtered_ansible_rules = [r for r in filtered_rules if r.source == "ansible-lint"]
+            filtered_internal_rules = [r for r in filtered_rules if r.source == "internal"]
+            
+            # Show filtering information
+            self.ui.print_message(
+                f"🔍 Rule filtering: {len(all_rules)} → {len(filtered_rules)} rules "
+                f"({len(filtered_ansible_rules)} ansible-lint + {len(filtered_internal_rules)} internal)",
+                "yellow"
+            )
+            if self.rule_filter.include_patterns:
+                self.ui.print_message(f"   Include patterns: {', '.join(self.rule_filter.include_patterns)}", "dim")
+            if self.rule_filter.exclude_patterns:
+                self.ui.print_message(f"   Exclude patterns: {', '.join(self.rule_filter.exclude_patterns)}", "dim")
+            
+            all_rules = filtered_rules
+            ansible_rules = filtered_ansible_rules
+
         total_rules = len(all_rules)
 
         # Show summary with source information
@@ -1281,7 +1349,11 @@ class ComprehensiveLintFixer:
                     f"  ansible-lint --fix={rule.id} {self.target_path}", "dim"
                 )
             if self.enable_manual_fixes and self.manual_processor:
+                # Get internal rules and filter them too
                 internal_rules = self.manual_processor.get_internal_rules()
+                if self.rule_filter.include_patterns or self.rule_filter.exclude_patterns:
+                    internal_rules = [r for r in internal_rules if self.rule_filter.should_process_rule(r)]
+                
                 self.ui.print_message(
                     f"  + {len(internal_rules)} internal manual fixes:", "dim"
                 )
@@ -1462,7 +1534,7 @@ class ComprehensiveLintFixer:
 
         modified_files = []
         for file_path in files_to_fix:
-            was_modified, content = self.manual_processor.apply_manual_fixes(file_path)
+            was_modified, content = self.manual_processor.apply_manual_fixes(file_path, self.rule_filter)
             if was_modified:
                 if not self.dry_run:
                     with open(file_path, "w") as f:
@@ -1536,7 +1608,7 @@ class ComprehensiveLintFixer:
                 task_id, description=f"Fixing: {os.path.basename(file_path)}"
             )
 
-            was_modified, content = self.manual_processor.apply_manual_fixes(file_path)
+            was_modified, content = self.manual_processor.apply_manual_fixes(file_path, self.rule_filter)
             if was_modified:
                 if not self.dry_run:
                     with open(file_path, "w") as f:
@@ -1745,6 +1817,93 @@ class ComprehensiveLintFixer:
         )
         self.ui.print_message(f"       --by-tag deprecations (old syntax fixes)", "dim")
 
+    def list_all_rules(self):
+        """List all available rules with source information."""
+        # Get all ansible-lint rules
+        ansible_rules = self.ansible_processor.get_fixable_rules()
+        
+        # Get all internal rules
+        internal_rules = []
+        if self.manual_processor:
+            internal_rules = self.manual_processor.get_internal_rules()
+        
+        # Combine all rules
+        all_rules = ansible_rules + internal_rules
+        
+        if self.ui.console:
+            table = Table(title="All Available Rules", show_lines=True)
+            table.add_column("Rule", style="cyan", no_wrap=True)
+            table.add_column("Source", style="yellow", no_wrap=True, width=12) 
+            table.add_column("Tags", style="blue", no_wrap=True, width=15)
+            table.add_column("Description", style="white")
+
+            for rule in sorted(all_rules, key=lambda r: (r.source, r.id)):
+                source_display = "🔧 ansible-lint" if rule.source == "ansible-lint" else "🏠 internal"
+                tags_display = ", ".join(rule.tags) if rule.tags else "N/A"
+                description = rule.description if hasattr(rule, 'description') and rule.description else "Unknown rule"
+                table.add_row(rule.id, source_display, tags_display, description)
+
+            self.ui.console.print(table)
+        else:
+            print(f"\n=== All Available Rules ({len(all_rules)} total) ===")
+            for rule in sorted(all_rules, key=lambda r: (r.source, r.id)):
+                source_indicator = "[ansible-lint]" if rule.source == "ansible-lint" else "[internal]"
+                tags_display = ", ".join(rule.tags) if rule.tags else "N/A"
+                description = rule.description if hasattr(rule, 'description') and rule.description else "Unknown rule"
+                print(f"{rule.id:25s} {source_indicator:13s} Tags: {tags_display:15s} - {description}")
+
+    def explain_rule(self, rule_id: str):
+        """Show detailed information about a specific rule."""
+        # Get all available rules
+        ansible_rules = self.ansible_processor.get_fixable_rules()
+        internal_rules = self.manual_processor.get_internal_rules() if self.manual_processor else []
+        all_rules = ansible_rules + internal_rules
+        
+        # Find the specific rule
+        rule = next((r for r in all_rules if r.id == rule_id), None)
+        
+        if not rule:
+            self.ui.print_message(f"Rule '{rule_id}' not found", "red")
+            self.ui.print_message(f"Available rules: {', '.join(sorted([r.id for r in all_rules]))}", "dim")
+            return
+        
+        # Display detailed information
+        if self.ui.console:
+            panel_content = f"""[bold cyan]{rule.id}[/bold cyan]
+            
+[bold]Source:[/bold] {"🔧 ansible-lint" if rule.source == "ansible-lint" else "🏠 internal"}
+[bold]Tags:[/bold] {", ".join(rule.tags) if rule.tags else "N/A"}
+[bold]Description:[/bold] {rule.description}
+
+[bold]Processing Method:[/bold]
+{"• Official ansible-lint autofix using --fix=" + rule.id if rule.source == "ansible-lint" else "• Custom internal manual fix implementation"}
+
+[bold]Usage Examples:[/bold]
+• Include only this rule: --include-rules "{rule.id}"
+• Exclude this rule: --exclude-rules "{rule.id}"
+{"• Process by tag: --by-tag " + rule.tags[0] if rule.tags else "• No tag-based processing available"}
+"""
+            
+            from rich.panel import Panel
+            self.ui.console.print(Panel(panel_content, title=f"Rule Details: {rule.id}", border_style="blue"))
+        else:
+            print(f"\n=== Rule Details: {rule.id} ===")
+            print(f"Source: {'[ansible-lint]' if rule.source == 'ansible-lint' else '[internal]'}")
+            print(f"Tags: {', '.join(rule.tags) if rule.tags else 'N/A'}")
+            print(f"Description: {rule.description}")
+            print(f"\nProcessing Method:")
+            if rule.source == "ansible-lint":
+                print(f"  • Official ansible-lint autofix using --fix={rule.id}")
+            else:
+                print(f"  • Custom internal manual fix implementation")
+            print(f"\nUsage Examples:")
+            print(f"  • Include only this rule: --include-rules \"{rule.id}\"")
+            print(f"  • Exclude this rule: --exclude-rules \"{rule.id}\"")
+            if rule.tags:
+                print(f"  • Process by tag: --by-tag {rule.tags[0]}")
+            else:
+                print(f"  • No tag-based processing available")
+
 
 def main():
     """Main entry point."""
@@ -1829,6 +1988,28 @@ def main():
         metavar="FILE",
         help="Load configuration from YAML/JSON file",
     )
+    parser.add_argument(
+        "--include-rules",
+        action="append",
+        metavar="PATTERN",
+        help="Include only rules matching pattern (can be used multiple times)",
+    )
+    parser.add_argument(
+        "--exclude-rules",
+        action="append",
+        metavar="PATTERN",
+        help="Exclude rules matching pattern (can be used multiple times)",
+    )
+    parser.add_argument(
+        "--list-rules",
+        action="store_true",
+        help="List all available rules with sources and exit",
+    )
+    parser.add_argument(
+        "--explain-rule",
+        metavar="RULE",
+        help="Show detailed information about a specific rule and exit",
+    )
 
     args = parser.parse_args()
 
@@ -1853,11 +2034,27 @@ def main():
             print(f"Error loading config file {args.config}: {e}")
             sys.exit(1)
 
+    # Process comma-separated rule patterns
+    def process_rule_patterns(patterns):
+        """Split comma-separated patterns and flatten the list."""
+        if not patterns:
+            return None
+        result = []
+        for pattern_group in patterns:
+            if ',' in pattern_group:
+                result.extend([p.strip() for p in pattern_group.split(',')])
+            else:
+                result.append(pattern_group.strip())
+        return result if result else None
+
+    args.include_rules = process_rule_patterns(args.include_rules)
+    args.exclude_rules = process_rule_patterns(args.exclude_rules)
+
     # Apply config file overrides
     for key, value in config_overrides.items():
         if hasattr(args, key):
-            # Convert lists for include/exclude
-            if key in ["include", "exclude"]:
+            # Convert lists for include/exclude patterns
+            if key in ["include", "exclude", "include_rules", "exclude_rules"]:
                 if isinstance(value, str):
                     value = [value]
                 if getattr(args, key) is None:
@@ -1903,11 +2100,17 @@ def main():
         verify=verify,
         include_patterns=args.include,
         exclude_patterns=args.exclude,
+        include_rules=args.include_rules,
+        exclude_rules=args.exclude_rules,
     )
 
     try:
         # Handle different modes
-        if args.show_files:
+        if args.list_rules:
+            fixer.list_all_rules()
+        elif args.explain_rule:
+            fixer.explain_rule(args.explain_rule)
+        elif args.show_files:
             fixer.show_discovered_files()
         elif args.list_tags:
             fixer.list_autofix_tags()

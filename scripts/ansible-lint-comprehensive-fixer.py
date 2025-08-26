@@ -509,37 +509,30 @@ class CommitMessageBuilder:
     def build_concise_commit_message(
         self, rule: str, target_path: str, changed_files: List[str]
     ) -> str:
-        """Generate a concise commit message following template-based approach."""
-        file_count = len(changed_files)
+        """Generate a minimal commit message matching testing/lint branch format."""
         prefix = self._get_commit_prefix(target_path, changed_files)
 
-        # Concise commit format
-        commit_msg = f"{prefix} ansible-lint fix {rule}\n\n"
-        commit_msg += f"Fixed {rule} violations across {file_count} file{'s' if file_count != 1 else ''}.\n"
+        # Minimal commit format matching testing/lint branch
+        commit_msg = f"{prefix} ansible-lint fix {rule}"
 
-        # Get dynamic git user info
+        # Add required tags per CLAUDE.md
         git_name, git_email = self.git_manager.get_user_info()
-        commit_msg += f"\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {git_name} <{git_email}>"
+        commit_msg += f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
 
         return commit_msg
 
     def build_tag_commit_message(
         self, tag: str, target_path: str, rules: List[str], changed_files: List[str]
     ) -> str:
-        """Generate a commit message for tag-based fixes."""
-        file_count = len(changed_files)
+        """Generate a minimal commit message for tag-based fixes."""
         prefix = self._get_commit_prefix(target_path, changed_files)
 
-        commit_msg = f"{prefix} ansible-lint fix {tag} tag\n\n"
-        commit_msg += f"Applied ansible-lint --fix={tag}\n"
-        commit_msg += f"Rules: {', '.join(rules)}\n"
+        # Use minimal format matching testing/lint branch
+        commit_msg = f"{prefix} ansible-lint fix {tag} tag"
 
-        if file_count > 0:
-            commit_msg += f"\nFixed across {file_count} file{'s' if file_count != 1 else ''}.\n"
-
-        # Get dynamic git user info
+        # Add required tags per CLAUDE.md
         git_name, git_email = self.git_manager.get_user_info()
-        commit_msg += f"\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {git_name} <{git_email}>"
+        commit_msg += f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
 
         return commit_msg
 
@@ -1328,7 +1321,7 @@ class ComprehensiveLintFixer:
                 
                 if should_commit:
                     if self.git_manager.add_files(modified_files):
-                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nFixed remaining issues across {len(modified_files)} files.\n\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
                         
                         if self.git_manager.create_commit(commit_message):
                             self.ui.print_message("✅ Manual fixes committed successfully!", "green")
@@ -1395,7 +1388,7 @@ class ComprehensiveLintFixer:
                 
                 if should_commit:
                     if self.git_manager.add_files(modified_files):
-                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nFixed remaining issues across {len(modified_files)} files.\n\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
                         
                         if self.git_manager.create_commit(commit_message):
                             self.ui.print_message("✅ Manual fixes committed successfully!", "green")

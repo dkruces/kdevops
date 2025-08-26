@@ -270,7 +270,7 @@ class GitManager:
 class ChangeFilter:
     """Filters files and lines based on git changes."""
 
-    def __init__(self, commit_ref: str = 'HEAD~1'):
+    def __init__(self, commit_ref: str = "HEAD~1"):
         self.commit_ref = commit_ref
         self.changed_lines_cache: Dict[str, Set[int]] = {}
 
@@ -278,22 +278,22 @@ class ChangeFilter:
         """Get line numbers that have been changed in the specified commit."""
         if file_path in self.changed_lines_cache:
             return self.changed_lines_cache[file_path]
-            
+
         changed = set()
         try:
             # Get the diff with line numbers
             result = subprocess.run(
-                ['git', 'diff', f'{self.commit_ref}', 'HEAD', '--unified=0', file_path],
+                ["git", "diff", f"{self.commit_ref}", "HEAD", "--unified=0", file_path],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
-            
+
             # Parse the diff to find changed line numbers
-            for line in result.stdout.split('\n'):
-                if line.startswith('@@'):
+            for line in result.stdout.split("\n"):
+                if line.startswith("@@"):
                     # Format: @@ -old_start,old_count +new_start,new_count @@
-                    match = re.match(r'@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@', line)
+                    match = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", line)
                     if match:
                         start = int(match.group(1))
                         count = int(match.group(2)) if match.group(2) else 1
@@ -302,7 +302,7 @@ class ChangeFilter:
         except subprocess.CalledProcessError:
             # If we can't get the diff, treat all lines as changeable
             return set(range(1, 100000))
-            
+
         self.changed_lines_cache[file_path] = changed
         return changed
 
@@ -310,14 +310,14 @@ class ChangeFilter:
         """Get YAML files changed in the specified commit."""
         try:
             result = subprocess.run(
-                ['git', 'diff', '--name-only', self.commit_ref, 'HEAD'],
+                ["git", "diff", "--name-only", self.commit_ref, "HEAD"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             files = []
-            for line in result.stdout.strip().split('\n'):
-                if line and (line.endswith('.yml') or line.endswith('.yaml')):
+            for line in result.stdout.strip().split("\n"):
+                if line and (line.endswith(".yml") or line.endswith(".yaml")):
                     if Path(line).exists():
                         files.append(line)
             return files
@@ -334,125 +334,162 @@ class RecursiveProcessor:
 
     def __init__(self, exclude_patterns: List[str] = None):
         self.exclude_patterns = exclude_patterns or [
-            '.git/**',
-            '**/node_modules/**',
-            '**/__pycache__/**',
-            '**/venv/**',
-            '**/env/**',
-            '**/.tox/**',
-            '**/build/**',
-            '**/dist/**'
+            ".git/**",
+            "**/node_modules/**",
+            "**/__pycache__/**",
+            "**/venv/**",
+            "**/env/**",
+            "**/.tox/**",
+            "**/build/**",
+            "**/dist/**",
         ]
 
-    def find_ansible_files(self, root_path: str, changes_only: bool = False, 
-                          change_filter: ChangeFilter = None, 
-                          include_patterns: List[str] = None,
-                          exclude_patterns: List[str] = None) -> List[str]:
+    def find_ansible_files(
+        self,
+        root_path: str,
+        changes_only: bool = False,
+        change_filter: ChangeFilter = None,
+        include_patterns: List[str] = None,
+        exclude_patterns: List[str] = None,
+    ) -> List[str]:
         """Find all ansible YAML files with advanced filtering capabilities."""
         if changes_only and change_filter:
             files = change_filter.get_changed_ansible_files()
             return self._apply_filters(files, include_patterns, exclude_patterns)
-        
+
         # Recursive discovery with intelligent filtering
         root = Path(root_path)
         if not root.exists():
             return []
-            
+
         ansible_files = []
-        
+
         # Use provided patterns or defaults
-        search_patterns = include_patterns or ['**/*.yml', '**/*.yaml']
+        search_patterns = include_patterns or ["**/*.yml", "**/*.yaml"]
         combined_excludes = list(self.exclude_patterns)
         if exclude_patterns:
             combined_excludes.extend(exclude_patterns)
-        
+
         for pattern in search_patterns:
             for file_path in root.glob(pattern):
                 if file_path.is_file():
                     # Apply exclusion filters
                     if self._should_exclude_file(file_path, combined_excludes):
                         continue
-                    
+
                     # Filter to likely ansible files
                     if self._is_ansible_file(file_path):
                         ansible_files.append(str(file_path))
-        
+
         return sorted(ansible_files)
 
-    def _should_exclude_file(self, file_path: Path, exclude_patterns: List[str]) -> bool:
+    def _should_exclude_file(
+        self, file_path: Path, exclude_patterns: List[str]
+    ) -> bool:
         """Check if file should be excluded based on patterns."""
         import fnmatch
-        
+
         file_str = str(file_path)
-        relative_path = file_path.relative_to(Path.cwd()) if file_path.is_absolute() else file_path
+        relative_path = (
+            file_path.relative_to(Path.cwd()) if file_path.is_absolute() else file_path
+        )
         relative_str = str(relative_path)
-        
+
         for pattern in exclude_patterns:
             # Support both full path and relative path matching
-            if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(relative_str, pattern):
+            if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(
+                relative_str, pattern
+            ):
                 return True
-            
+
             # Support directory-based exclusions
-            if '/' in pattern:
-                pattern_parts = pattern.split('/')
-                path_parts = relative_str.split('/')
-                
+            if "/" in pattern:
+                pattern_parts = pattern.split("/")
+                path_parts = relative_str.split("/")
+
                 # Check if any directory segment matches
                 for i in range(len(path_parts) - len(pattern_parts) + 1):
-                    segment = '/'.join(path_parts[i:i + len(pattern_parts)])
+                    segment = "/".join(path_parts[i : i + len(pattern_parts)])
                     if fnmatch.fnmatch(segment, pattern):
                         return True
-        
+
         return False
 
-    def _apply_filters(self, files: List[str], include_patterns: List[str] = None, 
-                      exclude_patterns: List[str] = None) -> List[str]:
+    def _apply_filters(
+        self,
+        files: List[str],
+        include_patterns: List[str] = None,
+        exclude_patterns: List[str] = None,
+    ) -> List[str]:
         """Apply include/exclude filters to a list of files."""
         if not files:
             return files
-            
+
         filtered = []
         combined_excludes = list(self.exclude_patterns)
         if exclude_patterns:
             combined_excludes.extend(exclude_patterns)
-            
+
         for file_str in files:
             file_path = Path(file_str)
-            
+
             # Apply exclusion filters
             if self._should_exclude_file(file_path, combined_excludes):
                 continue
-                
+
             # Apply include filters if specified
             if include_patterns:
                 import fnmatch
+
                 included = False
                 for pattern in include_patterns:
-                    if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(str(file_path.relative_to(Path.cwd()) if file_path.is_absolute() else file_path), pattern):
+                    if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(
+                        str(
+                            file_path.relative_to(Path.cwd())
+                            if file_path.is_absolute()
+                            else file_path
+                        ),
+                        pattern,
+                    ):
                         included = True
                         break
                 if not included:
                     continue
-            
+
             filtered.append(file_str)
-        
+
         return sorted(filtered)
 
     def _is_ansible_file(self, file_path: Path) -> bool:
         """Determine if a YAML file is likely an ansible file."""
         # Check if it's in common ansible directories
         parts = file_path.parts
-        ansible_dirs = {'playbooks', 'roles', 'group_vars', 'host_vars', 'tasks', 'handlers', 'vars', 'defaults', 'meta'}
-        
+        ansible_dirs = {
+            "playbooks",
+            "roles",
+            "group_vars",
+            "host_vars",
+            "tasks",
+            "handlers",
+            "vars",
+            "defaults",
+            "meta",
+        }
+
         if any(part in ansible_dirs for part in parts):
             return True
-            
+
         # Check file content for ansible indicators
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 content = f.read(1024)  # Read first 1KB
                 ansible_indicators = [
-                    '- name:', '- hosts:', 'ansible.builtin.', 'become:', 'tasks:', 'handlers:'
+                    "- name:",
+                    "- hosts:",
+                    "ansible.builtin.",
+                    "become:",
+                    "tasks:",
+                    "handlers:",
                 ]
                 return any(indicator in content for indicator in ansible_indicators)
         except:
@@ -517,7 +554,9 @@ class CommitMessageBuilder:
 
         # Add required tags per CLAUDE.md
         git_name, git_email = self.git_manager.get_user_info()
-        commit_msg += f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
+        commit_msg += (
+            f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
+        )
 
         return commit_msg
 
@@ -532,7 +571,9 @@ class CommitMessageBuilder:
 
         # Add required tags per CLAUDE.md
         git_name, git_email = self.git_manager.get_user_info()
-        commit_msg += f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
+        commit_msg += (
+            f"\n\nGenerated-by: Claude AI\nSigned-off-by: {git_name} <{git_email}>"
+        )
 
         return commit_msg
 
@@ -546,7 +587,7 @@ class AnsibleLintProcessor:
     def run_verification(self, files: List[str] = None) -> Tuple[bool, Dict[str, int]]:
         """Run ansible-lint verification and return results summary."""
         target = files if files else [self.target_path]
-        
+
         try:
             # Run ansible-lint with JSON output
             result = subprocess.run(
@@ -555,22 +596,22 @@ class AnsibleLintProcessor:
                 text=True,
                 timeout=Config.ANSIBLE_LINT_TIMEOUT,
             )
-            
+
             if result.stdout:
                 try:
                     issues = json.loads(result.stdout)
                     # Group by rule type
                     by_rule = {}
                     for issue in issues:
-                        rule_name = issue.get('check_name', 'unknown')
+                        rule_name = issue.get("check_name", "unknown")
                         by_rule[rule_name] = by_rule.get(rule_name, 0) + 1
-                    
+
                     return result.returncode == 0, by_rule
                 except json.JSONDecodeError:
                     return result.returncode == 0, {}
             else:
                 return result.returncode == 0, {}
-                
+
         except subprocess.TimeoutExpired:
             return False, {"timeout": 1}
         except subprocess.CalledProcessError:
@@ -709,77 +750,75 @@ class AnsibleLintProcessor:
 
 class ManualFixProcessor:
     """Handles manual fixes for rules ansible-lint can't auto-fix."""
-    
+
     # Map of short module names to their FQCN (from fix_ansible_lint.py)
     FQCN_MAP = {
         # Core modules
-        'apt': 'ansible.builtin.apt',
-        'apt_key': 'ansible.builtin.apt_key',
-        'apt_repository': 'ansible.builtin.apt_repository',
-        'assemble': 'ansible.builtin.assemble',
-        'assert': 'ansible.builtin.assert',
-        'async_status': 'ansible.builtin.async_status',
-        'blockinfile': 'ansible.builtin.blockinfile',
-        'command': 'ansible.builtin.command',
-        'copy': 'ansible.builtin.copy',
-        'debug': 'ansible.builtin.debug',
-        'dnf': 'ansible.builtin.dnf',
-        'fail': 'ansible.builtin.fail',
-        'fetch': 'ansible.builtin.fetch',
-        'file': 'ansible.builtin.file',
-        'find': 'ansible.builtin.find',
-        'get_url': 'ansible.builtin.get_url',
-        'git': 'ansible.builtin.git',
-        'group': 'ansible.builtin.group',
-        'hostname': 'ansible.builtin.hostname',
-        'import_playbook': 'ansible.builtin.import_playbook',
-        'import_role': 'ansible.builtin.import_role',
-        'import_tasks': 'ansible.builtin.import_tasks',
-        'include': 'ansible.builtin.include',
-        'include_role': 'ansible.builtin.include_role',
-        'include_tasks': 'ansible.builtin.include_tasks',
-        'include_vars': 'ansible.builtin.include_vars',
-        'lineinfile': 'ansible.builtin.lineinfile',
-        'meta': 'ansible.builtin.meta',
-        'package': 'ansible.builtin.package',
-        'pause': 'ansible.builtin.pause',
-        'ping': 'ansible.builtin.ping',
-        'pip': 'ansible.builtin.pip',
-        'raw': 'ansible.builtin.raw',
-        'reboot': 'ansible.builtin.reboot',
-        'replace': 'ansible.builtin.replace',
-        'rpm_key': 'ansible.builtin.rpm_key',
-        'script': 'ansible.builtin.script',
-        'service': 'ansible.builtin.service',
-        'service_facts': 'ansible.builtin.service_facts',
-        'set_fact': 'ansible.builtin.set_fact',
-        'setup': 'ansible.builtin.setup',
-        'shell': 'ansible.builtin.shell',
-        'slurp': 'ansible.builtin.slurp',
-        'stat': 'ansible.builtin.stat',
-        'systemd': 'ansible.builtin.systemd',
-        'sysctl': 'ansible.builtin.sysctl',
-        'template': 'ansible.builtin.template',
-        'unarchive': 'ansible.builtin.unarchive',
-        'uri': 'ansible.builtin.uri',
-        'user': 'ansible.builtin.user',
-        'wait_for': 'ansible.builtin.wait_for',
-        'wait_for_connection': 'ansible.builtin.wait_for_connection',
-        'yum': 'ansible.builtin.yum',
-        'yum_repository': 'ansible.builtin.yum_repository',
-        
+        "apt": "ansible.builtin.apt",
+        "apt_key": "ansible.builtin.apt_key",
+        "apt_repository": "ansible.builtin.apt_repository",
+        "assemble": "ansible.builtin.assemble",
+        "assert": "ansible.builtin.assert",
+        "async_status": "ansible.builtin.async_status",
+        "blockinfile": "ansible.builtin.blockinfile",
+        "command": "ansible.builtin.command",
+        "copy": "ansible.builtin.copy",
+        "debug": "ansible.builtin.debug",
+        "dnf": "ansible.builtin.dnf",
+        "fail": "ansible.builtin.fail",
+        "fetch": "ansible.builtin.fetch",
+        "file": "ansible.builtin.file",
+        "find": "ansible.builtin.find",
+        "get_url": "ansible.builtin.get_url",
+        "git": "ansible.builtin.git",
+        "group": "ansible.builtin.group",
+        "hostname": "ansible.builtin.hostname",
+        "import_playbook": "ansible.builtin.import_playbook",
+        "import_role": "ansible.builtin.import_role",
+        "import_tasks": "ansible.builtin.import_tasks",
+        "include": "ansible.builtin.include",
+        "include_role": "ansible.builtin.include_role",
+        "include_tasks": "ansible.builtin.include_tasks",
+        "include_vars": "ansible.builtin.include_vars",
+        "lineinfile": "ansible.builtin.lineinfile",
+        "meta": "ansible.builtin.meta",
+        "package": "ansible.builtin.package",
+        "pause": "ansible.builtin.pause",
+        "ping": "ansible.builtin.ping",
+        "pip": "ansible.builtin.pip",
+        "raw": "ansible.builtin.raw",
+        "reboot": "ansible.builtin.reboot",
+        "replace": "ansible.builtin.replace",
+        "rpm_key": "ansible.builtin.rpm_key",
+        "script": "ansible.builtin.script",
+        "service": "ansible.builtin.service",
+        "service_facts": "ansible.builtin.service_facts",
+        "set_fact": "ansible.builtin.set_fact",
+        "setup": "ansible.builtin.setup",
+        "shell": "ansible.builtin.shell",
+        "slurp": "ansible.builtin.slurp",
+        "stat": "ansible.builtin.stat",
+        "systemd": "ansible.builtin.systemd",
+        "sysctl": "ansible.builtin.sysctl",
+        "template": "ansible.builtin.template",
+        "unarchive": "ansible.builtin.unarchive",
+        "uri": "ansible.builtin.uri",
+        "user": "ansible.builtin.user",
+        "wait_for": "ansible.builtin.wait_for",
+        "wait_for_connection": "ansible.builtin.wait_for_connection",
+        "yum": "ansible.builtin.yum",
+        "yum_repository": "ansible.builtin.yum_repository",
         # Community modules
-        'docker_compose': 'community.docker.docker_compose',
-        'docker_container': 'community.docker.docker_container',
-        'docker_image': 'community.docker.docker_image',
-        'docker_network': 'community.docker.docker_network',
-        'docker_volume': 'community.docker.docker_volume',
-        
+        "docker_compose": "community.docker.docker_compose",
+        "docker_container": "community.docker.docker_container",
+        "docker_image": "community.docker.docker_image",
+        "docker_network": "community.docker.docker_network",
+        "docker_volume": "community.docker.docker_volume",
         # POSIX modules
-        'synchronize': 'ansible.posix.synchronize',
-        'mount': 'ansible.posix.mount',
-        'seboolean': 'ansible.posix.seboolean',
-        'selinux': 'ansible.posix.selinux',
+        "synchronize": "ansible.posix.synchronize",
+        "mount": "ansible.posix.mount",
+        "seboolean": "ansible.posix.seboolean",
+        "selinux": "ansible.posix.selinux",
     }
 
     def __init__(self, change_filter: ChangeFilter = None):
@@ -793,177 +832,187 @@ class ManualFixProcessor:
 
     def fix_yaml_brackets(self, content: str, file_path: str) -> str:
         """Fix 'Too many spaces inside brackets' issues."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines):
             if not self.should_fix_line(file_path, i + 1):
                 continue
-                
+
             # Fix spacing in brackets: [ foo ] -> [foo]
-            fixed_line = re.sub(r'\[\s+', '[', line)
-            fixed_line = re.sub(r'\s+\]', ']', fixed_line)
+            fixed_line = re.sub(r"\[\s+", "[", line)
+            fixed_line = re.sub(r"\s+\]", "]", fixed_line)
             lines[i] = fixed_line
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def fix_yaml_truthy(self, content: str, file_path: str) -> str:
         """Fix truthy value issues (yes/no -> true/false)."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines):
             if not self.should_fix_line(file_path, i + 1):
                 continue
-                
+
             # Fix standalone yes/no values
-            fixed_line = re.sub(r':\s+yes\s*$', ': true', line)
-            fixed_line = re.sub(r':\s+no\s*$', ': false', fixed_line)
-            fixed_line = re.sub(r':\s+Yes\s*$', ': true', fixed_line)
-            fixed_line = re.sub(r':\s+No\s*$', ': false', fixed_line)
-            fixed_line = re.sub(r':\s+YES\s*$', ': true', fixed_line)
-            fixed_line = re.sub(r':\s+NO\s*$', ': false', fixed_line)
-            fixed_line = re.sub(r':\s+on\s*$', ': true', fixed_line)
-            fixed_line = re.sub(r':\s+off\s*$', ': false', fixed_line)
+            fixed_line = re.sub(r":\s+yes\s*$", ": true", line)
+            fixed_line = re.sub(r":\s+no\s*$", ": false", fixed_line)
+            fixed_line = re.sub(r":\s+Yes\s*$", ": true", fixed_line)
+            fixed_line = re.sub(r":\s+No\s*$", ": false", fixed_line)
+            fixed_line = re.sub(r":\s+YES\s*$", ": true", fixed_line)
+            fixed_line = re.sub(r":\s+NO\s*$", ": false", fixed_line)
+            fixed_line = re.sub(r":\s+on\s*$", ": true", fixed_line)
+            fixed_line = re.sub(r":\s+off\s*$", ": false", fixed_line)
             lines[i] = fixed_line
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def fix_jinja_spacing(self, content: str, file_path: str) -> str:
         """Fix Jinja2 spacing issues."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines):
             if not self.should_fix_line(file_path, i + 1):
                 continue
-                
+
             # Fix spacing around | in Jinja2 expressions
             # Match patterns like: {{var|filter}} or "{{var|filter}}"
             def fix_jinja_expr(match):
                 expr = match.group(1)
                 # Add spaces around |
-                expr = re.sub(r'([^|\s])\|([^|\s])', r'\1 | \2', expr)
+                expr = re.sub(r"([^|\s])\|([^|\s])", r"\1 | \2", expr)
                 # Fix multiple spaces
-                expr = re.sub(r'\s+\|\s+', ' | ', expr)
-                return '{{' + expr + '}}'
-            
-            fixed_line = re.sub(r'\{\{(.+?)\}\}', fix_jinja_expr, line)
-            
+                expr = re.sub(r"\s+\|\s+", " | ", expr)
+                return "{{" + expr + "}}"
+
+            fixed_line = re.sub(r"\{\{(.+?)\}\}", fix_jinja_expr, line)
+
             # Also fix in when: conditions without {{ }}
-            if re.match(r'\s*(when|changed_when|failed_when):', line):
+            if re.match(r"\s*(when|changed_when|failed_when):", line):
                 # Extract the condition part
-                parts = line.split(':', 1)
+                parts = line.split(":", 1)
                 if len(parts) == 2:
                     condition = parts[1]
                     # Fix spacing around | in conditions
-                    condition = re.sub(r'([^|\s])\|([^|\s])', r'\1 | \2', condition)
-                    condition = re.sub(r'\s+\|\s+', ' | ', condition)
-                    fixed_line = parts[0] + ':' + condition
-                    
+                    condition = re.sub(r"([^|\s])\|([^|\s])", r"\1 | \2", condition)
+                    condition = re.sub(r"\s+\|\s+", " | ", condition)
+                    fixed_line = parts[0] + ":" + condition
+
             lines[i] = fixed_line
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def fix_fqcn(self, content: str, file_path: str) -> str:
         """Fix FQCN (Fully Qualified Collection Name) issues."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         in_task = False
         task_start_line = 0
-        
+
         for i, line in enumerate(lines):
             # Detect task start
-            if re.match(r'\s*-\s+name:', line):
+            if re.match(r"\s*-\s+name:", line):
                 in_task = True
                 task_start_line = i
                 continue
-                
+
             if not in_task:
                 continue
-                
+
             # Check if we should fix this line
             if not self.should_fix_line(file_path, i + 1):
                 continue
-                
+
             # Look for module usage patterns
             # Pattern 1: Simple module at start of line (after dash and spaces)
-            match = re.match(r'^(\s*-?\s*)([a-z_]+)(\s*:.*)', line)
+            match = re.match(r"^(\s*-?\s*)([a-z_]+)(\s*:.*)", line)
             if not match and in_task:
                 # Pattern 2: Module name as a key (without dash)
-                match = re.match(r'^(\s*)([a-z_]+)(\s*:.*)', line)
-                
+                match = re.match(r"^(\s*)([a-z_]+)(\s*:.*)", line)
+
             if match:
                 indent = match.group(1)
                 module = match.group(2)
                 rest = match.group(3)
-                
+
                 if module in self.FQCN_MAP:
                     lines[i] = indent + self.FQCN_MAP[module] + rest
                     in_task = False  # Task module found, reset
-                    
+
             # Reset task flag if we hit another task or play
-            if re.match(r'\s*-\s+(name|hosts):', line) and i != task_start_line:
-                in_task = re.match(r'\s*-\s+name:', line) is not None
+            if re.match(r"\s*-\s+(name|hosts):", line) and i != task_start_line:
+                in_task = re.match(r"\s*-\s+name:", line) is not None
                 if in_task:
                     task_start_line = i
-                    
-        return '\n'.join(lines)
+
+        return "\n".join(lines)
 
     def fix_ignore_errors(self, content: str, file_path: str) -> str:
         """
         Convert ignore_errors to failed_when where appropriate.
         This is a more conservative fix - only for simple cases.
         """
-        lines = content.split('\n')
+        lines = content.split("\n")
         i = 0
         while i < len(lines):
             if not self.should_fix_line(file_path, i + 1):
                 i += 1
                 continue
-                
+
             line = lines[i]
             # Look for ignore_errors: yes/true
-            if re.match(r'\s*ignore_errors:\s*(yes|true|True)', line):
+            if re.match(r"\s*ignore_errors:\s*(yes|true|True)", line):
                 # Check if there's already a failed_when
                 has_failed_when = False
                 indent = len(line) - len(line.lstrip())
-                
+
                 # Look ahead for failed_when at the same indent level
                 for j in range(i + 1, min(i + 10, len(lines))):
                     next_line = lines[j]
                     next_indent = len(next_line) - len(next_line.lstrip())
                     if next_indent < indent and next_line.strip():
                         break
-                    if re.match(r'\s*failed_when:', next_line):
+                    if re.match(r"\s*failed_when:", next_line):
                         has_failed_when = True
                         break
-                        
+
                 # Only convert if this is safe (no existing failed_when)
                 # Add a comment to indicate manual review needed
                 if not has_failed_when:
-                    lines[i] = line.replace('ignore_errors:', '# TODO: Review - was ignore_errors:')
+                    lines[i] = line.replace(
+                        "ignore_errors:", "# TODO: Review - was ignore_errors:"
+                    )
                     # Add a conservative failed_when
-                    lines.insert(i + 1, ' ' * indent + 'failed_when: false  # Always succeed - review this condition')
+                    lines.insert(
+                        i + 1,
+                        " " * indent
+                        + "failed_when: false  # Always succeed - review this condition",
+                    )
                     i += 1
-                    
+
             i += 1
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def fix_role_path(self, content: str, file_path: str) -> str:
         """Fix role path issues - remove ../roles/ prefix."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines):
             if not self.should_fix_line(file_path, i + 1):
                 continue
-                
+
             # Fix role paths in import_role and include_role
-            if 'role:' in line or 'name:' in line:
+            if "role:" in line or "name:" in line:
                 # Remove ../roles/ prefix from role names
-                fixed_line = re.sub(r'(role:|name:)\s*["\']?\.\.\/roles\/([^"\'\s]+)', r'\1 \2', line)
-                fixed_line = re.sub(r'(role:|name:)\s*\.\.\/roles\/([^\s]+)', r'\1 \2', fixed_line)
+                fixed_line = re.sub(
+                    r'(role:|name:)\s*["\']?\.\.\/roles\/([^"\'\s]+)', r"\1 \2", line
+                )
+                fixed_line = re.sub(
+                    r"(role:|name:)\s*\.\.\/roles\/([^\s]+)", r"\1 \2", fixed_line
+                )
                 lines[i] = fixed_line
-                
-        return '\n'.join(lines)
+
+        return "\n".join(lines)
 
     def apply_manual_fixes(self, file_path: str) -> Tuple[bool, str]:
         """Apply all manual fixes to a file."""
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 original_content = f.read()
         except Exception as e:
             return False, f"Error reading {file_path}: {e}"
-            
+
         # Apply all fixes
         content = original_content
         content = self.fix_yaml_brackets(content, file_path)
@@ -972,7 +1021,7 @@ class ManualFixProcessor:
         content = self.fix_fqcn(content, file_path)
         content = self.fix_ignore_errors(content, file_path)
         content = self.fix_role_path(content, file_path)
-        
+
         # Check if anything changed
         if content != original_content:
             return True, content
@@ -1007,12 +1056,14 @@ class ComprehensiveLintFixer:
         self.ui = UserInterface(auto_accept)
         self.git_manager = GitManager()
         self.commit_builder = CommitMessageBuilder(self.git_manager)
-        
+
         # Initialize processors
         self.change_filter = ChangeFilter() if changes_only else None
         self.recursive_processor = RecursiveProcessor(exclude_patterns)
         self.ansible_processor = AnsibleLintProcessor(target_path)
-        self.manual_processor = ManualFixProcessor(self.change_filter) if enable_manual_fixes else None
+        self.manual_processor = (
+            ManualFixProcessor(self.change_filter) if enable_manual_fixes else None
+        )
 
         # Track processing results
         self.processed_rules = set()
@@ -1022,15 +1073,17 @@ class ComprehensiveLintFixer:
         """Get list of files to process based on configuration."""
         if self.recursive:
             return self.recursive_processor.find_ansible_files(
-                self.target_path, 
-                self.changes_only, 
+                self.target_path,
+                self.changes_only,
                 self.change_filter,
                 self.include_patterns,
-                self.exclude_patterns
+                self.exclude_patterns,
             )
         elif self.changes_only and self.change_filter:
             files = self.change_filter.get_changed_ansible_files()
-            return self.recursive_processor._apply_filters(files, self.include_patterns, self.exclude_patterns)
+            return self.recursive_processor._apply_filters(
+                files, self.include_patterns, self.exclude_patterns
+            )
         else:
             # Single path processing (original behavior)
             return [self.target_path]
@@ -1038,16 +1091,22 @@ class ComprehensiveLintFixer:
     def show_discovered_files(self):
         """Show discovered files for filter testing."""
         target_files = self.get_target_files()
-        
+
         if self.recursive or self.changes_only:
             total_files = len(target_files)
-            self.ui.print_message(f"🔍 Discovered {total_files} ansible files", "cyan bold")
-            
+            self.ui.print_message(
+                f"🔍 Discovered {total_files} ansible files", "cyan bold"
+            )
+
             if self.include_patterns:
-                self.ui.print_message(f"📥 Include patterns: {', '.join(self.include_patterns)}", "blue")
+                self.ui.print_message(
+                    f"📥 Include patterns: {', '.join(self.include_patterns)}", "blue"
+                )
             if self.exclude_patterns:
-                self.ui.print_message(f"🚫 Exclude patterns: {', '.join(self.exclude_patterns)}", "red")
-            
+                self.ui.print_message(
+                    f"🚫 Exclude patterns: {', '.join(self.exclude_patterns)}", "red"
+                )
+
             # Show files grouped by directory for better readability
             files_by_dir = {}
             for file_path in target_files:
@@ -1055,7 +1114,7 @@ class ComprehensiveLintFixer:
                 if dir_name not in files_by_dir:
                     files_by_dir[dir_name] = []
                 files_by_dir[dir_name].append(Path(file_path).name)
-            
+
             # Display organized by directory
             for dir_name in sorted(files_by_dir.keys()):
                 files = sorted(files_by_dir[dir_name])
@@ -1063,7 +1122,9 @@ class ComprehensiveLintFixer:
                 for file_name in files[:10]:  # Show first 10 files per directory
                     self.ui.print_message(f"  - {file_name}", "dim")
                 if len(files) > 10:
-                    self.ui.print_message(f"  ... and {len(files) - 10} more files", "dim")
+                    self.ui.print_message(
+                        f"  ... and {len(files) - 10} more files", "dim"
+                    )
         else:
             self.ui.print_message(f"🎯 Target: {self.target_path}", "cyan")
 
@@ -1131,12 +1192,16 @@ class ComprehensiveLintFixer:
         """Main method to process all rules with comprehensive workflow."""
         # Get target files
         target_files = self.get_target_files()
-        
+
         # Show file discovery results
         if self.recursive:
-            self.ui.print_message(f"📁 Found {len(target_files)} ansible files for processing", "blue")
+            self.ui.print_message(
+                f"📁 Found {len(target_files)} ansible files for processing", "blue"
+            )
         elif self.changes_only:
-            self.ui.print_message(f"🔄 Found {len(target_files)} changed ansible files", "blue")
+            self.ui.print_message(
+                f"🔄 Found {len(target_files)} changed ansible files", "blue"
+            )
 
         # Get fixable rules
         fixable_rules = self.ansible_processor.get_fixable_rules()
@@ -1171,7 +1236,9 @@ class ComprehensiveLintFixer:
         # Process rules with enhanced progress tracking
         processed = 0
         successful = 0
-        total_phases = 1 + (1 if self.enable_manual_fixes else 0)  # ansible-lint + manual fixes
+        total_phases = 1 + (
+            1 if self.enable_manual_fixes else 0
+        )  # ansible-lint + manual fixes
 
         if self.ui.console:
             with Progress(
@@ -1188,7 +1255,9 @@ class ComprehensiveLintFixer:
                 )
 
                 for rule in fixable_rules:
-                    progress.update(rules_task, description=f"Processing rule: {rule.id}")
+                    progress.update(
+                        rules_task, description=f"Processing rule: {rule.id}"
+                    )
 
                     # Pause progress bar for user interaction
                     progress.stop()
@@ -1224,14 +1293,18 @@ class ComprehensiveLintFixer:
 
                 # Phase 2: Manual fixes if enabled
                 if self.enable_manual_fixes and self.manual_processor:
-                    progress.update(rules_task, description="Ansible-lint rules complete")
-                    
+                    progress.update(
+                        rules_task, description="Ansible-lint rules complete"
+                    )
+
                     manual_task = progress.add_task(
                         "Applying manual fixes...", total=100
                     )
-                    
+
                     progress.start()
-                    self._apply_manual_fixes_with_progress(target_files, progress, manual_task)
+                    self._apply_manual_fixes_with_progress(
+                        target_files, progress, manual_task
+                    )
                     progress.update(manual_task, completed=100)
 
         else:
@@ -1267,7 +1340,11 @@ class ComprehensiveLintFixer:
                 self._apply_manual_fixes(target_files)
 
         # Post-processing verification
-        if self.verify and not self.dry_run and (successful > 0 or (self.enable_manual_fixes and self.manual_processor)):
+        if (
+            self.verify
+            and not self.dry_run
+            and (successful > 0 or (self.enable_manual_fixes and self.manual_processor))
+        ):
             self._run_post_fix_verification(target_files)
 
         # Final summary
@@ -1279,7 +1356,7 @@ class ComprehensiveLintFixer:
         """Apply manual fixes to target files."""
         if not target_files or not self.manual_processor:
             return
-            
+
         # For manual fixes, we need individual files, not directory paths
         files_to_fix = []
         for target in target_files:
@@ -1289,28 +1366,32 @@ class ComprehensiveLintFixer:
                 # Get files from directory
                 discovered = self.recursive_processor.find_ansible_files(target)
                 files_to_fix.extend(discovered)
-        
+
         # Remove duplicates and filter if changes-only
         files_to_fix = list(set(files_to_fix))
         if self.changes_only and self.change_filter:
             changed_files = self.change_filter.get_changed_ansible_files()
             files_to_fix = [f for f in files_to_fix if f in changed_files]
 
-        self.ui.print_message(f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue")
-        
+        self.ui.print_message(
+            f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue"
+        )
+
         modified_files = []
         for file_path in files_to_fix:
             was_modified, content = self.manual_processor.apply_manual_fixes(file_path)
             if was_modified:
                 if not self.dry_run:
-                    with open(file_path, 'w') as f:
+                    with open(file_path, "w") as f:
                         f.write(content)
                 modified_files.append(file_path)
                 self.ui.print_message(f"  ✅ Fixed: {file_path}", "green")
-        
+
         if modified_files:
-            self.ui.print_message(f"🔧 Manual fixes applied to {len(modified_files)} files", "green")
-            
+            self.ui.print_message(
+                f"🔧 Manual fixes applied to {len(modified_files)} files", "green"
+            )
+
             # Commit manual fixes if not dry run
             if not self.dry_run:
                 should_commit = self.ui.prompt_user(
@@ -1318,23 +1399,29 @@ class ComprehensiveLintFixer:
                     default=True,
                     auto_message="Auto-committing manual fixes",
                 )
-                
+
                 if should_commit:
                     if self.git_manager.add_files(modified_files):
                         commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
-                        
+
                         if self.git_manager.create_commit(commit_message):
-                            self.ui.print_message("✅ Manual fixes committed successfully!", "green")
+                            self.ui.print_message(
+                                "✅ Manual fixes committed successfully!", "green"
+                            )
                         else:
-                            self.ui.print_message("❌ Failed to commit manual fixes!", "red")
+                            self.ui.print_message(
+                                "❌ Failed to commit manual fixes!", "red"
+                            )
         else:
             self.ui.print_message("ℹ️  No manual fixes needed", "dim")
 
-    def _apply_manual_fixes_with_progress(self, target_files: List[str], progress, task_id):
+    def _apply_manual_fixes_with_progress(
+        self, target_files: List[str], progress, task_id
+    ):
         """Apply manual fixes with Rich progress tracking."""
         if not target_files or not self.manual_processor:
             return
-            
+
         # For manual fixes, we need individual files, not directory paths
         files_to_fix = []
         for target in target_files:
@@ -1344,7 +1431,7 @@ class ComprehensiveLintFixer:
                 # Get files from directory
                 discovered = self.recursive_processor.find_ansible_files(target)
                 files_to_fix.extend(discovered)
-        
+
         # Remove duplicates and filter if changes-only
         files_to_fix = list(set(files_to_fix))
         if self.changes_only and self.change_filter:
@@ -1356,45 +1443,58 @@ class ComprehensiveLintFixer:
             return
 
         progress.update(task_id, total=len(files_to_fix))
-        self.ui.print_message(f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue")
-        
+        self.ui.print_message(
+            f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue"
+        )
+
         modified_files = []
         for i, file_path in enumerate(files_to_fix):
-            progress.update(task_id, description=f"Fixing: {os.path.basename(file_path)}")
-            
+            progress.update(
+                task_id, description=f"Fixing: {os.path.basename(file_path)}"
+            )
+
             was_modified, content = self.manual_processor.apply_manual_fixes(file_path)
             if was_modified:
                 if not self.dry_run:
-                    with open(file_path, 'w') as f:
+                    with open(file_path, "w") as f:
                         f.write(content)
                 modified_files.append(file_path)
-                
-            progress.update(task_id, completed=i+1)
-        
+
+            progress.update(task_id, completed=i + 1)
+
         if modified_files:
-            progress.update(task_id, description=f"Manual fixes applied to {len(modified_files)} files")
-            self.ui.print_message(f"🔧 Manual fixes applied to {len(modified_files)} files", "green")
-            
+            progress.update(
+                task_id,
+                description=f"Manual fixes applied to {len(modified_files)} files",
+            )
+            self.ui.print_message(
+                f"🔧 Manual fixes applied to {len(modified_files)} files", "green"
+            )
+
             # Commit manual fixes if not dry run
             if not self.dry_run:
                 # Pause progress for user interaction
                 progress.stop()
-                
+
                 should_commit = self.ui.prompt_user(
                     "Commit manual fixes?",
                     default=True,
                     auto_message="Auto-committing manual fixes",
                 )
-                
+
                 if should_commit:
                     if self.git_manager.add_files(modified_files):
                         commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
-                        
+
                         if self.git_manager.create_commit(commit_message):
-                            self.ui.print_message("✅ Manual fixes committed successfully!", "green")
+                            self.ui.print_message(
+                                "✅ Manual fixes committed successfully!", "green"
+                            )
                         else:
-                            self.ui.print_message("❌ Failed to commit manual fixes!", "red")
-                
+                            self.ui.print_message(
+                                "❌ Failed to commit manual fixes!", "red"
+                            )
+
                 progress.start()
         else:
             progress.update(task_id, description="No manual fixes needed")
@@ -1402,7 +1502,7 @@ class ComprehensiveLintFixer:
     def _run_post_fix_verification(self, target_files: List[str]):
         """Run ansible-lint verification after fixes and show results."""
         self.ui.print_message(f"\n🔍 Running post-fix verification...", "cyan bold")
-        
+
         # Determine what to verify
         if len(target_files) == 1 and target_files[0] == self.target_path:
             verify_target = None  # Use default target
@@ -1417,23 +1517,27 @@ class ComprehensiveLintFixer:
                     discovered = self.recursive_processor.find_ansible_files(target)
                     files_to_verify.extend(discovered)
             verify_target = list(set(files_to_verify))
-        
-        passed, remaining_issues = self.ansible_processor.run_verification(verify_target)
-        
+
+        passed, remaining_issues = self.ansible_processor.run_verification(
+            verify_target
+        )
+
         if passed:
             self.ui.print_message("✅ All ansible-lint checks passed!", "green bold")
         else:
             total_issues = sum(remaining_issues.values())
-            self.ui.print_message(f"⚠️  {total_issues} ansible-lint issues remain", "yellow")
-            
+            self.ui.print_message(
+                f"⚠️  {total_issues} ansible-lint issues remain", "yellow"
+            )
+
             if remaining_issues and self.ui.console:
                 table = Table(title="Remaining Issues")
                 table.add_column("Rule", style="cyan")
                 table.add_column("Count", style="yellow")
-                
+
                 for rule, count in sorted(remaining_issues.items()):
                     table.add_row(rule, str(count))
-                
+
                 self.ui.console.print(table)
             else:
                 self.ui.print_message("Remaining issues by type:", "yellow")
@@ -1452,11 +1556,13 @@ class ComprehensiveLintFixer:
             return
 
         rules_for_tag = tags_to_rules[tag]
-        
+
         # Get target files for display
         target_files = self.get_target_files()
         if self.recursive:
-            self.ui.print_message(f"📁 Found {len(target_files)} ansible files for processing", "blue")
+            self.ui.print_message(
+                f"📁 Found {len(target_files)} ansible files for processing", "blue"
+            )
 
         if self.dry_run:
             self.ui.print_message(
@@ -1514,7 +1620,9 @@ class ComprehensiveLintFixer:
 
         # Apply manual fixes if enabled
         if self.enable_manual_fixes and self.manual_processor:
-            self.ui.print_message(f"\n🔧 Applying manual fixes after tag processing...", "cyan bold")
+            self.ui.print_message(
+                f"\n🔧 Applying manual fixes after tag processing...", "cyan bold"
+            )
             self._apply_manual_fixes(target_files)
 
     def list_autofix_tags(self):
@@ -1543,9 +1651,15 @@ class ComprehensiveLintFixer:
                 if len(rules) > 3:
                     print(f"{'':17s} ... and {len(rules)-3} more")
 
-        self.ui.print_message(f"\nUsage: --by-tag TAG  (process all rules with specific tag)", "cyan")
-        self.ui.print_message(f"       --by-tag formatting  (YAML formatting, key order, FQCN)", "dim")
-        self.ui.print_message(f"       --by-tag idiom       (naming, shell usage)", "dim")
+        self.ui.print_message(
+            f"\nUsage: --by-tag TAG  (process all rules with specific tag)", "cyan"
+        )
+        self.ui.print_message(
+            f"       --by-tag formatting  (YAML formatting, key order, FQCN)", "dim"
+        )
+        self.ui.print_message(
+            f"       --by-tag idiom       (naming, shell usage)", "dim"
+        )
         self.ui.print_message(f"       --by-tag deprecations (old syntax fixes)", "dim")
 
 
@@ -1618,7 +1732,7 @@ def main():
     )
     parser.add_argument(
         "--exclude",
-        action="append", 
+        action="append",
         metavar="PATTERN",
         help="Exclude files matching pattern (can be used multiple times)",
     )
@@ -1640,23 +1754,27 @@ def main():
     if args.config:
         try:
             import yaml
-            with open(args.config, 'r') as f:
-                if args.config.endswith('.json'):
+
+            with open(args.config, "r") as f:
+                if args.config.endswith(".json"):
                     import json
+
                     config_overrides = json.load(f)
                 else:
                     config_overrides = yaml.safe_load(f)
         except ImportError:
-            print("Warning: yaml library not available. Install with: pip install pyyaml")
+            print(
+                "Warning: yaml library not available. Install with: pip install pyyaml"
+            )
         except Exception as e:
             print(f"Error loading config file {args.config}: {e}")
             sys.exit(1)
-    
+
     # Apply config file overrides
     for key, value in config_overrides.items():
         if hasattr(args, key):
             # Convert lists for include/exclude
-            if key in ['include', 'exclude']:
+            if key in ["include", "exclude"]:
                 if isinstance(value, str):
                     value = [value]
                 if getattr(args, key) is None:
@@ -1664,7 +1782,9 @@ def main():
                 else:
                     getattr(args, key).extend(value)
             # Only set if not already specified on command line
-            elif getattr(args, key) is None or (isinstance(getattr(args, key), bool) and not getattr(args, key)):
+            elif getattr(args, key) is None or (
+                isinstance(getattr(args, key), bool) and not getattr(args, key)
+            ):
                 setattr(args, key, value)
 
     # Override rich if requested
@@ -1685,8 +1805,8 @@ def main():
         sys.exit(1)
 
     # Handle verification flags
-    verify = not args.no_verify if hasattr(args, 'no_verify') else True
-    if hasattr(args, 'verify') and args.verify:
+    verify = not args.no_verify if hasattr(args, "no_verify") else True
+    if hasattr(args, "verify") and args.verify:
         verify = True
 
     # Create the comprehensive fixer

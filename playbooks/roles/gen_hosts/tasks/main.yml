@@ -325,7 +325,6 @@
     - kdevops_workflow_enable_sysbench
     - ansible_hosts_template.stat.exists
 
-
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup
   tags: ["hosts"]
   ansible.builtin.template:
@@ -339,7 +338,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests
     - ansible_hosts_template.stat.exists
-
 
 - name: Infer enabled mmtests test types
   ansible.builtin.set_fact:

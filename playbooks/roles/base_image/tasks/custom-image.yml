@@ -83,6 +83,15 @@
         chdir: "{{ custom_image_dir }}"
       changed_when: false
 
+- name: Remove sentinel file when image is redownloaded
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ custom_image_ok }}"
+    state: absent
+  when:
+    - custom_image_download is changed
+
 - name: Resize custom image to match configured size
   become: true
   become_method: ansible.builtin.sudo

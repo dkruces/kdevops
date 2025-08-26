@@ -59,14 +59,6 @@
       ansible.builtin.set_fact:
         custom_image_sha512sum: "{{ custom_image_dir }}/{{ sha512sums_file }}"
 
-    - name: Check if the sha512sums file already exists
-      ansible.builtin.stat:
-        path: "{{ custom_image_sha512sum }}"
-        get_attributes: false
-        get_checksum: false
-        get_mime: false
-      register: sha512sums_stat
-
     - name: Fetch the sha512sums file
       become: true
       become_method: ansible.builtin.sudo
@@ -74,8 +66,6 @@
         url: "{{ guestfs_custom_raw_image_sha512sums_url }}"
         dest: "{{ custom_image_dir }}"
         mode: "u=rw,g=r,o=r"
-      when:
-        - not sha512sums_stat.stat.exists
 
     - name: Verify downloaded image checksum
       ansible.builtin.command:

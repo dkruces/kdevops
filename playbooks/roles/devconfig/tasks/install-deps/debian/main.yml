@@ -2,7 +2,8 @@
 - name: Check if unattended-upgrades is installed
   ansible.builtin.command: dpkg-query -W -f='${Status}' unattended-upgrades
   register: unattended_upgrade_status
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   changed_when: false
   tags: firstconfig
 
@@ -42,7 +43,8 @@
     - apt-daily-upgrade.service
     - apt-daily-upgrade.timer
     - systemd-networkd-wait-online.service
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   tags: firstconfig
 
 - name: Update apt cache accepting release info changes
@@ -51,7 +53,8 @@
   ansible.builtin.command:
     cmd: apt-get update --allow-releaseinfo-change
   changed_when: false
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   tags: firstconfig
 
 - name: Upgrade Packages
@@ -92,7 +95,8 @@
     - /etc/apt/apt.conf.d/02periodic
     - /etc/apt/apt.conf.d/50unattended-upgrades
     - /etc/apt/apt.conf.d/52unattended-upgrades-local
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   tags: firstconfig
 
 - name: Stop and disable unattended-upgrades related services
@@ -111,7 +115,8 @@
     - apt-daily-upgrade.service
     - apt-daily-upgrade.timer
     - systemd-networkd-wait-online.service
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   tags: firstconfig
 
 - name: Allow for distro source change / upgrade
@@ -143,7 +148,7 @@
     content: |
       # kdevops generated /etc/nsswitch.conf
       passwd:         files
-      group:          files
+      ansible.builtin.group:          files
       shadow:         files
       gshadow:        files
       hosts:          files myhostname resolve dns

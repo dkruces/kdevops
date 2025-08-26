@@ -20,7 +20,7 @@
   ansible.builtin.file:
     path: "{{ data_path }}"
     owner: "{{ data_user }}"
-    group: "{{ data_group }}"
+    ansible.builtin.group: "{{ data_group }}"
     state: directory
 
 - name: Clone mmtests repository
@@ -73,7 +73,8 @@
   when:
     - fixes_dir.stat.exists
     - mmtests_patches.files | length > 0
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   register: patch_results
 
 - name: Report patch application results
@@ -96,7 +97,7 @@
     src: "{{ mmtests_test_type }}-config.j2"
     dest: "{{ mmtests_data_dir }}/configs/config-workload-{{ mmtests_test_type }}-kdevops"
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
 
 - name: Fail if configured memory percentages overcommit available memory
@@ -181,7 +182,7 @@
   become_method: sudo
   ansible.builtin.shell: |
     for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-      if [ -f "$cpu" ]; then
+      if [-f "$cpu"]; then
         echo "performance" > "$cpu"
       fi
     done
@@ -210,7 +211,8 @@
     echo 1 > /proc/sys/vm/compact_memory
   when:
     - mmtests_pretest_compaction | bool
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
 
 - name: Show kernel version
   tags: ["run_tests"]

@@ -19,7 +19,7 @@
     src: smb.conf.j2
     dest: /etc/samba/smb.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
 
 - name: Set up a volume group on local block devices
@@ -61,7 +61,7 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.posix.firewalld:
-    service: samba
+    ansible.builtin.service: samba
     permanent: true
     immediate: true
     state: enabled

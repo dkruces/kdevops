@@ -56,7 +56,7 @@
   ansible.builtin.replace:
     path: ~/.ssh/config
     regexp: "(^\\s*$)"
-    replace: ""
+    ansible.builtin.replace: ""
   when: ssh_config.stat.exists
 
 # ssh include directives must follow a new line.

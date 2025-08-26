@@ -115,7 +115,8 @@
   delegate_to: localhost
   with_items: "{{ all_monitoring_files.files | map(attribute='path') | map('basename') | list }}"
   register: ab_plot_generation
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   run_once: true
   when:
     - monitor_developmental_stats|default(false)|bool
@@ -127,7 +128,8 @@
   ansible.builtin.command:
   delegate_to: localhost
   register: comprehensive_plot_generation
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   run_once: true
   when:
     - monitor_developmental_stats|default(false)|bool
@@ -161,4 +163,5 @@
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition

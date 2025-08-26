@@ -30,7 +30,7 @@
     path: "{{ libvirt_storage_pool_path }}"
     state: directory
     owner: root
-    group: "{{ libvirt_qemu_group }}"
+    ansible.builtin.group: "{{ libvirt_qemu_group }}"
     mode: "u=rwx,g=rwx,o=rx"
   when:
     - libvirt_uri_system|bool
@@ -51,7 +51,7 @@
     path: "{{ guestfs_base_image_dir }}"
     state: directory
     mode: "u=rwx,g=rwx,o=rx"
-    group: "{{ libvirt_qemu_group }}"
+    ansible.builtin.group: "{{ libvirt_qemu_group }}"
   when:
     - libvirt_uri_system|bool
 

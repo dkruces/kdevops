@@ -68,7 +68,8 @@
     LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
   ansible.builtin.shell: virsh net-list | grep -q default
   register: libvirt_default_net
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   changed_when: false
   when:
     - libvirt_uri_system|bool

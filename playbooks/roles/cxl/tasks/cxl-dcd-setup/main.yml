@@ -1,8 +1,8 @@
 ---
 - name: Add DC extents to the hosts
   ansible.builtin.shell: " qmp_port_str={{ qmp_port_str }}; qmp_port=`echo $qmp_port_str | awk -F'[^0-9]+' '{ print $2 }'`;qmp_str=' { \"execute\": \"qmp_capabilities\"\
-    \ } { \"execute\": \"cxl-add-dynamic-capacity\", \"arguments\": { \"path\": \"/machine/peripheral/kdevops-cxl-dcd0\", \"region-id\": 0, \"extents\": [ { \"offset\"\
-    : 0, \"len\": 128 }, { \"offset\": 128, \"len\": 256 } ] } } '; echo $qmp_str | ncat localhost $qmp_port"
+    \ } { \"execute\": \"cxl-add-dynamic-capacity\", \"arguments\": { \"path\": \"/machine/peripheral/kdevops-cxl-dcd0\", \"region-id\": 0, \"extents\": [{ \"offset\"\
+    : 0, \"len\": 128 }, { \"offset\": 128, \"len\": 256 }] } } '; echo $qmp_str | ncat localhost $qmp_port"
   register: command_output
   tags: ["cxl-dcd-setup"]
   delegate_to: localhost

@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -50,7 +51,7 @@
     create: true
     mode: "0644"
     owner: root
-    group: root
+    ansible.builtin.group: root
   loop:
     - { path: "/etc/default/locale", line: "LANG=en_US.UTF-8" }
     - { path: "/etc/default/locale", line: "LANGUAGE=en_US:en" }
@@ -187,7 +188,7 @@
 - name: Source the developer's bash hack script
   ansible.builtin.shell: |
     SOURCE_BASH_HACKS="test -s {{ dev_bash_config_hacks_generic }}  && . {{ dev_bash_config_hacks_generic }} || true"
-    if [ -f {{ dev_bash_config }} ]; then
+    if [-f {{ dev_bash_config }}]; then
       if ! grep "{{ dev_bash_config_hacks_name }}" {{ dev_bash_config }}  2>&1 > /dev/null ; then
         echo "$SOURCE_BASH_HACKS" >> {{ dev_bash_config }}
       fi
@@ -214,7 +215,7 @@
   become_method: sudo
   ansible.builtin.shell: |
     SOURCE_BASH_HACKS="test -s {{ dev_bash_config_hacks_generic }}  && . {{ dev_bash_config_hacks_generic }} || true"
-    if [ -f {{ dev_bash_config_root }} ]; then
+    if [-f {{ dev_bash_config_root }}]; then
       if ! grep "{{ dev_bash_config_hacks_name }}" {{ dev_bash_config_root }}  2>&1 > /dev/null ; then
         echo "$SOURCE_BASH_HACKS" >> {{ dev_bash_config_root }}
       fi
@@ -633,7 +634,7 @@
   ansible.builtin.set_fact:
     node_host_ip: "{{ ansible_ssh_host }} {{ ansible_default_ipv4.address }}"
   delegate_facts: true
-  when: devconfig_enable_systemd_journal_remote|bool
+  when: devconfig_enable_systemd_journal_remote | bool
 
 - name: Set up symlinks for journals
   tags: ["journal_ln"]
@@ -642,7 +643,7 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.command: "{{ topdir_path }}/workflows/kdevops/scripts/jounal-ln.sh {{ devconfig_systemd_journal_remote_path }} {{ node_host_ip }}"
-  when: devconfig_enable_systemd_journal_remote|bool
+  when: devconfig_enable_systemd_journal_remote | bool
 
 - name: Enables systemd's watchdog
   ansible.builtin.stat:

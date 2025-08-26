@@ -17,13 +17,13 @@
 
 - name: Enumerate block devices on the target nodes
   ansible.builtin.include_tasks:
-    file: "guestfs.yml"
+    ansible.builtin.file: "guestfs.yml"
   when:
     - kdevops_enable_guestfs|bool
 
 - name: Enumerate block devices on the target nodes
   ansible.builtin.include_tasks:
-    file: "terraform/{{ kdevops_terraform_provider }}.yml"
+    ansible.builtin.file: "terraform/{{ kdevops_terraform_provider }}.yml"
   when:
     - kdevops_enable_terraform|bool
 

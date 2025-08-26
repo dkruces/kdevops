@@ -6,7 +6,7 @@
     src: "{{ item }}"
     dest: "/etc/yum.repos.d/{{ item | basename }}"
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
   with_items: "{{ kdevops_devconfig_custom_repos | trim | split(',') }}"
   when:

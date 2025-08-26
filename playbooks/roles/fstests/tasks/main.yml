@@ -1,7 +1,8 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -25,7 +26,7 @@
     path: "{{ fstests_xfs_xfsprogs_data }}"
   register: xfsprogs_dir
   tags: ["oscheck", "git", "fstests"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Set up an iSCSI initiator on target nodes
   ansible.builtin.include_role:
@@ -54,7 +55,7 @@
     recurse: true
     follow: false
     owner: "{{ data_user }}"
-    group: "{{ data_group }}"
+    ansible.builtin.group: "{{ data_group }}"
   tags: ["oscheck", "git", "fstests"]
   when:
     - fstests_xfs_build_custom_xfsprogs|bool
@@ -80,21 +81,21 @@
   register: result
   until: not result.failed
   tags: ["oscheck", "git", "fstests"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Configure xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     target: configure
   tags: ["oscheck", "fstests", "build"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Build xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     jobs: "{{ nproc.stdout }}"
   tags: ["oscheck", "fstests", "build"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Install xfsprogs
   become: true
@@ -106,7 +107,7 @@
       DIST_ROOT: "{{ fstests_xfs_xfsprogs_install_path }}"
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
   tags: ["oscheck", "fstests", "build"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Check if there's an existing xfsdump directory
   become: true
@@ -127,7 +128,7 @@
     path: "{{ fstests_xfsdump_data }}"
     recurse: true
     owner: "{{ data_user }}"
-    group: "{{ data_group }}"
+    ansible.builtin.group: "{{ data_group }}"
   tags: ["fstests", "deps"]
   when:
     - fstests_xfsdump_build|bool
@@ -179,7 +180,7 @@
     line: "export PATH={{ fstests_xfs_xfsprogs_install_path }}/usr/sbin/:$PATH"
     state: present
   tags: ["oscheck", "fstests", "build"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Create {{ truncated_path }} if needed
   ansible.builtin.include_role:
@@ -302,7 +303,7 @@
     src: "64-btrfs-zoned.rules"
     dest: "/usr/lib/udev/rules.d/"
     owner: "{{ data_user }}"
-    group: "{{ data_group }}"
+    ansible.builtin.group: "{{ data_group }}"
   tags: ["oscheck", "fstests"]
   when:
     - fstests_zns_enabled == "y"
@@ -350,7 +351,7 @@
     src: "{{ kdevops_fstests_setup }}"
     dest: "/root/{{ kdevops_fstests_setup }}"
     owner: "root"
-    group: "root"
+    ansible.builtin.group: "root"
     mode: "0644"
 
 - name: Source .kdevops_fstests_setup for root if it is not already done
@@ -362,7 +363,7 @@
   tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install"]
   ansible.builtin.shell: |
     SOURCE_KDEVOPS_FSTESTS_SETUP="test -s ~/{{ kdevops_fstests_setup }} && . ~/{{ kdevops_fstests_setup }} || true"
-    if [ -f {{ dev_bash_config }} ]; then
+    if [-f {{ dev_bash_config }}]; then
       if ! grep "{{ kdevops_fstests_setup_name }}" {{ dev_bash_config }}  2>&1 > /dev/null ; then
         echo "$SOURCE_KDEVOPS_FSTESTS_SETUP" >> {{ dev_bash_config }}
       fi
@@ -812,7 +813,7 @@
     src: "{{ fstests_fstyp }}/nfsmount.conf"
     dest: /etc/nfsmount.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
   when:
     - fstests_fstyp == "nfs"
@@ -1272,7 +1273,8 @@
       {{ all_limit_tests }}
       {{ initial_baseline_expunges }}
       {{ skip_tests_args }}
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   no_log: true
   args:
     chdir: "{{ fstests_data_target }}"

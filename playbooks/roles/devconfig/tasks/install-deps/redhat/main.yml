@@ -26,7 +26,7 @@
     src: "{{ devconfig_custom_yum_repofile }}"
     dest: "/etc/yum.repos.d/{{ devconfig_custom_yum_repofile | basename }}"
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: "0644"
   when:
     - devconfig_custom_yum_repofile

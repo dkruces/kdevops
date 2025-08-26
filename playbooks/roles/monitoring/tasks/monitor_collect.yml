@@ -15,7 +15,7 @@
   become: true
   become_method: sudo
   ansible.builtin.shell: |
-    if [ -f /root/monitoring/folio_migration.pid ]; then
+    if [-f /root/monitoring/folio_migration.pid]; then
       pid=$(cat /root/monitoring/folio_migration.pid)
       if ps -p $pid > /dev/null 2>&1; then
         kill $pid
@@ -67,7 +67,8 @@
   become_method: sudo
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
   register: matplotlib_check
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
@@ -83,7 +84,8 @@
   args:
     chdir: /root/monitoring
   register: plot_generation
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
@@ -176,7 +178,8 @@
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
   delegate_to: localhost
   register: localhost_matplotlib_check
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   run_once: true
   when:
     - monitor_developmental_stats|default(false)|bool
@@ -187,7 +190,8 @@
     \  {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats.txt\n"
   delegate_to: localhost
   register: localhost_plot_generation
-  ignore_errors: true
+  # TODO: Review - was ignore_errors: true
+  failed_when: false  # Always succeed - review this condition
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool

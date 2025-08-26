@@ -46,27 +46,9 @@
     - not custom_image_stat.stat.exists
     - guestfs_has_custom_raw_image_url|bool
 
-- name: Resize custom image to match configured size
-  become: true
-  become_method: ansible.builtin.sudo
-  ansible.builtin.command:
-    cmd: "qemu-img resize {{ custom_image }} {{ libvirt_image_size }}"
-  changed_when: true
+- name: Verify downloaded image checksum
   when:
-    - custom_image_download is changed or custom_image_stat.stat.exists
-    - guestfs_has_custom_raw_image_url|bool
-
-- name: Check if the custom image sentinel file already exists
-  ansible.builtin.stat:
-    path: "{{ custom_image_ok }}"
-    get_attributes: false
-    get_checksum: false
-    get_mime: false
-  register: sentinel_stat
-
-- name: Check the custom image
-  when:
-    - not sentinel_stat.stat.exists
+    - custom_image_download is changed
     - guestfs_has_custom_raw_image_sha512sums|bool
   block:
     - name: Get the base name of the sha512sums file
@@ -95,11 +77,34 @@
       when:
         - not sha512sums_stat.stat.exists
 
-    - name: Compute checksum of something
+    - name: Verify downloaded image checksum
       ansible.builtin.command:
         cmd: "sha512sum --ignore-missing -c {{ sha512sums_file }}"
         chdir: "{{ custom_image_dir }}"
       changed_when: false
+
+- name: Resize custom image to match configured size
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.command:
+    cmd: "qemu-img resize {{ custom_image }} {{ libvirt_image_size }}"
+  changed_when: true
+  when:
+    - custom_image_download is changed or custom_image_stat.stat.exists
+    - guestfs_has_custom_raw_image_url|bool
+
+- name: Check if the custom image sentinel file already exists
+  ansible.builtin.stat:
+    path: "{{ custom_image_ok }}"
+    get_attributes: false
+    get_checksum: false
+    get_mime: false
+  register: sentinel_stat
+
+- name: Setup custom image for virt-customize
+  when:
+    - not sentinel_stat.stat.exists
+  block:
 
     - name: Get the UID of the kdevops user on the control host
       ansible.builtin.command:

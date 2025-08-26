@@ -332,14 +332,26 @@ class ChangeFilter:
 class RecursiveProcessor:
     """Handles recursive file discovery and processing."""
 
-    def __init__(self):
-        pass
+    def __init__(self, exclude_patterns: List[str] = None):
+        self.exclude_patterns = exclude_patterns or [
+            '.git/**',
+            '**/node_modules/**',
+            '**/__pycache__/**',
+            '**/venv/**',
+            '**/env/**',
+            '**/.tox/**',
+            '**/build/**',
+            '**/dist/**'
+        ]
 
     def find_ansible_files(self, root_path: str, changes_only: bool = False, 
-                          change_filter: ChangeFilter = None) -> List[str]:
-        """Find all ansible YAML files, optionally filtering to changed files."""
+                          change_filter: ChangeFilter = None, 
+                          include_patterns: List[str] = None,
+                          exclude_patterns: List[str] = None) -> List[str]:
+        """Find all ansible YAML files with advanced filtering capabilities."""
         if changes_only and change_filter:
-            return change_filter.get_changed_ansible_files()
+            files = change_filter.get_changed_ansible_files()
+            return self._apply_filters(files, include_patterns, exclude_patterns)
         
         # Recursive discovery with intelligent filtering
         root = Path(root_path)
@@ -348,20 +360,83 @@ class RecursiveProcessor:
             
         ansible_files = []
         
-        # Common ansible directories and patterns
-        ansible_patterns = [
-            '**/*.yml',
-            '**/*.yaml'
-        ]
+        # Use provided patterns or defaults
+        search_patterns = include_patterns or ['**/*.yml', '**/*.yaml']
+        combined_excludes = list(self.exclude_patterns)
+        if exclude_patterns:
+            combined_excludes.extend(exclude_patterns)
         
-        for pattern in ansible_patterns:
+        for pattern in search_patterns:
             for file_path in root.glob(pattern):
                 if file_path.is_file():
+                    # Apply exclusion filters
+                    if self._should_exclude_file(file_path, combined_excludes):
+                        continue
+                    
                     # Filter to likely ansible files
                     if self._is_ansible_file(file_path):
                         ansible_files.append(str(file_path))
         
         return sorted(ansible_files)
+
+    def _should_exclude_file(self, file_path: Path, exclude_patterns: List[str]) -> bool:
+        """Check if file should be excluded based on patterns."""
+        import fnmatch
+        
+        file_str = str(file_path)
+        relative_path = file_path.relative_to(Path.cwd()) if file_path.is_absolute() else file_path
+        relative_str = str(relative_path)
+        
+        for pattern in exclude_patterns:
+            # Support both full path and relative path matching
+            if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(relative_str, pattern):
+                return True
+            
+            # Support directory-based exclusions
+            if '/' in pattern:
+                pattern_parts = pattern.split('/')
+                path_parts = relative_str.split('/')
+                
+                # Check if any directory segment matches
+                for i in range(len(path_parts) - len(pattern_parts) + 1):
+                    segment = '/'.join(path_parts[i:i + len(pattern_parts)])
+                    if fnmatch.fnmatch(segment, pattern):
+                        return True
+        
+        return False
+
+    def _apply_filters(self, files: List[str], include_patterns: List[str] = None, 
+                      exclude_patterns: List[str] = None) -> List[str]:
+        """Apply include/exclude filters to a list of files."""
+        if not files:
+            return files
+            
+        filtered = []
+        combined_excludes = list(self.exclude_patterns)
+        if exclude_patterns:
+            combined_excludes.extend(exclude_patterns)
+            
+        for file_str in files:
+            file_path = Path(file_str)
+            
+            # Apply exclusion filters
+            if self._should_exclude_file(file_path, combined_excludes):
+                continue
+                
+            # Apply include filters if specified
+            if include_patterns:
+                import fnmatch
+                included = False
+                for pattern in include_patterns:
+                    if fnmatch.fnmatch(file_str, pattern) or fnmatch.fnmatch(str(file_path.relative_to(Path.cwd()) if file_path.is_absolute() else file_path), pattern):
+                        included = True
+                        break
+                if not included:
+                    continue
+            
+            filtered.append(file_str)
+        
+        return sorted(filtered)
 
     def _is_ansible_file(self, file_path: Path) -> bool:
         """Determine if a YAML file is likely an ansible file."""
@@ -923,6 +998,8 @@ class ComprehensiveLintFixer:
         dry_run: bool = False,
         auto_accept: bool = False,
         verify: bool = True,
+        include_patterns: List[str] = None,
+        exclude_patterns: List[str] = None,
     ):
         self.target_path = target_path
         self.recursive = recursive
@@ -930,6 +1007,8 @@ class ComprehensiveLintFixer:
         self.enable_manual_fixes = enable_manual_fixes
         self.dry_run = dry_run
         self.verify = verify
+        self.include_patterns = include_patterns
+        self.exclude_patterns = exclude_patterns
 
         # Initialize components
         self.ui = UserInterface(auto_accept)
@@ -938,7 +1017,7 @@ class ComprehensiveLintFixer:
         
         # Initialize processors
         self.change_filter = ChangeFilter() if changes_only else None
-        self.recursive_processor = RecursiveProcessor()
+        self.recursive_processor = RecursiveProcessor(exclude_patterns)
         self.ansible_processor = AnsibleLintProcessor(target_path)
         self.manual_processor = ManualFixProcessor(self.change_filter) if enable_manual_fixes else None
 
@@ -950,13 +1029,50 @@ class ComprehensiveLintFixer:
         """Get list of files to process based on configuration."""
         if self.recursive:
             return self.recursive_processor.find_ansible_files(
-                self.target_path, self.changes_only, self.change_filter
+                self.target_path, 
+                self.changes_only, 
+                self.change_filter,
+                self.include_patterns,
+                self.exclude_patterns
             )
         elif self.changes_only and self.change_filter:
-            return self.change_filter.get_changed_ansible_files()
+            files = self.change_filter.get_changed_ansible_files()
+            return self.recursive_processor._apply_filters(files, self.include_patterns, self.exclude_patterns)
         else:
             # Single path processing (original behavior)
             return [self.target_path]
+
+    def show_discovered_files(self):
+        """Show discovered files for filter testing."""
+        target_files = self.get_target_files()
+        
+        if self.recursive or self.changes_only:
+            total_files = len(target_files)
+            self.ui.print_message(f"🔍 Discovered {total_files} ansible files", "cyan bold")
+            
+            if self.include_patterns:
+                self.ui.print_message(f"📥 Include patterns: {', '.join(self.include_patterns)}", "blue")
+            if self.exclude_patterns:
+                self.ui.print_message(f"🚫 Exclude patterns: {', '.join(self.exclude_patterns)}", "red")
+            
+            # Show files grouped by directory for better readability
+            files_by_dir = {}
+            for file_path in target_files:
+                dir_name = str(Path(file_path).parent)
+                if dir_name not in files_by_dir:
+                    files_by_dir[dir_name] = []
+                files_by_dir[dir_name].append(Path(file_path).name)
+            
+            # Display organized by directory
+            for dir_name in sorted(files_by_dir.keys()):
+                files = sorted(files_by_dir[dir_name])
+                self.ui.print_message(f"\n📁 {dir_name}/", "yellow")
+                for file_name in files[:10]:  # Show first 10 files per directory
+                    self.ui.print_message(f"  - {file_name}", "dim")
+                if len(files) > 10:
+                    self.ui.print_message(f"  ... and {len(files) - 10} more files", "dim")
+        else:
+            self.ui.print_message(f"🎯 Target: {self.target_path}", "cyan")
 
     def _process_single_rule(self, rule: RuleInfo, target_files: List[str]) -> bool:
         """Process a single rule across target files."""
@@ -1501,8 +1617,62 @@ def main():
         action="store_true",
         help="Skip ansible-lint verification after fixes",
     )
+    parser.add_argument(
+        "--include",
+        action="append",
+        metavar="PATTERN",
+        help="Include files matching pattern (can be used multiple times)",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append", 
+        metavar="PATTERN",
+        help="Exclude files matching pattern (can be used multiple times)",
+    )
+    parser.add_argument(
+        "--show-files",
+        action="store_true",
+        help="Show discovered files and exit (useful for testing filters)",
+    )
+    parser.add_argument(
+        "--config",
+        metavar="FILE",
+        help="Load configuration from YAML/JSON file",
+    )
 
     args = parser.parse_args()
+
+    # Load configuration file if specified
+    config_overrides = {}
+    if args.config:
+        try:
+            import yaml
+            with open(args.config, 'r') as f:
+                if args.config.endswith('.json'):
+                    import json
+                    config_overrides = json.load(f)
+                else:
+                    config_overrides = yaml.safe_load(f)
+        except ImportError:
+            print("Warning: yaml library not available. Install with: pip install pyyaml")
+        except Exception as e:
+            print(f"Error loading config file {args.config}: {e}")
+            sys.exit(1)
+    
+    # Apply config file overrides
+    for key, value in config_overrides.items():
+        if hasattr(args, key):
+            # Convert lists for include/exclude
+            if key in ['include', 'exclude']:
+                if isinstance(value, str):
+                    value = [value]
+                if getattr(args, key) is None:
+                    setattr(args, key, value)
+                else:
+                    getattr(args, key).extend(value)
+            # Only set if not already specified on command line
+            elif getattr(args, key) is None or (isinstance(getattr(args, key), bool) and not getattr(args, key)):
+                setattr(args, key, value)
 
     # Override rich if requested
     if args.no_rich:
@@ -1535,11 +1705,15 @@ def main():
         dry_run=args.dry_run,
         auto_accept=args.auto,
         verify=verify,
+        include_patterns=args.include,
+        exclude_patterns=args.exclude,
     )
 
     try:
         # Handle different modes
-        if args.list_tags:
+        if args.show_files:
+            fixer.show_discovered_files()
+        elif args.list_tags:
             fixer.list_autofix_tags()
         elif args.by_tag:
             fixer.process_by_tag(args.by_tag)

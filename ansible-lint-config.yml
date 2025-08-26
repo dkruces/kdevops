@@ -1,0 +1,28 @@
+# Example configuration for ansible-lint-comprehensive-fixer.py
+# This file demonstrates the configuration options available
+
+# Basic processing options
+recursive: true
+enable_manual_fixes: true
+verify: true
+
+# Filtering options
+exclude:
+  - "**/node_modules/**"
+  - "**/venv/**"
+  - "**/.tox/**"
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/defaults/**"  # Skip defaults files for faster processing
+
+include:
+  - "**/*.yml"
+  - "**/*.yaml"
+
+# Processing options
+# auto: false  # Set to true for unattended mode
+# dry_run: false  # Set to true for testing
+# no_verify: false  # Set to true to skip verification
+
+# Example usage:
+# ./scripts/ansible-lint-comprehensive-fixer.py --config ansible-lint-config.yml playbooks/

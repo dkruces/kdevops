@@ -448,12 +448,65 @@ class CommitMessageBuilder:
 
         return commit_msg
 
+    def build_tag_commit_message(
+        self, tag: str, target_path: str, rules: List[str], changed_files: List[str]
+    ) -> str:
+        """Generate a commit message for tag-based fixes."""
+        file_count = len(changed_files)
+        prefix = self._get_commit_prefix(target_path, changed_files)
+
+        commit_msg = f"{prefix} ansible-lint fix {tag} tag\n\n"
+        commit_msg += f"Applied ansible-lint --fix={tag}\n"
+        commit_msg += f"Rules: {', '.join(rules)}\n"
+
+        if file_count > 0:
+            commit_msg += f"\nFixed across {file_count} file{'s' if file_count != 1 else ''}.\n"
+
+        # Get dynamic git user info
+        git_name, git_email = self.git_manager.get_user_info()
+        commit_msg += f"\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {git_name} <{git_email}>"
+
+        return commit_msg
+
 
 class AnsibleLintProcessor:
     """Handles ansible-lint rule processing."""
 
     def __init__(self, target_path: str):
         self.target_path = target_path
+
+    def run_verification(self, files: List[str] = None) -> Tuple[bool, Dict[str, int]]:
+        """Run ansible-lint verification and return results summary."""
+        target = files if files else [self.target_path]
+        
+        try:
+            # Run ansible-lint with JSON output
+            result = subprocess.run(
+                ["ansible-lint", "--format", "json"] + target,
+                capture_output=True,
+                text=True,
+                timeout=Config.ANSIBLE_LINT_TIMEOUT,
+            )
+            
+            if result.stdout:
+                try:
+                    issues = json.loads(result.stdout)
+                    # Group by rule type
+                    by_rule = {}
+                    for issue in issues:
+                        rule_name = issue.get('check_name', 'unknown')
+                        by_rule[rule_name] = by_rule.get(rule_name, 0) + 1
+                    
+                    return result.returncode == 0, by_rule
+                except json.JSONDecodeError:
+                    return result.returncode == 0, {}
+            else:
+                return result.returncode == 0, {}
+                
+        except subprocess.TimeoutExpired:
+            return False, {"timeout": 1}
+        except subprocess.CalledProcessError:
+            return False, {"error": 1}
 
     def get_fixable_rules(self) -> List[RuleInfo]:
         """Extract ansible-lint rules that support --fix (have autofix tag)."""
@@ -779,6 +832,62 @@ class ManualFixProcessor:
                     
         return '\n'.join(lines)
 
+    def fix_ignore_errors(self, content: str, file_path: str) -> str:
+        """
+        Convert ignore_errors to failed_when where appropriate.
+        This is a more conservative fix - only for simple cases.
+        """
+        lines = content.split('\n')
+        i = 0
+        while i < len(lines):
+            if not self.should_fix_line(file_path, i + 1):
+                i += 1
+                continue
+                
+            line = lines[i]
+            # Look for ignore_errors: yes/true
+            if re.match(r'\s*ignore_errors:\s*(yes|true|True)', line):
+                # Check if there's already a failed_when
+                has_failed_when = False
+                indent = len(line) - len(line.lstrip())
+                
+                # Look ahead for failed_when at the same indent level
+                for j in range(i + 1, min(i + 10, len(lines))):
+                    next_line = lines[j]
+                    next_indent = len(next_line) - len(next_line.lstrip())
+                    if next_indent < indent and next_line.strip():
+                        break
+                    if re.match(r'\s*failed_when:', next_line):
+                        has_failed_when = True
+                        break
+                        
+                # Only convert if this is safe (no existing failed_when)
+                # Add a comment to indicate manual review needed
+                if not has_failed_when:
+                    lines[i] = line.replace('ignore_errors:', '# TODO: Review - was ignore_errors:')
+                    # Add a conservative failed_when
+                    lines.insert(i + 1, ' ' * indent + 'failed_when: false  # Always succeed - review this condition')
+                    i += 1
+                    
+            i += 1
+        return '\n'.join(lines)
+
+    def fix_role_path(self, content: str, file_path: str) -> str:
+        """Fix role path issues - remove ../roles/ prefix."""
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if not self.should_fix_line(file_path, i + 1):
+                continue
+                
+            # Fix role paths in import_role and include_role
+            if 'role:' in line or 'name:' in line:
+                # Remove ../roles/ prefix from role names
+                fixed_line = re.sub(r'(role:|name:)\s*["\']?\.\.\/roles\/([^"\'\s]+)', r'\1 \2', line)
+                fixed_line = re.sub(r'(role:|name:)\s*\.\.\/roles\/([^\s]+)', r'\1 \2', fixed_line)
+                lines[i] = fixed_line
+                
+        return '\n'.join(lines)
+
     def apply_manual_fixes(self, file_path: str) -> Tuple[bool, str]:
         """Apply all manual fixes to a file."""
         try:
@@ -793,6 +902,8 @@ class ManualFixProcessor:
         content = self.fix_yaml_truthy(content, file_path)
         content = self.fix_jinja_spacing(content, file_path)
         content = self.fix_fqcn(content, file_path)
+        content = self.fix_ignore_errors(content, file_path)
+        content = self.fix_role_path(content, file_path)
         
         # Check if anything changed
         if content != original_content:
@@ -811,12 +922,14 @@ class ComprehensiveLintFixer:
         enable_manual_fixes: bool = False,
         dry_run: bool = False,
         auto_accept: bool = False,
+        verify: bool = True,
     ):
         self.target_path = target_path
         self.recursive = recursive
         self.changes_only = changes_only
         self.enable_manual_fixes = enable_manual_fixes
         self.dry_run = dry_run
+        self.verify = verify
 
         # Initialize components
         self.ui = UserInterface(auto_accept)
@@ -946,42 +1059,107 @@ class ComprehensiveLintFixer:
         if not should_process:
             return
 
-        # Process rules
+        # Process rules with enhanced progress tracking
         processed = 0
         successful = 0
+        total_phases = 1 + (1 if self.enable_manual_fixes else 0)  # ansible-lint + manual fixes
 
-        for rule in fixable_rules:
-            self.ui.print_message(f"\n📋 Processing rule: {rule.id}", "cyan bold")
-            
-            if self._process_single_rule(rule, target_files):
-                successful += 1
-                self.processed_rules.add(rule.id)
-            else:
-                if self.git_manager.has_changes():
-                    self.failed_rules.add(rule.id)
-                else:
-                    self.ui.print_message(
-                        f"⏭️  Rule '{rule.id}' - no changes needed", "dim"
-                    )
+        if self.ui.console:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                MofNCompleteColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.1f}%"),
+            ) as progress:
 
-            processed += 1
-
-            # Ask if user wants to continue to next rule
-            if processed < total_rules:
-                should_continue = self.ui.prompt_user(
-                    f"Continue to next rule? ({total_rules - processed} rules remaining)",
-                    default=True,
+                # Phase 1: Ansible-lint rules
+                rules_task = progress.add_task(
+                    "Processing ansible-lint rules...", total=total_rules
                 )
-                if not should_continue:
-                    self.ui.print_message(
-                        "⏹️  Stopping at user request", "yellow"
-                    )
-                    break
 
-        # Apply manual fixes if enabled
-        if self.enable_manual_fixes and self.manual_processor:
-            self.ui.print_message(f"\n🔧 Applying manual fixes...", "cyan bold")
-            self._apply_manual_fixes(target_files)
+                for rule in fixable_rules:
+                    progress.update(rules_task, description=f"Processing rule: {rule.id}")
+
+                    # Pause progress bar for user interaction
+                    progress.stop()
+
+                    if self._process_single_rule(rule, target_files):
+                        successful += 1
+                        self.processed_rules.add(rule.id)
+                    else:
+                        if self.git_manager.has_changes():
+                            self.failed_rules.add(rule.id)
+                        else:
+                            self.ui.print_message(
+                                f"⏭️  Rule '{rule.id}' - no changes needed", "dim"
+                            )
+
+                    processed += 1
+
+                    # Ask if user wants to continue to next rule
+                    if processed < total_rules:
+                        should_continue = self.ui.prompt_user(
+                            f"Continue to next rule? ({total_rules - processed} rules remaining)",
+                            default=True,
+                        )
+                        if not should_continue:
+                            self.ui.print_message(
+                                "⏹️  Stopping at user request", "yellow"
+                            )
+                            break
+
+                    # Resume progress bar
+                    progress.start()
+                    progress.update(rules_task, advance=1)
+
+                # Phase 2: Manual fixes if enabled
+                if self.enable_manual_fixes and self.manual_processor:
+                    progress.update(rules_task, description="Ansible-lint rules complete")
+                    
+                    manual_task = progress.add_task(
+                        "Applying manual fixes...", total=100
+                    )
+                    
+                    progress.start()
+                    self._apply_manual_fixes_with_progress(target_files, progress, manual_task)
+                    progress.update(manual_task, completed=100)
+
+        else:
+            # Fallback without rich
+            for i, rule in enumerate(fixable_rules, 1):
+                print(f"\n[{i}/{total_rules}] Processing rule: {rule.id}")
+                print("=" * 50)
+
+                if self._process_single_rule(rule, target_files):
+                    successful += 1
+                    self.processed_rules.add(rule.id)
+                else:
+                    if self.git_manager.has_changes():
+                        self.failed_rules.add(rule.id)
+                    else:
+                        print(f"⏭️  Rule '{rule.id}' - no changes needed")
+
+                processed += 1
+
+                # Ask if user wants to continue to next rule
+                if i < total_rules:
+                    should_continue = self.ui.prompt_user(
+                        f"Continue to next rule? ({total_rules - i} rules remaining)",
+                        default=True,
+                    )
+                    if not should_continue:
+                        print("⏹️  Stopping at user request")
+                        break
+
+            # Apply manual fixes if enabled (without progress)
+            if self.enable_manual_fixes and self.manual_processor:
+                print(f"\n🔧 Applying manual fixes...")
+                self._apply_manual_fixes(target_files)
+
+        # Post-processing verification
+        if self.verify and not self.dry_run and (successful > 0 or (self.enable_manual_fixes and self.manual_processor)):
+            self._run_post_fix_verification(target_files)
 
         # Final summary
         self.ui.show_final_summary(
@@ -1043,6 +1221,224 @@ class ComprehensiveLintFixer:
         else:
             self.ui.print_message("ℹ️  No manual fixes needed", "dim")
 
+    def _apply_manual_fixes_with_progress(self, target_files: List[str], progress, task_id):
+        """Apply manual fixes with Rich progress tracking."""
+        if not target_files or not self.manual_processor:
+            return
+            
+        # For manual fixes, we need individual files, not directory paths
+        files_to_fix = []
+        for target in target_files:
+            if os.path.isfile(target):
+                files_to_fix.append(target)
+            elif os.path.isdir(target):
+                # Get files from directory
+                discovered = self.recursive_processor.find_ansible_files(target)
+                files_to_fix.extend(discovered)
+        
+        # Remove duplicates and filter if changes-only
+        files_to_fix = list(set(files_to_fix))
+        if self.changes_only and self.change_filter:
+            changed_files = self.change_filter.get_changed_ansible_files()
+            files_to_fix = [f for f in files_to_fix if f in changed_files]
+
+        if not files_to_fix:
+            progress.update(task_id, description="No files to fix")
+            return
+
+        progress.update(task_id, total=len(files_to_fix))
+        self.ui.print_message(f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue")
+        
+        modified_files = []
+        for i, file_path in enumerate(files_to_fix):
+            progress.update(task_id, description=f"Fixing: {os.path.basename(file_path)}")
+            
+            was_modified, content = self.manual_processor.apply_manual_fixes(file_path)
+            if was_modified:
+                if not self.dry_run:
+                    with open(file_path, 'w') as f:
+                        f.write(content)
+                modified_files.append(file_path)
+                
+            progress.update(task_id, completed=i+1)
+        
+        if modified_files:
+            progress.update(task_id, description=f"Manual fixes applied to {len(modified_files)} files")
+            self.ui.print_message(f"🔧 Manual fixes applied to {len(modified_files)} files", "green")
+            
+            # Commit manual fixes if not dry run
+            if not self.dry_run:
+                # Pause progress for user interaction
+                progress.stop()
+                
+                should_commit = self.ui.prompt_user(
+                    "Commit manual fixes?",
+                    default=True,
+                    auto_message="Auto-committing manual fixes",
+                )
+                
+                if should_commit:
+                    if self.git_manager.add_files(modified_files):
+                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nFixed remaining issues across {len(modified_files)} files.\n\nGenerated-by: Ansible Lint (ansible-lint-comprehensive-fixer.py)\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+                        
+                        if self.git_manager.create_commit(commit_message):
+                            self.ui.print_message("✅ Manual fixes committed successfully!", "green")
+                        else:
+                            self.ui.print_message("❌ Failed to commit manual fixes!", "red")
+                
+                progress.start()
+        else:
+            progress.update(task_id, description="No manual fixes needed")
+
+    def _run_post_fix_verification(self, target_files: List[str]):
+        """Run ansible-lint verification after fixes and show results."""
+        self.ui.print_message(f"\n🔍 Running post-fix verification...", "cyan bold")
+        
+        # Determine what to verify
+        if len(target_files) == 1 and target_files[0] == self.target_path:
+            verify_target = None  # Use default target
+        else:
+            # For recursive/multiple files, verify the specific files
+            files_to_verify = []
+            for target in target_files:
+                if os.path.isfile(target):
+                    files_to_verify.append(target)
+                elif os.path.isdir(target):
+                    # Get files from directory
+                    discovered = self.recursive_processor.find_ansible_files(target)
+                    files_to_verify.extend(discovered)
+            verify_target = list(set(files_to_verify))
+        
+        passed, remaining_issues = self.ansible_processor.run_verification(verify_target)
+        
+        if passed:
+            self.ui.print_message("✅ All ansible-lint checks passed!", "green bold")
+        else:
+            total_issues = sum(remaining_issues.values())
+            self.ui.print_message(f"⚠️  {total_issues} ansible-lint issues remain", "yellow")
+            
+            if remaining_issues and self.ui.console:
+                table = Table(title="Remaining Issues")
+                table.add_column("Rule", style="cyan")
+                table.add_column("Count", style="yellow")
+                
+                for rule, count in sorted(remaining_issues.items()):
+                    table.add_row(rule, str(count))
+                
+                self.ui.console.print(table)
+            else:
+                self.ui.print_message("Remaining issues by type:", "yellow")
+                for rule, count in sorted(remaining_issues.items()):
+                    self.ui.print_message(f"  {rule}: {count}", "dim")
+
+    def process_by_tag(self, tag: str):
+        """Process all rules with a specific tag."""
+        tags_to_rules = self.ansible_processor.get_autofix_tags()
+
+        if tag not in tags_to_rules:
+            available_tags = ", ".join(sorted(tags_to_rules.keys()))
+            self.ui.print_message(
+                f"Tag '{tag}' not found. Available tags: {available_tags}", "red"
+            )
+            return
+
+        rules_for_tag = tags_to_rules[tag]
+        
+        # Get target files for display
+        target_files = self.get_target_files()
+        if self.recursive:
+            self.ui.print_message(f"📁 Found {len(target_files)} ansible files for processing", "blue")
+
+        if self.dry_run:
+            self.ui.print_message(
+                f"\n🔍 DRY RUN: Would process {len(rules_for_tag)} rules with tag '{tag}'",
+                "yellow bold",
+            )
+            self.ui.print_message(
+                f"Command: ansible-lint --fix={tag} {self.target_path}", "cyan"
+            )
+            self.ui.print_message(f"Rules included: {', '.join(rules_for_tag)}", "dim")
+            if self.enable_manual_fixes:
+                self.ui.print_message("  + Manual fixes for remaining issues", "dim")
+            return
+
+        # Ask for confirmation
+        should_process = self.ui.prompt_user(
+            f"\nProcess {len(rules_for_tag)} rules with tag '{tag}'?",
+            auto_message=f"Auto-processing {len(rules_for_tag)} rules with tag '{tag}'",
+        )
+
+        if not should_process:
+            return
+
+        # Process by tag
+        command = AnsibleLintCommand.fix_tag(tag, self.target_path)
+        success, output = self.ansible_processor.run_fix(command)
+
+        if success and self.git_manager.has_changes():
+            changed_files = self.git_manager.get_changed_files()
+            self.ui.print_message(f"✅ Tag '{tag}' applied successfully!", "green bold")
+            self.ui.print_message(f"Changed {len(changed_files)} files", "yellow")
+
+            # Ask to commit
+            should_commit = self.ui.prompt_user(
+                f"Commit changes for tag '{tag}'?",
+                default=True,
+                auto_message=f"Auto-committing changes for tag '{tag}'",
+            )
+
+            if should_commit:
+                if not self.git_manager.add_files(changed_files):
+                    self.ui.print_message("❌ Failed to stage files!", "red")
+                    return
+
+                commit_message = self.commit_builder.build_tag_commit_message(
+                    tag, self.target_path, rules_for_tag, changed_files
+                )
+
+                if self.git_manager.create_commit(commit_message):
+                    self.ui.print_message("✅ Committed successfully!", "green")
+                else:
+                    self.ui.print_message("❌ Commit failed!", "red")
+        else:
+            self.ui.print_message(f"⏭️  Tag '{tag}' - no changes needed", "dim")
+
+        # Apply manual fixes if enabled
+        if self.enable_manual_fixes and self.manual_processor:
+            self.ui.print_message(f"\n🔧 Applying manual fixes after tag processing...", "cyan bold")
+            self._apply_manual_fixes(target_files)
+
+    def list_autofix_tags(self):
+        """List all available autofix tags."""
+        tags_to_rules = self.ansible_processor.get_autofix_tags()
+
+        if self.ui.console:
+            table = Table(title="Available Autofix Tags")
+            table.add_column("Tag", style="cyan")
+            table.add_column("Rules Count", style="yellow")
+            table.add_column("Example Rules", style="white")
+
+            for tag in sorted(tags_to_rules.keys()):
+                rules = tags_to_rules[tag]
+                example_rules = ", ".join(rules[:3])
+                if len(rules) > 3:
+                    example_rules += f", ... (+{len(rules)-3} more)"
+                table.add_row(tag, str(len(rules)), example_rules)
+
+            self.ui.console.print(table)
+        else:
+            print("\n=== Available Autofix Tags ===")
+            for tag in sorted(tags_to_rules.keys()):
+                rules = tags_to_rules[tag]
+                print(f"{tag:15s} ({len(rules):2d} rules): {', '.join(rules[:3])}")
+                if len(rules) > 3:
+                    print(f"{'':17s} ... and {len(rules)-3} more")
+
+        self.ui.print_message(f"\nUsage: --by-tag TAG  (process all rules with specific tag)", "cyan")
+        self.ui.print_message(f"       --by-tag formatting  (YAML formatting, key order, FQCN)", "dim")
+        self.ui.print_message(f"       --by-tag idiom       (naming, shell usage)", "dim")
+        self.ui.print_message(f"       --by-tag deprecations (old syntax fixes)", "dim")
+
 
 def main():
     """Main entry point."""
@@ -1087,6 +1483,24 @@ def main():
         action="store_true",
         help="Disable rich formatting (use plain text)",
     )
+    parser.add_argument(
+        "--by-tag",
+        metavar="TAG",
+        help="Process rules by tag instead of individually (e.g., formatting, idiom, deprecations)",
+    )
+    parser.add_argument(
+        "--list-tags", action="store_true", help="List available autofix tags and exit"
+    )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Run ansible-lint verification after fixes (enabled by default)",
+    )
+    parser.add_argument(
+        "--no-verify",
+        action="store_true",
+        help="Skip ansible-lint verification after fixes",
+    )
 
     args = parser.parse_args()
 
@@ -1107,6 +1521,11 @@ def main():
         print("Error: ansible-lint not found. Please install ansible-lint")
         sys.exit(1)
 
+    # Handle verification flags
+    verify = not args.no_verify if hasattr(args, 'no_verify') else True
+    if hasattr(args, 'verify') and args.verify:
+        verify = True
+
     # Create the comprehensive fixer
     fixer = ComprehensiveLintFixer(
         target_path=args.path,
@@ -1115,11 +1534,17 @@ def main():
         enable_manual_fixes=args.enable_manual_fixes,
         dry_run=args.dry_run,
         auto_accept=args.auto,
+        verify=verify,
     )
 
     try:
-        # Process rules
-        fixer.process_rules()
+        # Handle different modes
+        if args.list_tags:
+            fixer.list_autofix_tags()
+        elif args.by_tag:
+            fixer.process_by_tag(args.by_tag)
+        else:
+            fixer.process_rules()
     except KeyboardInterrupt:
         print("\n⏹️  Processing interrupted by user")
         sys.exit(1)

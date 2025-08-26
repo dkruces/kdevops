@@ -149,7 +149,6 @@
   when:
     - not kdevops_workflows_dedicated_workflow
 
-
 - name: Generate the builder kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["nodes"]
   vars:
@@ -162,7 +161,6 @@
     force: true
   when:
     - bootlinux_builder
-
 
 - name: Generate the pynfs kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["nodes"]
@@ -179,7 +177,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_pynfs
 
-
 - name: Generate the cxl kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["nodes"]
   vars:
@@ -194,7 +191,6 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_cxl
-
 
 - name: Generate a kdevops nodes file for the gitr workflow
   tags: hosts
@@ -332,7 +328,6 @@
   when:
     - is_fstests|bool
 
-
 - name: Infer enabled blktests test section types
   ansible.builtin.set_fact:
     blktests_enabled_test_types: >-
@@ -393,7 +388,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_blktests
 
-
 - name: Infer enabled selftests test section types
   ansible.builtin.set_fact:
     selftests_enabled_test_types: >-
@@ -443,7 +437,6 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_selftests
-
 
 - name: Collect dynamically supported filesystems
   vars:
@@ -522,7 +515,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_sysbench
 
-
 - name: Generate the fio-tests kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["hosts"]
   vars:
@@ -539,7 +531,6 @@
     - kdevops_workflow_enable_fio_tests
     - ansible_nodes_template.stat.exists
 
-
 - name: Generate the fio-tests kdevops nodes file with dev hosts using nodes file using template as jinja2 source template
   tags: ["hosts"]
   vars:
@@ -555,7 +546,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests
     - ansible_nodes_template.stat.exists
-
 
 - name: Infer enabled mmtests test section types
   ansible.builtin.set_fact:
@@ -607,7 +597,6 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_mmtests
 
-
 - name: Generate the reboot-limit kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["hosts"]
   vars:
@@ -624,7 +613,6 @@
     - workflows_reboot_limit
     - ansible_nodes_template.stat.exists
 
-
 - name: Generate the reboot-limit kdevops nodes file with dev hosts using nodes file using template as jinja2 source template
   tags: ["hosts"]
   vars:
@@ -640,7 +628,6 @@
     - kdevops_workflows_dedicated_workflow
     - workflows_reboot_limit
     - ansible_nodes_template.stat.exists
-
 
 - name: Get the control host's timezone
   ansible.builtin.command: "timedatectl show -p Timezone --value"

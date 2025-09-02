@@ -63,6 +63,50 @@ config MONITOR_FOLIO_MIGRATION_INTERVAL
 
 endif # MONITOR_DEVELOPMENTAL_STATS
 
+config MONITOR_NVME_OCP
+	bool "Monitor NVMe OCP SMART statistics"
+	output yaml
+	default n
+	help
+	  Enable monitoring of NVMe OCP (Open Compute Project) extended SMART
+	  statistics using nvme-cli ocp plugin.
+
+	  Requires:
+	  - nvme-cli with OCP plugin support
+	  - NVMe devices with OCP SMART support
+	  - Root privileges for nvme command execution
+
+	  Collects statistics from: nvme ocp smart-add-log --output-format=json
+
+	  The collected data includes wear indicators, health metrics,
+	  thermal statistics, and reliability counters for comprehensive
+	  NVMe device monitoring during workflow execution.
+
+config MONITOR_NVME_OCP_INTERVAL
+	int "NVMe OCP monitoring interval (seconds)"
+	output yaml
+	default 300
+	depends on MONITOR_NVME_OCP
+	range 60 3600
+	help
+	  How often to collect NVMe OCP SMART statistics in seconds.
+	  Default is 300 seconds (5 minutes).
+
+	  Lower values provide more granular data but may impact system
+	  performance. Higher values reduce overhead but may miss
+	  short-lived device behavior changes.
+
+config MONITOR_NVME_OCP_DEVICES
+	string "NVMe devices to monitor (space-separated)"
+	output yaml
+	default "auto"
+	depends on MONITOR_NVME_OCP
+	help
+	  Space-separated list of NVMe devices to monitor (e.g., "/dev/nvme0n1 /dev/nvme1n1").
+	  
+	  Use "auto" to automatically discover all available NVMe devices.
+	  Use "ocp-only" to automatically discover only OCP-capable devices.
+
 # Future monitoring options can be added here
 # Examples:
 # - Memory pressure monitoring

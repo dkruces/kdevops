@@ -44,11 +44,43 @@ make menuconfig
 # Set: "Folio migration monitoring interval" (default: 60 seconds)
 ```
 
+#### NVMe OCP SMART Statistics
+
+This monitor tracks NVMe OCP (Open Compute Project) extended SMART statistics for storage device health and performance analysis.
+
+**Requirements:**
+- nvme-cli with OCP plugin support
+- NVMe devices with OCP SMART capability
+- Root privileges for nvme command execution
+
+**Configuration:**
+```bash
+make menuconfig
+# Navigate to: Monitors
+# Enable: "Enable monitoring services during workflow execution"
+# Enable: "Monitor NVMe OCP SMART statistics"
+# Set: "NVMe OCP monitoring interval" (default: 300 seconds)
+# Set: "NVMe devices to monitor" (default: "auto")
+```
+
+**Device Discovery Modes:**
+- **auto**: Automatically discover all available NVMe devices
+- **ocp-only**: Test each device for OCP support and monitor only compatible devices
+- **manual**: Space-separated list of specific devices (e.g., "/dev/nvme0n1 /dev/nvme1n1")
+
+**Collected Metrics:**
+- **Wear Indicators**: Physical media units written/read, erase counts
+- **Health Metrics**: Bad NAND blocks (raw/normalized), error counts
+- **Performance**: Thermal throttling events, unaligned I/O
+- **Reliability**: Uncorrectable errors, incomplete shutdowns, capacitor health
+```
+
 ## Integration with Workflows
 
 ### Currently Supported Workflows
 
 - **fstests**: Filesystem testing framework
+- **blktests**: Block layer testing framework
 
 ### How Workflows Integrate Monitoring
 
@@ -183,6 +215,39 @@ make fstests-baseline TESTS=generic/003
 ls -la workflows/fstests/results/monitoring/
 ```
 
+### Example: blktests with NVMe OCP Monitoring
+
+1. **Configure NVMe OCP monitoring**:
+```bash
+make menuconfig
+# Navigate to: Monitors
+# Enable: "Enable monitoring services during workflow execution"
+# Enable: "Monitor NVMe OCP SMART statistics"
+# Set device discovery mode (auto/ocp-only/manual)
+# Set monitoring interval (default: 300 seconds)
+make
+```
+
+2. **Provision systems**:
+```bash
+make bringup
+```
+
+3. **Run block tests with NVMe monitoring**:
+```bash
+# Run on all configured test groups
+make blktests
+
+# Run specific test subset
+make blktests TESTS="nvme/001 nvme/002"
+```
+
+4. **Check NVMe OCP results**:
+```bash
+ls -la workflows/blktests/results/monitoring/
+# Files: hostname_nvme_ocp_devicename_stats.txt, nvme_ocp_combined_plot.png
+```
+
 ## Advanced Usage
 
 ### Custom Monitoring Intervals
@@ -200,6 +265,12 @@ You can enable/disable specific monitors at runtime:
 ```bash
 # Enable only folio migration monitoring
 make fstests-tests EXTRA_VARS="enable_monitoring=true monitor_folio_migration=true"
+
+# Enable only NVMe OCP monitoring
+make blktests EXTRA_VARS="enable_monitoring=true monitor_nvme_ocp=true"
+
+# Enable both monitors with custom intervals
+make blktests EXTRA_VARS="enable_monitoring=true monitor_nvme_ocp=true monitor_nvme_ocp_interval=60"
 ```
 
 ## Troubleshooting
@@ -236,6 +307,29 @@ make fstests-tests AV=2 | grep -A5 -B5 monitoring
 3. **Look for error messages**:
 ```bash
 ansible all -m shell -a "cat /root/monitoring/folio_migration.log"
+```
+
+### NVMe OCP Specific Troubleshooting
+
+1. **Check NVMe OCP plugin availability**:
+```bash
+ansible all -m shell -a "nvme ocp help"
+```
+
+2. **Test OCP support on devices**:
+```bash
+ansible all -m shell -a "nvme ocp smart-add-log /dev/nvme0n1"
+```
+
+3. **Check NVMe device discovery**:
+```bash
+ansible all -m shell -a "find /dev -name 'nvme*n*' -type b"
+```
+
+4. **Verify monitoring processes**:
+```bash
+ansible all -m shell -a "ps aux | grep nvme_ocp"
+ansible all -m shell -a "ls -la /root/monitoring/nvme_ocp_*"
 ```
 
 ## Adding New Monitors

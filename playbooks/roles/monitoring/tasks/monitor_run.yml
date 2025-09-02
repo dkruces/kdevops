@@ -81,3 +81,105 @@
     - monitor_folio_migration|default(false)|bool
     - folio_migration_stats_file.stat.exists|default(false)
     - monitor_status is defined
+
+# NVMe OCP monitoring setup
+- name: Check if NVMe OCP monitoring is enabled
+  ansible.builtin.set_fact:
+    nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
+  when:
+    - enable_monitoring|default(false)|bool
+
+- name: Discover NVMe devices for OCP monitoring
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    if [ "{{ monitor_nvme_ocp_devices }}" = "auto" ]; then
+      find /dev -name 'nvme*n*' -type b 2>/dev/null | head -10
+    elif [ "{{ monitor_nvme_ocp_devices }}" = "ocp-only" ]; then
+      for dev in /dev/nvme*n*; do
+        if [ -b "$dev" ] && nvme ocp smart-add-log "$dev" >/dev/null 2>&1; then
+          echo "$dev"
+        fi
+      done
+    else
+      echo "{{ monitor_nvme_ocp_devices }}"
+    fi
+  register: nvme_devices_discovery
+  changed_when: false
+  failed_when: false
+  when:
+    - nvme_ocp_enabled|bool
+
+- name: Set NVMe devices list for monitoring
+  ansible.builtin.set_fact:
+    nvme_devices_list: "{{ nvme_devices_discovery.stdout_lines|default([]) }}"
+  when:
+    - nvme_ocp_enabled|bool
+
+- name: Display discovered NVMe devices
+  ansible.builtin.debug:
+    msg: "Found {{ nvme_devices_list|length }} NVMe devices for OCP monitoring: {{ nvme_devices_list|join(', ') }}"
+  when:
+    - nvme_ocp_enabled|bool
+    - nvme_devices_list is defined
+
+- name: Create monitoring directory for NVMe OCP
+  become: true
+  become_method: sudo
+  ansible.builtin.file:
+    path: /root/monitoring
+    state: directory
+    mode: "0755"
+  when:
+    - nvme_ocp_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Start NVMe OCP monitoring for each device
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    device_name=$(basename {{ item }} | sed 's/\//_/g')
+    nohup bash -c '
+      while true; do
+        echo "$(date "+%Y-%m-%d %H:%M:%S")"
+        nvme ocp smart-add-log --output-format=json {{ item }} 2>/dev/null || echo "{\"error\":\"command_failed\",\"device\":\"{{ item }}\",\"timestamp\":\"$(date "+%Y-%m-%d %H:%M:%S")\"}"
+        echo ""
+        sleep {{ monitor_nvme_ocp_interval|default(300) }}
+      done
+    ' > /root/monitoring/nvme_ocp_${device_name}_stats.txt 2>&1 &
+    echo $! > /root/monitoring/nvme_ocp_${device_name}.pid
+  loop: "{{ nvme_devices_list }}"
+  when:
+    - nvme_ocp_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Verify NVMe OCP monitoring processes started
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    device_name=$(basename {{ item }} | sed 's/\//_/g')
+    if [ -f /root/monitoring/nvme_ocp_${device_name}.pid ]; then
+      pid=$(cat /root/monitoring/nvme_ocp_${device_name}.pid)
+      if ps -p $pid > /dev/null 2>&1; then
+        echo "NVMe OCP monitoring for {{ item }} (PID $pid) is running"
+      else
+        echo "ERROR: NVMe OCP monitoring for {{ item }} (PID $pid) failed to start" >&2
+        exit 1
+      fi
+    else
+      echo "ERROR: PID file for {{ item }} not found" >&2
+      exit 1
+    fi
+  register: nvme_monitor_status
+  loop: "{{ nvme_devices_list }}"
+  when:
+    - nvme_ocp_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Display NVMe OCP monitoring status
+  ansible.builtin.debug:
+    msg: "{{ nvme_monitor_status.results | map(attribute='stdout') | list }}"
+  when:
+    - nvme_ocp_enabled|bool
+    - nvme_devices_list|length > 0
+    - nvme_monitor_status is defined

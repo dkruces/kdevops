@@ -206,3 +206,143 @@
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
     - folio_migration_data_file.stat.exists|default(false)
+
+# NVMe OCP monitoring collection
+- name: Check for NVMe OCP monitoring processes
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_ocp_*.pid 2>/dev/null || true"
+  register: nvme_ocp_pids
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+
+- name: Stop NVMe OCP monitoring processes
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    for pidfile in /root/monitoring/nvme_ocp_*.pid; do
+      if [ -f "$pidfile" ]; then
+        device_name=$(basename "$pidfile" .pid | sed 's/nvme_ocp_//')
+        pid=$(cat "$pidfile")
+        if ps -p $pid > /dev/null 2>&1; then
+          kill $pid
+          echo "Stopped NVMe OCP monitoring for device $device_name (PID $pid)"
+        else
+          echo "NVMe OCP monitoring for device $device_name (PID $pid) was not running"
+        fi
+        rm -f "$pidfile"
+      fi
+    done
+  register: nvme_stop_monitor
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_pids.stdout != ""
+
+- name: Display NVMe OCP stop status
+  ansible.builtin.debug:
+    msg: "{{ nvme_stop_monitor.stdout }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_stop_monitor is defined
+    - nvme_stop_monitor.stdout != ""
+
+- name: Create local NVMe OCP monitoring results directory
+  ansible.builtin.file:
+    path: "{{ monitoring_results_path }}"
+    state: directory
+  delegate_to: localhost
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+
+- name: Collect NVMe OCP monitoring data files
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_ocp_*_stats.txt 2>/dev/null || true"
+  register: nvme_ocp_data_files
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+
+- name: Copy NVMe OCP monitoring data to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: "{{ item }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ nvme_ocp_data_files.stdout_lines|default([]) }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_data_files.stdout != ""
+
+- name: Display NVMe OCP data collection summary
+  ansible.builtin.debug:
+    msg: |
+      NVMe OCP monitoring collection complete.
+      Data files copied: {{ nvme_ocp_data_files.stdout_lines|default([])|length }}
+      Results directory: {{ monitoring_results_path }}
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_data_files.stdout != ""
+
+# Generate NVMe OCP plots on localhost
+- name: Check if matplotlib is available on localhost for NVMe OCP plots
+  ansible.builtin.command: python3 -c "import matplotlib.pyplot"
+  delegate_to: localhost
+  register: nvme_localhost_matplotlib_check
+  ignore_errors: true
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+
+- name: Find collected NVMe OCP data files for plotting
+  ansible.builtin.find:
+    paths: "{{ monitoring_results_path }}"
+    patterns: "*_nvme_ocp_*_stats.txt"
+  delegate_to: localhost
+  register: nvme_plot_files
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+    - nvme_localhost_matplotlib_check.rc == 0
+
+- name: Generate NVMe OCP plots on localhost
+  ansible.builtin.command: |
+    python3 {{ playbook_dir }}/roles/monitoring/files/plot_nvme_ocp_stats.py
+      -o {{ monitoring_results_path }}/nvme_ocp_combined_plot.png
+      {{ nvme_plot_files.files | map(attribute='path') | join(' ') }}
+  delegate_to: localhost
+  register: nvme_plot_generation
+  ignore_errors: true
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool
+    - nvme_localhost_matplotlib_check.rc == 0
+    - nvme_plot_files.matched > 0
+
+- name: Log NVMe OCP plot generation status
+  ansible.builtin.debug:
+    msg: |
+      {% if nvme_localhost_matplotlib_check.rc != 0 %}
+      Skipping NVMe OCP plot generation - matplotlib not available on localhost
+      {% elif nvme_plot_files.matched == 0 %}
+      Skipping NVMe OCP plot generation - no data files found
+      {% else %}
+      NVMe OCP plot generated: {{ monitoring_results_path }}/nvme_ocp_combined_plot.png
+      Data files processed: {{ nvme_plot_files.matched }}
+      {% endif %}
+  delegate_to: localhost
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_enabled|default(false)|bool

@@ -619,11 +619,28 @@ class AnsibleLintProcessor:
             if result.stdout:
                 try:
                     issues = json.loads(result.stdout)
-                    # Group by rule type
+                    # Group by rule type with context
                     by_rule = {}
                     for issue in issues:
                         rule_name = issue.get("check_name", "unknown")
-                        by_rule[rule_name] = by_rule.get(rule_name, 0) + 1
+                        
+                        # Create unique identifier with location context for verification table
+                        location = issue.get("location", {})
+                        path = location.get("path", "unknown")
+                        line = location.get("lines", {}).get("begin", "unknown")
+                        content = issue.get("content", {})
+                        task_name = content.get("body", "").replace("Task/Handler: ", "")
+                        
+                        # Create context-aware key for better identification
+                        if task_name:
+                            # Include task name for better context
+                            rule_key = f"{rule_name} ({task_name})"
+                        else:
+                            # Fallback to file:line format
+                            filename = Path(path).name if path != "unknown" else path
+                            rule_key = f"{rule_name} ({filename}:{line})"
+                        
+                        by_rule[rule_key] = by_rule.get(rule_key, 0) + 1
 
                     return result.returncode == 0, by_rule
                 except json.JSONDecodeError:

@@ -161,7 +161,8 @@ endmenu
 config ANSIBLE_CFG_DEPRECATION_WARNINGS
 	bool "deprecation_warnings"
 	output yaml
-	default y
+	default y if !ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
+	default n if ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
 	help
 	  Toggle to control the showing of deprecation warnings
 	  https://docs.ansible.com/ansible/latest/reference_appendices/config.html#deprecation-warnings

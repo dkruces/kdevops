@@ -26,8 +26,6 @@ runner_on_ok_msg_color = green
 runner_on_changed_msg = changed: [{{ '{{' }} ansible_callback_diy.result.host | default('host') {{ '}}' }}]
 runner_on_changed_msg_color = bright yellow
 runner_on_failed_msg = FAILED: [{{ '{{' }} ansible_callback_diy.result.host | default('host') {{ '}}' }}] => {{ '{{' }} ansible_callback_diy.result.output.msg | default('') {{ '}}' }}
- {{ '{% if ansible_callback_diy.result.output.stderr %}' }}{{ '{{' }} ansible_callback_diy.result.output.stderr {{ '}}' }}{{ '{% endif %}' }}
- {{ '{% if ansible_callback_diy.result.output.stdout %}' }}{{ '{{' }} ansible_callback_diy.result.output.stdout {{ '}}' }}{{ '{% endif %}' }}
 runner_on_failed_msg_color = bright red
 runner_on_skipped_msg = skipped: [{{ '{{' }} ansible_callback_diy.result.host | default('host') {{ '}}' }}]
 runner_on_skipped_msg_color = cyan

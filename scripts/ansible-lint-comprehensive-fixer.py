@@ -1139,6 +1139,51 @@ class ManualFixProcessor:
             return True, content
         return False, original_content
 
+    def apply_single_manual_fix(self, file_path: str, rule_name: str) -> Tuple[bool, str]:
+        """Apply a single manual fix rule to a file."""
+        try:
+            with open(file_path, "r") as f:
+                original_content = f.read()
+        except Exception as e:
+            return False, f"Error reading {file_path}: {e}"
+
+        # Map rule names to fix functions
+        rule_to_function = {
+            "yaml[brackets]": self.fix_yaml_brackets,
+            "yaml[truthy]": self.fix_yaml_truthy,
+            "jinja[spacing]": self.fix_jinja_spacing,
+            "fqcn[action-core]": self.fix_fqcn,
+            "ignore-errors": self.fix_ignore_errors,
+            "role-path": self.fix_role_path,
+        }
+
+        if rule_name not in rule_to_function:
+            return False, f"Unknown manual rule: {rule_name}"
+
+        # Apply single fix
+        content = rule_to_function[rule_name](original_content, file_path)
+
+        # Check if anything changed
+        if content != original_content:
+            return True, content
+        else:
+            return False, original_content
+
+    def get_available_manual_rules(self, rule_filter=None) -> List[RuleInfo]:
+        """Get list of available manual rules, optionally filtered."""
+        all_rules = [
+            RuleInfo("yaml[brackets]", "Fix YAML bracket formatting", ["formatting"], "internal"),
+            RuleInfo("yaml[truthy]", "Fix YAML truthy values", ["formatting"], "internal"),
+            RuleInfo("jinja[spacing]", "Fix Jinja2 expression spacing", ["formatting"], "internal"),
+            RuleInfo("fqcn[action-core]", "Convert to FQCN for builtin actions", ["idiom"], "internal"),
+            RuleInfo("ignore-errors", "Convert ignore_errors to failed_when", ["idiom"], "internal"),
+            RuleInfo("role-path", "Fix ansible.builtin.file usage in include tasks", ["idiom"], "internal"),
+        ]
+        
+        if rule_filter:
+            return [rule for rule in all_rules if rule_filter.should_process_rule(rule)]
+        return all_rules
+
 
 class ComprehensiveLintFixer:
     """Main orchestrator combining ansible-lint fixes and manual fixes."""
@@ -1525,72 +1570,7 @@ class ComprehensiveLintFixer:
         )
 
     def _apply_manual_fixes(self, target_files: List[str]):
-        """Apply manual fixes to target files."""
-        if not target_files or not self.manual_processor:
-            return
-
-        # For manual fixes, we need individual files, not directory paths
-        files_to_fix = []
-        for target in target_files:
-            if os.path.isfile(target):
-                files_to_fix.append(target)
-            elif os.path.isdir(target):
-                # Get files from directory
-                discovered = self.recursive_processor.find_ansible_files(target)
-                files_to_fix.extend(discovered)
-
-        # Remove duplicates and filter if changes-only
-        files_to_fix = list(set(files_to_fix))
-        if self.changes_only and self.change_filter:
-            changed_files = self.change_filter.get_changed_ansible_files()
-            files_to_fix = [f for f in files_to_fix if f in changed_files]
-
-        self.ui.print_message(
-            f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue"
-        )
-
-        modified_files = []
-        for file_path in files_to_fix:
-            was_modified, content = self.manual_processor.apply_manual_fixes(file_path, self.rule_filter)
-            if was_modified:
-                if not self.dry_run:
-                    with open(file_path, "w") as f:
-                        f.write(content)
-                modified_files.append(file_path)
-                self.ui.print_message(f"  ✅ Fixed: {file_path}", "green")
-
-        if modified_files:
-            self.ui.print_message(
-                f"🔧 Manual fixes applied to {len(modified_files)} files", "green"
-            )
-
-            # Commit manual fixes if not dry run
-            if not self.dry_run:
-                should_commit = self.ui.prompt_user(
-                    "Commit manual fixes?",
-                    default=True,
-                    auto_message="Auto-committing manual fixes",
-                )
-
-                if should_commit:
-                    if self.git_manager.add_files(modified_files):
-                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
-
-                        if self.git_manager.create_commit(commit_message):
-                            self.ui.print_message(
-                                "✅ Manual fixes committed successfully!", "green"
-                            )
-                        else:
-                            self.ui.print_message(
-                                "❌ Failed to commit manual fixes!", "red"
-                            )
-        else:
-            self.ui.print_message("ℹ️  No manual fixes needed", "dim")
-
-    def _apply_manual_fixes_with_progress(
-        self, target_files: List[str], progress, task_id
-    ):
-        """Apply manual fixes with Rich progress tracking."""
+        """Apply manual fixes to target files with individual rule commits."""
         if not target_files or not self.manual_processor:
             return
 
@@ -1611,63 +1591,187 @@ class ComprehensiveLintFixer:
             files_to_fix = [f for f in files_to_fix if f in changed_files]
 
         if not files_to_fix:
-            progress.update(task_id, description="No files to fix")
+            self.ui.print_message("No files to process for manual fixes", "yellow")
             return
 
-        progress.update(task_id, total=len(files_to_fix))
+        # Get available manual rules for individual processing
+        manual_rules = self.manual_processor.get_available_manual_rules(self.rule_filter)
+        
+        if not manual_rules:
+            self.ui.print_message("No manual rules to process (filtered out)", "yellow")
+            return
+
         self.ui.print_message(
-            f"🔧 Applying manual fixes to {len(files_to_fix)} files", "blue"
+            f"🔧 Processing {len(manual_rules)} manual rules on {len(files_to_fix)} files", "blue"
         )
 
-        modified_files = []
-        for i, file_path in enumerate(files_to_fix):
-            progress.update(
-                task_id, description=f"Fixing: {os.path.basename(file_path)}"
-            )
-
-            was_modified, content = self.manual_processor.apply_manual_fixes(file_path, self.rule_filter)
-            if was_modified:
-                if not self.dry_run:
-                    with open(file_path, "w") as f:
-                        f.write(content)
-                modified_files.append(file_path)
-
-            progress.update(task_id, completed=i + 1)
-
-        if modified_files:
-            progress.update(
-                task_id,
-                description=f"Manual fixes applied to {len(modified_files)} files",
-            )
+        # Process each manual rule individually
+        successful_rules = []
+        for i, rule in enumerate(manual_rules, 1):
             self.ui.print_message(
-                f"🔧 Manual fixes applied to {len(modified_files)} files", "green"
+                f"[{i}/{len(manual_rules)}] Processing manual rule: {rule.id}", "cyan"
             )
 
-            # Commit manual fixes if not dry run
-            if not self.dry_run:
-                # Pause progress for user interaction
-                progress.stop()
+            modified_files = []
+            for file_path in files_to_fix:
+                was_modified, content = self.manual_processor.apply_single_manual_fix(file_path, rule.id)
+                if was_modified:
+                    if not self.dry_run:
+                        with open(file_path, "w") as f:
+                            f.write(content)
+                    modified_files.append(file_path)
 
-                should_commit = self.ui.prompt_user(
-                    "Commit manual fixes?",
-                    default=True,
-                    auto_message="Auto-committing manual fixes",
+            if modified_files:
+                self.ui.print_message(
+                    f"  ✅ Rule '{rule.id}' modified {len(modified_files)} files", "green"
                 )
 
-                if should_commit:
-                    if self.git_manager.add_files(modified_files):
-                        commit_message = f"playbooks: apply manual ansible-lint fixes\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+                # Commit this individual rule if not dry run
+                if not self.dry_run:
+                    should_commit = self.ui.prompt_user(
+                        f"Commit changes for rule '{rule.id}'?",
+                        default=True,
+                        auto_message=f"Auto-committing rule '{rule.id}'",
+                    )
 
-                        if self.git_manager.create_commit(commit_message):
-                            self.ui.print_message(
-                                "✅ Manual fixes committed successfully!", "green"
-                            )
+                    if should_commit:
+                        if self.git_manager.add_files(modified_files):
+                            commit_message = f"playbooks: ansible-lint fix {rule.id}\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+
+                            if self.git_manager.create_commit(commit_message):
+                                self.ui.print_message(
+                                    f"✅ Rule '{rule.id}' committed successfully!", "green"
+                                )
+                                successful_rules.append(rule.id)
+                            else:
+                                self.ui.print_message(
+                                    f"❌ Failed to commit rule '{rule.id}'", "red"
+                                )
                         else:
                             self.ui.print_message(
-                                "❌ Failed to commit manual fixes!", "red"
+                                f"❌ Failed to stage files for rule '{rule.id}'", "red"
                             )
+                    else:
+                        self.ui.print_message(f"⏭️  Skipped committing rule '{rule.id}'", "yellow")
+                else:
+                    successful_rules.append(rule.id)
+            else:
+                self.ui.print_message(f"  ⏭️  Rule '{rule.id}' - no changes needed", "yellow")
 
-                progress.start()
+        if successful_rules:
+            self.ui.print_message(
+                f"🎉 Successfully processed {len(successful_rules)} manual rules: {', '.join(successful_rules)}", "green"
+            )
+        else:
+            self.ui.print_message("ℹ️  No manual fixes needed", "dim")
+
+    def _apply_manual_fixes_with_progress(
+        self, target_files: List[str], progress, task_id
+    ):
+        """Apply manual fixes with Rich progress tracking and individual commits."""
+        if not target_files or not self.manual_processor:
+            return
+
+        # For manual fixes, we need individual files, not directory paths
+        files_to_fix = []
+        for target in target_files:
+            if os.path.isfile(target):
+                files_to_fix.append(target)
+            elif os.path.isdir(target):
+                # Get files from directory
+                discovered = self.recursive_processor.find_ansible_files(target)
+                files_to_fix.extend(discovered)
+
+        # Remove duplicates and filter if changes-only
+        files_to_fix = list(set(files_to_fix))
+        if self.changes_only and self.change_filter:
+            changed_files = self.change_filter.get_changed_ansible_files()
+            files_to_fix = [f for f in files_to_fix if f in changed_files]
+
+        if not files_to_fix:
+            progress.update(task_id, description="No files to process")
+            return
+
+        # Get available manual rules for individual processing
+        manual_rules = self.manual_processor.get_available_manual_rules(self.rule_filter)
+        
+        if not manual_rules:
+            progress.update(task_id, description="No manual rules to process")
+            return
+
+        progress.update(task_id, total=len(manual_rules))
+        self.ui.print_message(
+            f"🔧 Processing {len(manual_rules)} manual rules on {len(files_to_fix)} files", "blue"
+        )
+
+        # Process each manual rule individually
+        successful_rules = []
+        for i, rule in enumerate(manual_rules):
+            progress.update(
+                task_id, description=f"Processing rule: {rule.id}", completed=i
+            )
+
+            modified_files = []
+            for file_path in files_to_fix:
+                was_modified, content = self.manual_processor.apply_single_manual_fix(file_path, rule.id)
+                if was_modified:
+                    if not self.dry_run:
+                        with open(file_path, "w") as f:
+                            f.write(content)
+                    modified_files.append(file_path)
+
+            if modified_files:
+                self.ui.print_message(
+                    f"  ✅ Rule '{rule.id}' modified {len(modified_files)} files", "green"
+                )
+
+                # Commit this individual rule if not dry run
+                if not self.dry_run:
+                    # Pause progress for user interaction
+                    progress.stop()
+
+                    should_commit = self.ui.prompt_user(
+                        f"Commit changes for rule '{rule.id}'?",
+                        default=True,
+                        auto_message=f"Auto-committing rule '{rule.id}'",
+                    )
+
+                    if should_commit:
+                        if self.git_manager.add_files(modified_files):
+                            commit_message = f"playbooks: ansible-lint fix {rule.id}\n\nGenerated-by: Claude AI\nSigned-off-by: {self.git_manager.get_user_info()[0]} <{self.git_manager.get_user_info()[1]}>"
+
+                            if self.git_manager.create_commit(commit_message):
+                                self.ui.print_message(
+                                    f"✅ Rule '{rule.id}' committed successfully!", "green"
+                                )
+                                successful_rules.append(rule.id)
+                            else:
+                                self.ui.print_message(
+                                    f"❌ Failed to commit rule '{rule.id}'", "red"
+                                )
+                        else:
+                            self.ui.print_message(
+                                f"❌ Failed to stage files for rule '{rule.id}'", "red"
+                            )
+                    else:
+                        self.ui.print_message(f"⏭️  Skipped committing rule '{rule.id}'", "yellow")
+
+                    progress.start()
+                else:
+                    successful_rules.append(rule.id)
+            else:
+                self.ui.print_message(f"  ⏭️  Rule '{rule.id}' - no changes needed", "yellow")
+
+        progress.update(task_id, completed=len(manual_rules))
+        
+        if successful_rules:
+            progress.update(
+                task_id,
+                description=f"Successfully processed {len(successful_rules)} manual rules",
+            )
+            self.ui.print_message(
+                f"🎉 Successfully processed {len(successful_rules)} manual rules: {', '.join(successful_rules)}", "green"
+            )
         else:
             progress.update(task_id, description="No manual fixes needed")
 

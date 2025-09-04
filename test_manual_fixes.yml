@@ -1,0 +1,16 @@
+---
+- name: Test task with manual fix issues
+  ansible.builtin.set_fact:
+    test_var: "{{ some_var}}" # jinja spacing issue
+    bool_var: yes # truthy issue
+    list_var: [item1, item2] # bracket spacing issue
+  ignore_errors: yes # ignore-errors issue
+
+- name: Test include with role path issue
+  ansible.builtin.include_tasks:
+    file: "tasks/test.yml" # role-path issue
+
+- name: Test FQCN issue
+  ansible.builtin.file: # fqcn issue - should be ansible.builtin.file
+    path: /tmp/test
+    state: directory

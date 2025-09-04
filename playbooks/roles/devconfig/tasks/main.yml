@@ -51,7 +51,7 @@
     create: true
     mode: "0644"
     owner: root
-    ansible.builtin.group: root
+    group: root
   loop:
     - { path: "/etc/default/locale", line: "LANG=en_US.UTF-8" }
     - { path: "/etc/default/locale", line: "LANGUAGE=en_US:en" }

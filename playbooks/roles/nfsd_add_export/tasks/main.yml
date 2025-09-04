@@ -1,21 +1,21 @@
 ---
 - name: Add a local logical volume for the new export
   ansible.builtin.include_tasks:
-    ansible.builtin.file: storage/local.yml
+    file: storage/local.yml
   when:
     - nfsd_export_storage_local|bool
     - export_fstype != "tmpfs"
 
 - name: Add an iSCSI LUN for the new export
   ansible.builtin.include_tasks:
-    ansible.builtin.file: storage/iscsi.yml
+    file: storage/iscsi.yml
   when:
     - nfsd_export_storage_iscsi|bool
     - export_fstype != "tmpfs"
 
 - name: Add a tmpfs for the new export
   ansible.builtin.include_tasks:
-    ansible.builtin.file: storage/tmpfs.yml
+    file: storage/tmpfs.yml
   when:
     - export_fstype == "tmpfs"
 
@@ -28,7 +28,7 @@
     state: directory
     path: "{{ nfsd_export_path }}/{{ export_volname }}"
     owner: "{{ export_user }}"
-    ansible.builtin.group: "{{ export_group }}"
+    group: "{{ export_group }}"
     mode: "{{ export_mode }}"
 
 - name: Test whether SELinux is enabled
@@ -55,7 +55,7 @@
     state: directory
     path: "/etc/exports.d"
     owner: "root"
-    ansible.builtin.group: "root"
+    group: "root"
     mode: "644"
 
 - name: Copy export options to a template variable
@@ -97,7 +97,7 @@
     src: exports.j2
     dest: /etc/exports.d/{{ export_volname }}.exports
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
 
 - name: Reload the exports table

@@ -64,7 +64,7 @@
     src: "{{ ca_dir }}/ca-cert.pem"
     dest: "/etc/pki/tls/certs/ca-cert.pem"
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
   become: true
 
@@ -99,7 +99,7 @@
     src: "{{ playbook_dir }}/roles/ktls/templates/tlshd.conf"
     dest: "/etc/tlshd.conf"
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
   become: true
 

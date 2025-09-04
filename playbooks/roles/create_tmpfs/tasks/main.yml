@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars:
-    ansible.builtin.file: "{{ item }}"
+    file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -51,5 +51,5 @@
     state: directory
     path: "{{ tmpfs_mounted_on }}"
     owner: "{{ tmpfs_user }}"
-    ansible.builtin.group: "{{ tmpfs_group }}"
+    group: "{{ tmpfs_group }}"
     mode: "{{ tmpfs_mode }}"

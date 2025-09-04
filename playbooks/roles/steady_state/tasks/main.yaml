@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars:
-    ansible.builtin.file: "{{ item }}"
+    file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"

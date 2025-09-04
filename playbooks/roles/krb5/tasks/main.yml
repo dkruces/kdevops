@@ -18,7 +18,7 @@
     src: krb5.conf.j2
     dest: /etc/krb5.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
 
 - name: Ensure /etc/krb5.conf.d exists
@@ -28,7 +28,7 @@
     path: /etc/krb5.conf.d
     state: directory
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0755"
 
 - name: Add nfs principal

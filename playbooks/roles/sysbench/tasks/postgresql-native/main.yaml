@@ -234,7 +234,7 @@
   ansible.builtin.file:
     path: "{{ sysbench_mnt }}"
     owner: "{{ sysbench_postgresql_user }}"
-    ansible.builtin.group: "{{ sysbench_postgresql_user }}"
+    group: "{{ sysbench_postgresql_user }}"
     recurse: true
 
 - name: Initialize the PostgreSQL database
@@ -557,7 +557,7 @@
     dest: "{{ sysbench_postgresql_controldata_logfile }}"
     mode: "0755"
     owner: "{{ sysbench_postgresql_user }}"
-    ansible.builtin.group: "{{ sysbench_postgresql_user }}"
+    group: "{{ sysbench_postgresql_user }}"
     remote_src: true
 
 - name: Copy telemetry data from each node to the localhost

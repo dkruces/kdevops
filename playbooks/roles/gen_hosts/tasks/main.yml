@@ -31,7 +31,7 @@
   ansible.builtin.file:
     path: "{{ ansible_cfg_inventory }}"
     owner: "{{ my_user.stdout }}"
-    ansible.builtin.group: "{{ my_group.stdout }}"
+    group: "{{ my_group.stdout }}"
   when:
     - kdevops_hosts_dest.stat.exists
 

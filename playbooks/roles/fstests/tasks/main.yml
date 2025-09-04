@@ -55,7 +55,7 @@
     recurse: true
     follow: false
     owner: "{{ data_user }}"
-    ansible.builtin.group: "{{ data_group }}"
+    group: "{{ data_group }}"
   tags: ["oscheck", "git", "fstests"]
   when:
     - fstests_xfs_build_custom_xfsprogs|bool
@@ -128,7 +128,7 @@
     path: "{{ fstests_xfsdump_data }}"
     recurse: true
     owner: "{{ data_user }}"
-    ansible.builtin.group: "{{ data_group }}"
+    group: "{{ data_group }}"
   tags: ["fstests", "deps"]
   when:
     - fstests_xfsdump_build|bool
@@ -303,7 +303,7 @@
     src: "64-btrfs-zoned.rules"
     dest: "/usr/lib/udev/rules.d/"
     owner: "{{ data_user }}"
-    ansible.builtin.group: "{{ data_group }}"
+    group: "{{ data_group }}"
   tags: ["oscheck", "fstests"]
   when:
     - fstests_zns_enabled == "y"
@@ -351,7 +351,7 @@
     src: "{{ kdevops_fstests_setup }}"
     dest: "/root/{{ kdevops_fstests_setup }}"
     owner: "root"
-    ansible.builtin.group: "root"
+    group: "root"
     mode: "0644"
 
 - name: Source .kdevops_fstests_setup for root if it is not already done
@@ -813,7 +813,7 @@
     src: "{{ fstests_fstyp }}/nfsmount.conf"
     dest: /etc/nfsmount.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
   when:
     - fstests_fstyp == "nfs"

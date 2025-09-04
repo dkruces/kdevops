@@ -148,7 +148,7 @@
     content: |
       # kdevops generated /etc/nsswitch.conf
       passwd:         files
-      ansible.builtin.group:          files
+      group:          files
       shadow:         files
       gshadow:        files
       hosts:          files myhostname resolve dns

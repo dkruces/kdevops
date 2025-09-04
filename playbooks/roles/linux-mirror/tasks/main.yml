@@ -48,7 +48,7 @@
     state: directory
     mode: "0755"
     owner: root
-    ansible.builtin.group: root
+    group: root
   when:
     - install_linux_mirror|bool
 
@@ -99,7 +99,7 @@
 
 - name: Load variables from yaml file
   ansible.builtin.include_vars:
-    ansible.builtin.file: "{{ topdir_path }}/playbooks/roles/linux-mirror/linux-mirror-systemd/mirrors.yaml"
+    file: "{{ topdir_path }}/playbooks/roles/linux-mirror/linux-mirror-systemd/mirrors.yaml"
     name: mirrors
   tags: ["mirror", "status-check"]
   when:
@@ -252,7 +252,7 @@
     path: /mirror/
     state: directory
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0755"
   when:
     - ansible_user_id == 'root'

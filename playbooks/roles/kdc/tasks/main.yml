@@ -29,7 +29,7 @@
     src: krb5.conf.j2
     dest: /etc/krb5.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
 
 - name: Ensure /etc/krb5.conf.d exists
@@ -39,7 +39,7 @@
     path: /etc/krb5.conf.d
     state: directory
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0755"
 
 - name: Configure {{ kdc_conf_dir }}/kdc.conf
@@ -49,7 +49,7 @@
     src: kdc.conf.j2
     dest: "{{ kdc_conf_dir }}/kdc.conf"
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0600"
 
 - name: Configure {{ kdc_data_dir }}/kadm5.acl
@@ -59,7 +59,7 @@
     src: kadm5.acl.j2
     dest: "{{ kdc_data_dir }}/kadm5.acl"
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0600"
 
 - name: Check to see if Kerberos database exists

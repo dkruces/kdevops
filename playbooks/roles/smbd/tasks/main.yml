@@ -19,7 +19,7 @@
     src: smb.conf.j2
     dest: /etc/samba/smb.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
 
 - name: Set up a volume group on local block devices

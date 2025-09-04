@@ -17,7 +17,7 @@
     src: "udev-rule.j2"
     dest: "/usr/lib/udev/rules.d/99-siw.rules"
     owner: "root"
-    ansible.builtin.group: "root"
+    group: "root"
     mode: "0644"
     force: false
 

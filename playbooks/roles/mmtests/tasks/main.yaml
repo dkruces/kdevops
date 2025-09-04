@@ -20,7 +20,7 @@
   ansible.builtin.file:
     path: "{{ data_path }}"
     owner: "{{ data_user }}"
-    ansible.builtin.group: "{{ data_group }}"
+    group: "{{ data_group }}"
     state: directory
 
 - name: Clone mmtests repository
@@ -97,7 +97,7 @@
     src: "{{ mmtests_test_type }}-config.j2"
     dest: "{{ mmtests_data_dir }}/configs/config-workload-{{ mmtests_test_type }}-kdevops"
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: "0644"
 
 - name: Fail if configured memory percentages overcommit available memory

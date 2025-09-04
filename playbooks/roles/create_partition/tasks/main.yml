@@ -154,6 +154,6 @@
     state: directory
     path: "{{ disk_setup_path }}"
     owner: "{{ disk_setup_user }}"
-    ansible.builtin.group: "{{ disk_setup_group }}"
+    group: "{{ disk_setup_group }}"
     mode: "{{ disk_setup_mode }}"
   tags: ["partition"]

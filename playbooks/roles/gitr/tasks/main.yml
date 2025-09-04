@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars:
-    ansible.builtin.file: "{{ item }}"
+    file: "{{ item }}"
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -72,7 +72,7 @@
 - name: Install dependencies for the git regression tests
   tags: gitr
   ansible.builtin.include_tasks:
-    ansible.builtin.file: install-deps/main.yml
+    file: install-deps/main.yml
 
 - name: Set up an iSCSI initiator on the target node
   tags: gitr

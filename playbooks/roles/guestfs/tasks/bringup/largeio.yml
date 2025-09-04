@@ -5,7 +5,7 @@
 
 - name: Create largeio block devices
   ansible.builtin.include_tasks:
-    ansible.builtin.file: "{{ role_path }}/tasks/extra_disks.yml"
+    file: "{{ role_path }}/tasks/extra_disks.yml"
   vars:
     path: "{{ storagedir }}/{{ inventory_hostname }}/extra{{ item }}.{{ libvirt_extra_drive_format }}"
   loop: "{{ range(0, total_devices) | list }}"

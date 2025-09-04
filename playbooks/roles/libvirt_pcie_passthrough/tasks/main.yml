@@ -31,7 +31,7 @@
   become_method: sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
-    ansible.builtin.group: "{{ libvirt_qemu_group }}"
+    group: "{{ libvirt_qemu_group }}"
     mode: "0664"
   with_items: "{{ sysfs_driver_override_file_stats.results }}"
   loop_control:
@@ -61,7 +61,7 @@
   become_method: sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
-    ansible.builtin.group: "{{ libvirt_qemu_group }}"
+    group: "{{ libvirt_qemu_group }}"
     mode: "0220"
   with_items: "{{ sysfs_driver_unbind_file_stats.results }}"
   loop_control:

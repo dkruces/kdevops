@@ -85,7 +85,7 @@
   ansible.builtin.file:
     path: "/var/log/journal/remote/"
     owner: systemd-journal-remote
-    ansible.builtin.group: systemd-journal-remote
+    group: systemd-journal-remote
     mode: u=rwx,g=rwx,o=rx,g+s
     recurse: true
     state: directory

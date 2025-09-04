@@ -270,7 +270,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: /bin/bash -c "test -S /var/lib/mysql/mysql.sock"
+    command: /bin/bash -c "test -S /var/lib/mysql/mysql.sock"
   register: result
   retries: 12 # Retry up to 12 times
   delay: 5 # Delay 5 seconds between retries
@@ -283,7 +283,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql --socket=/var/lib/mysql/mysql.sock -e "SHOW DATABASES;"
+    command: mysql --socket=/var/lib/mysql/mysql.sock -e "SHOW DATABASES;"
   register: mysql_socket_output_explicit
   # TODO: Review - was ignore_errors: true
   failed_when: false  # Always succeed - review this condition
@@ -304,7 +304,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql -h localhost -e "SHOW DATABASES;"
+    command: mysql -h localhost -e "SHOW DATABASES;"
   register: mysql_socket_output
   when: "sysbench_type_mysql_docker | bool"
 
@@ -324,7 +324,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql -e "CREATE USER {{ sysbench_db_username }}@'%' IDENTIFIED WITH 'mysql_native_password' BY '{{ sysbench_db_password }}';"
+    command: mysql -e "CREATE USER {{ sysbench_db_username }}@'%' IDENTIFIED WITH 'mysql_native_password' BY '{{ sysbench_db_password }}';"
   register: mysql_add_sysbench_user
   when: "sysbench_type_mysql_docker | bool"
 
@@ -344,7 +344,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql -e "GRANT ALL PRIVILEGES ON {{ sysbench_db_name }}.* to {{ sysbench_db_username }}@'%';"
+    command: mysql -e "GRANT ALL PRIVILEGES ON {{ sysbench_db_name }}.* to {{ sysbench_db_username }}@'%';"
   register: mysql_sysbench_privs
   when: "sysbench_type_mysql_docker | bool"
 
@@ -364,7 +364,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql -e "FLUSH PRIVILEGES;"
+    command: mysql -e "FLUSH PRIVILEGES;"
   when: "sysbench_type_mysql_docker | bool"
 
 - name: Install pip using MySQL container
@@ -374,7 +374,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: microdnf install -y python-pip
+    command: microdnf install -y python-pip
   register: mysql_pip
   when: "sysbench_type_mysql_docker | bool"
 
@@ -394,7 +394,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: pip install pandas matplotlib
+    command: pip install pandas matplotlib
     env:
       PYTHONPATH: "{{ sysbench_mysql_container_python_path }}"
   register: mysql_pip_install_deps
@@ -416,7 +416,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_mysql_container_name }}"
-    ansible.builtin.command: mysql -e "SELECT user, host, plugin FROM mysql.user WHERE user = '{{ sysbench_db_username }}' AND plugin = 'mysql_native_password';"
+    command: mysql -e "SELECT user, host, plugin FROM mysql.user WHERE user = '{{ sysbench_db_username }}' AND plugin = 'mysql_native_password';"
   register: user_check_result
   failed_when: user_check_result.stdout.find(sysbench_db_username) == -1
   when: "sysbench_type_mysql_docker | bool"
@@ -446,7 +446,7 @@
     state: started
     detach: true
     restart_policy: unless-stopped
-    ansible.builtin.command: "tail -f /dev/null" # Keeps the container running
+    command: "tail -f /dev/null" # Keeps the container running
   when: "sysbench_type_mysql_docker | bool"
 
 - name: Wait for the sysbench container to be in running state
@@ -471,7 +471,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_container_name }}"
-    ansible.builtin.command: |
+    command: |
       /usr/bin/sysbench
       /usr/share/sysbench/tests/include/oltp_legacy/parallel_prepare.lua
       --db-driver={{ sysbench_db_type }}
@@ -507,7 +507,7 @@
   become_method: sudo
   community.docker.docker_container_exec:
     container: "{{ sysbench_container_name }}"
-    ansible.builtin.command: >
+    command: >
       sh -c "/usr/bin/sysbench
       --test=/usr/share/sysbench/tests/include/oltp_legacy/oltp.lua
       --db-driver={{ sysbench_db_type }}
@@ -540,7 +540,7 @@
       MYSQL_DATABASE: "{{ sysbench_db_name }}"
       MYSQL_ROOT_PASSWORD: "{{ sysbench_db_password }}"
       PYTHONPATH: "{{ sysbench_mysql_container_python_path }}"
-    ansible.builtin.command: |
+    command: |
       mysqlsh --execute
       "support.collect(mysql=true, os=true, time={{ sysbench_test_duration | int // 60 }}, outputdir='{{ sysbench_telemetry_path }}')"
   when: "sysbench_type_mysql_docker | bool"

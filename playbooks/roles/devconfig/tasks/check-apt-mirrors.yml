@@ -138,7 +138,7 @@
             src: debian-hop1-mirror.sources
             dest: /etc/apt/sources.list.d/debian.sources
             owner: root
-            ansible.builtin.group: root
+            group: root
             mode: "0644"
           become: true
 
@@ -186,7 +186,7 @@
         src: debian-testing-fallback.sources
         dest: /etc/apt/sources.list.d/debian.sources
         owner: root
-        ansible.builtin.group: root
+        group: root
         mode: "0644"
       become: true
 

@@ -2,7 +2,7 @@
 - name: Gather the list of running libvirt guests
   run_once: true
   community.libvirt.virt:
-    ansible.builtin.command: list_vms
+    command: list_vms
     state: running
     uri: "{{ libvirt_uri }}"
   register: running_vms
@@ -10,7 +10,7 @@
 - name: Shut down each running target node
   community.libvirt.virt:
     name: "{{ inventory_hostname }}"
-    ansible.builtin.command: destroy
+    command: destroy
     uri: "{{ libvirt_uri }}"
   changed_when: true
   when:
@@ -19,14 +19,14 @@
 - name: Gather the list of stopped libvirt guests
   run_once: true
   community.libvirt.virt:
-    ansible.builtin.command: list_vms
+    command: list_vms
     state: shutdown
     uri: "{{ libvirt_uri }}"
   register: shutdown_vms
 
 - name: Undefine each stopped target node
   community.libvirt.virt:
-    ansible.builtin.command: "undefine"
+    command: "undefine"
     flags:
       - "nvram"
       - "snapshots_metadata"

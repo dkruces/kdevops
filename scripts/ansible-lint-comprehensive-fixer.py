@@ -1007,46 +1007,133 @@ class ManualFixProcessor:
         return "\n".join(lines)
 
     def fix_fqcn(self, content: str, file_path: str) -> str:
-        """Fix FQCN (Fully Qualified Collection Name) issues."""
+        """Fix FQCN (Fully Qualified Collection Name) issues.
+        
+        This method:
+        1. Converts module names to FQCN: `file:` -> `ansible.builtin.file:`
+        2. REVERTS incorrect FQCN on parameters: `ansible.builtin.group:` -> `group:`
+        """
         lines = content.split("\n")
-        in_task = False
-        task_start_line = 0
+        in_task_block = False
+        current_module = None
+        task_base_indent = 0
+        module_indent = 0
 
         for i, line in enumerate(lines):
-            # Detect task start
-            if re.match(r"\s*-\s+name:", line):
-                in_task = True
-                task_start_line = i
-                continue
-
-            if not in_task:
+            # Skip empty lines and comments
+            if not line.strip() or line.strip().startswith('#'):
                 continue
 
             # Check if we should fix this line
             if not self.should_fix_line(file_path, i + 1):
                 continue
 
-            # Look for module usage patterns
-            # Pattern 1: Simple module at start of line (after dash and spaces)
-            match = re.match(r"^(\s*-?\s*)([a-z_]+)(\s*:.*)", line)
-            if not match and in_task:
-                # Pattern 2: Module name as a key (without dash)
-                match = re.match(r"^(\s*)([a-z_]+)(\s*:.*)", line)
+            current_indent = len(line) - len(line.lstrip())
+            
+            # Detect task start (starts with dash and name)
+            task_start_match = re.match(r"^(\s*)-\s+name:", line)
+            if task_start_match:
+                in_task_block = True
+                current_module = None
+                task_base_indent = current_indent
+                continue
 
-            if match:
-                indent = match.group(1)
-                module = match.group(2)
-                rest = match.group(3)
+            # Detect play start (starts with dash and hosts) - reset task context
+            play_start_match = re.match(r"^(\s*)-\s+hosts:", line)
+            if play_start_match:
+                in_task_block = False
+                current_module = None
+                continue
 
-                if module in self.FQCN_MAP:
-                    lines[i] = indent + self.FQCN_MAP[module] + rest
-                    in_task = False  # Task module found, reset
+            # If we're not in a task block, skip
+            if not in_task_block:
+                continue
 
-            # Reset task flag if we hit another task or play
-            if re.match(r"\s*-\s+(name|hosts):", line) and i != task_start_line:
-                in_task = re.match(r"\s*-\s+name:", line) is not None
-                if in_task:
-                    task_start_line = i
+            # Check if we're at a higher level (back to task level or beyond)
+            if current_indent <= task_base_indent and line.strip() and not line.lstrip().startswith('-'):
+                # We've moved out of the current task scope
+                in_task_block = False
+                current_module = None
+                continue
+
+            # Detect new task in same play (starts with dash)
+            if re.match(r"^(\s*)-\s+", line) and current_indent >= task_base_indent:
+                if "name:" in line:
+                    # This is a new task
+                    task_base_indent = current_indent
+                    current_module = None
+                    continue
+                elif current_module is None:
+                    # This might be a task without explicit name, look for module
+                    match = re.match(r"^(\s*)-\s+([a-z_][a-z0-9_.]*)\s*:", line)
+                    if match and match.group(2) in self.FQCN_MAP:
+                        indent_part = match.group(1) + "- "
+                        module_name = match.group(2)
+                        rest_of_line = line[len(indent_part) + len(module_name):]
+                        lines[i] = indent_part + self.FQCN_MAP[module_name] + rest_of_line
+                        current_module = self.FQCN_MAP[module_name]
+                        module_indent = current_indent
+                continue
+
+            # Look for module declaration (first non-name key after task start)
+            if current_module is None:
+                # This should be the module line - handle both short names and existing FQCN
+                module_match = re.match(r"^(\s+)([a-z_][a-z0-9_.]*)\s*:", line)
+                if module_match:
+                    indent_part = module_match.group(1)
+                    potential_module = module_match.group(2)
+                    
+                    # Check if this is already FQCN format
+                    if potential_module.startswith('ansible.builtin.') or potential_module.startswith('community.'):
+                        # It's already FQCN, just record it as current module
+                        current_module = potential_module
+                        module_indent = current_indent
+                        continue
+                    # Check if this is a known module (not a parameter) that needs FQCN conversion
+                    elif potential_module in self.FQCN_MAP:
+                        rest_of_line = line[len(indent_part) + len(potential_module):]
+                        lines[i] = indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        current_module = self.FQCN_MAP[potential_module]
+                        module_indent = current_indent
+                        continue
+
+            # If we have a current_module, we're inside module parameters
+            # REVERT any incorrect FQCN conversions on parameters
+            if current_module and current_indent > module_indent:
+                # This is a parameter line - check for incorrect FQCN and revert it
+                param_match = re.match(r"^(\s+)ansible\.builtin\.([a-z_][a-z0-9_]*)\s*:", line)
+                if param_match:
+                    indent_part = param_match.group(1)
+                    param_name = param_match.group(2)
+                    rest_of_line = line[len(indent_part) + len(f"ansible.builtin.{param_name}"):]
+                    # Revert the FQCN conversion on the parameter
+                    lines[i] = indent_part + param_name + rest_of_line
+                    continue
+                
+                # Also handle community.* incorrect conversions on parameters
+                community_param_match = re.match(r"^(\s+)community\.[a-z0-9_]+\.([a-z_][a-z0-9_]*)\s*:", line)
+                if community_param_match:
+                    indent_part = community_param_match.group(1)
+                    param_name = community_param_match.group(2)
+                    # Find the full FQCN part to replace
+                    fqcn_part = line[len(indent_part):].split(':')[0]
+                    rest_of_line = line[len(indent_part) + len(fqcn_part):]
+                    lines[i] = indent_part + param_name + rest_of_line
+                    continue
+            
+            # Check if we've moved to a different indentation level that indicates end of current module
+            if current_module and current_indent <= module_indent and line.strip():
+                # We might be starting a new module or moving to a different block
+                module_match = re.match(r"^(\s+)([a-z_][a-z0-9_.]*)\s*:", line)
+                if module_match:
+                    potential_module = module_match.group(2)
+                    if potential_module in self.FQCN_MAP:
+                        # This is a new module
+                        indent_part = module_match.group(1)
+                        rest_of_line = line[len(indent_part) + len(potential_module):]
+                        lines[i] = indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        current_module = self.FQCN_MAP[potential_module]
+                        module_indent = current_indent
 
         return "\n".join(lines)
 

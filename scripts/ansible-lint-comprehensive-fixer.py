@@ -1008,7 +1008,7 @@ class ManualFixProcessor:
 
     def fix_fqcn(self, content: str, file_path: str) -> str:
         """Fix FQCN (Fully Qualified Collection Name) issues.
-        
+
         This method:
         1. Converts module names to FQCN: `file:` -> `ansible.builtin.file:`
         2. REVERTS incorrect FQCN on parameters: `ansible.builtin.group:` -> `group:`
@@ -1021,7 +1021,7 @@ class ManualFixProcessor:
 
         for i, line in enumerate(lines):
             # Skip empty lines and comments
-            if not line.strip() or line.strip().startswith('#'):
+            if not line.strip() or line.strip().startswith("#"):
                 continue
 
             # Check if we should fix this line
@@ -1029,7 +1029,7 @@ class ManualFixProcessor:
                 continue
 
             current_indent = len(line) - len(line.lstrip())
-            
+
             # Detect task start (starts with dash and name)
             task_start_match = re.match(r"^(\s*)-\s+name:", line)
             if task_start_match:
@@ -1050,7 +1050,11 @@ class ManualFixProcessor:
                 continue
 
             # Check if we're at a higher level (back to task level or beyond)
-            if current_indent <= task_base_indent and line.strip() and not line.lstrip().startswith('-'):
+            if (
+                current_indent <= task_base_indent
+                and line.strip()
+                and not line.lstrip().startswith("-")
+            ):
                 # We've moved out of the current task scope
                 in_task_block = False
                 current_module = None
@@ -1069,8 +1073,10 @@ class ManualFixProcessor:
                     if match and match.group(2) in self.FQCN_MAP:
                         indent_part = match.group(1) + "- "
                         module_name = match.group(2)
-                        rest_of_line = line[len(indent_part) + len(module_name):]
-                        lines[i] = indent_part + self.FQCN_MAP[module_name] + rest_of_line
+                        rest_of_line = line[len(indent_part) + len(module_name) :]
+                        lines[i] = (
+                            indent_part + self.FQCN_MAP[module_name] + rest_of_line
+                        )
                         current_module = self.FQCN_MAP[module_name]
                         module_indent = current_indent
                 continue
@@ -1082,17 +1088,21 @@ class ManualFixProcessor:
                 if module_match:
                     indent_part = module_match.group(1)
                     potential_module = module_match.group(2)
-                    
+
                     # Check if this is already FQCN format
-                    if potential_module.startswith('ansible.builtin.') or potential_module.startswith('community.'):
+                    if potential_module.startswith(
+                        "ansible.builtin."
+                    ) or potential_module.startswith("community."):
                         # It's already FQCN, just record it as current module
                         current_module = potential_module
                         module_indent = current_indent
                         continue
                     # Check if this is a known module (not a parameter) that needs FQCN conversion
                     elif potential_module in self.FQCN_MAP:
-                        rest_of_line = line[len(indent_part) + len(potential_module):]
-                        lines[i] = indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        rest_of_line = line[len(indent_part) + len(potential_module) :]
+                        lines[i] = (
+                            indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        )
                         current_module = self.FQCN_MAP[potential_module]
                         module_indent = current_indent
                         continue
@@ -1101,26 +1111,32 @@ class ManualFixProcessor:
             # REVERT any incorrect FQCN conversions on parameters
             if current_module and current_indent > module_indent:
                 # This is a parameter line - check for incorrect FQCN and revert it
-                param_match = re.match(r"^(\s+)ansible\.builtin\.([a-z_][a-z0-9_]*)\s*:", line)
+                param_match = re.match(
+                    r"^(\s+)ansible\.builtin\.([a-z_][a-z0-9_]*)\s*:", line
+                )
                 if param_match:
                     indent_part = param_match.group(1)
                     param_name = param_match.group(2)
-                    rest_of_line = line[len(indent_part) + len(f"ansible.builtin.{param_name}"):]
+                    rest_of_line = line[
+                        len(indent_part) + len(f"ansible.builtin.{param_name}") :
+                    ]
                     # Revert the FQCN conversion on the parameter
                     lines[i] = indent_part + param_name + rest_of_line
                     continue
-                
+
                 # Also handle community.* incorrect conversions on parameters
-                community_param_match = re.match(r"^(\s+)community\.[a-z0-9_]+\.([a-z_][a-z0-9_]*)\s*:", line)
+                community_param_match = re.match(
+                    r"^(\s+)community\.[a-z0-9_]+\.([a-z_][a-z0-9_]*)\s*:", line
+                )
                 if community_param_match:
                     indent_part = community_param_match.group(1)
                     param_name = community_param_match.group(2)
                     # Find the full FQCN part to replace
-                    fqcn_part = line[len(indent_part):].split(':')[0]
-                    rest_of_line = line[len(indent_part) + len(fqcn_part):]
+                    fqcn_part = line[len(indent_part) :].split(":")[0]
+                    rest_of_line = line[len(indent_part) + len(fqcn_part) :]
                     lines[i] = indent_part + param_name + rest_of_line
                     continue
-            
+
             # Check if we've moved to a different indentation level that indicates end of current module
             if current_module and current_indent <= module_indent and line.strip():
                 # We might be starting a new module or moving to a different block
@@ -1130,8 +1146,10 @@ class ManualFixProcessor:
                     if potential_module in self.FQCN_MAP:
                         # This is a new module
                         indent_part = module_match.group(1)
-                        rest_of_line = line[len(indent_part) + len(potential_module):]
-                        lines[i] = indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        rest_of_line = line[len(indent_part) + len(potential_module) :]
+                        lines[i] = (
+                            indent_part + self.FQCN_MAP[potential_module] + rest_of_line
+                        )
                         current_module = self.FQCN_MAP[potential_module]
                         module_indent = current_indent
 

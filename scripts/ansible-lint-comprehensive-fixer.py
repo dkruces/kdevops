@@ -1016,8 +1016,10 @@ class ManualFixProcessor:
         lines = content.split("\n")
         in_task_block = False
         current_module = None
+        current_directive = None
         task_base_indent = 0
         module_indent = 0
+        directive_indent = 0
 
         for i, line in enumerate(lines):
             # Skip empty lines and comments
@@ -1035,6 +1037,7 @@ class ManualFixProcessor:
             if task_start_match:
                 in_task_block = True
                 current_module = None
+                current_directive = None
                 task_base_indent = current_indent
                 continue
 
@@ -1043,6 +1046,7 @@ class ManualFixProcessor:
             if play_start_match:
                 in_task_block = False
                 current_module = None
+                current_directive = None
                 continue
 
             # If we're not in a task block, skip
@@ -1066,6 +1070,7 @@ class ManualFixProcessor:
                     # This is a new task
                     task_base_indent = current_indent
                     current_module = None
+                    current_directive = None
                     continue
                 elif current_module is None:
                     # This might be a task without explicit name, look for module
@@ -1088,6 +1093,36 @@ class ManualFixProcessor:
                 if module_match:
                     indent_part = module_match.group(1)
                     potential_module = module_match.group(2)
+
+                    # Skip special Ansible directives that are not modules
+                    ansible_directives = {
+                        "vars",
+                        "when",
+                        "loop",
+                        "with_items",
+                        "with_dict",
+                        "with_file",
+                        "register",
+                        "become",
+                        "become_user",
+                        "become_method",
+                        "delegate_to",
+                        "run_once",
+                        "ignore_errors",
+                        "failed_when",
+                        "changed_when",
+                        "tags",
+                        "environment",
+                        "args",
+                        "notify",
+                        "listen",
+                    }
+
+                    if potential_module in ansible_directives:
+                        # This is an Ansible directive, not a module - track it for reversion logic
+                        current_directive = potential_module
+                        directive_indent = current_indent
+                        continue
 
                     # Check if this is already FQCN format
                     if potential_module.startswith(
@@ -1137,12 +1172,118 @@ class ManualFixProcessor:
                     lines[i] = indent_part + param_name + rest_of_line
                     continue
 
+            # If we have a current_directive (like vars:), we're inside directive content
+            # REVERT any incorrect FQCN conversions in directive contexts
+            if current_directive and current_indent > directive_indent:
+                # This is inside a directive - check for incorrect FQCN and revert it
+                param_match = re.match(
+                    r"^(\s+)ansible\.builtin\.([a-z_][a-z0-9_]*)\s*:", line
+                )
+                if param_match:
+                    indent_part = param_match.group(1)
+                    param_name = param_match.group(2)
+                    rest_of_line = line[
+                        len(indent_part) + len(f"ansible.builtin.{param_name}") :
+                    ]
+                    # Revert the FQCN conversion on the directive content
+                    lines[i] = indent_part + param_name + rest_of_line
+                    continue
+
+                # Also handle community.* incorrect conversions in directive contexts
+                community_param_match = re.match(
+                    r"^(\s+)community\.[a-z0-9_]+\.([a-z_][a-z0-9_]*)\s*:", line
+                )
+                if community_param_match:
+                    indent_part = community_param_match.group(1)
+                    param_name = community_param_match.group(2)
+                    # Find the full FQCN part to replace
+                    fqcn_part = line[len(indent_part) :].split(":")[0]
+                    rest_of_line = line[len(indent_part) + len(fqcn_part) :]
+                    lines[i] = indent_part + param_name + rest_of_line
+                    continue
+
+            # Reset directive context when moving to same or different indentation level
+            if (
+                current_directive
+                and current_indent <= directive_indent
+                and line.strip()
+            ):
+                current_directive = None
+                # If this looks like a potential module at the same level, process it
+                if current_indent == directive_indent:
+                    module_match = re.match(r"^(\s+)([a-z_][a-z0-9_.]*)\s*:", line)
+                    if module_match:
+                        potential_module = module_match.group(2)
+                        # Skip directives
+                        ansible_directives = {
+                            "vars",
+                            "when",
+                            "loop",
+                            "with_items",
+                            "with_dict",
+                            "with_file",
+                            "register",
+                            "become",
+                            "become_user",
+                            "become_method",
+                            "delegate_to",
+                            "run_once",
+                            "ignore_errors",
+                            "failed_when",
+                            "changed_when",
+                            "tags",
+                            "environment",
+                            "args",
+                            "notify",
+                            "listen",
+                        }
+
+                        if potential_module not in ansible_directives:
+                            # Check if this is already FQCN format
+                            if potential_module.startswith(
+                                "ansible.builtin."
+                            ) or potential_module.startswith("community."):
+                                current_module = potential_module
+                                module_indent = current_indent
+                                continue
+
             # Check if we've moved to a different indentation level that indicates end of current module
             if current_module and current_indent <= module_indent and line.strip():
                 # We might be starting a new module or moving to a different block
                 module_match = re.match(r"^(\s+)([a-z_][a-z0-9_.]*)\s*:", line)
                 if module_match:
                     potential_module = module_match.group(2)
+
+                    # Skip special Ansible directives that are not modules
+                    ansible_directives = {
+                        "vars",
+                        "when",
+                        "loop",
+                        "with_items",
+                        "with_dict",
+                        "with_file",
+                        "register",
+                        "become",
+                        "become_user",
+                        "become_method",
+                        "delegate_to",
+                        "run_once",
+                        "ignore_errors",
+                        "failed_when",
+                        "changed_when",
+                        "tags",
+                        "environment",
+                        "args",
+                        "notify",
+                        "listen",
+                    }
+
+                    if potential_module in ansible_directives:
+                        # This is an Ansible directive, not a module - track it for reversion logic
+                        current_directive = potential_module
+                        directive_indent = current_indent
+                        continue
+
                     if potential_module in self.FQCN_MAP:
                         # This is a new module
                         indent_part = module_match.group(1)

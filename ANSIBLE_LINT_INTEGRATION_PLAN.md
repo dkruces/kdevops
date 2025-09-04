@@ -914,6 +914,159 @@ The comprehensive script now provides **complete clarity** during application/ap
 
 ---
 
-**Document Status**: Phases 1-5 Complete + Usage Clarification - Production Solution v2.0  
-**Last Updated**: Current session  
-**Next Action**: Address remaining enhancement phases and ensure proper documentation of flag requirements
+## Phase 6: User Experience and Quality Improvements - IN PROGRESS
+
+**Status**: Critical fixes identified from production usage (Current session)
+**Priority**: High - Production quality issues
+
+### Issues Identified from Production Testing:
+
+#### 🐛 Issue 1: Rule Name Duplication in Verification Table
+**Problem**: Multiple "name" entries appear in verification results table without context
+```
+│ name                      │ 68    │
+│ name                      │ 5     │
+│ name                      │ 63    │
+```
+
+**Root Cause**: JSON parsing only uses `check_name` without additional context from ansible-lint output
+
+**Solution Required**:
+- Enhance verification parsing to include rule context (e.g., subtypes, line numbers)
+- Group similar rules with descriptive subtypes
+- Improve table display with more specific rule identification
+
+#### 🔧 Issue 2: Manual Rules Committed as Single Batch
+**Current Behavior**: All 6 manual fixes committed together as one commit
+```bash
+[main e444caa4] playbooks: apply manual ansible-lint fixes
+ 124 files changed, 589 insertions(+), 492 deletions(-)
+```
+
+**Requirement**: Each manual fix should create individual commits (like ansible-lint rules)
+- `yaml[brackets]` → separate commit
+- `yaml[truthy]` → separate commit  
+- `jinja[spacing]` → separate commit
+- `fqcn[action-core]` → separate commit
+- `ignore-errors` → separate commit
+- `role-path` → separate commit
+
+**Solution Required**:
+- Modify `_apply_manual_fixes*` methods to process rules individually
+- Create separate commits per manual rule type
+- Maintain bisectability like ansible-lint rule processing
+
+#### 🎯 Issue 3: Flag Design and User Experience
+**Current Problem**: Confusing flag combination requirements
+- Users must specify `--enable-manual-fixes` to get internal rules
+- No clear separation between rule source types
+- Default behavior runs nothing without explicit flag selection
+
+**New Requirements**:
+1. **Explicit Rule Selection**: Require users to choose rule types
+2. **Better Flag Names**: More intuitive flag naming
+3. **No Default Processing**: Script should do nothing unless flags specified
+4. **Clear Error Messages**: Guide users to select appropriate flags
+
+**Proposed Flag Design**:
+```bash
+# Option 1: Source-based flags
+--fix-with-ansible-lint      # Run official ansible-lint fixes
+--fix-with-custom-rules      # Run internal manual fixes  
+
+# Option 2: Type-based flags  
+--official-fixes             # ansible-lint automated fixes
+--manual-fixes              # Internal custom fixes
+
+# Option 3: Action-based flags
+--run-lint-fixes            # Official ansible-lint processing
+--run-manual-fixes          # Custom manual processing
+```
+
+**Requirements**:
+- At least one flag must be specified or script reports error
+- Flags can be combined: `--fix-with-ansible-lint --fix-with-custom-rules`
+- Clear help documentation explaining each flag's purpose
+- Backward compatibility consideration for existing users
+
+### Implementation Tasks for Phase 6:
+
+#### Task 6.1: Fix Rule Name Duplication (High Priority)
+- **File**: `scripts/ansible-lint-comprehensive-fixer.py`
+- **Method**: `AnsibleLintProcessor.run_verification()`
+- **Changes Required**:
+  - Parse additional JSON context from ansible-lint output
+  - Create unique rule identifiers with subtypes/context
+  - Enhance verification table display with better rule descriptions
+  - Group similar rules logically
+
+#### Task 6.2: Implement Individual Manual Fix Commits (High Priority)  
+- **File**: `scripts/ansible-lint-comprehensive-fixer.py`
+- **Methods**: `_apply_manual_fixes()`, `_apply_manual_fixes_with_progress()`
+- **Changes Required**:
+  - Process each of the 6 manual rules individually
+  - Create separate commits per rule type with descriptive messages
+  - Update progress tracking to show individual rule processing
+  - Maintain same commit format as ansible-lint rules
+
+#### Task 6.3: Redesign Flag System (Medium Priority)
+- **File**: `scripts/ansible-lint-comprehensive-fixer.py`  
+- **Methods**: `__init__()`, argument parsing, main processing
+- **Changes Required**:
+  - Add new explicit flag system (choose final naming)
+  - Remove implicit `--enable-manual-fixes` behavior
+  - Implement validation requiring at least one flag
+  - Update help documentation and examples
+  - Consider backward compatibility migration
+
+#### Task 6.4: Enhanced Error Messages and User Guidance (Medium Priority)
+- **File**: `scripts/ansible-lint-comprehensive-fixer.py`
+- **Methods**: Argument validation, error handling
+- **Changes Required**:
+  - Clear error when no processing flags specified
+  - Helpful suggestions for common use cases
+  - Enhanced `--help` documentation with examples
+  - User-friendly validation messages
+
+### Expected Outcomes Phase 6:
+
+**✅ Production Quality Improvements**:
+- Clear, unambiguous verification results
+- Atomic commits for all rule types (ansible-lint + manual)
+- Intuitive flag system requiring explicit user choice
+- Professional error handling and user guidance
+
+**✅ Enhanced User Experience**:
+- No confusion about rule sources or processing phases
+- Clear commitment history for easy rollback
+- Explicit control over which rule types to apply
+- Better visibility into what each rule does
+
+**✅ Maintained Compatibility**:
+- Core functionality preserved 
+- All existing features continue working
+- Clear migration path for current users
+- Backward compatibility considerations
+
+### Command Examples After Phase 6:
+
+```bash
+# Process only official ansible-lint rules
+./scripts/ansible-lint-comprehensive-fixer.py --fix-with-ansible-lint --auto playbooks/
+
+# Process only custom manual fixes  
+./scripts/ansible-lint-comprehensive-fixer.py --fix-with-custom-rules --auto playbooks/
+
+# Process both types (comprehensive processing)
+./scripts/ansible-lint-comprehensive-fixer.py --fix-with-ansible-lint --fix-with-custom-rules --auto playbooks/
+
+# Error when no flags specified
+./scripts/ansible-lint-comprehensive-fixer.py --auto playbooks/
+# Error: Must specify at least one processing type. Use --fix-with-ansible-lint or --fix-with-custom-rules
+```
+
+---
+
+**Document Status**: Phases 1-5 Complete + Phase 6 Requirements Defined - Production Quality Focus  
+**Last Updated**: Current session - Production issues identified  
+**Next Action**: Implement Phase 6 quality improvements based on production feedback

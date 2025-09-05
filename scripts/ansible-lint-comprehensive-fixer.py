@@ -966,11 +966,13 @@ class ManualFixProcessor:
         """Check if line contains shell/bash syntax that needs bracket spacing."""
         shell_patterns = [
             r"if\s*\[",  # bash conditionals: if [ -f file ]
+            r"elif\s*\[",  # elif conditionals: elif [ -n "$var" ]
             r"while\s*\[",  # while [ condition ]
             r"until\s*\[",  # until [ condition ]
             r"\[\[\s+",  # double brackets: [[ condition ]]
             r"test\s+",  # test command
             r"\$\([^)]*\[",  # command substitution with brackets
+            r"\w+\[[^\]]*\]",  # array access: arr[index], ${var[n]}
         ]
         return any(re.search(pattern, line) for pattern in shell_patterns)
 

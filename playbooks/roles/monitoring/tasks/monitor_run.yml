@@ -86,8 +86,6 @@
 - name: Check if NVMe OCP monitoring is enabled
   ansible.builtin.set_fact:
     nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
-  when:
-    - enable_monitoring|default(false)|bool
 
 - name: Discover NVMe devices for SMART monitoring
   become: true
@@ -108,18 +106,21 @@
   changed_when: false
   failed_when: false
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
 
 - name: Set NVMe devices list for monitoring
   ansible.builtin.set_fact:
     nvme_devices_list: "{{ nvme_devices_discovery.stdout_lines|default([]) }}"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
 
 - name: Display discovered NVMe devices
   ansible.builtin.debug:
     msg: "Found {{ nvme_devices_list|length }} NVMe devices for SMART monitoring: {{ nvme_devices_list|join(', ') }}"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_devices_list is defined
 
@@ -131,6 +132,7 @@
     state: directory
     mode: "0755"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_devices_list|length > 0
 
@@ -150,6 +152,7 @@
     echo $! > /root/monitoring/nvme_ocp_${device_name}.pid
   loop: "{{ nvme_devices_list }}"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_devices_list|length > 0
 
@@ -173,6 +176,7 @@
   register: nvme_monitor_status
   loop: "{{ nvme_devices_list }}"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_devices_list|length > 0
 
@@ -180,6 +184,7 @@
   ansible.builtin.debug:
     msg: "{{ nvme_monitor_status.results | map(attribute='stdout') | list }}"
   when:
+    - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_devices_list|length > 0
     - nvme_monitor_status is defined

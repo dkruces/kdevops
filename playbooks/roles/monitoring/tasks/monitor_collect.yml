@@ -219,8 +219,6 @@
 - name: Check if NVMe OCP monitoring is enabled
   ansible.builtin.set_fact:
     nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
-  when:
-    - enable_monitoring|default(false)|bool
 
 - name: Check for NVMe OCP monitoring processes
   become: true
@@ -269,7 +267,7 @@
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
 
 - name: Collect NVMe OCP monitoring data files
   become: true
@@ -279,7 +277,7 @@
   changed_when: false
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
 
 - name: Copy NVMe OCP monitoring data to localhost
   become: true
@@ -292,7 +290,7 @@
   loop: "{{ nvme_ocp_data_files.stdout_lines|default([]) }}"
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
     - nvme_ocp_data_files.stdout != ""
 
 - name: Display NVMe OCP data collection summary
@@ -303,7 +301,7 @@
       Results directory: {{ monitoring_results_path }}
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
     - nvme_ocp_data_files.stdout != ""
 
 # Generate NVMe OCP plots on localhost
@@ -315,7 +313,7 @@
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
 
 - name: Find collected NVMe OCP data files for plotting
   ansible.builtin.find:
@@ -326,7 +324,7 @@
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
     - nvme_localhost_matplotlib_check.rc == 0
 
 - name: Generate NVMe SMART plots on localhost
@@ -340,7 +338,7 @@
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool
     - nvme_localhost_matplotlib_check.rc == 0
     - nvme_plot_files.matched > 0
 
@@ -359,4 +357,4 @@
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - nvme_ocp_enabled|default(false)|bool
+    - nvme_ocp_enabled|bool

@@ -1134,7 +1134,9 @@ class ManualFixProcessor:
                         continue
                     # Check if this is a known module (not a parameter) that needs FQCN conversion
                     # BUT skip conversion if we're inside a directive context (like vars:)
-                    elif potential_module in self.FQCN_MAP and not (current_directive and current_indent > directive_indent):
+                    elif potential_module in self.FQCN_MAP and not (
+                        current_directive and current_indent > directive_indent
+                    ):
                         rest_of_line = line[len(indent_part) + len(potential_module) :]
                         lines[i] = (
                             indent_part + self.FQCN_MAP[potential_module] + rest_of_line

@@ -219,6 +219,7 @@
 - name: Check if NVMe OCP monitoring is enabled
   ansible.builtin.set_fact:
     nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
+  tags: ["monitoring", "monitor_collect"]
 
 - name: Check for NVMe OCP monitoring processes
   become: true
@@ -228,6 +229,7 @@
   changed_when: false
   when:
     - enable_monitoring|default(false)|bool
+  tags: ["monitoring", "monitor_collect"]
 
 - name: Stop NVMe OCP monitoring processes
   become: true
@@ -250,6 +252,7 @@
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_pids.stdout != ""
+  tags: ["monitoring", "monitor_collect"]
 
 - name: Display NVMe OCP stop status
   ansible.builtin.debug:
@@ -278,6 +281,7 @@
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
+  tags: ["monitoring", "monitor_collect"]
 
 - name: Copy NVMe OCP monitoring data to localhost
   become: true
@@ -292,6 +296,7 @@
     - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_ocp_data_files.stdout != ""
+  tags: ["monitoring", "monitor_collect"]
 
 - name: Display NVMe OCP data collection summary
   ansible.builtin.debug:

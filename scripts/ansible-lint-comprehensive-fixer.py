@@ -965,22 +965,22 @@ class ManualFixProcessor:
     def _is_shell_context(self, line: str) -> bool:
         """Check if line contains shell/bash syntax that needs bracket spacing."""
         shell_patterns = [
-            r'if\s*\[',          # bash conditionals: if [ -f file ]
-            r'while\s*\[',       # while [ condition ]
-            r'until\s*\[',       # until [ condition ]
-            r'\[\[\s+',          # double brackets: [[ condition ]]
-            r'test\s+',          # test command
-            r'\$\([^)]*\[',      # command substitution with brackets
+            r"if\s*\[",  # bash conditionals: if [ -f file ]
+            r"while\s*\[",  # while [ condition ]
+            r"until\s*\[",  # until [ condition ]
+            r"\[\[\s+",  # double brackets: [[ condition ]]
+            r"test\s+",  # test command
+            r"\$\([^)]*\[",  # command substitution with brackets
         ]
         return any(re.search(pattern, line) for pattern in shell_patterns)
 
     def _contains_regex_pattern(self, line: str) -> bool:
         """Check if line contains regex patterns that need bracket spacing."""
         regex_patterns = [
-            r"'\^?\[[^\]]*\]",   # regex character classes: '[^ ]+'
-            r'"\^?\[[^\]]*\]',   # regex character classes in double quotes
-            r'regex_replace\(',   # ansible regex_replace filter
-            r're\.',             # python re module calls
+            r"'\^?\[[^\]]*\]",  # regex character classes: '[^ ]+'
+            r'"\^?\[[^\]]*\]',  # regex character classes in double quotes
+            r"regex_replace\(",  # ansible regex_replace filter
+            r"re\.",  # python re module calls
         ]
         return any(re.search(pattern, line) for pattern in regex_patterns)
 
@@ -988,16 +988,16 @@ class ManualFixProcessor:
         """Fix spacing only in YAML list contexts."""
         # Only fix clear YAML list patterns, not shell or regex contexts
         yaml_list_patterns = [
-            (r':\s*\[\s+([^\]]+)\s+\]', r': [\1]'),  # key: [ value ] -> key: [value]
-            (r'=\s*\[\s+([^\]]+)\s+\]', r'= [\1]'),  # var = [ value ] -> var = [value]
+            (r":\s*\[\s+([^\]]+)\s+\]", r": [\1]"),  # key: [ value ] -> key: [value]
+            (r"=\s*\[\s+([^\]]+)\s+\]", r"= [\1]"),  # var = [ value ] -> var = [value]
         ]
-        
+
         fixed_line = line
         for pattern, replacement in yaml_list_patterns:
             # Additional safety: only apply if it looks like a YAML list
-            if ':' in line and not self._is_shell_context(line):
+            if ":" in line and not self._is_shell_context(line):
                 fixed_line = re.sub(pattern, replacement, fixed_line)
-        
+
         return fixed_line
 
     def fix_yaml_truthy(self, content: str, file_path: str) -> str:

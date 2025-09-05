@@ -57,6 +57,24 @@ class Config:
     FILES_TO_SHOW_BEFORE_TRUNCATION = 5
     MAX_CHANGED_FILES_PREVIEW = 3
 
+    # Rule application order to prevent misleading commits
+    # Phase 1: YAML formatting rules applied first (foundational)
+    YAML_FOUNDATION_RULES = ["yaml"]
+
+    # Phase 2: Content rules applied in logical dependency order
+    CONTENT_RULES = [
+        "command-instead-of-shell",
+        "fqcn",
+        "fqcn[action-core]",
+        "name",
+        "key-order",
+        "jinja[spacing]",
+        "deprecated-local-action",
+    ]
+
+    # Phase 3: Rules requiring special handling or that should be applied last
+    FINAL_RULES = ["no-free-form"]
+
 
 @dataclass
 class RuleInfo:
@@ -1700,6 +1718,45 @@ class ComprehensiveLintFixer:
             self.ui.print_message("⏭️  Skipping commit", "yellow")
             return True
 
+    def order_rules_by_priority(self, rules: List[RuleInfo]) -> List[RuleInfo]:
+        """
+        Order rules by priority to prevent misleading commits.
+
+        Returns rules in the correct application order:
+        1. YAML foundation rules (formatting)
+        2. Content rules (semantic changes)
+        3. Final rules (special handling)
+        4. Unclassified rules (applied last)
+        """
+        ordered_rules = []
+        remaining_rules = rules.copy()
+
+        # Phase 1: YAML foundation rules
+        for rule_id in Config.YAML_FOUNDATION_RULES:
+            matching_rules = [r for r in remaining_rules if r.id == rule_id]
+            ordered_rules.extend(matching_rules)
+            for rule in matching_rules:
+                remaining_rules.remove(rule)
+
+        # Phase 2: Content rules in dependency order
+        for rule_id in Config.CONTENT_RULES:
+            matching_rules = [r for r in remaining_rules if r.id == rule_id]
+            ordered_rules.extend(matching_rules)
+            for rule in matching_rules:
+                remaining_rules.remove(rule)
+
+        # Phase 3: Final rules requiring special handling
+        for rule_id in Config.FINAL_RULES:
+            matching_rules = [r for r in remaining_rules if r.id == rule_id]
+            ordered_rules.extend(matching_rules)
+            for rule in matching_rules:
+                remaining_rules.remove(rule)
+
+        # Phase 4: Any unclassified rules (applied last)
+        ordered_rules.extend(remaining_rules)
+
+        return ordered_rules
+
     def process_rules(self):
         """Main method to process all rules with comprehensive workflow."""
         # Get target files
@@ -1757,6 +1814,16 @@ class ComprehensiveLintFixer:
 
             all_rules = filtered_rules
             ansible_rules = filtered_ansible_rules
+
+        # Apply rule ordering to ensure correct application sequence
+        # This prevents misleading commit messages by applying rules in logical order
+        ordered_ansible_rules = self.order_rules_by_priority(ansible_rules)
+        if ordered_ansible_rules != ansible_rules:
+            self.ui.print_message(
+                f"🔄 Applied rule ordering for clean commits ({len(ordered_ansible_rules)} rules)",
+                "blue",
+            )
+        ansible_rules = ordered_ansible_rules
 
         total_rules = len(all_rules)
 

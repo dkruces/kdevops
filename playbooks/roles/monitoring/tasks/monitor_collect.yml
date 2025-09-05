@@ -216,6 +216,12 @@
     - folio_migration_data_file.stat.exists|default(false)
 
 # NVMe OCP monitoring collection
+- name: Check if NVMe OCP monitoring is enabled
+  ansible.builtin.set_fact:
+    nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
+  when:
+    - enable_monitoring|default(false)|bool
+
 - name: Check for NVMe OCP monitoring processes
   become: true
   become_method: sudo

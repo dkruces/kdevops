@@ -15,7 +15,7 @@
   become: true
   become_method: sudo
   ansible.builtin.shell: |
-    if [-f /root/monitoring/folio_migration.pid]; then
+    if [ -f /root/monitoring/folio_migration.pid ]; then
       pid=$(cat /root/monitoring/folio_migration.pid)
       if ps -p $pid > /dev/null 2>&1; then
         kill $pid

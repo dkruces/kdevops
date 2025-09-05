@@ -12,7 +12,7 @@
 - name: Extract hop1 mirror info from control host (DEB822 format)
   delegate_to: localhost
   ansible.builtin.shell: |
-    if [-f /etc/apt/sources.list.d/debian.sources]; then
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then
       HOST=$(grep -E "^URIs:" /etc/apt/sources.list.d/debian.sources | head -1 | awk '{print $2}' | sed -E 's|https?://||')
       echo "${HOST}"
     fi
@@ -25,9 +25,9 @@
 - name: Extract hop1 mirror info from control host (legacy format)
   delegate_to: localhost
   ansible.builtin.shell: |
-    if [-f /etc/apt/sources.list] && [! -f /etc/apt/sources.list.d/debian.sources]; then
+    if [ -f /etc/apt/sources.list ] && [ ! -f /etc/apt/sources.list.d/debian.sources ]; then
       LINE=$(grep -v "^#" /etc/apt/sources.list | grep -E "^deb\s+http" | head -1)
-      if [-n "$LINE"]; then
+      if [ -n "$LINE" ]; then
         URL=$(echo $LINE | awk '{print $2}')
         echo "${URL}" | sed 's|http://||'
       fi

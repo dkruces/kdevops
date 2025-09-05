@@ -188,7 +188,7 @@
 - name: Source the developer's bash hack script
   ansible.builtin.shell: |
     SOURCE_BASH_HACKS="test -s {{ dev_bash_config_hacks_generic }}  && . {{ dev_bash_config_hacks_generic }} || true"
-    if [-f {{ dev_bash_config }}]; then
+    if [ -f {{ dev_bash_config }} ]; then
       if ! grep "{{ dev_bash_config_hacks_name }}" {{ dev_bash_config }}  2>&1 > /dev/null ; then
         echo "$SOURCE_BASH_HACKS" >> {{ dev_bash_config }}
       fi
@@ -215,7 +215,7 @@
   become_method: sudo
   ansible.builtin.shell: |
     SOURCE_BASH_HACKS="test -s {{ dev_bash_config_hacks_generic }}  && . {{ dev_bash_config_hacks_generic }} || true"
-    if [-f {{ dev_bash_config_root }}]; then
+    if [ -f {{ dev_bash_config_root }} ]; then
       if ! grep "{{ dev_bash_config_hacks_name }}" {{ dev_bash_config_root }}  2>&1 > /dev/null ; then
         echo "$SOURCE_BASH_HACKS" >> {{ dev_bash_config_root }}
       fi

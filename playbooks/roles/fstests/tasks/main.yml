@@ -363,7 +363,7 @@
   tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install"]
   ansible.builtin.shell: |
     SOURCE_KDEVOPS_FSTESTS_SETUP="test -s ~/{{ kdevops_fstests_setup }} && . ~/{{ kdevops_fstests_setup }} || true"
-    if [-f {{ dev_bash_config }}]; then
+    if [ -f {{ dev_bash_config }} ]; then
       if ! grep "{{ kdevops_fstests_setup_name }}" {{ dev_bash_config }}  2>&1 > /dev/null ; then
         echo "$SOURCE_KDEVOPS_FSTESTS_SETUP" >> {{ dev_bash_config }}
       fi

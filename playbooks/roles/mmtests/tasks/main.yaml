@@ -182,7 +182,7 @@
   become_method: sudo
   ansible.builtin.shell: |
     for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-      if [-f "$cpu"]; then
+      if [ -f "$cpu" ]; then
         echo "performance" > "$cpu"
       fi
     done

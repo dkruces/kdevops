@@ -152,7 +152,7 @@
     filesystem_command_for_host: "{{ fs_cmd }}"
     sysbench_fs_sector_size: "{{ sect_size }}"
     sysbench_fstype: "{{ fs_type_variable }}"
-    sysbench_fs_opts_without_sector_size: "{{ fs_cmd | regex_replace('^[^]+ ', '') }}"
+    sysbench_fs_opts_without_sector_size: "{{ fs_cmd | regex_replace('^[^ ]+ ', '') }}"
     sysbench_db_page_size: "{{ db_page_size }}"
 
 - name: Set filesystem options for XFS with sector size

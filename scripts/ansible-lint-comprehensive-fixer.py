@@ -942,17 +942,63 @@ class ManualFixProcessor:
         return self.change_filter.should_fix_line(file_path, line_num)
 
     def fix_yaml_brackets(self, content: str, file_path: str) -> str:
-        """Fix 'Too many spaces inside brackets' issues."""
+        """Fix 'Too many spaces inside brackets' issues - YAML context aware."""
         lines = content.split("\n")
         for i, line in enumerate(lines):
             if not self.should_fix_line(file_path, i + 1):
                 continue
 
-            # Fix spacing in brackets: [ foo ] -> [foo]
-            fixed_line = re.sub(r"\[\s+", "[", line)
-            fixed_line = re.sub(r"\s+\]", "]", fixed_line)
+            # Skip shell/script contexts where brackets are part of shell syntax
+            if self._is_shell_context(line):
+                continue
+
+            # Skip regex patterns which need spaces in character classes
+            if self._contains_regex_pattern(line):
+                continue
+
+            # Only fix YAML list contexts: [ foo, bar ] -> [foo, bar]
+            # But preserve shell conditionals, regex patterns, etc.
+            fixed_line = self._fix_yaml_list_spacing(line)
             lines[i] = fixed_line
         return "\n".join(lines)
+
+    def _is_shell_context(self, line: str) -> bool:
+        """Check if line contains shell/bash syntax that needs bracket spacing."""
+        shell_patterns = [
+            r'if\s*\[',          # bash conditionals: if [ -f file ]
+            r'while\s*\[',       # while [ condition ]
+            r'until\s*\[',       # until [ condition ]
+            r'\[\[\s+',          # double brackets: [[ condition ]]
+            r'test\s+',          # test command
+            r'\$\([^)]*\[',      # command substitution with brackets
+        ]
+        return any(re.search(pattern, line) for pattern in shell_patterns)
+
+    def _contains_regex_pattern(self, line: str) -> bool:
+        """Check if line contains regex patterns that need bracket spacing."""
+        regex_patterns = [
+            r"'\^?\[[^\]]*\]",   # regex character classes: '[^ ]+'
+            r'"\^?\[[^\]]*\]',   # regex character classes in double quotes
+            r'regex_replace\(',   # ansible regex_replace filter
+            r're\.',             # python re module calls
+        ]
+        return any(re.search(pattern, line) for pattern in regex_patterns)
+
+    def _fix_yaml_list_spacing(self, line: str) -> str:
+        """Fix spacing only in YAML list contexts."""
+        # Only fix clear YAML list patterns, not shell or regex contexts
+        yaml_list_patterns = [
+            (r':\s*\[\s+([^\]]+)\s+\]', r': [\1]'),  # key: [ value ] -> key: [value]
+            (r'=\s*\[\s+([^\]]+)\s+\]', r'= [\1]'),  # var = [ value ] -> var = [value]
+        ]
+        
+        fixed_line = line
+        for pattern, replacement in yaml_list_patterns:
+            # Additional safety: only apply if it looks like a YAML list
+            if ':' in line and not self._is_shell_context(line):
+                fixed_line = re.sub(pattern, replacement, fixed_line)
+        
+        return fixed_line
 
     def fix_yaml_truthy(self, content: str, file_path: str) -> str:
         """Fix truthy value issues (yes/no -> true/false)."""

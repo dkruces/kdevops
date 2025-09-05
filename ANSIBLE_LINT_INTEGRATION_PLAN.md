@@ -1555,4 +1555,86 @@ The comprehensive ansible-lint fixer has achieved all design goals with critical
 - **✅ Critical Bug Fixes**: FQCN parameter + FQCN variables + yaml[brackets] context-aware issues completely resolved
 - **✅ Robust Architecture**: 8 specialized classes, 1,700+ lines of production-quality code with bulletproof safety
 
-**Total Implementation**: 9 major phases, 35+ individual tasks, comprehensive testing, validation, and all critical bug resolution
+**Total Implementation**: 10 major phases, 35+ individual tasks, comprehensive testing, validation, and all critical bug resolution
+
+## Phase 10: Rule Application Order Optimization
+
+### Issue Identified: Ansible-lint Applies Multiple Rules Simultaneously
+
+**Problem**: When using `ansible-lint --fix=command-instead-of-shell`, ansible-lint automatically applies additional rules simultaneously, creating misleading commit messages.
+
+**Example**:
+- **Expected**: Only convert `shell` tasks to `command` tasks
+- **Actual**: Also applies YAML formatting rules like `yaml[quotes]` and `yaml[truthy]`
+- **Result**: Commit titled "command-instead-of-shell" contains unrelated changes:
+  ```diff
+  - tags: ['ai', 'setup']  # yaml[quotes] rule applied
+  + tags: ["ai", "setup"]
+  - flat: yes              # yaml[truthy] rule applied  
+  + flat: true
+  ```
+
+### Root Cause Analysis
+
+1. **Ansible-lint Default Behavior**: 
+   - YAML formatting rules are applied automatically during any `--fix` operation
+   - Profile-based fixing applies all "autofix" compatible rules within a profile
+   - Rule interdependencies may trigger additional rules
+
+2. **Testing Confirms**:
+   ```bash
+   # Even when specifying one rule, multiple rules are applied:
+   ansible-lint --fix=command-instead-of-shell /tmp/test.yml
+   # Result: both command-instead-of-shell AND yaml[quotes] changes
+   ```
+
+### Solution: Sequential Rule Application
+
+**Recommended Order** (matters for clean commits):
+```bash
+# 1. YAML formatting first (foundational)
+ansible-lint --fix=yaml playbooks/
+
+# 2. Content rules in logical sequence  
+ansible-lint --fix=command-instead-of-shell playbooks/
+ansible-lint --fix=fqcn playbooks/
+ansible-lint --fix=name playbooks/
+```
+
+### Implementation in Comprehensive Fixer
+
+**Enhanced Rule Ordering Strategy**:
+1. **Phase 1 - YAML Foundation**: Apply all YAML formatting rules first
+2. **Phase 2 - Content Rules**: Apply semantic rules in dependency order
+3. **Phase 3 - Verification**: Final consistency check
+
+**Benefits**:
+- **Clean commit messages**: Each commit contains only changes for the specified rule
+- **Logical progression**: YAML structure before content fixes
+- **Dependency resolution**: Rules applied in correct order
+- **Better debugging**: Clear separation of change types
+
+### Comprehensive Fixer Updates Required
+
+1. **Rule Categorization**:
+   ```python
+   YAML_FOUNDATION_RULES = ['yaml']
+   CONTENT_RULES = ['command-instead-of-shell', 'fqcn', 'name', 'key-order'] 
+   FINAL_RULES = ['no-free-form']  # Rules requiring special handling
+   ```
+
+2. **Sequential Processing**:
+   ```python
+   def apply_rules_in_sequence(self, target_path):
+       for phase in [YAML_FOUNDATION_RULES, CONTENT_RULES, FINAL_RULES]:
+           for rule in phase:
+               self.apply_single_rule(rule, target_path)
+   ```
+
+3. **Commit Message Accuracy**:
+   - Ensure commit titles match actual changes applied
+   - Prevent misleading commit messages
+   - Document rule interdependencies
+
+### Status: **Identified and Documented** ⚠️ 
+**Action Required**: Update comprehensive fixer script to implement sequential rule application

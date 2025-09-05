@@ -311,7 +311,7 @@
 
 - name: Run oscheck-get-failures.sh to get list of known failed tests
   vars:
-    ansible.builtin.group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
   tags: ["blktests", "run_tests"]
   ansible.builtin.command: "{{ kdevops_data }}/workflows/blktests/scripts/oscheck-get-failures.sh --test-group {{ group }}"
   args:
@@ -356,7 +356,7 @@
 
 - name: Run blktests using oscheck.sh
   vars:
-    ansible.builtin.group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    group: "{{ ansible_host | regex_replace('blktests-') | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
   tags: ["blktests", "run_tests"]
   become: true
   become_flags: "su - -c"

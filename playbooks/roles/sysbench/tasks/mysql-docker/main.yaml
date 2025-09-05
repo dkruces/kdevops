@@ -54,7 +54,6 @@
   tags: ["mkfs"]
 
 - name: Set environment variable for sector size for ext4
-  vars:
   ansible.builtin.set_fact:
     sysbench_fs_env:
       MKE2FS_DEVICE_SECTSIZE: "{{ sysbench_fs_sector_size }}"

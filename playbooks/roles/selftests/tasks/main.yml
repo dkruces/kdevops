@@ -37,7 +37,6 @@
   tags: ["vars"]
 
 - name: Check if this node is in charge of userspace tests
-  vars:
   ansible.builtin.set_fact:
     selftest_userspace: "{{ selftest_xarray or selftest_maple or selftest_vma }}"
   tags: ["vars"]

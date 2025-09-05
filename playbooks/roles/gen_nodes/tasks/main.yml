@@ -713,7 +713,7 @@
 
 - name: Generate XML files for the libvirt guests
   vars:
-    ansible.builtin.hostname: "{{ item.name }}"
+    hostname: "{{ item.name }}"
     guestidx: "{{ idx }}"
   ansible.builtin.template:
     src: "guestfs_{{ libvirt_machine_type }}.j2.xml"

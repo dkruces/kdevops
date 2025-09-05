@@ -89,7 +89,7 @@
   when:
     - enable_monitoring|default(false)|bool
 
-- name: Discover NVMe devices for OCP monitoring
+- name: Discover NVMe devices for SMART monitoring
   become: true
   become_method: sudo
   ansible.builtin.shell: |
@@ -97,7 +97,7 @@
       find /dev -name 'nvme*n*' -type b 2>/dev/null | head -10
     elif [ "{{ monitor_nvme_ocp_devices }}" = "ocp-only" ]; then
       for dev in /dev/nvme*n*; do
-        if [ -b "$dev" ] && nvme ocp smart-add-log "$dev" >/dev/null 2>&1; then
+        if [ -b "$dev" ] && nvme smart-log "$dev" >/dev/null 2>&1; then
           echo "$dev"
         fi
       done
@@ -118,7 +118,7 @@
 
 - name: Display discovered NVMe devices
   ansible.builtin.debug:
-    msg: "Found {{ nvme_devices_list|length }} NVMe devices for OCP monitoring: {{ nvme_devices_list|join(', ') }}"
+    msg: "Found {{ nvme_devices_list|length }} NVMe devices for SMART monitoring: {{ nvme_devices_list|join(', ') }}"
   when:
     - nvme_ocp_enabled|bool
     - nvme_devices_list is defined
@@ -134,7 +134,7 @@
     - nvme_ocp_enabled|bool
     - nvme_devices_list|length > 0
 
-- name: Start NVMe OCP monitoring for each device
+- name: Start NVMe SMART monitoring for each device
   become: true
   become_method: sudo
   ansible.builtin.shell: |
@@ -142,7 +142,7 @@
     nohup bash -c '
       while true; do
         echo "$(date "+%Y-%m-%d %H:%M:%S")"
-        nvme ocp smart-add-log --output-format=json {{ item }} 2>/dev/null || echo "{\"error\":\"command_failed\",\"device\":\"{{ item }}\",\"timestamp\":\"$(date "+%Y-%m-%d %H:%M:%S")\"}"
+        nvme smart-log --output-format=json {{ item }} 2>/dev/null || echo "{\"error\":\"command_failed\",\"device\":\"{{ item }}\",\"timestamp\":\"$(date "+%Y-%m-%d %H:%M:%S")\"}"
         echo ""
         sleep {{ monitor_nvme_ocp_interval|default(300) }}
       done

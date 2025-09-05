@@ -323,10 +323,10 @@
     - nvme_ocp_enabled|default(false)|bool
     - nvme_localhost_matplotlib_check.rc == 0
 
-- name: Generate NVMe OCP plots on localhost
+- name: Generate NVMe SMART plots on localhost
   ansible.builtin.command: |
-    python3 {{ playbook_dir }}/roles/monitoring/files/plot_nvme_ocp_stats.py
-      -o {{ monitoring_results_path }}/nvme_ocp_combined_plot.png
+    python3 {{ playbook_dir }}/roles/monitoring/files/plot_nvme_smart_stats.py
+      -o {{ monitoring_results_path }}/nvme_smart_combined_plot.png
       {{ nvme_plot_files.files | map(attribute='path') | join(' ') }}
   delegate_to: localhost
   register: nvme_plot_generation

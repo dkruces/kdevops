@@ -111,7 +111,6 @@
 - name: Set monitoring results path
   ansible.builtin.set_fact:
     monitoring_results_path: "{{ monitoring_results_base_path | default(topdir_path + '/workflows/fstests/results/monitoring') }}"
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 # Set blktests-specific monitoring results path
 - name: Set blktests monitoring results path
@@ -120,7 +119,6 @@
   when:
     - kdevops_run_blktests|default(false)|bool
     - enable_monitoring|default(false)|bool
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Create local monitoring results directory
   ansible.builtin.file:
@@ -221,7 +219,6 @@
 - name: Check if NVMe OCP monitoring is enabled
   ansible.builtin.set_fact:
     nvme_ocp_enabled: "{{ monitor_nvme_ocp|default(false)|bool }}"
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Check for NVMe OCP monitoring processes
   become: true
@@ -231,7 +228,6 @@
   changed_when: false
   when:
     - enable_monitoring|default(false)|bool
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Stop NVMe OCP monitoring processes
   become: true
@@ -254,7 +250,6 @@
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_pids.stdout != ""
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Display NVMe OCP stop status
   ansible.builtin.debug:
@@ -283,7 +278,6 @@
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Copy NVMe OCP monitoring data to localhost
   become: true
@@ -298,7 +292,6 @@
     - enable_monitoring|default(false)|bool
     - nvme_ocp_enabled|bool
     - nvme_ocp_data_files.stdout != ""
-  tags: ["monitoring", "monitor_collect", "copy_results"]
 
 - name: Display NVMe OCP data collection summary
   ansible.builtin.debug:

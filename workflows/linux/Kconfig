@@ -466,4 +466,182 @@ endif # BOOTLINUX_AB_DIFFERENT_REF
 
 endif # KDEVOPS_BASELINE_AND_DEV
 
+if TARGET_ARCH_ARM64
+
+config BOOTLINUX_USE_CONFIG_FRAGMENTS
+	bool "Use kernel configuration fragments"
+	output yaml
+	help
+	  Enable this to build the kernel using configuration fragments
+	  instead of a monolithic configuration file. This allows you to
+	  compose kernel configurations from smaller, focused fragments.
+
+	  When enabled, the kernel configuration will be built using
+	  merge_config.sh with selected fragments from both upstream
+	  kernel sources and kdevops templates.
+
+if BOOTLINUX_USE_CONFIG_FRAGMENTS
+
+menu "Upstream kernel configuration fragments"
+
+config BOOTLINUX_FRAGMENT_TINY
+	bool "Tiny kernel configuration"
+	output yaml
+	help
+	  Use the tiny.config fragment from the upstream kernel sources.
+	  This enables CONFIG_EMBEDDED and other options for minimal kernels.
+
+config BOOTLINUX_FRAGMENT_NOPM
+	bool "Disable power management"
+	output yaml
+	help
+	  Use the nopm.config fragment to disable power management features.
+
+config BOOTLINUX_FRAGMENT_DEBUG
+	bool "Enable kernel debugging features"
+	output yaml
+	help
+	  Use the debug.config fragment to enable various kernel debugging
+	  and diagnostic features.
+
+config BOOTLINUX_FRAGMENT_HARDENING
+	bool "Security hardening options"
+	output yaml
+	help
+	  Use the hardening.config fragment to enable kernel security
+	  hardening features.
+
+config BOOTLINUX_FRAGMENT_KVM_GUEST
+	bool "KVM guest optimizations"
+	default y
+	output yaml
+	help
+	  Use the kvm_guest.config fragment to enable optimizations for
+	  running the kernel as a KVM guest.
+
+config BOOTLINUX_FRAGMENT_XEN
+	bool "Xen guest support"
+	output yaml
+	help
+	  Use the xen.config fragment to enable Xen hypervisor support.
+
+config BOOTLINUX_FRAGMENT_RUST
+	bool "Rust language support"
+	output yaml
+	help
+	  Use the rust.config fragment to enable Rust programming language
+	  support in the kernel.
+
+endmenu
+
+menu "kdevops kernel configuration fragments"
+
+config BOOTLINUX_FRAGMENT_64BIT
+	bool "64-bit architecture optimizations"
+	default y
+	output yaml
+	help
+	  Enable 64-bit specific optimizations and features.
+
+config BOOTLINUX_FRAGMENT_SYSTEMD
+	bool "systemd support"
+	default y
+	output yaml
+	help
+	  Enable kernel features required by systemd init system.
+
+config BOOTLINUX_FRAGMENT_DISTRO
+	bool "Distribution kernel features"
+	default y
+	output yaml
+	help
+	  Enable features commonly needed by Linux distributions.
+
+config BOOTLINUX_FRAGMENT_STORAGE
+	bool "Storage and filesystem features"
+	default y
+	output yaml
+	help
+	  Enable advanced storage and filesystem features.
+
+config BOOTLINUX_FRAGMENT_VIRTIO_FS
+	bool "VirtIO filesystem support"
+	default y
+	output yaml
+	help
+	  Enable VirtIO filesystem support for virtualized environments.
+
+config BOOTLINUX_FRAGMENT_NUMA
+	bool "NUMA support"
+	output yaml
+	help
+	  Enable Non-Uniform Memory Access support.
+
+config BOOTLINUX_FRAGMENT_MODULES
+	bool "Enhanced module support"
+	output yaml
+	help
+	  Enable advanced kernel module features.
+
+config BOOTLINUX_FRAGMENT_INITRAMFS
+	bool "Initial RAM disk support"
+	default y
+	output yaml
+	help
+	  Enable initramfs (initial RAM disk) support with compression
+	  algorithms. This is essential for most Linux distributions
+	  and is needed for generating initrd images during kernel
+	  installation.
+
+config BOOTLINUX_FRAGMENT_EBPF
+	bool "Extended BPF support"
+	output yaml
+	help
+	  Enable extended Berkeley Packet Filter support.
+
+config BOOTLINUX_FRAGMENT_GDB
+	bool "Kernel GDB support"
+	output yaml
+	help
+	  Enable kernel debugging via GDB.
+
+config BOOTLINUX_FRAGMENT_VM_DEBUG
+	bool "Virtual memory debugging"
+	output yaml
+	help
+	  Enable virtual memory debugging features.
+
+choice
+	prompt "ARM64 page size configuration"
+	default BOOTLINUX_FRAGMENT_ARM64_4K_PAGES
+	help
+	  Choose the page size configuration for ARM64.
+
+config BOOTLINUX_FRAGMENT_ARM64_4K_PAGES
+	bool "4KB pages"
+	output yaml
+	help
+	  Use 4KB page size (default for most systems).
+
+config BOOTLINUX_FRAGMENT_ARM64_16K_PAGES
+	bool "16KB pages"
+	output yaml
+	help
+	  Use 16KB page size for better performance in some workloads.
+
+config BOOTLINUX_FRAGMENT_ARM64_64K_PAGES
+	bool "64KB pages"
+	output yaml
+	help
+	  Use 64KB page size for high-performance computing workloads.
+
+endchoice
+
+endmenu
+
+
+endif # BOOTLINUX_USE_CONFIG_FRAGMENTS
+
+endif # TARGET_ARCH_ARM64
+
 endif # BOOTLINUX

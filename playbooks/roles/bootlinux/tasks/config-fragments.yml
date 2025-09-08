@@ -1,0 +1,92 @@
+---
+# Kernel configuration using fragments with merge_config.sh
+
+- name: Initialize fragment list
+  ansible.builtin.set_fact:
+    fragment_list: []
+
+# Build fragment list for upstream kernel fragments
+- name: Add upstream fragments to list
+  ansible.builtin.set_fact:
+    fragment_list: "{{ fragment_list + [item.path] }}"
+  loop:
+    - { condition: "{{ bootlinux_fragment_tiny|default(false)|bool }}", path: "kernel/configs/tiny.config" }
+    - { condition: "{{ bootlinux_fragment_nopm|default(false)|bool }}", path: "kernel/configs/nopm.config" }
+    - { condition: "{{ bootlinux_fragment_debug|default(false)|bool }}", path: "kernel/configs/debug.config" }
+    - { condition: "{{ bootlinux_fragment_hardening|default(false)|bool }}", path: "kernel/configs/hardening.config" }
+    - { condition: "{{ bootlinux_fragment_kvm_guest|default(false)|bool }}", path: "kernel/configs/kvm_guest.config" }
+    - { condition: "{{ bootlinux_fragment_xen|default(false)|bool }}", path: "kernel/configs/xen.config" }
+    - { condition: "{{ bootlinux_fragment_rust|default(false)|bool }}", path: "kernel/configs/rust.config" }
+  when: item.condition
+
+# Build fragment list for kdevops template fragments
+- name: Add kdevops template fragments to list
+  ansible.builtin.set_fact:
+    fragment_list: "{{ fragment_list + [role_path + '/templates/fragments/' + item.file] }}"
+  loop:
+    - { condition: "{{ bootlinux_fragment_64bit|default(false)|bool }}", file: "64bit.config" }
+    - { condition: "{{ bootlinux_fragment_systemd|default(false)|bool }}", file: "systemd.config" }
+    - { condition: "{{ bootlinux_fragment_distro|default(false)|bool }}", file: "distro.config" }
+    - { condition: "{{ bootlinux_fragment_storage|default(false)|bool }}", file: "storage.config" }
+    - { condition: "{{ bootlinux_fragment_virtio_fs|default(false)|bool }}", file: "virtio-fs.config" }
+    - { condition: "{{ bootlinux_fragment_numa|default(false)|bool }}", file: "numa.config" }
+    - { condition: "{{ bootlinux_fragment_modules|default(false)|bool }}", file: "modules.config" }
+    - { condition: "{{ bootlinux_fragment_initramfs|default(false)|bool }}", file: "initramfs.config" }
+    - { condition: "{{ bootlinux_fragment_ebpf|default(false)|bool }}", file: "ebpf.config" }
+    - { condition: "{{ bootlinux_fragment_gdb|default(false)|bool }}", file: "gdb.config" }
+    - { condition: "{{ bootlinux_fragment_vm_debug|default(false)|bool }}", file: "vm_debug.config" }
+    - { condition: "{{ bootlinux_fragment_arm64_4k_pages|default(false)|bool }}", file: "arm64_4k_pages.config" }
+    - { condition: "{{ bootlinux_fragment_arm64_16k_pages|default(false)|bool }}", file: "arm64_16k_pages.config" }
+    - { condition: "{{ bootlinux_fragment_arm64_64k_pages|default(false)|bool }}", file: "arm64_64k_pages.config" }
+  when: item.condition
+
+- name: Debug fragment selection process
+  ansible.builtin.debug:
+    msg: |
+      Fragment selection debug:
+      - bootlinux_use_config_fragments: {{ bootlinux_use_config_fragments|default(false) }}
+      - target_arch_arm64: {{ target_arch_arm64|default(false) }}
+      - bootlinux_fragment_64bit: {{ bootlinux_fragment_64bit|default(false) }}
+      - bootlinux_fragment_kvm_guest: {{ bootlinux_fragment_kvm_guest|default(false) }}
+      - bootlinux_fragment_virtio_fs: {{ bootlinux_fragment_virtio_fs|default(false) }}
+      - bootlinux_fragment_systemd: {{ bootlinux_fragment_systemd|default(false) }}
+      - bootlinux_fragment_distro: {{ bootlinux_fragment_distro|default(false) }}
+      - bootlinux_fragment_storage: {{ bootlinux_fragment_storage|default(false) }}
+      - bootlinux_fragment_initramfs: {{ bootlinux_fragment_initramfs|default(false) }}
+      - role_path: {{ role_path }}
+      - target_linux_dir_path: {{ target_linux_dir_path }}
+  vars:
+    ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
+
+- name: Display selected configuration fragments
+  ansible.builtin.debug:
+    msg: |
+      Selected kernel configuration fragments ({{ fragment_list | length }} total):
+      {{ fragment_list | join(' ') }}
+  when: fragment_list | length > 0
+
+- name: Display warning if no fragments selected
+  ansible.builtin.debug:
+    msg: "WARNING: No configuration fragments were selected!"
+  when: fragment_list | length == 0
+
+# Create minimal base ARM64 configuration
+- name: Create minimal base ARM64 configuration
+  ansible.builtin.copy:
+    content: |
+      # Minimal ARM64 base configuration for fragment merging
+      CONFIG_ARM64=y
+    dest: "{{ target_linux_dir_path }}/.config"
+    mode: "0644"
+
+# Apply fragments using merge_config.sh
+- name: Apply configuration fragments using merge_config.sh
+  ansible.builtin.shell: |
+    {{ 'LLVM=1 ' if bootlinux_compiler_clang|default(false)|bool else '' }}./scripts/kconfig/merge_config.sh -n .config {{ fragment_list | join(' ') }}
+  args:
+    chdir: "{{ target_linux_dir_path }}"
+  when: fragment_list | length > 0
+  vars:
+    ansible_callback_diy_runner_on_ok_msg: |
+      $ {{ ansible_callback_diy.result.output.cmd }}
+      {{ ansible_callback_diy.result.output.stdout | default('') }}

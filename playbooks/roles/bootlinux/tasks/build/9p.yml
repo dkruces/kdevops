@@ -116,6 +116,16 @@
     mode: "0644"
   run_once: true
   delegate_to: localhost
+  when: not bootlinux_use_config_fragments|default(false)|bool
+
+- name: Use configuration fragments for Linux {{ target_linux_tree }} on the control node
+  ansible.builtin.import_tasks: ../config-fragments.yml
+  run_once: true
+  delegate_to: localhost
+  vars:
+    target_linux_dir_path: "{{ bootlinux_9p_host_path }}"
+  when:
+    - bootlinux_use_config_fragments|default(false)|bool
 
 - name: Set kernel localversion if requested on the control node
   ansible.builtin.shell: "echo {{ active_linux_localversion | default(target_linux_localversion) }} > {{ bootlinux_9p_host_path }}/localversion"
@@ -140,6 +150,7 @@
     executable: /bin/bash
   run_once: true
   delegate_to: localhost
+  when: not bootlinux_use_config_fragments|default(false)|bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: |
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}

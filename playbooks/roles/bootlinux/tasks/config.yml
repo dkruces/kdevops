@@ -36,3 +36,11 @@
     linux_config: "{{ item | basename }}"
   with_first_found:
     - files: "{{ search_list }}"
+  when: not bootlinux_use_config_fragments|default(false)|bool
+
+- name: Use configuration fragments instead of monolithic config
+  ansible.builtin.import_tasks: config-fragments.yml
+  when:
+    - bootlinux_use_config_fragments|default(false)|bool
+    - target_arch_arm64|default(false)|bool
+    - not bootlinux_9p|default(false)|bool

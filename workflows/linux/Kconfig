@@ -466,4 +466,8 @@ endif # BOOTLINUX_AB_DIFFERENT_REF
 
 endif # KDEVOPS_BASELINE_AND_DEV
 
+if TARGET_ARCH_ARM64
+source "workflows/linux/Kconfig.fragments"
+endif # TARGET_ARCH_ARM64
+
 endif # BOOTLINUX

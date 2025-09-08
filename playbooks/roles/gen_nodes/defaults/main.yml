@@ -28,7 +28,7 @@ libvirt_mem_mb: 4096
 gdb_port_conflict: false
 libvirt_enable_gdb: false
 libvirt_gdb_baseport: 1234
-qemu_bin_path: "/usr/bin/qemu-system-x86_64"
+qemu_bin_path: "/usr/bin/qemu-system-{{ 'x86_64' if target_arch_x86_64|default(false) else 'aarch64' if target_arch_arm64|default(false) else 'ppc64le' }}"
 extra_disk_path: "./nvme_disks"
 extra_disk_driver: "nvme"
 extra_disk_controller: "NVMe"
@@ -54,7 +54,7 @@ libvirt_qemu_group: libvirt-qemu
 # we imply this is this the default for libvirt, we however
 # don't actually use this variable unless libvirt_override_machine_type is
 # True. So by default we use whatever libvirt uses by default.
-libvirt_machine_type: "pc"
+libvirt_machine_type: "{{ 'q35' if target_arch_x86_64|default(false) else 'virt' if target_arch_arm64|default(false) else 'pc' }}"
 libvirt_host_passthrough: false
 libvirt_enable_cxl: false
 libvirt_enable_qmp: false

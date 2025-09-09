@@ -485,34 +485,34 @@ if BOOTLINUX_USE_CONFIG_FRAGMENTS
 menu "Upstream kernel configuration fragments"
 
 config BOOTLINUX_FRAGMENT_TINY
-	bool "Tiny kernel configuration"
+	bool "Tiny kernel configuration (tiny.config)"
 	output yaml
 	help
 	  Use the tiny.config fragment from the upstream kernel sources.
 	  This enables CONFIG_EMBEDDED and other options for minimal kernels.
 
 config BOOTLINUX_FRAGMENT_NOPM
-	bool "Disable power management"
+	bool "Disable power management (nopm.config)"
 	output yaml
 	help
 	  Use the nopm.config fragment to disable power management features.
 
 config BOOTLINUX_FRAGMENT_DEBUG
-	bool "Enable kernel debugging features"
+	bool "Enable kernel debugging features (debug.config)"
 	output yaml
 	help
 	  Use the debug.config fragment to enable various kernel debugging
 	  and diagnostic features.
 
 config BOOTLINUX_FRAGMENT_HARDENING
-	bool "Security hardening options"
+	bool "Security hardening options (hardening.config)"
 	output yaml
 	help
 	  Use the hardening.config fragment to enable kernel security
 	  hardening features.
 
 config BOOTLINUX_FRAGMENT_KVM_GUEST
-	bool "KVM guest optimizations"
+	bool "KVM guest optimizations (kvm_guest.config)"
 	default y
 	output yaml
 	help
@@ -520,13 +520,13 @@ config BOOTLINUX_FRAGMENT_KVM_GUEST
 	  running the kernel as a KVM guest.
 
 config BOOTLINUX_FRAGMENT_XEN
-	bool "Xen guest support"
+	bool "Xen guest support (xen.config)"
 	output yaml
 	help
 	  Use the xen.config fragment to enable Xen hypervisor support.
 
 config BOOTLINUX_FRAGMENT_RUST
-	bool "Rust language support"
+	bool "Rust language support (rust.config)"
 	output yaml
 	help
 	  Use the rust.config fragment to enable Rust programming language
@@ -537,54 +537,54 @@ endmenu
 menu "kdevops kernel configuration fragments"
 
 config BOOTLINUX_FRAGMENT_64BIT
-	bool "64-bit architecture optimizations"
+	bool "64-bit architecture optimizations (64bit.config)"
 	default y
 	output yaml
 	help
 	  Enable 64-bit specific optimizations and features.
 
 config BOOTLINUX_FRAGMENT_SYSTEMD
-	bool "systemd support"
+	bool "systemd support (systemd.config)"
 	default y
 	output yaml
 	help
 	  Enable kernel features required by systemd init system.
 
 config BOOTLINUX_FRAGMENT_DISTRO
-	bool "Distribution kernel features"
+	bool "Distribution kernel features (distro.config)"
 	default y
 	output yaml
 	help
 	  Enable features commonly needed by Linux distributions.
 
 config BOOTLINUX_FRAGMENT_STORAGE
-	bool "Storage and filesystem features"
+	bool "Storage and filesystem features (storage.config)"
 	default y
 	output yaml
 	help
 	  Enable advanced storage and filesystem features.
 
 config BOOTLINUX_FRAGMENT_VIRTIO_FS
-	bool "VirtIO filesystem support"
+	bool "VirtIO filesystem support (virtio-fs.config)"
 	default y
 	output yaml
 	help
 	  Enable VirtIO filesystem support for virtualized environments.
 
 config BOOTLINUX_FRAGMENT_NUMA
-	bool "NUMA support"
+	bool "NUMA support (numa.config)"
 	output yaml
 	help
 	  Enable Non-Uniform Memory Access support.
 
 config BOOTLINUX_FRAGMENT_MODULES
-	bool "Enhanced module support"
+	bool "Enhanced module support (modules.config)"
 	output yaml
 	help
 	  Enable advanced kernel module features.
 
 config BOOTLINUX_FRAGMENT_INITRAMFS
-	bool "Initial RAM disk support"
+	bool "Initial RAM disk support (initramfs.config)"
 	default y
 	output yaml
 	help
@@ -594,22 +594,41 @@ config BOOTLINUX_FRAGMENT_INITRAMFS
 	  installation.
 
 config BOOTLINUX_FRAGMENT_EBPF
-	bool "Extended BPF support"
+	bool "Extended BPF support (ebpf.config)"
 	output yaml
 	help
 	  Enable extended Berkeley Packet Filter support.
 
 config BOOTLINUX_FRAGMENT_GDB
-	bool "Kernel GDB support"
+	bool "Kernel GDB support (gdb.config)"
 	output yaml
 	help
 	  Enable kernel debugging via GDB.
 
 config BOOTLINUX_FRAGMENT_VM_DEBUG
-	bool "Virtual memory debugging"
+	bool "Virtual memory debugging (vm_debug.config)"
 	output yaml
 	help
 	  Enable virtual memory debugging features.
+
+config BOOTLINUX_FRAGMENT_LOCALVERSION
+	bool "Automatic local version generation (localversion.config)"
+	output yaml
+	help
+	  Enable CONFIG_LOCALVERSION_AUTO=y to automatically append
+	  git commit information to kernel version strings.
+
+config BOOTLINUX_FRAGMENT_BLKTRACE
+	bool "Block I/O tracing support (blktrace.config)"
+	output yaml
+	help
+	  Enable block layer tracing and debugging capabilities.
+
+config BOOTLINUX_FRAGMENT_KSM
+	bool "Kernel Samepage Merging (ksm.config)"
+	output yaml
+	help
+	  Enable KSM for memory deduplication in virtualized environments.
 
 choice
 	prompt "ARM64 page size configuration"
@@ -618,24 +637,74 @@ choice
 	  Choose the page size configuration for ARM64.
 
 config BOOTLINUX_FRAGMENT_ARM64_4K_PAGES
-	bool "4KB pages"
+	bool "4KB pages (arm64_4k_pages.config)"
 	output yaml
 	help
 	  Use 4KB page size (default for most systems).
 
 config BOOTLINUX_FRAGMENT_ARM64_16K_PAGES
-	bool "16KB pages"
+	bool "16KB pages (arm64_16k_pages.config)"
 	output yaml
 	help
 	  Use 16KB page size for better performance in some workloads.
 
 config BOOTLINUX_FRAGMENT_ARM64_64K_PAGES
-	bool "64KB pages"
+	bool "64KB pages (arm64_64k_pages.config)"
 	output yaml
 	help
 	  Use 64KB page size for high-performance computing workloads.
 
 endchoice
+
+config BOOTLINUX_FRAGMENT_BUFFER_HEAD
+	bool "Buffer head support (buffer_head.config)"
+	output yaml
+	help
+	  Enable buffer head infrastructure for filesystem operations.
+
+config BOOTLINUX_FRAGMENT_EBPF_ERRORINJ
+	bool "eBPF error injection (ebpf-errorinj.config)"
+	output yaml
+	help
+	  Enable eBPF-based error injection capabilities for testing.
+
+config BOOTLINUX_FRAGMENT_LOCALAUTO
+	bool "Local version auto generation (localauto.config)"
+	default y
+	output yaml
+	help
+	  Automatically generate local version strings with git information.
+
+config BOOTLINUX_FRAGMENT_MOBY
+	bool "Container/Moby support (moby.config)"
+	output yaml
+	help
+	  Enable kernel features required for container runtimes like Moby/Docker.
+
+config BOOTLINUX_FRAGMENT_MODULES_BLK
+	bool "Block layer module support (modules-blk.config)"
+	output yaml
+	help
+	  Enhanced block layer module support and debugging.
+
+config BOOTLINUX_FRAGMENT_X86
+	bool "x86 architecture optimizations (x86.config)"
+	depends on TARGET_ARCH_X86_64
+	output yaml
+	help
+	  Enable x86-specific optimizations and features.
+
+config BOOTLINUX_FRAGMENT_XARRAY
+	bool "XArray data structure support (xarray.config)"
+	output yaml
+	help
+	  Enable XArray data structure support in the kernel.
+
+config BOOTLINUX_FRAGMENT_XARRAY_NO_MULTI
+	bool "XArray without multi-index (xarray_no_multi.config)"
+	output yaml
+	help
+	  Enable XArray support but disable multi-index functionality.
 
 endmenu
 

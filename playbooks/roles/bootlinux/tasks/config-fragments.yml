@@ -35,9 +35,20 @@
     - { condition: "{{ bootlinux_fragment_ebpf|default(false)|bool }}", file: "ebpf.config" }
     - { condition: "{{ bootlinux_fragment_gdb|default(false)|bool }}", file: "gdb.config" }
     - { condition: "{{ bootlinux_fragment_vm_debug|default(false)|bool }}", file: "vm_debug.config" }
+    - { condition: "{{ bootlinux_fragment_localversion|default(false)|bool }}", file: "localversion.config" }
+    - { condition: "{{ bootlinux_fragment_blktrace|default(false)|bool }}", file: "blktrace.config" }
+    - { condition: "{{ bootlinux_fragment_ksm|default(false)|bool }}", file: "ksm.config" }
     - { condition: "{{ bootlinux_fragment_arm64_4k_pages|default(false)|bool }}", file: "arm64_4k_pages.config" }
     - { condition: "{{ bootlinux_fragment_arm64_16k_pages|default(false)|bool }}", file: "arm64_16k_pages.config" }
     - { condition: "{{ bootlinux_fragment_arm64_64k_pages|default(false)|bool }}", file: "arm64_64k_pages.config" }
+    - { condition: "{{ bootlinux_fragment_buffer_head|default(false)|bool }}", file: "buffer_head.config" }
+    - { condition: "{{ bootlinux_fragment_ebpf_errorinj|default(false)|bool }}", file: "ebpf-errorinj.config" }
+    - { condition: "{{ bootlinux_fragment_localauto|default(false)|bool }}", file: "localauto.config" }
+    - { condition: "{{ bootlinux_fragment_moby|default(false)|bool }}", file: "moby.config" }
+    - { condition: "{{ bootlinux_fragment_modules_blk|default(false)|bool }}", file: "modules-blk.config" }
+    - { condition: "{{ bootlinux_fragment_x86|default(false)|bool }}", file: "x86.config" }
+    - { condition: "{{ bootlinux_fragment_xarray|default(false)|bool }}", file: "xarray.config" }
+    - { condition: "{{ bootlinux_fragment_xarray_no_multi|default(false)|bool }}", file: "xarray_no_multi.config" }
   when: item.condition
 
 - name: Debug fragment selection process
@@ -69,15 +80,6 @@
   ansible.builtin.debug:
     msg: "WARNING: No configuration fragments were selected!"
   when: fragment_list | length == 0
-
-# Create minimal base ARM64 configuration
-- name: Create minimal base ARM64 configuration
-  ansible.builtin.copy:
-    content: |
-      # Minimal ARM64 base configuration for fragment merging
-      CONFIG_ARM64=y
-    dest: "{{ target_linux_dir_path }}/.config"
-    mode: "0644"
 
 # Apply fragments using merge_config.sh
 - name: Apply configuration fragments using merge_config.sh

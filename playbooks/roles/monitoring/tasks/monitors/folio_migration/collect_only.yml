@@ -1,0 +1,56 @@
+---
+# Folio migration interim data collection (without stopping monitoring)
+- name: Check if folio migration monitoring data exists
+  become: true
+  become_method: sudo
+  ansible.builtin.stat:
+    path: /root/monitoring/folio_migration_stats.txt
+  register: folio_migration_data_file
+  when:
+    - monitor_developmental_stats|default(false)|bool
+    - monitor_folio_migration|default(false)|bool
+
+- name: Create folio migration snapshot for interim collection
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    cp /root/monitoring/folio_migration_stats.txt /root/monitoring/folio_migration_stats_snapshot.txt
+  when:
+    - monitor_developmental_stats|default(false)|bool
+    - monitor_folio_migration|default(false)|bool
+    - folio_migration_data_file.stat.exists|default(false)
+
+- name: Copy folio migration interim data to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: /root/monitoring/folio_migration_stats_snapshot.txt
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats_interim.txt"
+    flat: true
+    validate_checksum: false
+  when:
+    - monitor_developmental_stats|default(false)|bool
+    - monitor_folio_migration|default(false)|bool
+    - folio_migration_data_file.stat.exists|default(false)
+
+- name: Clean up folio migration snapshot
+  become: true
+  become_method: sudo
+  ansible.builtin.file:
+    path: /root/monitoring/folio_migration_stats_snapshot.txt
+    state: absent
+  when:
+    - monitor_developmental_stats|default(false)|bool
+    - monitor_folio_migration|default(false)|bool
+  ignore_errors: true
+
+- name: Display folio migration interim collection status
+  ansible.builtin.debug:
+    msg: |
+      Folio migration interim data {% if folio_migration_data_file.stat.exists|default(false) %}collected{% else %}not available{% endif %}.
+      {% if folio_migration_data_file.stat.exists|default(false) %}
+      Data saved to: {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats_interim.txt
+      {% endif %}
+  when:
+    - monitor_developmental_stats|default(false)|bool
+    - monitor_folio_migration|default(false)|bool

@@ -5,7 +5,6 @@
 - ansible.builtin.import_tasks: common/setup.yml
   when:
     - enable_monitoring|default(false)|bool
-    - (monitor_developmental_stats|default(false)|bool or monitor_nvme_smart_log|default(false)|bool)
 
 # Import folio migration collection tasks
 - ansible.builtin.import_tasks: monitors/folio_migration/collect.yml

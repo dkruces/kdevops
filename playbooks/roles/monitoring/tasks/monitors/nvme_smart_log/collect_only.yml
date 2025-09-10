@@ -1,0 +1,66 @@
+---
+# NVMe SMART log interim data collection (without stopping monitoring)
+- name: Check for NVMe SMART log interim data files
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_smart_log_*_stats.txt 2>/dev/null || true"
+  register: nvme_smart_log_data_files
+  changed_when: false
+  when:
+    - monitor_nvme_smart_log|default(false)|bool
+
+- name: Create NVMe SMART log snapshots for interim collection
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    for file in /root/monitoring/nvme_smart_log_*_stats.txt; do
+      if [ -f "$file" ]; then
+        base_name=$(basename "$file" .txt)
+        cp "$file" "/root/monitoring/${base_name}_snapshot.txt"
+      fi
+    done
+  when:
+    - monitor_nvme_smart_log|default(false)|bool
+    - nvme_smart_log_data_files.stdout != ""
+
+- name: Copy NVMe SMART log interim data to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_smart_log_*_snapshot.txt 2>/dev/null || true"
+  register: nvme_smart_log_snapshots
+  changed_when: false
+  when:
+    - monitor_nvme_smart_log|default(false)|bool
+
+- name: Fetch NVMe SMART log interim snapshots
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: "{{ item }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename | replace('_snapshot', '_interim') }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ nvme_smart_log_snapshots.stdout_lines|default([]) }}"
+  when:
+    - monitor_nvme_smart_log|default(false)|bool
+    - nvme_smart_log_snapshots.stdout != ""
+
+- name: Clean up NVMe SMART log snapshots
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "rm -f /root/monitoring/nvme_smart_log_*_snapshot.txt"
+  when:
+    - monitor_nvme_smart_log|default(false)|bool
+  ignore_errors: true
+
+- name: Display NVMe SMART log interim collection status
+  ansible.builtin.debug:
+    msg: |
+      NVMe SMART log interim data collection complete.
+      {% if nvme_smart_log_snapshots.stdout_lines|default([])|length > 0 %}
+      Data files collected: {{ nvme_smart_log_snapshots.stdout_lines|default([])|length }}
+      {% else %}
+      No NVMe SMART log data available for interim collection.
+      {% endif %}
+  when:
+    - monitor_nvme_smart_log|default(false)|bool

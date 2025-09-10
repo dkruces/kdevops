@@ -11,3 +11,8 @@
 - ansible.builtin.import_tasks: monitors/nvme_smart_log/run.yml
   when:
     - monitor_nvme_smart_log|default(false)|bool
+
+# Import NVMe OCP SMART monitoring tasks
+- ansible.builtin.import_tasks: monitors/nvme_ocp_smart/run.yml
+  when:
+    - monitor_nvme_ocp_smart|default(false)|bool

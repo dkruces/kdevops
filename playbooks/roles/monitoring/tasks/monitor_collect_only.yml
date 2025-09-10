@@ -18,6 +18,11 @@
   when:
     - monitor_nvme_smart_log|default(false)|bool
 
+# Import NVMe OCP SMART interim collection tasks
+- ansible.builtin.import_tasks: monitors/nvme_ocp_smart/collect_only.yml
+  when:
+    - monitor_nvme_ocp_smart|default(false)|bool
+
 # Generate plots from interim data on localhost
 - name: Check if matplotlib is available on localhost
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
@@ -67,6 +72,20 @@
     - localhost_matplotlib_check.rc == 0
     - interim_monitoring_files.files | selectattr('path', 'match', '.*nvme_smart_log.*') | list | length > 0
 
+- name: Generate NVMe OCP SMART interim plots on localhost
+  ansible.builtin.command: |
+    python3 {{ playbook_dir }}/roles/monitoring/files/plot_nvme_ocp_stats.py
+      -o {{ monitoring_results_path }}/interim_nvme_ocp_smart_plot.png
+      {{ interim_monitoring_files.files | selectattr('path', 'match', '.*nvme_ocp_smart.*') | map(attribute='path') | join(' ') }}
+  delegate_to: localhost
+  register: nvme_ocp_interim_plot_generation
+  ignore_errors: true
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - localhost_matplotlib_check.rc == 0
+    - interim_monitoring_files.files | selectattr('path', 'match', '.*nvme_ocp_smart.*') | list | length > 0
+
 # Display comprehensive interim monitoring collection summary
 - name: Display interim monitoring collection summary
   ansible.builtin.debug:
@@ -79,6 +98,9 @@
       {% if monitor_nvme_smart_log|default(false)|bool %}
       - NVMe SMART log interim data collected
       {% endif %}
+      {% if monitor_nvme_ocp_smart|default(false)|bool %}
+      - NVMe OCP SMART interim data collected
+      {% endif %}
       {% if localhost_matplotlib_check is defined and localhost_matplotlib_check.rc is defined and localhost_matplotlib_check.rc == 0 %}
       Plot generation status:
       {% if folio_interim_plot_generation is defined and folio_interim_plot_generation.rc is defined and folio_interim_plot_generation.rc == 0 %}
@@ -86,6 +108,9 @@
       {% endif %}
       {% if nvme_interim_plot_generation is defined and nvme_interim_plot_generation.rc is defined and nvme_interim_plot_generation.rc == 0 %}
       - NVMe SMART log interim plots generated
+      {% endif %}
+      {% if nvme_ocp_interim_plot_generation is defined and nvme_ocp_interim_plot_generation.rc is defined and nvme_ocp_interim_plot_generation.rc == 0 %}
+      - NVMe OCP SMART interim plots generated
       {% endif %}
       {% else %}
       Plot generation skipped - matplotlib not available on localhost

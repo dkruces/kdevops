@@ -1,4 +1,7 @@
 ---
+# We default to not run tests.
+kdevops_run_sysbench: false
+
 sysbench_db_type: "mysql"
 sysbench_db_type_mysql: false
 sysbench_docker: false

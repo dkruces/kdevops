@@ -33,19 +33,22 @@ sysbench:
 sysbench-test:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		playbooks/sysbench.yml \
-		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_TEST))
+		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_TEST)) \
+		--extra-vars kdevops_run_sysbench=true
 
 # Optional target to collect telemetry
 sysbench-telemetry:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		playbooks/sysbench.yml \
-		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_TELEMETRY))
+		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_TELEMETRY)) \
+		--extra-vars kdevops_run_sysbench=true
 
 # Optional target to collect all results
 sysbench-results:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		playbooks/sysbench.yml \
-		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_RESULTS))
+		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_RESULTS)) \
+		--extra-vars kdevops_run_sysbench=true
 
 sysbench-clean:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \

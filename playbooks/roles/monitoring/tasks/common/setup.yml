@@ -24,6 +24,13 @@
     - kdevops_run_blktests|default(false)|bool
     - enable_monitoring|default(false)|bool
 
+- name: Set sysbench monitoring results path
+  ansible.builtin.set_fact:
+    monitoring_results_path: "{{ topdir_path }}/workflows/sysbench/results/monitoring"
+  when:
+    - kdevops_run_sysbench|default(false)|bool
+    - enable_monitoring|default(false)|bool
+
 - name: Set workflow-appropriate monitoring results path using kdevops_workflow_name
   ansible.builtin.set_fact:
     monitoring_results_path: "{{ topdir_path }}/workflows/{{ kdevops_workflow_name | default('fstests') }}/results/monitoring"

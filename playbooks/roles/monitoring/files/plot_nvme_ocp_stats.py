@@ -268,8 +268,13 @@ def plot_nvme_ocp_stats(stats_files, output_file):
     ax2.set_ylabel("Bad NAND Blocks (Raw)", fontsize=12)
     ax2.grid(True, alpha=0.3)
     ax2.legend(loc="upper left", fontsize=9)
-    ax2_twin.set_ylabel("Free Blocks (%)", fontsize=12)
-    ax2_twin.legend(loc="upper right", fontsize=9)
+
+    # Only configure twin axis if it was created
+    try:
+        ax2_twin.set_ylabel("Free Blocks (%)", fontsize=12)
+        ax2_twin.legend(loc="upper right", fontsize=9)
+    except NameError:
+        pass
 
     # Plot 3: Thermal Events
     ax3.set_title(f"Thermal Throttling Events{title_suffix}", fontsize=14)
@@ -284,8 +289,13 @@ def plot_nvme_ocp_stats(stats_files, output_file):
     ax4.set_ylabel("Uncorrectable Errors", fontsize=12)
     ax4.grid(True, alpha=0.3)
     ax4.legend(loc="upper left", fontsize=9)
-    ax4_twin.set_ylabel("Max Erase Count", fontsize=12)
-    ax4_twin.legend(loc="upper right", fontsize=9)
+
+    # Only configure twin axis if it was created
+    try:
+        ax4_twin.set_ylabel("Max Erase Count", fontsize=12)
+        ax4_twin.legend(loc="upper right", fontsize=9)
+    except NameError:
+        pass
 
     # Add A/B comparison summary if applicable
     if len(stats_files) == 2 and len(ab_data) == 2:

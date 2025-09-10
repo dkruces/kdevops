@@ -63,6 +63,51 @@ config MONITOR_FOLIO_MIGRATION_INTERVAL
 
 endif # MONITOR_DEVELOPMENTAL_STATS
 
+config MONITOR_NVME_SMART_LOG
+	bool "Monitor NVMe SMART Log statistics"
+	output yaml
+	default n
+	help
+	  Enable monitoring of NVMe SMART Log statistics using standard nvme-cli
+	  tools.
+
+	  Requires:
+	  - nvme-cli tools installed (nvme command available)
+	  - NVMe devices supporting SMART log queries
+	  - Root privileges for nvme command execution
+
+	  Collects statistics from: nvme smart-log --output-format=json
+
+	  The collected data includes:
+	  - Device health: temperature, available spare, percentage used
+	  - Performance: data units read/written, host commands
+	  - Reliability: media errors, power cycles, unsafe shutdowns
+	  - Thermal management: temperature warning and critical times
+
+config MONITOR_NVME_SMART_LOG_INTERVAL
+	int "NVMe SMART Log monitoring interval (seconds)"
+	output yaml
+	default 60
+	depends on MONITOR_NVME_SMART_LOG
+	range 20 3600
+	help
+	  How often to collect NVMe SMART Log statistics in seconds.
+	  Default is 60 seconds (1 minute).
+
+	  Lower values provide more granular data but may impact system
+	  performance. Higher values reduce overhead but may miss
+	  short-lived device behavior changes.
+
+config MONITOR_NVME_SMART_LOG_DEVICES
+	string "NVMe devices to monitor (space-separated)"
+	output yaml
+	default "auto"
+	depends on MONITOR_NVME_SMART_LOG
+	help
+	  Space-separated list of NVMe devices to monitor (e.g., "/dev/nvme0n1 /dev/nvme1n1").
+
+	  Use "auto" to automatically discover all available NVMe devices.
+
 # Future monitoring options can be added here
 # Examples:
 # - Memory pressure monitoring

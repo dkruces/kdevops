@@ -44,6 +44,32 @@ make menuconfig
 # Set: "Folio migration monitoring interval" (default: 60 seconds)
 ```
 
+#### NVMe SMART Log Statistics
+
+This monitor collects NVMe device health and performance metrics using the standard SMART log interface. It works with any NVMe device supporting SMART logging.
+
+**Requirements:**
+- NVMe devices present in the system
+- nvme-cli tools installed (`nvme` command available)
+- NVMe devices supporting SMART log queries
+
+**Configuration:**
+```bash
+make menuconfig
+# Navigate to: Monitors
+# Enable: "Enable monitoring services during workflow execution"
+# Enable: "Monitor NVMe SMART log statistics"
+# Set: "NVMe SMART log monitoring interval" (default: 60 seconds)
+# Set: "NVMe devices to monitor" (default: auto-discover)
+```
+
+**What it monitors:**
+- Device health indicators (temperature, available spare, percentage used)
+- Performance metrics (data units read/written, host read/write commands)
+- Reliability metrics (media errors, power cycles, unsafe shutdowns)
+- Thermal management data (temperature warning/critical times)
+- Controller status (busy time, critical warnings)
+
 ## Integration with Workflows
 
 ### Currently Supported Workflows

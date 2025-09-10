@@ -1,0 +1,101 @@
+---
+# NVMe SMART Log monitoring setup
+- name: Check if NVMe SMART Log monitoring is enabled
+  ansible.builtin.set_fact:
+    nvme_smart_log_enabled: "{{ monitor_nvme_smart_log|default(false)|bool }}"
+
+- name: Discover NVMe devices for SMART monitoring
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    if [ "{{ monitor_nvme_smart_log_devices }}" = "auto" ]; then
+      find /dev -name 'nvme*n*' -type b 2>/dev/null | head -10
+    else
+      echo "{{ monitor_nvme_smart_log_devices }}"
+    fi
+  register: nvme_devices_discovery
+  changed_when: false
+  failed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+
+- name: Set NVMe devices list for monitoring
+  ansible.builtin.set_fact:
+    nvme_devices_list: "{{ nvme_devices_discovery.stdout_lines|default([]) }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+
+- name: Display discovered NVMe devices
+  ansible.builtin.debug:
+    msg: "Found {{ nvme_devices_list|length }} NVMe devices for SMART monitoring: {{ nvme_devices_list|join(', ') }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_devices_list is defined
+
+- name: Create monitoring directory for NVMe SMART Log
+  become: true
+  become_method: sudo
+  ansible.builtin.file:
+    path: /root/monitoring
+    state: directory
+    mode: "0755"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Start NVMe SMART monitoring for each device
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    device_name=$(basename {{ item }} | sed 's/\//_/g')
+    nohup bash -c '
+      while true; do
+        echo "$(date "+%Y-%m-%d %H:%M:%S")"
+        /usr/sbin/nvme smart-log --output-format=json {{ item }} 2>/dev/null || echo "{\"error\":\"command_failed\",\"device\":\"{{ item }}\",\"timestamp\":\"$(date "+%Y-%m-%d %H:%M:%S")\"}"
+        echo ""
+        sleep {{ monitor_nvme_smart_log_interval|default(300) }}
+      done
+    ' > /root/monitoring/nvme_smart_log_${device_name}_stats.txt 2>&1 &
+    echo $! > /root/monitoring/nvme_smart_log_${device_name}.pid
+  loop: "{{ nvme_devices_list }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Verify NVMe SMART Log monitoring processes started
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    device_name=$(basename {{ item }} | sed 's/\//_/g')
+    if [ -f /root/monitoring/nvme_smart_log_${device_name}.pid ]; then
+      pid=$(cat /root/monitoring/nvme_smart_log_${device_name}.pid)
+      if ps -p $pid > /dev/null 2>&1; then
+        echo "NVMe SMART Log monitoring for {{ item }} (PID $pid) is running"
+      else
+        echo "ERROR: NVMe SMART Log monitoring for {{ item }} (PID $pid) failed to start" >&2
+        exit 1
+      fi
+    else
+      echo "ERROR: PID file for {{ item }} not found" >&2
+      exit 1
+    fi
+  register: nvme_monitor_status
+  loop: "{{ nvme_devices_list }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_devices_list|length > 0
+
+- name: Display NVMe SMART Log monitoring status
+  ansible.builtin.debug:
+    msg: "{{ nvme_monitor_status.results | map(attribute='stdout') | list }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_devices_list|length > 0
+    - nvme_monitor_status is defined

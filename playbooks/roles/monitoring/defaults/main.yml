@@ -13,6 +13,15 @@ monitor_folio_migration: false
 # Folio migration monitoring interval in seconds
 monitor_folio_migration_interval: 60
 
+# Enable NVMe SMART Log monitoring
+monitor_nvme_smart_log: false
+
+# NVMe SMART Log monitoring interval in seconds
+monitor_nvme_smart_log_interval: 60
+
+# NVMe devices to monitor
+monitor_nvme_smart_log_devices: "auto"
+
 # Base path to store monitoring results on the control host
 # Workflows can override by setting monitoring_results_base_path
 monitoring_results_base_path: "{{ topdir_path }}/workflows/fstests/results/monitoring"

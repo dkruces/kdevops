@@ -1,0 +1,137 @@
+---
+# NVMe SMART Log monitoring collection
+- name: Check if NVMe SMART Log monitoring is enabled
+  ansible.builtin.set_fact:
+    nvme_smart_log_enabled: "{{ monitor_nvme_smart_log|default(false)|bool }}"
+
+- name: Check for NVMe SMART Log monitoring processes
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_smart_log_*.pid 2>/dev/null || true"
+  register: nvme_smart_log_pids
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+
+- name: Stop NVMe SMART Log monitoring processes
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    for pidfile in /root/monitoring/nvme_smart_log_*.pid; do
+      if [ -f "$pidfile" ]; then
+        device_name=$(basename "$pidfile" .pid | sed 's/nvme_smart_log_//')
+        pid=$(cat "$pidfile")
+        if ps -p $pid > /dev/null 2>&1; then
+          kill $pid
+          echo "Stopped NVMe SMART Log monitoring for device $device_name (PID $pid)"
+        else
+          echo "NVMe SMART Log monitoring for device $device_name (PID $pid) was not running"
+        fi
+        rm -f "$pidfile"
+      fi
+    done
+  register: nvme_stop_monitor
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_pids.stdout != ""
+
+- name: Display NVMe SMART Log stop status
+  ansible.builtin.debug:
+    msg: "{{ nvme_stop_monitor.stdout }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_stop_monitor is defined
+    - nvme_stop_monitor.stdout != ""
+
+# monitoring_results_path is set by common/setup.yml
+# Directory is also created there - no need to duplicate
+
+- name: Collect NVMe SMART Log monitoring data files
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/nvme_smart_log_*_stats.txt 2>/dev/null || true"
+  register: nvme_smart_log_data_files
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+
+- name: Copy NVMe SMART Log monitoring data to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: "{{ item }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ nvme_smart_log_data_files.stdout_lines|default([]) }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_smart_log_data_files.stdout != ""
+
+- name: Display NVMe SMART Log data collection summary
+  ansible.builtin.debug:
+    msg: |
+      NVMe SMART Log monitoring collection complete.
+      Data files copied: {{ nvme_smart_log_data_files.stdout_lines|default([])|length }}
+      Results directory: {{ monitoring_results_path }}
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_smart_log_data_files.stdout != ""
+
+# Generate NVMe SMART Log plots on localhost
+- name: Check if matplotlib is available on localhost for NVMe SMART Log plots
+  ansible.builtin.command: python3 -c "import matplotlib.pyplot"
+  delegate_to: localhost
+  register: nvme_localhost_matplotlib_check
+  ignore_errors: true
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+
+- name: Find collected NVMe SMART Log data files for plotting
+  ansible.builtin.find:
+    paths: "{{ monitoring_results_path }}"
+    patterns: "*nvme_smart_log_*_stats.txt"
+  delegate_to: localhost
+  register: nvme_plot_files
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_localhost_matplotlib_check.rc == 0
+
+- name: Generate NVMe SMART plots on localhost
+  ansible.builtin.command: |
+    python3 {{ playbook_dir }}/roles/monitoring/files/plot_nvme_smart_stats.py
+      -o {{ monitoring_results_path }}/nvme_smart_combined_plot.png
+      {{ nvme_plot_files.files | map(attribute='path') | join(' ') }}
+  delegate_to: localhost
+  register: nvme_plot_generation
+  ignore_errors: true
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool
+    - nvme_localhost_matplotlib_check.rc == 0
+    - nvme_plot_files.matched > 0
+
+- name: Log NVMe SMART Log plot generation status
+  ansible.builtin.debug:
+    msg: |
+      {% if nvme_localhost_matplotlib_check.rc != 0 %}
+      Skipping NVMe SMART Log plot generation - matplotlib not available on localhost
+      {% elif nvme_plot_files.matched == 0 %}
+      Skipping NVMe SMART Log plot generation - no data files found
+      {% else %}
+      NVMe SMART Log plot generated: {{ monitoring_results_path }}/nvme_smart_log_combined_plot.png
+      Data files processed: {{ nvme_plot_files.matched }}
+      {% endif %}
+  delegate_to: localhost
+  run_once: true
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_smart_log_enabled|bool

@@ -6,3 +6,8 @@
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
+
+# Import nvme smart log monitoring tasks
+- ansible.builtin.import_tasks: monitors/nvme_smart_log/run.yml
+  when:
+    - monitor_nvme_smart_log|default(false)|bool

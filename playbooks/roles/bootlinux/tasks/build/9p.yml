@@ -175,7 +175,7 @@
   register: target_linux_kernelversion
   tags: ["build-linux"]
   when:
-    - (active_linux_kernelrelease | default(target_linux_kernelrelease)) | length > 0
+    - (active_linux_kernelrelease | default(target_linux_kernelrelease) | default('')) | length > 0
   run_once: true
   delegate_to: localhost
 

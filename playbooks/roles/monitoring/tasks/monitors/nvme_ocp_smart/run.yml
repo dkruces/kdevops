@@ -15,69 +15,73 @@
     - enable_monitoring|default(false)|bool
     - nvme_ocp_smart_enabled|bool
 
-- name: Discover OCP-compatible NVMe devices
+- name: Discover NVMe devices for OCP SMART monitoring
   become: true
   become_method: sudo
   ansible.builtin.shell: |
-    devices=()
-    for dev in /dev/nvme*n1; do
-      if [ -e "$dev" ]; then
-        # Test OCP compatibility
-        if nvme ocp smart-add-log "$dev" --output-format=json >/dev/null 2>&1; then
-          devices+=("$dev")
+    if [ "{{ monitor_nvme_ocp_smart_devices }}" = "auto" ]; then
+      # Test OCP compatibility for each NVMe device
+      ocp_devices=""
+      for dev in $(find /dev -name 'nvme*n*' -type b 2>/dev/null | head -10); do
+        if /usr/sbin/nvme ocp smart-add-log --output-format=json "$dev" >/dev/null 2>&1; then
+          ocp_devices="$ocp_devices$dev\n"
         fi
-      fi
-    done
-    echo "${devices[@]}"
-  register: discovered_ocp_devices
+      done
+      echo -e "$ocp_devices" | grep -v '^$' || true
+    else
+      echo "{{ monitor_nvme_ocp_smart_devices }}"
+    fi
+  register: nvme_ocp_devices_discovery
   changed_when: false
+  failed_when: false
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_smart_enabled|bool
-    - monitor_nvme_ocp_smart_devices|default("auto") == "auto"
 
-- name: Set OCP device list
+- name: Set NVMe OCP devices list for monitoring
   ansible.builtin.set_fact:
-    ocp_device_list: >-
-      {{
-        discovered_ocp_devices.stdout.split()
-        if monitor_nvme_ocp_smart_devices|default("auto") == "auto"
-        else monitor_nvme_ocp_smart_devices.split()
-      }}
+    nvme_ocp_devices_list: "{{ nvme_ocp_devices_discovery.stdout_lines|default([]) }}"
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_smart_enabled|bool
+
+- name: Display discovered NVMe OCP devices
+  ansible.builtin.debug:
+    msg: "Found {{ nvme_ocp_devices_list|length }} NVMe devices for OCP SMART monitoring: {{ nvme_ocp_devices_list|join(', ') }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - nvme_ocp_smart_enabled|bool
+    - nvme_ocp_devices_list is defined
 
 - name: Start NVMe OCP SMART monitoring for each device
   become: true
   become_method: sudo
   ansible.builtin.shell: |
-    device_name=$(echo "{{ item }}" | sed 's|/dev/||g')
-    nohup bash -c 'while true; do
-      echo "$(date +"%Y-%m-%d %H:%M:%S")" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      if nvme ocp smart-add-log "{{ item }}" --output-format=json 2>/dev/null; then
-        echo "" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      else
-        echo "Error: OCP SMART collection failed for {{ item }}" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      fi
-      sleep {{ monitor_nvme_ocp_smart_interval|default(120) }}
-    done' > /root/monitoring/nvme_ocp_smart_${device_name}.log 2>&1 &
+    device_name=$(basename {{ item }} | sed 's/\//_/g')
+    nohup bash -c '
+      while true; do
+        echo "$(date "+%Y-%m-%d %H:%M:%S")"
+        /usr/sbin/nvme ocp smart-add-log --output-format=json {{ item }} 2>/dev/null || echo "{\"error\":\"ocp_command_failed\",\"device\":\"{{ item }}\",\"timestamp\":\"$(date "+%Y-%m-%d %H:%M:%S")\"}"
+        echo ""
+        sleep {{ monitor_nvme_ocp_smart_interval|default(120) }}
+      done
+    ' > /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt 2>&1 &
     echo $! > /root/monitoring/nvme_ocp_smart_${device_name}.pid
-  loop: "{{ ocp_device_list }}"
+  loop: "{{ nvme_ocp_devices_list }}"
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_smart_enabled|bool
-    - ocp_device_list|length > 0
+    - nvme_ocp_devices_list|length > 0
 
-- name: Display OCP SMART monitoring startup status
+- name: Display NVMe OCP SMART monitoring startup status
   ansible.builtin.debug:
     msg: |
-      Started NVMe OCP SMART monitoring for {{ ocp_device_list|length }} devices:
-      {% for device in ocp_device_list %}
+      Started NVMe OCP SMART monitoring for {{ nvme_ocp_devices_list|length }} devices:
+      {% for device in nvme_ocp_devices_list %}
       - {{ device }}
       {% endfor %}
       Monitoring interval: {{ monitor_nvme_ocp_smart_interval|default(120) }} seconds
   when:
     - enable_monitoring|default(false)|bool
     - nvme_ocp_smart_enabled|bool
-    - ocp_device_list|length > 0
+    - nvme_ocp_devices_list|length > 0

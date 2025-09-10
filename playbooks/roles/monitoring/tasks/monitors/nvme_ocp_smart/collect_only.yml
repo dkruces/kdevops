@@ -33,7 +33,7 @@
   become_method: sudo
   ansible.builtin.fetch:
     src: "{{ item }}"
-    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename | replace('_snapshot', '_interim') }}"
     flat: true
     validate_checksum: false
   loop: "{{ nvme_ocp_smart_snapshot_files.stdout_lines|default([]) }}"

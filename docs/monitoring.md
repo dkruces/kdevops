@@ -70,6 +70,36 @@ make menuconfig
 - Thermal management data (temperature warning/critical times)
 - Controller status (busy time, critical warnings)
 
+#### NVMe OCP Extended SMART Statistics
+
+This monitor collects OCP (Open Compute Project) extended SMART statistics for cloud SSD devices using nvme-cli OCP plugin.
+
+**Requirements:**
+- OCP-compatible NVMe devices (cloud SSDs)
+- nvme-cli tools with OCP plugin support
+- Root privileges for nvme command execution
+
+**Configuration:**
+```bash
+make menuconfig
+# Navigate to: Monitors
+# Enable: "Enable monitoring services during workflow execution"
+# Enable: "Monitor NVMe OCP extended SMART statistics"
+# Set: "NVMe OCP SMART monitoring interval" (default: 120 seconds)
+# Set: "NVMe OCP devices to monitor" (default: auto-discover)
+```
+
+**What it monitors:**
+- Advanced wear leveling data (erase counts, bad NAND blocks)
+- Extended reliability metrics (ECC errors, XOR recovery counts)
+- Cloud SSD specific data (system data usage, refresh counts)
+- Thermal throttling events and current throttling status
+- Power loss protection (PLP) health and start counts
+- PCIe error counters and link retraining events
+- Capacitor health and endurance estimates
+
+**Note:** OCP monitoring provides much more detailed telemetry than standard SMART logs but requires OCP-compatible hardware. It can run alongside standard SMART monitoring for comprehensive coverage.
+
 ## Integration with Workflows
 
 ### Currently Supported Workflows
@@ -164,6 +194,14 @@ Workflows can customize the results path by setting the `monitoring_results_base
 For folio migration monitoring:
 - `<hostname>_folio_migration_stats.txt`: Raw statistics with timestamps
 - `<hostname>_folio_migration_plot.png`: Visualization plot (if generation succeeds)
+
+For NVMe SMART log monitoring:
+- `<hostname>_nvme_smart_log_<device>_stats.txt`: Device health and performance data
+- `<hostname>_nvme_smart_plot.png`: Visualization plots (if generation succeeds)
+
+For NVMe OCP SMART monitoring:
+- `<hostname>_nvme_ocp_smart_<device>_stats.txt`: Extended cloud SSD telemetry
+- `<hostname>_nvme_ocp_smart_plot.png`: Visualization plots (if generation succeeds)
 
 ### Example Output
 

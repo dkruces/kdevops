@@ -17,6 +17,13 @@
     - kdevops_run_fstests|default(false)|bool
     - enable_monitoring|default(false)|bool
 
+- name: Set blktests monitoring results path
+  ansible.builtin.set_fact:
+    monitoring_results_path: "{{ topdir_path }}/workflows/blktests/results/monitoring"
+  when:
+    - kdevops_run_blktests|default(false)|bool
+    - enable_monitoring|default(false)|bool
+
 - name: Create local monitoring results directory
   ansible.builtin.file:
     path: "{{ monitoring_results_path }}"

@@ -10,9 +10,12 @@
       enable_monitoring: {{ enable_monitoring | default(false) }}
       kdevops_run_fstests: {{ kdevops_run_fstests | default(false) }}
 
-- name: Set monitoring results path
+- name: Set fstests monitoring results path
   ansible.builtin.set_fact:
     monitoring_results_path: "{{ monitoring_results_base_path | default(topdir_path + '/workflows/fstests/results/monitoring') }}"
+  when:
+    - kdevops_run_fstests|default(false)|bool
+    - enable_monitoring|default(false)|bool
 
 - name: Create local monitoring results directory
   ansible.builtin.file:

@@ -24,10 +24,16 @@
       ocp_devices=""
       for dev in $(find /dev -name 'nvme*n*' -type b 2>/dev/null | head -10); do
         if /usr/sbin/nvme ocp smart-add-log --output-format=json "$dev" >/dev/null 2>&1; then
-          ocp_devices="$ocp_devices$dev\n"
+          if [ -n "$ocp_devices" ]; then
+            ocp_devices="$ocp_devices\n$dev"
+          else
+            ocp_devices="$dev"
+          fi
         fi
       done
-      echo -e "$ocp_devices" | grep -v '^$' || true
+      if [ -n "$ocp_devices" ]; then
+        printf "%b\n" "$ocp_devices"
+      fi
     else
       echo "{{ monitor_nvme_ocp_smart_devices }}"
     fi

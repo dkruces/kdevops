@@ -457,7 +457,7 @@
     dest: "{{ sysbench_telemetry_path }}/sysbench_populate.txt"
     mode: "0755"
 
-- name: Start sysbench run
+- name: Start sysbench run ({{ sysbench_test_duration }}s)
   tags: ["run_sysbench"]
   become: true
   become_user: "{{ sysbench_postgresql_user }}"

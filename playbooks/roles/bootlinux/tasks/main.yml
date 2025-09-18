@@ -32,6 +32,15 @@
     - bootlinux_9p|bool
     - not workflow_linux_packaged|bool
 
+# Setup ccache configuration
+- name: Setup ccache configuration
+  ansible.builtin.import_tasks:
+    file: ccache.yml
+  when:
+    - bootlinux_ccache|default(false)|bool
+    - not workflow_linux_packaged|bool
+  tags: ['ccache']
+
 # We do this regardless of what distro you use
 - name: Install b4
   become: true
@@ -322,8 +331,10 @@
       target_linux_make_install_cmd: {{ target_linux_make_install_cmd }}
       bootlinux_make_params: {{ bootlinux_make_params }}
       bootlinux_build_environment: {{ bootlinux_build_environment }}
+      bootlinux_ccache: {{ bootlinux_ccache|default(false) }}
       bootlinux_compiler_clang: {{ bootlinux_compiler_clang|default(false) }}
       bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds|default(false) }}
+      bootlinux_ccache_kdevops_managed: {{ bootlinux_ccache_kdevops_managed|default(false) }}
   when:
     - not workflow_linux_packaged|bool
   vars:

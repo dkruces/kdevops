@@ -314,15 +314,32 @@
   when:
     - workflow_linux_packaged|bool
 
+- name: Debug kernel build command configuration
+  ansible.builtin.debug:
+    msg: |
+      === KERNEL BUILD COMMAND DEBUG ===
+      target_linux_make_cmd: {{ target_linux_make_cmd }}
+      target_linux_make_install_cmd: {{ target_linux_make_install_cmd }}
+      bootlinux_make_params: {{ bootlinux_make_params }}
+      bootlinux_build_environment: {{ bootlinux_build_environment }}
+      bootlinux_compiler_clang: {{ bootlinux_compiler_clang|default(false) }}
+      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds|default(false) }}
+  when:
+    - not workflow_linux_packaged|bool
+  vars:
+    ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
+  tags: ["install-linux", "debug"]
+
 - name: Install {{ target_linux_tree }} on the target nodes
   become: true
   become_flags: "su - -c"
   become_method: sudo
-  ansible.builtin.command: "{{ target_linux_make_install_cmd }}"
+  ansible.builtin.shell: "{{ target_linux_make_install_cmd }}"
   register: install_done
   changed_when: "install_done.rc == 0"
   args:
     chdir: "{{ target_linux_dir_path }}"
+  environment: "{{ bootlinux_build_environment }}"
   tags: ["install-linux"]
   when:
     - not workflow_linux_packaged|bool
@@ -335,11 +352,12 @@
   become: true
   become_flags: "su - -c"
   become_method: sudo
-  ansible.builtin.command: "{{ target_linux_make_install_cmd }} M=tools/testing/cxl INSTALL_MOD_DIR=updates"
+  ansible.builtin.shell: "{{ target_linux_make_install_cmd }} M=tools/testing/cxl INSTALL_MOD_DIR=updates"
   register: install_done
   changed_when: "install_done.rc == 0"
   args:
     chdir: "{{ target_linux_dir_path }}"
+  environment: "{{ bootlinux_build_environment }}"
   tags: ["install-linux", "cxl-install"]
   when:
     - kdevops_workflow_enable_cxl|bool

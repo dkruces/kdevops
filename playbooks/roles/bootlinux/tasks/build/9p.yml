@@ -125,6 +125,16 @@
     mode: "0644"
   run_once: true
   delegate_to: localhost
+  when: not bootlinux_use_config_fragments|default(false)|bool
+
+- name: Use configuration fragments for Linux {{ target_linux_tree }} on the control node
+  ansible.builtin.import_tasks: ../config-fragments.yml
+  run_once: true
+  delegate_to: localhost
+  vars:
+    target_linux_dir_path: "{{ bootlinux_9p_host_path }}"
+  when:
+    - bootlinux_use_config_fragments|default(false)|bool
 
 - name: Set kernel localversion if requested on the control node
   ansible.builtin.shell: "echo {{ active_linux_localversion | default(target_linux_localversion) }} > {{ bootlinux_9p_host_path }}/localversion"
@@ -137,18 +147,20 @@
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
       {{ ansible_callback_diy.result.output.stdout | default('') }}
 
-- name: Configure Linux {{ target_linux_tree }} on the control node
+- name: Configure kernel with oldconfig (9P build - monolithic config only)
   ansible.builtin.shell: |
     set -o pipefail
     yes "" | make oldconfig
   register: configure_done
   changed_when: configure_done.rc == 0 or configure_done.rc == 141
   failed_when: configure_done.rc != 0 and configure_done.rc != 141
+  environment: "{{ bootlinux_build_environment }}"
   args:
     chdir: "{{ bootlinux_9p_host_path }}"
     executable: /bin/bash
   run_once: true
   delegate_to: localhost
+  when: not bootlinux_use_config_fragments|default(false)|bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: |
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
@@ -165,10 +177,49 @@
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
       {{ ansible_callback_diy.result.output.stdout | default('') }}
 
+- name: Debug kernel build command configuration for 9P build
+  ansible.builtin.debug:
+    msg: |
+      === KERNEL BUILD COMMAND DEBUG (9P BUILD) ===
+      target_linux_make_cmd: {{ target_linux_make_cmd }}
+      target_linux_make_install_cmd: {{ target_linux_make_install_cmd }}
+      bootlinux_make_params: {{ bootlinux_make_params }}
+      bootlinux_build_environment: {{ bootlinux_build_environment }}
+      bootlinux_ccache: {{ bootlinux_ccache|default(false) }}
+      bootlinux_compiler_clang: {{ bootlinux_compiler_clang|default(false) }}
+      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds|default(false) }}
+      bootlinux_ccache_kdevops_managed: {{ bootlinux_ccache_kdevops_managed|default(false) }}
+      nproc: {{ nproc_9p.stdout }}
+  run_once: true
+  delegate_to: localhost
+  vars:
+    ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
+  tags: ["build-linux"]
+
+- name: Test CC environment variable is working before build
+  ansible.builtin.shell: |
+    echo "CC environment test:"
+    echo "CC=${CC:-'not set'}"
+    echo "PATH=${PATH}"
+    which gcc || echo "gcc not found"
+    which ccache || echo "ccache not found"
+    env | grep -E '^(CC|CCACHE|PATH)' | sort
+  environment: "{{ bootlinux_build_environment }}"
+  register: cc_test_result
+  run_once: true
+  delegate_to: localhost
+  vars:
+    ansible_callback_diy_runner_on_ok_msg: |
+      CC Environment Test Results:
+      {{ ansible_callback_diy.result.output.stdout | default('') }}
+  tags: ["build-linux"]
+
 - name: Get kernelversion
   community.general.make:
     chdir: "{{ bootlinux_9p_host_path }}"
     target: kernelversion
+    params: "{{ bootlinux_make_params }}"
+  environment: "{{ bootlinux_build_environment }}"
   register: target_linux_kernelversion
   tags: ["build-linux"]
   when:
@@ -189,7 +240,8 @@
   community.general.make:
     jobs: "{{ nproc_9p.stdout }}"
     chdir: "{{ bootlinux_9p_host_path }}"
-    params: KERNELRELEASE={{ target_user_kernelrelease }}
+    params: "{{ bootlinux_make_params | combine({'KERNELRELEASE': target_user_kernelrelease}) }}"
+  environment: "{{ bootlinux_build_environment }}"
   tags: ["build-linux"]
   when:
     - (active_linux_kernelrelease | default(target_linux_kernelrelease)) | length > 0
@@ -200,6 +252,8 @@
   community.general.make:
     jobs: "{{ nproc_9p.stdout }}"
     chdir: "{{ bootlinux_9p_host_path }}"
+    params: "{{ bootlinux_make_params }}"
+  environment: "{{ bootlinux_build_environment }}"
   tags: ["build-linux"]
   when:
     - (active_linux_kernelrelease | default(target_linux_kernelrelease)) | length == 0
@@ -210,8 +264,8 @@
   community.general.make:
     jobs: "{{ nproc_9p.stdout }}"
     chdir: "{{ bootlinux_9p_host_path }}"
-    params:
-      M: "tools/testing/cxl"
+    params: "{{ bootlinux_make_params | combine({'M': 'tools/testing/cxl'}) }}"
+  environment: "{{ bootlinux_build_environment }}"
   tags: ["build-linux", "cxl-build"]
   when:
     - bootlinux_cxl_test|bool

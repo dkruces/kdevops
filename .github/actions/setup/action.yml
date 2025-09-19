@@ -41,7 +41,7 @@ runs:
       working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
-        git clone https://github.com/dkruces/kdevops.git --branch ci-workflow kdevops
+        git clone https://github.com/dkruces/kdevops.git --branch main kdevops
 
     - name: Checkout custom branch with delta on kdevops/linux
       working-directory: ${{ inputs.dir }}/kdevops
@@ -163,6 +163,12 @@ runs:
         echo "make $KDEVOPS_ARGS"
 
         make $KDEVOPS_ARGS
+        ./scripts/kconfig/merge_config.sh \
+        -n .config \
+        defconfigs/configs/diy.config \
+        defconfigs/configs/linux_v6.15.config \
+        defconfigs/configs/ccache-default.config \
+        defconfigs/configs/ci.config
 
     - name: Run kdevops make
       working-directory: ${{ inputs.dir }}/kdevops

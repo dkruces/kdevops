@@ -61,11 +61,7 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        if [[ -z "${{ inputs.kdevops_defconfig }}" ]]; then
-          KDEVOPS_DEFCONFIG=${{ inputs.ci_workflow }}
-        else
-          KDEVOPS_DEFCONFIG="${{ inputs.kdevops_defconfig }}"
-        fi
+        KDEVOPS_DEFCONFIG=${{ inputs.ci_workflow }}
 
         if [[ ! -f defconfigs/$KDEVOPS_DEFCONFIG ]]; then
           echo "Missing defconfig: defconfigs/$KDEVOPS_DEFCONFIG"

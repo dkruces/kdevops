@@ -40,21 +40,72 @@ runs:
         echo "path=$path" >> $GITHUB_OUTPUT
         "${{ github.workspace }}/scripts/github_output.sh" wpath "$wpath"
 
-    - name: Generate CI commit info
+    - name: Generate CI commit info with workflow-specific logic
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
-        find ${{ steps.setpath.outputs.wpath }}/results/last-run/ -name '*.dmesg.log' \
-        -exec tail -n 1 {} + >> ci.commit_extra
+        wpath="${{ steps.setpath.outputs.wpath }}"
 
-        echo -e "\n\n" >> ci.commit_extra
-        echo -e "Userspace test results:\n" >> ci.commit_extra
-        find ${{ steps.setpath.outputs.wpath }}/results/last-run/ -name '*.userspace.log' \
-        -exec tail -n 1 {} + >> ci.commit_extra
-        echo -e "\n\n" >> ci.commit_extra
+        # Workflow-specific result collection
+        case "${{ inputs.ci_workflow }}" in
+          *xfs*|*btrfs*|*ext4*|tmpfs*|*fstests*)
+            # fstests workflows: Use xunit_results.txt for rich summary
+            echo "Collecting fstests results..."
+            if find "$wpath/results/last-run" -name "xunit_results.txt" -type f -exec cat {} \; > ci.commit_extra 2>/dev/null; then
+              echo "Found xunit_results.txt"
+            else
+              echo "No xunit_results.txt found, using fallback..."
+              echo "Kernel tests results:" > ci.commit_extra
+              find "$wpath/results/last-run/" -name '*.dmesg.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
+            fi
 
-        if grep -i -q "fail" ci.commit_extra ; then
-          echo "fail" > ci.result
-        else
-          echo "ok" > ci.result
-        fi
+            # fstests success detection
+            if ! grep -E "failures, [1-9]|errors, [1-9]" ci.commit_extra >/dev/null 2>&1; then
+              echo "ok" > ci.result
+            else
+              echo "not ok" > ci.result
+            fi
+            ;;
+          blktests*)
+            # blktests workflows: Use gen-results-dir.py output
+            echo "Collecting blktests results..."
+            echo "Kernel tests results:" > ci.commit_extra
+            find "$wpath/results/last-run/" -name '*.dmesg.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
+            echo -e "\n\nBlktests results:" >> ci.commit_extra
+            find "$wpath/results/" -name "*.txt" -newer "$wpath/results/last-run" -exec head -n 10 {} + >> ci.commit_extra 2>/dev/null || true
+
+            # blktests success detection (needs refinement)
+            if grep -i -q "fail\|error\|FAIL" ci.commit_extra; then
+              echo "not ok" > ci.result
+            else
+              echo "ok" > ci.result
+            fi
+            ;;
+          *selftests*|*modules*|*mm*|*firmware*)
+            # selftests workflows: Use userspace.log
+            echo "Collecting selftests results..."
+            echo "Kernel tests results:" > ci.commit_extra
+            find "$wpath/results/last-run/" -name '*.userspace.log' -exec cat {} \; >> ci.commit_extra 2>/dev/null || true
+
+            # selftests success detection
+            if grep -q "passed\|PASS" ci.commit_extra && ! grep -q "FAIL\|failed\|ERROR" ci.commit_extra; then
+              echo "ok" > ci.result
+            else
+              echo "not ok" > ci.result
+            fi
+            ;;
+          *)
+            # Default/unknown workflows: Generic approach
+            echo "Using generic result collection for ${{ inputs.ci_workflow }}..."
+            echo "Kernel tests results:" > ci.commit_extra
+            find "$wpath/results/last-run/" -name '*.dmesg.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
+            echo -e "\n\nUserspace test results:" >> ci.commit_extra
+            find "$wpath/results/last-run/" -name '*.userspace.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
+
+            if grep -i -q "fail" ci.commit_extra; then
+              echo "not ok" > ci.result
+            else
+              echo "ok" > ci.result
+            fi
+            ;;
+        esac

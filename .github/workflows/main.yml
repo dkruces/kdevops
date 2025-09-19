@@ -26,7 +26,7 @@ jobs:
     name: Setup kdevops workspace
     runs-on: [self-hosted]
     steps:
-      - name: Checkout kdevops-ci
+      - name: Checkout dkruces/kdevops
         uses: actions/checkout@v4
         with:
           clean: false

@@ -58,7 +58,9 @@ def kreleases(args) -> None:
             for release in data["releases"]:
                 if release["moniker"] == args.moniker:
                     # Check if release.json is aa.bb.cc type
-                    if re.compile(r'^\d+\.\d+(\.\d+|-rc\d+)?$').match(release["version"]):
+                    if re.compile(r"^\d+\.\d+(\.\d+|-rc\d+)?$").match(
+                        release["version"]
+                    ):
                         reflist.append("v" + release["version"])
                     else:
                         reflist.append(release["version"])

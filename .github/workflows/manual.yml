@@ -31,6 +31,41 @@ on:
           - linux-mm-kpd
           - linux-modules-kpd
           - linux-xfs-kpd
+          - xfs
+          - xfs_crc
+          - xfs_crc_logdev
+          - xfs_crc_rtdev
+          - xfs_crc_rtdev_extsize_28k
+          - xfs_crc_rtdev_extsize_64k
+          - xfs_nocrc
+          - xfs_nocrc_16k_4ks
+          - xfs_nocrc_1k
+          - xfs_nocrc_2k
+          - xfs_nocrc_32_4ks
+          - xfs_nocrc_4k
+          - xfs_nocrc_512
+          - xfs_nocrc_64_4ks
+          - xfs_nocrc_8k_4ks
+          - xfs_nocrc_lbs
+          - xfs_reflink
+          - xfs_reflink_1024
+          - xfs_reflink_16k_4ks
+          - xfs_reflink_2k
+          - xfs_reflink_32k_4ks
+          - xfs_reflink_4k
+          - xfs_reflink_4k_8ks
+          - xfs_reflink_64k_4ks
+          - xfs_reflink_dir_bsize_8k
+          - xfs_reflink_lbs
+          - xfs_reflink_logdev
+          - xfs_reflink_normapbt
+          - xfs_reflink_nrext64
+          - xfs_reflink_stripe_len
+          - xfs-soak
+          - lbs-xfs
+          - lbs-xfs-bdev-large-nvme
+          - lbs-xfs-bdev-nvme
+          - lbs-xfs-small
           - selftests
       kernel_tree:
         description: "Linux kernel tree to use"

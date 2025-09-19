@@ -113,8 +113,83 @@ case "${{ inputs.ci_workflow }}" in
 - ✅ `xfs_reflink_4k` ready for CI testing
 - ✅ Maintains existing modular architecture
 
+## CI_WORKFLOW Parameter Deep Dive
+
+### Why CI_WORKFLOW is Critical
+
+The `CI_WORKFLOW` parameter is the backbone of kdevops standardization:
+
+1. **Standardized Commands**: Regardless of workflow (fstests, blktests, selftests), the same make targets are used:
+   - `make ci-build-test CI_WORKFLOW=<name>`
+   - `make ci-test CI_WORKFLOW=<name>`
+   - `make ci-archive CI_WORKFLOW=<name>`
+
+2. **Dynamic Resolution**: `scripts/ci.Makefile` uses `CI_WORKFLOW` to:
+   ```bash
+   CI_WORKFLOW_BASENAME := $(shell basename $(CI_WORKFLOW))
+   ```
+
+3. **File-Based Configuration**: The `.ci/` directory structure defines what each workflow does:
+   ```
+   .ci/
+   ├── build-test/
+   │   ├── fstests      # "make fstests"
+   │   ├── blktests     # "make blktests"
+   │   └── selftests    # "make selftests"
+   ├── test/
+   │   ├── fstests      # "make fstests-baseline"
+   │   ├── blktests     # "make blktests-baseline"
+   │   └── selftests    # "make selftests"
+   └── results/
+       ├── fstests      # Lists result paths for archival
+       ├── blktests     # workflows/blktests/results/, etc.
+       └── selftests    # workflows/selftests/results/, etc.
+   ```
+
+### Archive Workflow Architecture
+
+The archive process is **CI_WORKFLOW-agnostic**:
+
+1. **scripts/archive.Makefile**: Handles archival via ansible playbook
+   ```bash
+   ci-archive:
+       ansible-playbook playbooks/kdevops_archive.yml \
+           --extra-vars=@./extra_vars.yaml
+   ```
+
+2. **No CI_WORKFLOW Logic**: Archive doesn't use `.ci/` files directly
+   - Archive playbook reads from `extra_vars.yaml`
+   - All workflow results are collected systematically
+   - Results paths are determined by kdevops configuration, not CI_WORKFLOW
+
+3. **V=1 Importance**: Verbose output shows:
+   - Exact make commands being executed
+   - Ansible playbook verbose output
+   - Critical for debugging CI issues
+
+### XFS Workflow Integration
+
+For XFS support, the CI_WORKFLOW flow will be:
+
+1. **manual.yml**: User selects `xfs_reflink_4k`
+2. **CI_WORKFLOW**: Becomes `xfs_reflink_4k`
+3. **ci.Makefile**: Resolves to basename `xfs_reflink_4k`
+4. **Execution**:
+   - `ci-build-test` → reads `.ci/build-test/fstests` → `make fstests`
+   - `ci-test` → reads `.ci/test/fstests` → `make fstests-baseline`
+   - `ci-archive` → runs ansible archival (CI_WORKFLOW passed for metadata)
+
+### Key Insight: fstests Mapping
+
+All XFS defconfigs map to the same `.ci/` files:
+- `xfs`, `xfs_reflink_4k`, `xfs_crc`, etc. → **same** `.ci/*/fstests` files
+- The specific XFS variant is handled by the **defconfig**, not the CI workflow
+- CI_WORKFLOW for all XFS variants should resolve to `fstests`
+
 ## Implementation Notes
 - Each fix should be atomic commit
 - Follow CLAUDE.md commit formatting (Generated-by: Claude AI / Signed-off-by:)
 - Test each change independently
+- **Always use V=1**: Critical for debugging and transparency
+- **CI_WORKFLOW parameter**: Essential for standardized execution
 - No major refactoring needed - architecture is sound

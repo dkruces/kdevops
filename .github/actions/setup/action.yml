@@ -78,7 +78,9 @@ runs:
       run: |
         set -euxo pipefail
         echo "${{ inputs.kernel_tree }}" > ../ci.trigger
-        echo "testing" > ../ci.subject
+        # Get the kdevops commit subject, not kernel commit
+        cd "${{ github.workspace }}" && git log -1 --pretty=format:"%s" > "${{ inputs.dir }}/kdevops/ci.subject"
+        cd - > /dev/null
         echo "${{ inputs.kernel_ref }}" > ../ci.ref
 
         RELEVANT_GIT_TAG=$(cat ../ci.ref)

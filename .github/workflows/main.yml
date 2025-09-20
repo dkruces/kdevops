@@ -43,6 +43,7 @@ jobs:
     name: Run kdevops ci-test
     runs-on: [self-hosted]
     needs: [setup]
+    timeout-minutes: 60
     steps:
       - name: kdevops ci-test
         uses: ./.github/actions/test

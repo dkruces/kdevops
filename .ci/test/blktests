@@ -1,1 +1,14 @@
+#!/bin/bash
+set -euxo pipefail
+
+echo "=== DEBUG: Starting blktests CI execution ==="
+echo "Working directory: $(pwd)"
+echo "Environment variables:"
+env | grep -E "(TESTS|LIMIT|CI)" || true
+
+echo "=== DEBUG: Executing blktests command ==="
 make blktests-baseline TESTS=block/003
+
+echo "=== DEBUG: blktests execution completed ==="
+echo "Results directory structure:"
+find workflows/blktests/results -type f | head -20 || true

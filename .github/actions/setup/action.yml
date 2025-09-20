@@ -92,8 +92,16 @@ runs:
           LINUX_GIT_TAG "$RELEVANT_GIT_TAG"
 
         # Start out pessimistic
+        echo "=== DEBUG: Creating initial metadata files ==="
+        echo "Working directory: $(pwd)"
+        echo "Parent directory contents: $(ls -la ..)"
+
         echo "unknown" > ../ci.result
         echo "Nothing to write home about." > ../ci.commit_extra
+
+        echo "=== DEBUG: Initial metadata files created ==="
+        echo "ci.result content: $(cat ../ci.result)"
+        echo "ci.commit_extra content: $(cat ../ci.commit_extra)"
 
     - name: Run a quick Linux kernel defconfig build test
       working-directory: ${{ inputs.dir }}/kdevops/linux

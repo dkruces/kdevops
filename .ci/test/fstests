@@ -1,1 +1,1 @@
-make fstests-baseline
+make fstests-baseline TESTS=generic/003

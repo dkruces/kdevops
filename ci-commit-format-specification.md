@@ -93,6 +93,40 @@ The workflow name encodes multiple pieces of information using consistent **"sec
   - `selftests_firmware` → workflow: selftests, section: firmware
   - `selftests_xarray` → workflow: selftests, section: xarray
 
+#### Additional Workflows (Currently Supported)
+
+#### ai Workflows
+- **Format**: `ai_<test_type>`
+- **test_types**: `vector_database` (with A/B testing support)
+- **Examples**:
+  - `ai_vector_database` → workflow: ai, test_type: vector_database
+
+#### mmtests Workflows
+- **Format**: `mmtests_<test_type>`
+- **test_types**: `thpcompact`, `thpchallenge` (memory management testing)
+- **Examples**:
+  - `mmtests_thpcompact` → workflow: mmtests, test_type: thpcompact
+  - `mmtests_thpchallenge` → workflow: mmtests, test_type: thpchallenge
+
+#### ltp Workflows
+- **Format**: `ltp_<test_group>`
+- **test_groups**: `cve`, `fcntl`, `fs`, `fs_bind`, `fs_perms_simple`, `fs_readonly`, `nfs`, `notify`, `rpc`, `smack`, and others
+- **Examples**:
+  - `ltp_cve` → workflow: ltp, test_group: cve
+  - `ltp_fs` → workflow: ltp, test_group: fs
+
+#### Other Supported Workflows
+- **gitr**: Git regression testing
+- **pynfs**: Python NFS testing
+- **nfstest**: NFS testing framework
+- **cxl**: CXL (Compute Express Link) testing
+- **minio**: MinIO object storage testing (`minio_warp`)
+- **fio-tests**: I/O performance testing
+- **sysbench**: Database performance testing
+- **steady_state**: Storage steady state testing
+
+**Note**: Some workflows like `linux`, `demos`, `common`, and `kdevops` are infrastructure workflows that may not follow the standard naming patterns or may not be suitable for CI result archiving.
+
 ### Complete Enhanced Format Template
 
 ```
@@ -251,6 +285,65 @@ workflow: selftests_kmod | tree: linux-next
 ref: next-20250120-15-gab12cd34e5f6 | scope: kdevops | result: ok
 ```
 
+### Example 4: Memory Management Testing (mmtests)
+
+```
+mmtests_thpcompact (linux-mm v6.15-mm-ab12cd34): PASS
+
+BUILD INFO:
+  Kernel: v6.15-mm-15-gab12cd34e5f6 ("mm: improve transparent hugepage
+          compaction performance")
+  Workflow: mmtests_thpcompact
+  kdevops: 8e395d4b ("blktests: fix result collection and add fast CI test")
+  Scope: full test suite (A/B testing with baseline and dev nodes)
+  Duration: 2h 15m 30s
+
+EXECUTION RESULTS:
+  Status: PASS ✅
+  Tests Run: 1
+  Passed: 1
+  Failed: 0
+
+TEST EVIDENCE:
+mmtests thpcompact performance comparison:
+  Baseline: 1.234s compaction time
+  Development: 0.987s compaction time
+  Improvement: 20.0% faster compaction
+
+METADATA:
+workflow: mmtests_thpcompact | tree: linux-mm
+ref: v6.15-mm-15-gab12cd34e5f6 | scope: tests | result: ok
+```
+
+### Example 5: AI Vector Database Testing
+
+```
+kdevops: ai_vector_database (linux v6.15-ga1b2c3d4)
+
+BUILD INFO:
+  Kernel: v6.15-ga1b2c3d4e5f6 ("fs: optimize vector I/O operations")
+  Workflow: ai_vector_database
+  kdevops: 8e395d4b ("blktests: fix result collection and add fast CI test")
+  Scope: kdevops validation (single test: vector_basic)
+  Duration: 3m 12s
+
+EXECUTION RESULTS:
+  Tests Run: 1
+  Passed: 1
+  Failed: 0
+
+TEST EVIDENCE:
+Vector database performance test:
+  Vector dimensions: 768
+  Batch size: 1000
+  Query latency: 12.5ms
+  Throughput: 8,000 QPS
+
+METADATA:
+workflow: ai_vector_database | tree: linux
+ref: v6.15-ga1b2c3d4e5f6 | scope: kdevops | result: ok
+```
+
 ## Implementation Variables and Logic
 
 ### Core Detection Logic
@@ -270,6 +363,40 @@ else
     SHOW_STATUS=true
     SCOPE_META="tests"
 fi
+```
+
+### Workflow Mapping Logic
+```bash
+# Map CI_WORKFLOW to result collection logic (from scripts/ci.Makefile)
+case "$CI_WORKFLOW" in
+    *xfs*|*btrfs*|*ext4*|*tmpfs*|*lbs-xfs*)
+        WORKFLOW_TYPE="fstests"
+        ;;
+    blktests*)
+        WORKFLOW_TYPE="blktests"
+        ;;
+    selftests*|*firmware*|*modules*|*mm*)
+        WORKFLOW_TYPE="selftests"
+        ;;
+    ai_*)
+        WORKFLOW_TYPE="ai"
+        ;;
+    mmtests_*)
+        WORKFLOW_TYPE="mmtests"
+        ;;
+    ltp_*)
+        WORKFLOW_TYPE="ltp"
+        ;;
+    fio-tests*|fio_*)
+        WORKFLOW_TYPE="fio-tests"
+        ;;
+    minio_*)
+        WORKFLOW_TYPE="minio"
+        ;;
+    *)
+        WORKFLOW_TYPE=$(echo "$CI_WORKFLOW" | cut -d'_' -f1)
+        ;;
+esac
 ```
 
 ### Kernel Version Information

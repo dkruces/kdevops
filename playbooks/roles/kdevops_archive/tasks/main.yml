@@ -414,14 +414,23 @@
     kdevops_archive_ci_test_result: "unknown"
   when: not ci_result_file.stat.exists
 
-- name: Create a temporary file for commit message
-  ansible.builtin.tempfile:
-    state: file
-    suffix: txt
-    prefix: kdevops_commit_msg_
-  register: tmp_commit_msg
+- name: Check if enhanced commit message file exists
+  ansible.builtin.stat:
+    path: "{{ topdir_path }}/ci.commit_message_enhanced"
+  register: ci_commit_enhanced_file
 
-- name: Set commit message
+- name: Read enhanced commit message file if it exists
+  ansible.builtin.slurp:
+    path: "{{ topdir_path }}/ci.commit_message_enhanced"
+  register: ci_commit_enhanced_content
+  when: ci_commit_enhanced_file.stat.exists
+
+- name: Set enhanced commit message from file
+  ansible.builtin.set_fact:
+    commit_message: "{{ ci_commit_enhanced_content.content | b64decode | trim }}"
+  when: ci_commit_enhanced_file.stat.exists
+
+- name: Set legacy commit message if enhanced version not available
   ansible.builtin.set_fact:
     commit_message: |
       {{ kdevops_archive_test_trigger }}: {{ kdevops_archive_test_subject }}
@@ -436,6 +445,14 @@
       Detailed test report:
 
       {{ kdevops_archive_test_commit }}
+  when: not ci_commit_enhanced_file.stat.exists
+
+- name: Create a temporary file for commit message
+  ansible.builtin.tempfile:
+    state: file
+    suffix: txt
+    prefix: kdevops_commit_msg_
+  register: tmp_commit_msg
 
 - name: Copy commit message into temporary file
   ansible.builtin.copy:

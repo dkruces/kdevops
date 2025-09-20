@@ -25,13 +25,18 @@ runs:
         echo "=== DEBUG: Starting CI test execution ==="
         echo "CI_WORKFLOW: ${{ inputs.ci_workflow }}"
         echo "Working directory: $(pwd)"
-        echo "Directory contents: $(ls -la)"
+        echo "=== DEBUG: Directory contents ==="
+        ls -la
+
+        # Create start time for duration calculation
+        echo "$(date +%s)" > ci.start_time
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
         echo "=== DEBUG: CI test completed, initializing metadata ==="
         echo -e "Kernel tests results:\n" > ci.commit_extra
-        echo "Initial ci.commit_extra created: $(cat ci.commit_extra)"
+        echo "=== DEBUG: Initial ci.commit_extra content ==="
+        cat ci.commit_extra
 
     - name: Generate workflow results path
       id: setpath
@@ -65,7 +70,8 @@ runs:
 
         echo "=== DEBUG: Starting result collection ==="
         echo "Working directory: $(pwd)"
-        echo "Available files: $(ls -la)"
+        echo "=== DEBUG: Available files ==="
+        ls -la
 
         wpath="${{ steps.setpath.outputs.wpath }}"
         echo "=== DEBUG: Workflow path resolved ==="
@@ -97,7 +103,11 @@ runs:
             echo "=== DEBUG: Starting blktests result collection ==="
             echo "Collecting blktests results..."
             echo "wpath: $wpath"
-            echo "Results directory exists: $(test -d "$wpath/results/last-run" && echo "YES" || echo "NO")"
+            if [ -d "$wpath/results/last-run" ]; then
+              echo "Results directory exists: YES"
+            else
+              echo "Results directory exists: NO"
+            fi
 
             if [ -d "$wpath/results/last-run" ]; then
               echo "=== DEBUG: Contents of results/last-run ==="
@@ -205,3 +215,20 @@ runs:
             fi
             ;;
         esac
+
+        echo "=== DEBUG: Generating enhanced commit message ==="
+        # Set environment variables for the commit message script
+        export CI_WORKFLOW="${{ inputs.ci_workflow }}"
+        export KERNEL_TREE="${{ inputs.kernel_tree || 'linux' }}"
+        export TESTS="${TESTS:-}"
+        export LIMIT_TESTS="${LIMIT_TESTS:-}"
+
+        # Generate enhanced commit message using our script
+        ./scripts/generate_ci_commit_message.sh > ci.commit_message_enhanced
+
+        echo "=== DEBUG: Enhanced commit message generated ==="
+        echo "Enhanced commit message content:"
+        cat ci.commit_message_enhanced
+
+        # Keep the original ci.commit_extra for backward compatibility
+        # The archive action will use ci.commit_message_enhanced if available

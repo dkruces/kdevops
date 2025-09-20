@@ -67,15 +67,38 @@ runs:
             fi
             ;;
           blktests*)
-            # blktests workflows: Use gen-results-dir.py output
+            # blktests workflows: Collect individual test results
             echo "Collecting blktests results..."
             echo "Kernel tests results:" > ci.commit_extra
-            find "$wpath/results/last-run/" -name '*.dmesg.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
-            echo -e "\n\nBlktests results:" >> ci.commit_extra
-            find "$wpath/results/" -name "*.txt" -newer "$wpath/results/last-run" -exec head -n 10 {} + >> ci.commit_extra 2>/dev/null || true
 
-            # blktests success detection (needs refinement)
-            if grep -i -q "fail\|error\|FAIL" ci.commit_extra; then
+            # Collect test results from last-run directory
+            if [ -d "$wpath/results/last-run" ]; then
+              echo -e "\nBlktests summary:" >> ci.commit_extra
+
+              # Count total tests, passed, and failed
+              total_tests=$(find "$wpath/results/last-run" -name "*.out*" -o -name "*" -type f | grep -E '/[^/]*$' | wc -l)
+              failed_tests=$(find "$wpath/results/last-run" -name "*.out.bad" -type f | wc -l)
+              passed_tests=$((total_tests - failed_tests))
+
+              echo "Tests run: $total_tests, Passed: $passed_tests, Failed: $failed_tests" >> ci.commit_extra
+
+              # List failed tests if any
+              if [ $failed_tests -gt 0 ]; then
+                echo -e "\nFailed tests:" >> ci.commit_extra
+                find "$wpath/results/last-run" -name "*.out.bad" -type f | sed 's|.*/\([^/]*\)\.out\.bad$|\1|' | sort >> ci.commit_extra 2>/dev/null || true
+              fi
+
+              # Show sample test status files for passed tests
+              if [ $passed_tests -gt 0 ]; then
+                echo -e "\nSample passed test:" >> ci.commit_extra
+                find "$wpath/results/last-run" -type f -name "*" ! -name "*.out.bad" ! -name "*.dmesg" | head -1 | xargs cat 2>/dev/null || true
+              fi
+            else
+              echo -e "\nNo blktests results found in $wpath/results/last-run" >> ci.commit_extra
+            fi
+
+            # blktests success detection - look for .out.bad files (failures)
+            if find "$wpath/results/last-run" -name "*.out.bad" -type f | head -1 >/dev/null 2>&1; then
               echo "not ok" > ci.result
             else
               echo "ok" > ci.result

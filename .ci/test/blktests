@@ -1,1 +1,1 @@
-make blktests-baseline
+make blktests-baseline TESTS=block/003

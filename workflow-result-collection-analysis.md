@@ -178,6 +178,10 @@ echo "${{ inputs.ci_workflow }}" > ci.workflow
    - fstests: `xunit_results.txt` extraction ✅ **IMPLEMENTED**
    - blktests: Custom result parsing ✅ **COMPLETED**
    - selftests: Better userspace.log parsing
+   - ai: Vector database performance result parsing (TBD)
+   - mmtests: A/B testing comparison result parsing (TBD)
+   - ltp: Test group result parsing (TBD)
+   - Other workflows: Result collection patterns (TBD)
 
 2. **Metadata Corrections**:
    - Fix `ci.subject` to use actual commit subject
@@ -250,3 +254,145 @@ date    2025-01-20 15:30:42
 ```
 
 **Commit**: `8e395d4b` - "blktests: fix result collection and add fast CI test"
+
+## Complete kdevops Workflow Analysis
+
+### ✅ **DISCOVERY: Comprehensive Workflow Inventory (September 2025)**
+
+**Investigation Scope**: Analyzed all 18+ workflow directories in kdevops codebase to ensure complete CI result collection coverage.
+
+**Findings**: The initial specification only covered 3 primary workflows (fstests, blktests, selftests) but kdevops supports significantly more testing frameworks.
+
+### **Complete Workflow Taxonomy**
+
+#### **Core Testing Workflows** (Primary CI Focus)
+1. **fstests**: Filesystem testing
+   - **Sections**: `xfs_*`, `btrfs_*`, `ext4_*`, `tmpfs_*`, `lbs-xfs_*`
+   - **Status**: ✅ Result collection implemented
+   - **Format**: `<filesystem>_<section>` (e.g., `xfs_reflink_4k`)
+
+2. **blktests**: Block layer testing
+   - **Sections**: `block`, `nvme`, `meta`, `nbd`, `nvmemp`, `scsi`, `srp`, `zbd`
+   - **Status**: ✅ Result collection implemented
+   - **Format**: `blktests_<section>` (e.g., `blktests_nvme`)
+
+3. **selftests**: Kernel selftests
+   - **Sections**: `radix`, `firmware`, `kmod`, `module`, `maple`, `sysctls`, `xarray`, `vma`
+   - **Status**: ⚠️ Basic implementation (needs enhancement)
+   - **Format**: `selftests_<section>` (e.g., `selftests_kmod`)
+
+#### **Advanced Testing Workflows** (Specialized)
+4. **ai**: AI/ML performance testing
+   - **Test Types**: `vector_database` (with A/B testing support)
+   - **Status**: 🆕 Newly discovered (needs implementation)
+   - **Format**: `ai_<test_type>` (e.g., `ai_vector_database`)
+
+5. **mmtests**: Memory management testing
+   - **Test Types**: `thpcompact`, `thpchallenge`
+   - **Status**: 🆕 Newly discovered (needs implementation)
+   - **Format**: `mmtests_<test_type>` (e.g., `mmtests_thpcompact`)
+   - **Features**: A/B testing with baseline and dev nodes
+
+6. **ltp**: Linux Test Project
+   - **Test Groups**: `cve`, `fcntl`, `fs`, `fs_bind`, `fs_perms_simple`, `fs_readonly`, `nfs`, `notify`, `rpc`, `smack`, and others
+   - **Status**: 🆕 Newly discovered (needs implementation)
+   - **Format**: `ltp_<test_group>` (e.g., `ltp_cve`)
+
+#### **Infrastructure & Integration Workflows**
+7. **gitr**: Git regression testing
+8. **pynfs**: Python NFS testing
+9. **nfstest**: NFS testing framework
+10. **cxl**: CXL (Compute Express Link) testing
+11. **minio**: MinIO object storage testing (`minio_warp`)
+12. **fio-tests**: I/O performance testing
+13. **sysbench**: Database performance testing
+14. **steady_state**: Storage steady state testing
+
+#### **Infrastructure Workflows** (Non-CI)
+- **linux**: Kernel building and installation
+- **demos**: Demonstration workflows
+- **common**: Shared workflow components
+- **kdevops**: Framework self-testing
+
+### **CI Implementation Status Overview**
+
+#### **✅ Fully Implemented (3 workflows)**
+- **fstests**: Complete xunit_results.txt parsing
+- **blktests**: Individual test result file parsing
+- **tmpfs**: Uses fstests infrastructure
+
+#### **⚠️ Partially Implemented (1 workflow)**
+- **selftests**: Basic userspace.log parsing (needs enhancement)
+
+#### **🆕 Newly Discovered - Need Implementation (11+ workflows)**
+- **ai**: Vector database performance results
+- **mmtests**: A/B testing comparison results
+- **ltp**: Test group execution results
+- **gitr**: Git regression test results
+- **pynfs**: Python NFS test results
+- **nfstest**: NFS testing results
+- **cxl**: CXL testing results
+- **minio**: Object storage benchmark results
+- **fio-tests**: I/O performance results
+- **sysbench**: Database performance results
+- **steady_state**: Storage state analysis results
+
+### **Enhanced CI Workflow Mapping Requirements**
+
+The current CI workflow mapping logic needs expansion:
+
+```bash
+# Current (Limited Coverage)
+case "$CI_WORKFLOW" in
+  *xfs*|*btrfs*|*ext4*|tmpfs*|*fstests*) # fstests
+  blktests*) # blktests
+  *selftests*|*modules*|*mm*|*firmware*) # selftests
+esac
+
+# Required (Complete Coverage)
+case "$CI_WORKFLOW" in
+  *xfs*|*btrfs*|*ext4*|*tmpfs*|*lbs-xfs*) WORKFLOW_TYPE="fstests" ;;
+  blktests*) WORKFLOW_TYPE="blktests" ;;
+  selftests*|*firmware*|*modules*|*mm*) WORKFLOW_TYPE="selftests" ;;
+  ai_*) WORKFLOW_TYPE="ai" ;;
+  mmtests_*) WORKFLOW_TYPE="mmtests" ;;
+  ltp_*) WORKFLOW_TYPE="ltp" ;;
+  fio-tests*|fio_*) WORKFLOW_TYPE="fio-tests" ;;
+  minio_*) WORKFLOW_TYPE="minio" ;;
+  gitr*) WORKFLOW_TYPE="gitr" ;;
+  pynfs*) WORKFLOW_TYPE="pynfs" ;;
+  nfstest*) WORKFLOW_TYPE="nfstest" ;;
+  cxl*) WORKFLOW_TYPE="cxl" ;;
+  sysbench*) WORKFLOW_TYPE="sysbench" ;;
+  steady_state*) WORKFLOW_TYPE="steady_state" ;;
+  *) WORKFLOW_TYPE=$(echo "$CI_WORKFLOW" | cut -d'_' -f1) ;;
+esac
+```
+
+### **Implementation Priority Recommendations**
+
+#### **Phase 1: High-Impact Workflows**
+1. **mmtests**: Critical for memory management testing and A/B comparisons
+2. **ltp**: Comprehensive Linux testing coverage
+3. **ai**: Growing importance for AI/ML workload testing
+
+#### **Phase 2: Integration Workflows**
+4. **fio-tests**: I/O performance baseline establishment
+5. **minio**: Object storage performance tracking
+6. **pynfs/nfstest**: NFS testing completeness
+
+#### **Phase 3: Specialized Workflows**
+7. **cxl**: Hardware-specific testing
+8. **sysbench**: Database performance validation
+9. **gitr**: Development workflow validation
+10. **steady_state**: Storage reliability testing
+
+### **Documentation Impact**
+
+This comprehensive workflow analysis resulted in:
+1. **Enhanced CI Commit Format Specification**: Updated `ci-commit-format-specification.md` with all workflows
+2. **Complete Workflow Mapping**: Added workflow detection logic for all 18+ workflows
+3. **Extended Examples**: Added mmtests A/B testing and AI vector database examples
+4. **Future Implementation Guide**: Clear roadmap for remaining workflow result collection
+
+**Key Insight**: kdevops is significantly more comprehensive than initially apparent, supporting advanced testing scenarios including AI performance analysis, memory management A/B testing, and specialized hardware validation that all need proper CI result collection and archiving.

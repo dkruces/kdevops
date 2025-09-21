@@ -16,14 +16,6 @@ inputs:
     description: 'CI execution mode'
     required: false
     default: 'auto'
-  force_validation:
-    description: 'Force kdevops-ci validation mode (single test)'
-    required: false
-    default: 'false'
-  force_full_testing:
-    description: 'Force full testing mode (complete suite)'
-    required: false
-    default: 'false'
 
 runs:
   using: "composite"
@@ -45,8 +37,6 @@ runs:
 
         echo "=== DEBUG: Auto-detecting CI execution mode ==="
         echo "ci_mode input: '${{ inputs.ci_mode }}'"
-        echo "force_validation input: '${{ inputs.force_validation }}'"
-        echo "force_full_testing input: '${{ inputs.force_full_testing }}'"
         echo "github.event_name: '${{ github.event_name }}'"
 
         # Determine CI execution mode based on Option 2 strategy
@@ -57,16 +47,7 @@ runs:
           KDEVOPS_CI_MODE="validation"
           echo "Auto-detected: kdevops-ci validation (PR context)"
 
-        # Priority 2: Force overrides from manual.yml
-        elif [[ "${{ inputs.force_validation }}" == "true" ]]; then
-          KDEVOPS_CI_MODE="validation"
-          echo "User forced: kdevops-ci validation mode"
-
-        elif [[ "${{ inputs.force_full_testing }}" == "true" ]]; then
-          KDEVOPS_CI_MODE="full_testing"
-          echo "User forced: full testing mode"
-
-        # Priority 3: ci_mode choice from manual.yml
+        # Priority 2: ci_mode choice from manual.yml
         elif [[ "${{ inputs.ci_mode }}" == "kdevops-validation" ]]; then
           KDEVOPS_CI_MODE="validation"
           echo "User selected: kdevops-ci validation mode"
@@ -75,7 +56,7 @@ runs:
           KDEVOPS_CI_MODE="full_testing"
           echo "User selected: full testing mode"
 
-        # Priority 4: Default based on trigger type
+        # Priority 3: Default based on trigger type
         elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           KDEVOPS_CI_MODE="full_testing"
           echo "Auto-detected: full testing (manual dispatch default)"

@@ -48,7 +48,7 @@ calculate_duration() {
 
 # Determine scope and header format
 determine_scope() {
-    if [[ -n "$TESTS_PARAM" ]]; then
+    if [[ -n "$TESTS" ]]; then
         echo "kdevops"
     else
         echo "tests"
@@ -57,10 +57,16 @@ determine_scope() {
 
 # Get kernel information
 get_kernel_info() {
-    # Try to get git describe, fallback gracefully
-    local kernel_describe=$(git describe --tags --always --dirty 2>/dev/null || echo "unknown")
-    local kernel_hash=$(git rev-parse --short=12 HEAD 2>/dev/null || echo "unknown")
-    local kernel_subject=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "unknown commit")
+    # Try to get git describe from linux directory, fallback gracefully
+    local kernel_describe="unknown"
+    local kernel_hash="unknown"
+    local kernel_subject="unknown commit"
+
+    if [ -d "linux/.git" ]; then
+        kernel_describe=$(cd linux && git describe --tags --always --dirty 2>/dev/null || echo "unknown")
+        kernel_hash=$(cd linux && git rev-parse --short=12 HEAD 2>/dev/null || echo "unknown")
+        kernel_subject=$(cd linux && git log -1 --pretty=format:"%s" 2>/dev/null || echo "unknown commit")
+    fi
 
     echo "$kernel_describe|$kernel_hash|$kernel_subject"
 }
@@ -145,7 +151,7 @@ generate_commit_message() {
     # Build scope description
     local scope_desc=""
     if [ "$scope" = "kdevops" ]; then
-        scope_desc="kdevops validation (single test: $TESTS_PARAM)"
+        scope_desc="kdevops validation (single test: $TESTS)"
     else
         scope_desc="full test suite"
     fi

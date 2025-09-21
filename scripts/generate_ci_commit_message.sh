@@ -189,6 +189,16 @@ generate_commit_message() {
         metadata_output="$metadata_line"
     fi
 
+    # Build kernel validation info
+    local kernel_info_line=""
+    if [ "$actual_kernel_ref" != "unknown" ] && [ "$kernel_describe" != "$actual_kernel_ref" ]; then
+        # Show both requested and actual if they differ
+        kernel_info_line="  Kernel: $actual_kernel_ref (requested) → $kernel_describe (actual)"
+    else
+        # Show just the kernel version if they match or no metadata
+        kernel_info_line="  Kernel: $kernel_describe"
+    fi
+
     # Build the complete commit message based on scope
     if [ "$scope" = "kdevops" ]; then
         # kdevops-ci validation format
@@ -199,14 +209,14 @@ BUILD INFO:
   kdevops: $kdevops_hash ($wrapped_kdevops_subject)
   Workflow: $CI_WORKFLOW
   Test: $TESTS
-  Kernel: $kernel_describe
+$kernel_info_line
   Duration: $duration
 
 EXECUTION RESULTS:
 $result_content
 
 METADATA:
-workflow: $CI_WORKFLOW | scope: kdevops | test: $TESTS | result: $test_result
+workflow: $CI_WORKFLOW | scope: kdevops | test: $TESTS | requested: $actual_kernel_ref | actual: $kernel_describe | result: $test_result
 EOF
     else
         # Full test suite format
@@ -214,7 +224,7 @@ EOF
 $header
 
 BUILD INFO:
-  Kernel: $kernel_describe ($wrapped_kernel_subject)
+$kernel_info_line ($wrapped_kernel_subject)
   Workflow: $CI_WORKFLOW
   kdevops: $kdevops_hash ($wrapped_kdevops_subject)
   Scope: $scope_desc
@@ -224,7 +234,7 @@ EXECUTION RESULTS:
 $result_content
 
 METADATA:
-$metadata_output
+$metadata_output | requested: $actual_kernel_ref | actual: $kernel_describe
 EOF
     fi
 }

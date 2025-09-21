@@ -50,9 +50,17 @@ calculate_duration() {
 
 # Determine scope and header format
 determine_scope() {
-    if [[ -n "$TESTS" ]]; then
+    # Debug output for troubleshooting
+    echo "DEBUG: TESTS='${TESTS:-}'" >&2
+    echo "DEBUG: LIMIT_TESTS='${LIMIT_TESTS:-}'" >&2
+    echo "DEBUG: TESTS_PARAM='${TESTS_PARAM:-}'" >&2
+
+    # Check for any test parameter indicating validation mode
+    if [[ -n "${TESTS:-}" ]] || [[ -n "${LIMIT_TESTS:-}" ]] || [[ -n "${TESTS_PARAM:-}" ]]; then
+        echo "DEBUG: Detected kdevops validation mode" >&2
         echo "kdevops"
     else
+        echo "DEBUG: Detected full test suite mode" >&2
         echo "tests"
     fi
 }
@@ -140,9 +148,15 @@ generate_commit_message() {
     local kernel_subject=$(echo "$kernel_info" | cut -d'|' -f3)
 
     # Use metadata ref if available, fallback to git describe
-    if [ "$actual_kernel_ref" != "unknown" ]; then
+    # Ensure we use the most accurate kernel version consistently
+    if [ "$actual_kernel_ref" != "unknown" ] && [ "$actual_kernel_ref" != "" ]; then
         kernel_describe="$actual_kernel_ref"
     fi
+
+    # Debug kernel version information
+    echo "DEBUG: kernel_describe from git: $(cd linux && git describe --tags --always --dirty 2>/dev/null || echo 'unknown')" >&2
+    echo "DEBUG: actual_kernel_ref from CI: $actual_kernel_ref" >&2
+    echo "DEBUG: final kernel_describe: $kernel_describe" >&2
 
     # Get kdevops info (this assumes we can access kdevops directory)
     local kdevops_info=$(get_kdevops_info)
@@ -171,7 +185,12 @@ generate_commit_message() {
     # Build scope description
     local scope_desc=""
     if [ "$scope" = "kdevops" ]; then
-        scope_desc="kdevops validation (single test: $TESTS)"
+        local test_param="${TESTS:-${LIMIT_TESTS:-${TESTS_PARAM:-}}}"
+        if [[ -n "$test_param" ]]; then
+            scope_desc="kdevops validation (single test: $test_param)"
+        else
+            scope_desc="kdevops validation"
+        fi
     else
         scope_desc="full test suite"
     fi

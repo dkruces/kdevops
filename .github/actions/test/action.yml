@@ -233,8 +233,14 @@ runs:
         # Set environment variables for the commit message script
         export CI_WORKFLOW="${{ inputs.ci_workflow }}"
         export KERNEL_TREE="${{ inputs.kernel_tree || 'linux' }}"
-        export TESTS="${TESTS:-}"
-        export LIMIT_TESTS="${LIMIT_TESTS:-}"
+
+        # Only export TESTS if it's actually set and non-empty
+        if [[ -n "${TESTS:-}" ]]; then
+          export TESTS="$TESTS"
+        fi
+        if [[ -n "${LIMIT_TESTS:-}" ]]; then
+          export LIMIT_TESTS="$LIMIT_TESTS"
+        fi
 
         # Generate enhanced commit message using our script
         ./scripts/generate_ci_commit_message.sh > ci.commit_message_enhanced

@@ -56,6 +56,9 @@ ci-test: ci-test-$(CI_WORKFLOW_BASENAME)
 ci-test-%::
 	@set -e; \
 		while IFS= read -r line || [ -n "$$line" ]; do \
+		case "$$line" in \
+			\#*|"") continue ;; \
+		esac; \
 		echo "Running: $$line"; \
 		$$line; \
 	  done < .ci/test/$(CI_WORKFLOW_BASENAME); \

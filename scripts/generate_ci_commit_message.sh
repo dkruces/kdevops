@@ -16,6 +16,8 @@ DURATION="${DURATION:-unknown}"
 CI_COMMIT_EXTRA="${CI_COMMIT_EXTRA:-ci.commit_extra}"
 CI_RESULT="${CI_RESULT:-ci.result}"
 CI_START_TIME="${CI_START_TIME:-ci.start_time}"
+CI_REF="${CI_REF:-ci.ref}"
+CI_TRIGGER="${CI_TRIGGER:-ci.trigger}"
 
 # Helper function to wrap long commit subjects at 72 chars
 wrap_commit_subject() {
@@ -119,11 +121,28 @@ generate_commit_message() {
     local workflow_type=$(get_workflow_type)
     local duration=$(calculate_duration)
 
+    # Get kernel tree and ref from metadata files
+    local actual_kernel_tree="$KERNEL_TREE"
+    local actual_kernel_ref="unknown"
+
+    if [ -f "$CI_TRIGGER" ]; then
+        actual_kernel_tree=$(cat "$CI_TRIGGER" | tr -d '\n' | tr -d '\r')
+    fi
+
+    if [ -f "$CI_REF" ]; then
+        actual_kernel_ref=$(cat "$CI_REF" | tr -d '\n' | tr -d '\r')
+    fi
+
     # Get kernel info (this assumes we're in the kernel directory context)
     local kernel_info=$(get_kernel_info)
     local kernel_describe=$(echo "$kernel_info" | cut -d'|' -f1)
     local kernel_hash=$(echo "$kernel_info" | cut -d'|' -f2)
     local kernel_subject=$(echo "$kernel_info" | cut -d'|' -f3)
+
+    # Use metadata ref if available, fallback to git describe
+    if [ "$actual_kernel_ref" != "unknown" ]; then
+        kernel_describe="$actual_kernel_ref"
+    fi
 
     # Get kdevops info (this assumes we can access kdevops directory)
     local kdevops_info=$(get_kdevops_info)
@@ -146,7 +165,7 @@ generate_commit_message() {
         if [ "$test_result" = "not ok" ] || [ "$test_result" = "fail" ]; then
             status="FAIL"
         fi
-        header="$CI_WORKFLOW ($KERNEL_TREE $kernel_describe): $status"
+        header="$CI_WORKFLOW ($actual_kernel_tree $kernel_describe): $status"
     fi
 
     # Build scope description
@@ -162,10 +181,10 @@ generate_commit_message() {
     local wrapped_kdevops_subject=$(wrap_commit_subject "$kdevops_subject")
 
     # Generate metadata line with 72-char handling
-    local metadata_line="workflow: $CI_WORKFLOW | tree: $KERNEL_TREE | ref: $kernel_describe | scope: $scope | result: $test_result"
+    local metadata_line="workflow: $CI_WORKFLOW | tree: $actual_kernel_tree | ref: $kernel_describe | scope: $scope | result: $test_result"
     local metadata_output=""
     if [ ${#metadata_line} -gt 72 ]; then
-        metadata_output="workflow: $CI_WORKFLOW | tree: $KERNEL_TREE"$'\n'"ref: $kernel_describe | scope: $scope | result: $test_result"
+        metadata_output="workflow: $CI_WORKFLOW | tree: $actual_kernel_tree"$'\n'"ref: $kernel_describe | scope: $scope | result: $test_result"
     else
         metadata_output="$metadata_line"
     fi

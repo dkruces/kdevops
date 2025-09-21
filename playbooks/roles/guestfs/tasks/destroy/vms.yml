@@ -82,7 +82,7 @@
     name: "{{ item }}"
     command: undefine
     flags:
-      - "remove_all_storage"
+      - "delete_volumes"
       - "managed_save"
       - "snapshots_metadata"
       - "checkpoints_metadata"
@@ -91,31 +91,35 @@
   loop: "{{ vms_to_destroy }}"
   when:
     - vms_to_destroy | length > 0
+  register: undefine_comprehensive_results
   ignore_errors: true
 
 - name: Fallback - undefine VMs with basic cleanup (for older libvirt)
   run_once: true
   delegate_to: localhost
   community.libvirt.virt:
-    name: "{{ item }}"
+    name: "{{ item.item }}"
     command: undefine
     flags:
       - "managed_save"
       - "nvram"
     uri: "{{ libvirt_uri }}"
-  loop: "{{ vms_to_destroy }}"
+  loop: "{{ undefine_comprehensive_results.results | default([]) }}"
   when:
     - vms_to_destroy | length > 0
+    - item.failed | default(false)
+  register: undefine_basic_results
   ignore_errors: true
 
 - name: Final fallback - basic undefine
   run_once: true
   delegate_to: localhost
   community.libvirt.virt:
-    name: "{{ item }}"
+    name: "{{ item.item.item }}"
     command: undefine
     uri: "{{ libvirt_uri }}"
-  loop: "{{ vms_to_destroy }}"
+  loop: "{{ undefine_basic_results.results | default([]) }}"
   when:
     - vms_to_destroy | length > 0
+    - item.failed | default(false)
   ignore_errors: true

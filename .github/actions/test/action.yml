@@ -31,6 +31,19 @@ runs:
         # Create start time for duration calculation
         echo "$(date +%s)" > ci.start_time
 
+        # Set TESTS parameter for fast CI execution based on workflow type
+        case "${{ inputs.ci_workflow }}" in
+          *fstests*|*xfs*|*btrfs*|*ext4*|*tmpfs*)
+            export TESTS="generic/003"
+            ;;
+          blktests*)
+            export TESTS="block/003"
+            ;;
+          *)
+            # No TESTS parameter for other workflows
+            ;;
+        esac
+
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
         echo "=== DEBUG: CI test completed, initializing metadata ==="

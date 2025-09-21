@@ -54,8 +54,9 @@ HELP_TARGETS += ci-build-test-help-menu
 ci-test: ci-test-$(CI_WORKFLOW_BASENAME)
 
 ci-test-%::
-	@chmod +x .ci/test/$(CI_WORKFLOW_BASENAME)
-	@.ci/test/$(CI_WORKFLOW_BASENAME)
+	@while IFS= read -r line || [ -n "$$line" ]; do \
+		[ -n "$$line" ] && $$line; \
+	done < .ci/test/$(CI_WORKFLOW_BASENAME)
 
 ci-test-help-menu:
 	@echo "kdevops built-in run time tests for $(CI_WORKFLOW_BASENAME):"

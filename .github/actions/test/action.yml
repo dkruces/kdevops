@@ -12,6 +12,18 @@ inputs:
     required: false
     type: string
     default: 'demo'
+  ci_mode:
+    description: 'CI execution mode'
+    required: false
+    default: 'auto'
+  force_validation:
+    description: 'Force kdevops-ci validation mode (single test)'
+    required: false
+    default: 'false'
+  force_full_testing:
+    description: 'Force full testing mode (complete suite)'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -31,18 +43,79 @@ runs:
         # Create start time for duration calculation
         echo "$(date +%s)" > ci.start_time
 
-        # Set TESTS parameter for fast CI execution based on workflow type
-        case "${{ inputs.ci_workflow }}" in
-          *fstests*|*xfs*|*btrfs*|*ext4*|*tmpfs*)
-            export TESTS="generic/003"
-            ;;
-          blktests*)
-            export TESTS="block/003"
-            ;;
-          *)
-            # No TESTS parameter for other workflows
-            ;;
-        esac
+        echo "=== DEBUG: Auto-detecting CI execution mode ==="
+        echo "ci_mode input: '${{ inputs.ci_mode }}'"
+        echo "force_validation input: '${{ inputs.force_validation }}'"
+        echo "force_full_testing input: '${{ inputs.force_full_testing }}'"
+        echo "github.event_name: '${{ github.event_name }}'"
+
+        # Determine CI execution mode based on Option 2 strategy
+        KDEVOPS_CI_MODE=""
+
+        # Priority 1: GitHub context detection (PRs automatically get validation)
+        if [[ "${{ github.event_name }}" == "pull_request"* ]]; then
+          KDEVOPS_CI_MODE="validation"
+          echo "Auto-detected: kdevops-ci validation (PR context)"
+
+        # Priority 2: Force overrides from manual.yml
+        elif [[ "${{ inputs.force_validation }}" == "true" ]]; then
+          KDEVOPS_CI_MODE="validation"
+          echo "User forced: kdevops-ci validation mode"
+
+        elif [[ "${{ inputs.force_full_testing }}" == "true" ]]; then
+          KDEVOPS_CI_MODE="full_testing"
+          echo "User forced: full testing mode"
+
+        # Priority 3: ci_mode choice from manual.yml
+        elif [[ "${{ inputs.ci_mode }}" == "kdevops-validation" ]]; then
+          KDEVOPS_CI_MODE="validation"
+          echo "User selected: kdevops-ci validation mode"
+
+        elif [[ "${{ inputs.ci_mode }}" == "full-testing" ]]; then
+          KDEVOPS_CI_MODE="full_testing"
+          echo "User selected: full testing mode"
+
+        # Priority 4: Default based on trigger type
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          KDEVOPS_CI_MODE="full_testing"
+          echo "Auto-detected: full testing (manual dispatch default)"
+
+        else
+          # Fallback: validation mode for safety
+          KDEVOPS_CI_MODE="validation"
+          echo "Fallback: kdevops-ci validation mode"
+        fi
+
+        echo "Final CI mode: $KDEVOPS_CI_MODE"
+        echo "KDEVOPS_CI_MODE=$KDEVOPS_CI_MODE" >> $GITHUB_ENV
+
+        # Configure test execution based on detected/selected mode
+        if [[ "$KDEVOPS_CI_MODE" == "validation" ]]; then
+          echo "=== Configuring kdevops-ci validation mode (single test) ==="
+
+          case "${{ inputs.ci_workflow }}" in
+            *fstests*|*xfs*|*btrfs*|*ext4*|*tmpfs*)
+              export TESTS="generic/003"
+              echo "fstests validation: TESTS=$TESTS"
+              ;;
+            blktests*)
+              export TESTS="block/003"
+              echo "blktests validation: TESTS=$TESTS"
+              ;;
+            selftests*|*modules*|*kmod*|*firmware*|*mm*)
+              export TESTS="kmod/test_001"
+              echo "selftests validation: TESTS=$TESTS"
+              ;;
+            *)
+              echo "Unknown workflow for validation, using minimal test"
+              ;;
+          esac
+
+        else
+          echo "=== Configuring full testing mode (complete suite) ==="
+          echo "No TESTS parameter - running complete test suite"
+          # Don't set TESTS variable - this triggers full suite
+        fi
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
@@ -234,12 +307,20 @@ runs:
         export CI_WORKFLOW="${{ inputs.ci_workflow }}"
         export KERNEL_TREE="${{ inputs.kernel_tree || 'linux' }}"
 
+        # Context-aware environment variables for auto-detection
+        export KDEVOPS_CI_MODE="$KDEVOPS_CI_MODE"
+        export GITHUB_EVENT_NAME="${{ github.event_name }}"
+
         # Only export TESTS if it's actually set and non-empty
         if [[ -n "${TESTS:-}" ]]; then
           export TESTS="$TESTS"
+          echo "DEBUG: Exporting TESTS=$TESTS"
+        else
+          echo "DEBUG: TESTS not set - full testing mode"
         fi
         if [[ -n "${LIMIT_TESTS:-}" ]]; then
           export LIMIT_TESTS="$LIMIT_TESTS"
+          echo "DEBUG: Exporting LIMIT_TESTS=$LIMIT_TESTS"
         fi
 
         # Generate enhanced commit message using our script

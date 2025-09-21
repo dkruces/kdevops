@@ -48,21 +48,39 @@ calculate_duration() {
     fi
 }
 
-# Determine scope and header format
+# Determine scope and header format with enhanced context-aware detection
 determine_scope() {
     # Debug output for troubleshooting
     echo "DEBUG: TESTS='${TESTS:-}'" >&2
     echo "DEBUG: LIMIT_TESTS='${LIMIT_TESTS:-}'" >&2
     echo "DEBUG: TESTS_PARAM='${TESTS_PARAM:-}'" >&2
+    echo "DEBUG: KDEVOPS_CI_MODE='${KDEVOPS_CI_MODE:-}'" >&2
+    echo "DEBUG: GITHUB_EVENT_NAME='${GITHUB_EVENT_NAME:-}'" >&2
 
-    # Check for any test parameter indicating validation mode
-    if [[ -n "${TESTS:-}" ]] || [[ -n "${LIMIT_TESTS:-}" ]] || [[ -n "${TESTS_PARAM:-}" ]]; then
-        echo "DEBUG: Detected kdevops validation mode" >&2
+    # Priority 1: Explicit CI mode from GitHub Actions
+    if [[ "${KDEVOPS_CI_MODE:-}" == "validation" ]]; then
+        echo "DEBUG: Detected kdevops validation mode (from KDEVOPS_CI_MODE)" >&2
         echo "kdevops"
-    else
-        echo "DEBUG: Detected full test suite mode" >&2
-        echo "tests"
+        return
     fi
+
+    # Priority 2: GitHub context detection
+    if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request"* ]]; then
+        echo "DEBUG: Detected kdevops validation mode (PR context)" >&2
+        echo "kdevops"
+        return
+    fi
+
+    # Priority 3: Test parameter detection (backward compatibility)
+    if [[ -n "${TESTS:-}" ]] || [[ -n "${LIMIT_TESTS:-}" ]] || [[ -n "${TESTS_PARAM:-}" ]]; then
+        echo "DEBUG: Detected kdevops validation mode (TESTS parameter)" >&2
+        echo "kdevops"
+        return
+    fi
+
+    # Default: full testing
+    echo "DEBUG: Detected full test suite mode (default)" >&2
+    echo "tests"
 }
 
 # Get kernel information

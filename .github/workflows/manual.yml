@@ -81,6 +81,23 @@ on:
         required: true
         default: 'master'
         type: string
+      ci_mode:
+        description: 'CI execution mode'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'              # Auto-detect based on context (default)
+          - 'kdevops-validation' # Fast single test (framework validation)
+          - 'full-testing'       # Complete test suite (kernel testing)
+      force_validation:
+        description: 'Force kdevops-ci validation mode (single test)'
+        type: boolean
+        default: false
+      force_full_testing:
+        description: 'Force full testing mode (complete suite)'
+        type: boolean
+        default: false
 
 jobs:
   check_ref:
@@ -116,3 +133,6 @@ jobs:
       ci_workflow: ${{ inputs.ci_workflow }}
       kernel_ref: ${{ inputs.kernel_ref }}
       kernel_tree: ${{ inputs.kernel_tree }}
+      ci_mode: ${{ inputs.ci_mode }}
+      force_validation: ${{ inputs.force_validation }}
+      force_full_testing: ${{ inputs.force_full_testing }}

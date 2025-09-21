@@ -72,7 +72,7 @@ runs:
         echo "=== DEBUG: Resolved workflow path ==="
         echo "wpath: $wpath"
 
-        echo "path=$path" >> $GITHUB_OUTPUT
+        echo "path=$wpath" >> $GITHUB_OUTPUT
         "${{ github.workspace }}/scripts/github_output.sh" wpath "$wpath"
 
     - name: Generate CI commit info with workflow-specific logic

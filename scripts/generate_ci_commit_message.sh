@@ -138,9 +138,10 @@ generate_commit_message() {
     # Build header
     local header=""
     if [ "$scope" = "kdevops" ]; then
-        header="kdevops: $CI_WORKFLOW ($KERNEL_TREE $kernel_describe)"
+        # kdevops-ci validation format: focus on kdevops commit being tested
+        header="kdevops-ci: $CI_WORKFLOW: $kdevops_hash $kdevops_subject"
     else
-        # Determine PASS/FAIL for full test suites
+        # Full test suite format: include PASS/FAIL status
         local status="PASS"
         if [ "$test_result" = "not ok" ] || [ "$test_result" = "fail" ]; then
             status="FAIL"
@@ -169,8 +170,28 @@ generate_commit_message() {
         metadata_output="$metadata_line"
     fi
 
-    # Build the complete commit message
-    cat << EOF
+    # Build the complete commit message based on scope
+    if [ "$scope" = "kdevops" ]; then
+        # kdevops-ci validation format
+        cat << EOF
+$header
+
+BUILD INFO:
+  kdevops: $kdevops_hash ($wrapped_kdevops_subject)
+  Workflow: $CI_WORKFLOW
+  Test: $TESTS
+  Kernel: $kernel_describe
+  Duration: $duration
+
+EXECUTION RESULTS:
+$result_content
+
+METADATA:
+workflow: $CI_WORKFLOW | scope: kdevops | test: $TESTS | result: $test_result
+EOF
+    else
+        # Full test suite format
+        cat << EOF
 $header
 
 BUILD INFO:
@@ -186,6 +207,7 @@ $result_content
 METADATA:
 $metadata_output
 EOF
+    fi
 }
 
 # Main execution

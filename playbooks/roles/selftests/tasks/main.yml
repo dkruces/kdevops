@@ -346,6 +346,22 @@
     command_to_run: >
       {%- if selftest_xarray -%} modprobe test_xarray{%- elif selftest_maple -%} modprobe test_maple_tree{%- else -%} echo missing command{%- endif -%}
 
+- name: Check if VMA executable exists
+  ansible.builtin.stat:
+    path: "{{ target_linux_dir_path }}/tools/testing/vma/vma"
+  register: vma_executable
+  when:
+    - kdevops_run_selftests|bool
+    - selftest_vma|bool
+
+- name: Skip VMA test if executable doesn't exist
+  ansible.builtin.debug:
+    msg: "VMA test executable not found, skipping. This may indicate the kernel version doesn't support VMA selftests or the build failed."
+  when:
+    - kdevops_run_selftests|bool
+    - selftest_vma|bool
+    - not vma_executable.stat.exists
+
 - name: Run userspace selftests
   tags: ["selftests", "run_tests"]
   become: true
@@ -357,7 +373,7 @@
   register: selftests_userspace_out
   when:
     - kdevops_run_selftests|bool
-    - (selftests_build_radix_tree|bool and selftest_userspace|bool and not selftest_vma|bool) or selftest_vma|bool
+    - (selftests_build_radix_tree|bool and selftest_userspace|bool and not selftest_vma|bool) or (selftest_vma|bool and vma_executable.stat.exists)
   vars:
     test_target_dir: >-
       {%- if selftest_vma -%} {{ target_linux_dir_path }}/tools/testing/vma{%- else -%} {{ target_linux_dir_path }}/tools/testing/radix-tree{%- endif -%}

@@ -27,12 +27,14 @@ runs:
     - name: Create workspace directory
       shell: bash
       run: |
+        set -euxo pipefail
         rm --recursive --force --verbose ${{ inputs.dir }}
         mkdir --parent --verbose ${{ inputs.dir }}
 
     - name: Configure git
       shell: bash
       run: |
+        set -euxo pipefail
         git config --global --add safe.directory '*'
         git config --global user.name "kdevops"
         git config --global user.email "kdevops@lists.linux.dev"
@@ -41,6 +43,7 @@ runs:
       working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
+        set -euxo pipefail
         git clone https://github.com/dkruces/kdevops.git --branch main kdevops
 
     - name: Checkout custom branch with delta on kdevops/linux
@@ -92,16 +95,8 @@ runs:
           LINUX_GIT_TAG "$RELEVANT_GIT_TAG"
 
         # Start out pessimistic
-        echo "=== DEBUG: Creating initial metadata files ==="
-        echo "Working directory: $(pwd)"
-        echo "Parent directory contents: $(ls -la ..)"
-
         echo "unknown" > ../ci.result
         echo "Nothing to write home about." > ../ci.commit_extra
-
-        echo "=== DEBUG: Initial metadata files created ==="
-        echo "ci.result content: $(cat ../ci.result)"
-        echo "ci.commit_extra content: $(cat ../ci.commit_extra)"
 
     # - name: Run a quick Linux kernel defconfig build test
     #   working-directory: ${{ inputs.dir }}/kdevops/linux
@@ -122,6 +117,7 @@ runs:
         KDEVOPS_DEFCONFIG: ${{ steps.defconfig.outputs.KDEVOPS_DEFCONFIG }}
       shell: bash
       run: |
+        set -euxo pipefail
         LINUX_TREE="/mirror/${{ inputs.kernel_tree }}.git"
         LINUX_TREE_REF="$LINUX_GIT_TAG"
 
@@ -178,12 +174,14 @@ runs:
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
+        set -euxo pipefail
         make -j$(nproc)
 
     - name: Run kdevops make bringup
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
+        set -euxo pipefail
         ls -ld linux
         make destroy
         make bringup
@@ -192,10 +190,12 @@ runs:
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
+        set -euxo pipefail
         make linux
 
     - name: Build required ci tests
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
+        set -euxo pipefail
         make ci-build-test CI_WORKFLOW=${{ inputs.ci_workflow }}

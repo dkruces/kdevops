@@ -82,7 +82,6 @@ runs:
           *) wpath="workflows/selftests" ;;
         esac
 
-        echo "path=$wpath" >> $GITHUB_OUTPUT
         "${{ github.workspace }}/scripts/github_output.sh" wpath "$wpath"
 
     - name: Generate CI commit info with workflow-specific logic

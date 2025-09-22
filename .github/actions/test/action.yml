@@ -25,6 +25,7 @@ runs:
   using: "composite"
   steps:
     - name: Run CI tests
+      id: ci_test
       working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
@@ -36,25 +37,31 @@ runs:
         # Handle test mode and tests parameters
         if [[ -n "${{ inputs.tests }}" ]]; then
           # Custom test specified for kdevops-validation mode
-          export TESTS="${{ inputs.tests }}"
+          TESTS="${{ inputs.tests }}"
         elif [[ "${{ inputs.test_mode }}" == "kdevops-validation" ]]; then
           # Auto-assign appropriate test based on workflow
           case "${{ inputs.ci_workflow }}" in
             *fstests*|*xfs*|*btrfs*|*ext4*|*tmpfs*)
-              export TESTS="generic/003"
+              TESTS="generic/003"
               ;;
             blktests*)
-              export TESTS="block/003"
+              TESTS="block/003"
               ;;
             selftests*|*modules*|*kmod*|*firmware*|*mm*)
-              export TESTS="kmod/test_001"
+              TESTS="kmod/test_001"
               ;;
             *)
-              export TESTS="generic/003"
+              TESTS="generic/003"
               ;;
           esac
+        else
+          # Full testing mode - no TESTS variable
+          TESTS=""
         fi
-        # If TESTS is not set, full suite will run
+
+        # Export TESTS for current step and save to GitHub output for later steps
+        export TESTS="$TESTS"
+        "${{ github.workspace }}/scripts/github_output.sh" TESTS "$TESTS"
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
@@ -191,7 +198,8 @@ runs:
         export CI_WORKFLOW="${{ inputs.ci_workflow }}"
         export KERNEL_TREE="${{ inputs.kernel_tree || 'linux' }}"
 
-        # Export TESTS if it's set (determines kdevops validation vs full testing)
+        # Get TESTS from GitHub output (determines kdevops validation vs full testing)
+        TESTS="${{ steps.ci_test.outputs.TESTS }}"
         if [[ -n "${TESTS:-}" ]]; then
           export TESTS="$TESTS"
         fi

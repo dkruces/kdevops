@@ -20,10 +20,10 @@ on:
         required: true
         default: 'linux'
         type: string
-      ci_mode:
-        description: 'CI execution mode'
+      tests:
+        description: 'Specific tests to run (leave empty for full suite)'
         required: false
-        default: 'auto'
+        default: ''
         type: string
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
           dir: ${{ inputs.ci_workflow }}
-          ci_mode: ${{ inputs.ci_mode }}
+          tests: ${{ inputs.tests }}
 
   archive:
     name: Archive kdevops

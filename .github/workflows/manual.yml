@@ -81,15 +81,11 @@ on:
         required: true
         default: 'master'
         type: string
-      ci_mode:
-        description: 'CI execution mode'
+      tests:
+        description: 'Specific tests to run (leave empty for full suite)'
         required: false
-        default: 'auto'
-        type: choice
-        options:
-          - 'auto'              # Auto-detect based on context (default)
-          - 'kdevops-validation' # Fast single test (framework validation)
-          - 'full-testing'       # Complete test suite (kernel testing)
+        type: string
+        default: ''
 
 jobs:
   check_ref:
@@ -125,4 +121,4 @@ jobs:
       ci_workflow: ${{ inputs.ci_workflow }}
       kernel_ref: ${{ inputs.kernel_ref }}
       kernel_tree: ${{ inputs.kernel_tree }}
-      ci_mode: ${{ inputs.ci_mode }}
+      tests: ${{ inputs.tests }}

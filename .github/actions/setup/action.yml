@@ -162,7 +162,7 @@ runs:
         LINUX_TREE_REF=$LINUX_TREE_REF \
         ${KMOD_TIMEOUT_ARG} \
         GUEST_KDEVOPS_REPO="https://github.com/dkruces/kdevops.git" \
-        GUEST_KDEVOPS_REF="ci-workflow" \
+        GUEST_KDEVOPS_REF="main" \
         defconfig-$KDEVOPS_DEFCONFIG"
         echo "Going to run:"
         echo "make $KDEVOPS_ARGS"

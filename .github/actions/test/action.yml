@@ -121,9 +121,14 @@ runs:
             if [ -d "$wpath/results/last-run" ]; then
               echo -e "\nBlktests summary:" >> ci.commit_extra
 
-              # Count total tests, passed, and failed
-              all_files=$(find "$wpath/results/last-run" -name "*.out*" -o -name "*" -type f | grep -E '/[^/]*$')
-              total_tests=$(echo "$all_files" | wc -l)
+              # Count total tests by unique test names (not file extensions)
+              # Get base test names by removing extensions and extracting just the test name
+              test_names=$(find "$wpath/results/last-run" -type f -name "*" | \
+                grep -E '/[^/]*$' | \
+                sed 's|.*/||' | \
+                sed 's/\.\(full\|out\|runtime\|dmesg\)$//' | \
+                sort -u)
+              total_tests=$(echo "$test_names" | grep -v '^$' | wc -l)
 
               bad_files=$(find "$wpath/results/last-run" -name "*.out.bad" -type f)
               if [[ -n "$bad_files" ]]; then

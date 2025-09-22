@@ -222,7 +222,7 @@ $header
 BUILD INFO:
   kdevops: $kdevops_hash ($wrapped_kdevops_subject)
   Workflow: $CI_WORKFLOW
-  Test: $TESTS
+  Test: ${TESTS_PARAM:-"complete suite"}
 $kernel_info_line
   Duration: $duration
 
@@ -230,7 +230,7 @@ EXECUTION RESULTS:
 $result_content
 
 METADATA:
-workflow: $CI_WORKFLOW | scope: kdevops | test: $TESTS | requested: $actual_kernel_ref | actual: $kernel_describe | result: $test_result
+workflow: $CI_WORKFLOW | scope: kdevops | test: ${TESTS_PARAM:-"complete suite"} | requested: $actual_kernel_ref | actual: $kernel_describe | result: $test_result
 EOF
     else
         # Full test suite format

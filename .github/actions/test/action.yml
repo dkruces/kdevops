@@ -170,7 +170,11 @@ runs:
               bad_files=$(find "$wpath/results/last-run" -name "*.out.bad" -type f)
               echo "Bad files found:"
               echo "$bad_files"
-              failed_tests=$(echo "$bad_files" | grep -c . || echo 0)
+              if [[ -n "$bad_files" ]]; then
+                failed_tests=$(echo "$bad_files" | wc -l)
+              else
+                failed_tests=0
+              fi
 
               passed_tests=$((total_tests - failed_tests))
 

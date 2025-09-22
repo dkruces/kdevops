@@ -17,7 +17,7 @@ inputs:
     required: false
     default: 'full-testing'
   tests:
-    description: 'Specific tests to run (overrides test_mode if specified)'
+    description: 'Custom test to run (for kdevops-validation mode only)'
     required: false
     default: ''
 
@@ -41,9 +41,9 @@ runs:
 
         # Handle test mode and tests parameters
         if [[ -n "${{ inputs.tests }}" ]]; then
-          # Explicit tests parameter overrides test_mode
+          # Custom test specified for kdevops-validation mode
           export TESTS="${{ inputs.tests }}"
-          echo "=== kdevops validation mode: TESTS=$TESTS (explicit) ==="
+          echo "=== kdevops validation mode: TESTS=$TESTS (custom) ==="
         elif [[ "${{ inputs.test_mode }}" == "kdevops-validation" ]]; then
           # Auto-assign appropriate test based on workflow
           case "${{ inputs.ci_workflow }}" in

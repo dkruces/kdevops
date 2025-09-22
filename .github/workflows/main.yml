@@ -26,7 +26,7 @@ on:
         default: 'full-testing'
         type: string
       tests:
-        description: 'Specific tests to run (overrides test_mode if specified)'
+        description: 'Custom test to run (for kdevops-validation mode only)'
         required: false
         default: ''
         type: string

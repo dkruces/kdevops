@@ -90,7 +90,7 @@ on:
           - 'full-testing'        # Complete test suite
           - 'kdevops-validation'  # Single test for framework validation
       tests:
-        description: 'Specific tests to run (overrides test_mode if specified)'
+        description: 'Custom test to run (for kdevops-validation mode only)'
         required: false
         type: string
         default: ''

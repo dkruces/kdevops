@@ -55,6 +55,23 @@ jobs:
     needs: [setup]
     timeout-minutes: 60
     steps:
+      - name: Check workspace directory
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Current working directory: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+          echo "Checking for expected directory: ${{ inputs.ci_workflow }}/kdevops"
+          if [ -d "${{ inputs.ci_workflow }}/kdevops" ]; then
+            echo "Directory exists!"
+            ls -la "${{ inputs.ci_workflow }}/kdevops"
+          else
+            echo "Directory does not exist!"
+            echo "Contents of ${{ inputs.ci_workflow }} (if it exists):"
+            ls -la "${{ inputs.ci_workflow }}" || echo "Parent directory also does not exist"
+          fi
+
       - name: kdevops ci-test
         uses: ./.github/actions/test
         with:

@@ -160,7 +160,6 @@ runs:
         KDEVOPS_HOSTS_PREFIX=$KDEVOPS_HOSTS_PREFIX \
         LINUX_TREE=$LINUX_TREE \
         LINUX_TREE_REF=$LINUX_TREE_REF \
-        ANSIBLE_CFG_CALLBACK_PLUGIN="debug" \
         ${KMOD_TIMEOUT_ARG} \
         GUEST_KDEVOPS_REPO="https://github.com/dkruces/kdevops.git" \
         GUEST_KDEVOPS_REF="ci-workflow" \

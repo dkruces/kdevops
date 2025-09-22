@@ -30,12 +30,6 @@ runs:
       run: |
         set -euxo pipefail
 
-        echo "=== DEBUG: Starting CI test execution ==="
-        echo "CI_WORKFLOW: ${{ inputs.ci_workflow }}"
-        echo "Working directory: $(pwd)"
-        echo "=== DEBUG: Directory contents ==="
-        ls -la
-
         # Create start time for duration calculation
         echo "$(date +%s)" > ci.start_time
 
@@ -43,47 +37,34 @@ runs:
         if [[ -n "${{ inputs.tests }}" ]]; then
           # Custom test specified for kdevops-validation mode
           export TESTS="${{ inputs.tests }}"
-          echo "=== kdevops validation mode: TESTS=$TESTS (custom) ==="
         elif [[ "${{ inputs.test_mode }}" == "kdevops-validation" ]]; then
           # Auto-assign appropriate test based on workflow
           case "${{ inputs.ci_workflow }}" in
             *fstests*|*xfs*|*btrfs*|*ext4*|*tmpfs*)
               export TESTS="generic/003"
-              echo "=== kdevops validation mode: TESTS=$TESTS (auto-assigned for fstests workflow) ==="
               ;;
             blktests*)
               export TESTS="block/003"
-              echo "=== kdevops validation mode: TESTS=$TESTS (auto-assigned for blktests workflow) ==="
               ;;
             selftests*|*modules*|*kmod*|*firmware*|*mm*)
               export TESTS="kmod/test_001"
-              echo "=== kdevops validation mode: TESTS=$TESTS (auto-assigned for selftests workflow) ==="
               ;;
             *)
               export TESTS="generic/003"
-              echo "=== kdevops validation mode: TESTS=$TESTS (auto-assigned default) ==="
               ;;
           esac
-        else
-          echo "=== Full testing mode: running complete test suite ==="
-          # Don't set TESTS variable - this triggers full suite
         fi
+        # If TESTS is not set, full suite will run
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
-        echo "=== DEBUG: CI test completed, initializing metadata ==="
         echo -e "Kernel tests results:\n" > ci.commit_extra
-        echo "=== DEBUG: Initial ci.commit_extra content ==="
-        cat ci.commit_extra
 
     - name: Generate workflow results path
       id: setpath
       shell: bash
       run: |
         set -euxo pipefail
-
-        echo "=== DEBUG: Determining workflow path ==="
-        echo "ci_workflow: ${{ inputs.ci_workflow }}"
 
         case "${{ inputs.ci_workflow }}" in
           blktests*) wpath="workflows/blktests" ;;
@@ -94,9 +75,6 @@ runs:
           *) wpath="workflows/selftests" ;;
         esac
 
-        echo "=== DEBUG: Resolved workflow path ==="
-        echo "wpath: $wpath"
-
         echo "path=$wpath" >> $GITHUB_OUTPUT
         "${{ github.workspace }}/scripts/github_output.sh" wpath "$wpath"
 
@@ -106,14 +84,7 @@ runs:
       run: |
         set -euxo pipefail
 
-        echo "=== DEBUG: Starting result collection ==="
-        echo "Working directory: $(pwd)"
-        echo "=== DEBUG: Available files ==="
-        ls -la
-
         wpath="${{ steps.setpath.outputs.wpath }}"
-        echo "=== DEBUG: Workflow path resolved ==="
-        echo "wpath: $wpath"
 
         # Workflow-specific result collection
         case "${{ inputs.ci_workflow }}" in
@@ -136,23 +107,7 @@ runs:
             fi
             ;;
           blktests*)
-            set -euxo pipefail
             # blktests workflows: Collect individual test results
-            echo "=== DEBUG: Starting blktests result collection ==="
-            echo "Collecting blktests results..."
-            echo "wpath: $wpath"
-            if [ -d "$wpath/results/last-run" ]; then
-              echo "Results directory exists: YES"
-            else
-              echo "Results directory exists: NO"
-            fi
-
-            if [ -d "$wpath/results/last-run" ]; then
-              echo "=== DEBUG: Contents of results/last-run ==="
-              ls -la "$wpath/results/last-run" || true
-              echo "=== DEBUG: All files in results/last-run ==="
-              find "$wpath/results/last-run" -type f | head -20 || true
-            fi
 
             echo "Kernel tests results:" > ci.commit_extra
 
@@ -161,15 +116,10 @@ runs:
               echo -e "\nBlktests summary:" >> ci.commit_extra
 
               # Count total tests, passed, and failed
-              echo "=== DEBUG: Counting test files ==="
               all_files=$(find "$wpath/results/last-run" -name "*.out*" -o -name "*" -type f | grep -E '/[^/]*$')
-              echo "All matching files:"
-              echo "$all_files"
               total_tests=$(echo "$all_files" | wc -l)
 
               bad_files=$(find "$wpath/results/last-run" -name "*.out.bad" -type f)
-              echo "Bad files found:"
-              echo "$bad_files"
               if [[ -n "$bad_files" ]]; then
                 failed_tests=$(echo "$bad_files" | wc -l)
               else
@@ -177,11 +127,6 @@ runs:
               fi
 
               passed_tests=$((total_tests - failed_tests))
-
-              echo "=== DEBUG: Test counts ==="
-              echo "total_tests: $total_tests"
-              echo "failed_tests: $failed_tests"
-              echo "passed_tests: $passed_tests"
 
               echo "Tests run: $total_tests, Passed: $passed_tests, Failed: $failed_tests" >> ci.commit_extra
 
@@ -194,14 +139,9 @@ runs:
               # Show sample test status files for passed tests
               if [ $passed_tests -gt 0 ]; then
                 echo -e "\nSample passed test:" >> ci.commit_extra
-                echo "=== DEBUG: Looking for sample passed test ==="
                 sample_files=$(find "$wpath/results/last-run" -type f -name "*" ! -name "*.out.bad" ! -name "*.dmesg")
-                echo "Sample files found:"
-                echo "$sample_files"
                 sample_file=$(echo "$sample_files" | head -1)
-                echo "Selected sample file: $sample_file"
                 if [ -n "$sample_file" ] && [ -f "$sample_file" ]; then
-                  echo "Sample file contents:"
                   cat "$sample_file" >> ci.commit_extra || echo "Failed to read sample file" >> ci.commit_extra
                 else
                   echo "No valid sample file found" >> ci.commit_extra
@@ -212,26 +152,16 @@ runs:
             fi
 
             # blktests success detection - look for .out.bad files (failures)
-            echo "=== DEBUG: Determining test result ==="
             bad_check=$(find "$wpath/results/last-run" -name "*.out.bad" -type f | head -1)
-            echo "Bad file check result: '$bad_check'"
 
             if [ -n "$bad_check" ]; then
-              echo "=== DEBUG: Found bad files, setting result to 'not ok' ==="
               echo "not ok" > ci.result
             else
-              echo "=== DEBUG: No bad files found, setting result to 'ok' ==="
               echo "ok" > ci.result
             fi
-
-            echo "=== DEBUG: Final ci.result content ==="
-            cat ci.result
-            echo "=== DEBUG: Final ci.commit_extra content ==="
-            cat ci.commit_extra
             ;;
           *selftests*|*modules*|*mm*|*firmware*)
             # selftests workflows: Use userspace.log
-            echo "Collecting selftests results..."
             echo "Kernel tests results:" > ci.commit_extra
             find "$wpath/results/last-run/" -name '*.userspace.log' -exec cat {} \; >> ci.commit_extra 2>/dev/null || true
 
@@ -244,7 +174,6 @@ runs:
             ;;
           *)
             # Default/unknown workflows: Generic approach
-            echo "Using generic result collection for ${{ inputs.ci_workflow }}..."
             echo "Kernel tests results:" > ci.commit_extra
             find "$wpath/results/last-run/" -name '*.dmesg.log' -exec tail -n 1 {} + >> ci.commit_extra 2>/dev/null || true
             echo -e "\n\nUserspace test results:" >> ci.commit_extra
@@ -258,7 +187,6 @@ runs:
             ;;
         esac
 
-        echo "=== DEBUG: Generating enhanced commit message ==="
         # Set environment variables for the commit message script
         export CI_WORKFLOW="${{ inputs.ci_workflow }}"
         export KERNEL_TREE="${{ inputs.kernel_tree || 'linux' }}"
@@ -266,17 +194,10 @@ runs:
         # Export TESTS if it's set (determines kdevops validation vs full testing)
         if [[ -n "${TESTS:-}" ]]; then
           export TESTS="$TESTS"
-          echo "DEBUG: Exporting TESTS=$TESTS (kdevops validation mode)"
-        else
-          echo "DEBUG: TESTS not set (full testing mode)"
         fi
 
         # Generate enhanced commit message using our script
         ./scripts/generate_ci_commit_message.sh > ci.commit_message_enhanced
-
-        echo "=== DEBUG: Enhanced commit message generated ==="
-        echo "Enhanced commit message content:"
-        cat ci.commit_message_enhanced
 
         # Keep the original ci.commit_extra for backward compatibility
         # The archive action will use ci.commit_message_enhanced if available

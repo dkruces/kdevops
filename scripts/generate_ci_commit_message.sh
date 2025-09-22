@@ -52,10 +52,8 @@ calculate_duration() {
 determine_scope() {
     # Simple detection: if TESTS is set, it's kdevops validation
     if [[ -n "${TESTS:-}" ]] || [[ -n "${LIMIT_TESTS:-}" ]] || [[ -n "${TESTS_PARAM:-}" ]]; then
-        echo "DEBUG: Detected kdevops validation mode (TESTS parameter set)" >&2
         echo "kdevops"
     else
-        echo "DEBUG: Detected full testing mode (no TESTS parameter)" >&2
         echo "tests"
     fi
 }
@@ -149,9 +147,6 @@ generate_commit_message() {
     fi
 
     # Debug kernel version information
-    echo "DEBUG: kernel_describe from git: $(cd linux && git describe --tags --always --dirty 2>/dev/null || echo 'unknown')" >&2
-    echo "DEBUG: actual_kernel_ref from CI: $actual_kernel_ref" >&2
-    echo "DEBUG: final kernel_describe: $kernel_describe" >&2
 
     # Get kdevops info (this assumes we can access kdevops directory)
     local kdevops_info=$(get_kdevops_info)

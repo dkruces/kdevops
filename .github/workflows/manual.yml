@@ -81,8 +81,16 @@ on:
         required: true
         default: 'master'
         type: string
+      test_mode:
+        description: 'Testing mode'
+        required: false
+        default: 'full-testing'
+        type: choice
+        options:
+          - 'full-testing'        # Complete test suite
+          - 'kdevops-validation'  # Single test for framework validation
       tests:
-        description: 'Specific tests to run (leave empty for full suite)'
+        description: 'Specific tests to run (overrides test_mode if specified)'
         required: false
         type: string
         default: ''
@@ -121,4 +129,5 @@ jobs:
       ci_workflow: ${{ inputs.ci_workflow }}
       kernel_ref: ${{ inputs.kernel_ref }}
       kernel_tree: ${{ inputs.kernel_tree }}
+      test_mode: ${{ inputs.test_mode }}
       tests: ${{ inputs.tests }}

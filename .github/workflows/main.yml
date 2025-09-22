@@ -20,8 +20,13 @@ on:
         required: true
         default: 'linux'
         type: string
+      test_mode:
+        description: 'Testing mode'
+        required: false
+        default: 'full-testing'
+        type: string
       tests:
-        description: 'Specific tests to run (leave empty for full suite)'
+        description: 'Specific tests to run (overrides test_mode if specified)'
         required: false
         default: ''
         type: string
@@ -55,6 +60,7 @@ jobs:
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
           dir: ${{ inputs.ci_workflow }}
+          test_mode: ${{ inputs.test_mode }}
           tests: ${{ inputs.tests }}
 
   archive:

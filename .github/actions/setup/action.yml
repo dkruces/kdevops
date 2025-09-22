@@ -138,7 +138,7 @@ runs:
         # hosts with a bundled prefix ID like that ref-runid-testname. Tests
         # have been done with the full lenght sha1sum though and we know that
         # does work.
-        KDEVOPS_HOSTS_PREFIX="$LINUX_GIT_REF"
+        KDEVOPS_HOSTS_PREFIX="kci-$LINUX_GIT_REF"
 
         echo "Going to use defconfig-$KDEVOPS_DEFCONFIG"
 

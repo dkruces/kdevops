@@ -65,8 +65,6 @@ runs:
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
-        echo -e "Kernel tests results:\n" > ci.commit_extra
-
     - name: Generate workflow results path
       id: setpath
       shell: bash

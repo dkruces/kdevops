@@ -54,17 +54,6 @@
     dest: /etc/hostname
   tags: hostname
 
-- name: Ensure locales-all package is installed
-  become: true
-  become_flags: "su - -c"
-  become_method: sudo
-  ansible.builtin.package:
-    name: locales-all
-    state: present
-  when:
-    - ansible_facts['os_family']|lower == 'debian'
-  tags: firstconfig
-
 - name: Configure en_US.UTF-8 locale files
   become: true
   become_flags: "su - -c"

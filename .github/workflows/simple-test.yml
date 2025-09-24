@@ -19,8 +19,10 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 60
     steps:
-      - name: Checkout kdevops
+      - name: Checkout kdevops to custom directory
         uses: actions/checkout@v4
+        with:
+          path: run-${{ github.run_id }}
 
       - name: Simple setup with run_id
         uses: ./.github/actions/simple-setup

@@ -22,18 +22,12 @@ runs:
           exit 1
         fi
         
-        if [[ ! -d "${{ inputs.work_dir }}/kdevops" ]]; then
-          echo "✗ kdevops directory does not exist: ${{ inputs.work_dir }}/kdevops"
-          exit 1
-        fi
-        
         echo "✓ Working directory structure verified"
         ls -la "${{ inputs.work_dir }}/"
-        ls -la "${{ inputs.work_dir }}/kdevops/"
 
     - name: Run simple test
       shell: bash
-      working-directory: ${{ inputs.work_dir }}/kdevops
+      working-directory: ${{ inputs.work_dir }}
       run: |
         set -euxo pipefail
         echo "Running in working directory: $(pwd)"
@@ -58,7 +52,7 @@ runs:
 
     - name: Create test results
       shell: bash
-      working-directory: ${{ inputs.work_dir }}/kdevops  
+      working-directory: ${{ inputs.work_dir }}
       run: |
         set -euxo pipefail
         

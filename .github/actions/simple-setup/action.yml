@@ -15,7 +15,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Create working directory
+    - name: Verify checkout directory
       shell: bash
       run: |
         set -euxo pipefail
@@ -23,17 +23,14 @@ runs:
         echo "CI workflow: ${{ inputs.ci_workflow }}"
         echo "GitHub run ID: ${{ github.run_id }}"
         
-        # Clean up any existing directory
-        rm -rf "${{ inputs.work_dir }}" || true
+        # Verify the checkout worked correctly
+        if [[ ! -d "${{ inputs.work_dir }}" ]]; then
+          echo "✗ Checkout directory does not exist: ${{ inputs.work_dir }}"
+          exit 1
+        fi
         
-        # Create the working directory
-        mkdir -p "${{ inputs.work_dir }}/kdevops"
-        
-        # Copy kdevops source to working directory
-        cp -r ${{ github.workspace }}/* "${{ inputs.work_dir }}/kdevops/" || true
-        cp -r ${{ github.workspace }}/.* "${{ inputs.work_dir }}/kdevops/" 2>/dev/null || true
-        
-        ls -la "${{ inputs.work_dir }}/kdevops/"
+        echo "✓ Checkout directory exists"
+        ls -la "${{ inputs.work_dir }}/"
 
     - name: Basic git configuration
       shell: bash
@@ -45,7 +42,7 @@ runs:
 
     - name: Check defconfig exists
       shell: bash
-      working-directory: ${{ inputs.work_dir }}/kdevops
+      working-directory: ${{ inputs.work_dir }}
       run: |
         set -euxo pipefail
         echo "Checking for defconfig: ${{ inputs.ci_workflow }}"
@@ -61,7 +58,7 @@ runs:
 
     - name: Simple defconfig setup
       shell: bash  
-      working-directory: ${{ inputs.work_dir }}/kdevops
+      working-directory: ${{ inputs.work_dir }}
       run: |
         set -euxo pipefail
         echo "Setting up simple configuration..."

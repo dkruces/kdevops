@@ -17,14 +17,14 @@ runs:
         set -euxo pipefail
         echo "Archiving results from working directory: ${{ inputs.work_dir }}"
         
-        if [[ -d "${{ inputs.work_dir }}/kdevops/results" ]]; then
+        if [[ -d "${{ inputs.work_dir }}/results" ]]; then
           echo "✓ Found results directory"
           
           # Create archive directory in workspace
           mkdir -p "${{ github.workspace }}/archived-results"
           
           # Copy results to workspace for artifact upload
-          cp -r "${{ inputs.work_dir }}/kdevops/results"/* "${{ github.workspace }}/archived-results/" || true
+          cp -r "${{ inputs.work_dir }}/results"/* "${{ github.workspace }}/archived-results/" || true
           
           echo "Archived results:"
           ls -la "${{ github.workspace }}/archived-results/"

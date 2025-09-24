@@ -28,6 +28,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Create workspace directory and copy kdevops
+      shell: bash
+      run: |
+        set -euxo pipefail
+        rm --recursive --force --verbose ${{ inputs.dir }} || true
+        mkdir --parent --verbose ${{ inputs.dir }}/kdevops
+        cp -r ${{ github.workspace }}/* ${{ inputs.dir }}/kdevops/
+        ls -la ${{ inputs.dir }}/kdevops/
+
     - name: Configure git
       shell: bash
       run: |

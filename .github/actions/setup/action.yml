@@ -34,7 +34,10 @@ runs:
         set -euxo pipefail
         rm --recursive --force --verbose ${{ inputs.dir }} || true
         mkdir --parent --verbose ${{ inputs.dir }}/kdevops
-        cp -r ${{ github.workspace }}/* ${{ inputs.dir }}/kdevops/
+
+        # Copy all files/directories except the target directory to avoid recursion
+        find ${{ github.workspace }} -maxdepth 1 -name "*" ! -name "." ! -name "${{ inputs.dir }}" -exec cp -r {} ${{ inputs.dir }}/kdevops/ \;
+
         ls -la ${{ inputs.dir }}/kdevops/
 
     - name: Configure git

@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Simple Test
+description: Simple test execution that receives working directory
+
+inputs:
+  work_dir:
+    description: 'Working directory (passed from setup)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify working directory exists
+      shell: bash
+      run: |
+        set -euxo pipefail
+        echo "Testing with working directory: ${{ inputs.work_dir }}"
+        
+        if [[ ! -d "${{ inputs.work_dir }}" ]]; then
+          echo "✗ Working directory does not exist: ${{ inputs.work_dir }}"
+          exit 1
+        fi
+        
+        if [[ ! -d "${{ inputs.work_dir }}/kdevops" ]]; then
+          echo "✗ kdevops directory does not exist: ${{ inputs.work_dir }}/kdevops"
+          exit 1
+        fi
+        
+        echo "✓ Working directory structure verified"
+        ls -la "${{ inputs.work_dir }}/"
+        ls -la "${{ inputs.work_dir }}/kdevops/"
+
+    - name: Run simple test
+      shell: bash
+      working-directory: ${{ inputs.work_dir }}/kdevops
+      run: |
+        set -euxo pipefail
+        echo "Running in working directory: $(pwd)"
+        echo "Contents:"
+        ls -la
+        
+        # Verify configuration exists
+        if [[ -f ".config" ]]; then
+          echo "✓ Configuration file exists"
+          echo "Configuration details:"
+          head -20 .config
+        else
+          echo "✗ No configuration file found"
+          exit 1
+        fi
+        
+        # Simple validation - just check if basic make targets work
+        echo "Testing make help..."
+        make help V=0
+        
+        echo "✓ Simple test completed successfully"
+
+    - name: Create test results
+      shell: bash
+      working-directory: ${{ inputs.work_dir }}/kdevops  
+      run: |
+        set -euxo pipefail
+        
+        # Create a simple results directory
+        mkdir -p results
+        
+        # Generate some basic info
+        echo "Test completed at: $(date)" > results/test-info.txt
+        echo "Working directory: ${{ inputs.work_dir }}" >> results/test-info.txt
+        echo "Run ID: ${{ github.run_id }}" >> results/test-info.txt
+        echo "PWD: $(pwd)" >> results/test-info.txt
+        
+        # Save configuration summary
+        if [[ -f ".config" ]]; then
+          grep "^CONFIG_" .config > results/config-summary.txt
+        fi
+        
+        echo "✓ Test results created"
+        ls -la results/

@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Simple Test Workflow
+on:
+  push:
+    branches:
+      - ci-wip
+  workflow_dispatch:
+    inputs:
+      ci_workflow:
+        description: "CI Workflow"
+        required: true
+        default: 'blktests_nvme'
+        type: string
+
+jobs:
+  simple-test:
+    name: Simple kdevops test
+    runs-on: self-hosted
+    timeout-minutes: 60
+    steps:
+      - name: Checkout kdevops
+        uses: actions/checkout@v4
+
+      - name: Simple setup with run_id
+        uses: ./.github/actions/simple-setup
+        with:
+          ci_workflow: ${{ github.event.inputs.ci_workflow || 'blktests_nvme' }}
+          work_dir: run-${{ github.run_id }}
+
+      - name: Simple test execution
+        uses: ./.github/actions/simple-test
+        with:
+          work_dir: run-${{ github.run_id }}
+
+      - name: Simple cleanup
+        if: always()
+        uses: ./.github/actions/simple-cleanup
+        with:
+          work_dir: run-${{ github.run_id }}

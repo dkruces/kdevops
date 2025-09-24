@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Simple Cleanup
+description: Simple cleanup that receives working directory
+
+inputs:
+  work_dir:
+    description: 'Working directory to cleanup'
+    required: true
+
+runs:
+  using: "composite" 
+  steps:
+    - name: Archive test results before cleanup
+      shell: bash
+      run: |
+        set -euxo pipefail
+        echo "Archiving results from working directory: ${{ inputs.work_dir }}"
+        
+        if [[ -d "${{ inputs.work_dir }}/kdevops/results" ]]; then
+          echo "✓ Found results directory"
+          
+          # Create archive directory in workspace
+          mkdir -p "${{ github.workspace }}/archived-results"
+          
+          # Copy results to workspace for artifact upload
+          cp -r "${{ inputs.work_dir }}/kdevops/results"/* "${{ github.workspace }}/archived-results/" || true
+          
+          echo "Archived results:"
+          ls -la "${{ github.workspace }}/archived-results/"
+        else
+          echo "⚠ No results directory found"
+        fi
+
+    - name: Upload test results as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: simple-test-results-${{ github.run_id }}
+        path: ${{ github.workspace }}/archived-results/
+        if-no-files-found: warn
+
+    - name: Cleanup working directory  
+      shell: bash
+      run: |
+        set -euxo pipefail
+        echo "Cleaning up working directory: ${{ inputs.work_dir }}"
+        
+        if [[ -d "${{ inputs.work_dir }}" ]]; then
+          # Show what we're about to clean
+          echo "Directory contents before cleanup:"
+          du -sh "${{ inputs.work_dir }}" || true
+          
+          # Remove the working directory
+          rm -rf "${{ inputs.work_dir }}" || {
+            echo "⚠ Cleanup failed, but continuing..."
+          }
+          
+          echo "✓ Cleanup completed"
+        else
+          echo "⚠ Working directory does not exist: ${{ inputs.work_dir }}"
+        fi
+        
+    - name: Verify cleanup
+      shell: bash
+      run: |
+        set -euxo pipefail
+        
+        if [[ -d "${{ inputs.work_dir }}" ]]; then
+          echo "⚠ Working directory still exists after cleanup"
+          ls -la "${{ inputs.work_dir }}" || true
+        else
+          echo "✓ Working directory successfully removed"
+        fi

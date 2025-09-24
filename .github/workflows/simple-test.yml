@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Checkout kdevops to workspace (for actions)
         uses: actions/checkout@v4
+
+      - name: Checkout kdevops to workspace (for actions)
+        uses: actions/checkout@v4
         with:
           path: run-${{ github.run_id }}
 

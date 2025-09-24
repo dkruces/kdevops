@@ -25,18 +25,18 @@ jobs:
           path: run-${{ github.run_id }}
 
       - name: Simple setup with run_id
-        uses: ./.github/actions/simple-setup
+        uses: ./run-${{ github.run_id }}/.github/actions/simple-setup
         with:
           ci_workflow: ${{ github.event.inputs.ci_workflow || 'blktests_nvme' }}
           work_dir: run-${{ github.run_id }}
 
       - name: Simple test execution
-        uses: ./.github/actions/simple-test
+        uses: ./run-${{ github.run_id }}/.github/actions/simple-test
         with:
           work_dir: run-${{ github.run_id }}
 
       - name: Simple cleanup
         if: always()
-        uses: ./.github/actions/simple-cleanup
+        uses: ./run-${{ github.run_id }}/.github/actions/simple-cleanup
         with:
           work_dir: run-${{ github.run_id }}

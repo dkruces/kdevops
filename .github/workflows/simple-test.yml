@@ -19,10 +19,20 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 60
     steps:
-      - name: Checkout kdevops to custom directory
+      - name: Checkout kdevops to workspace (for actions)
         uses: actions/checkout@v4
-        with:
-          path: run-${{ github.run_id }}
+
+      - name: Create unique working directory with git clone
+        run: |
+          echo "Creating unique working directory: run-${{ github.run_id }}"
+          mkdir -p "run-${{ github.run_id }}"
+          cd "run-${{ github.run_id }}"
+
+          # Clone the repository into this directory
+          git clone --branch ci-wip --single-branch https://github.com/dkruces/kdevops.git .
+
+          echo "Working directory created and cloned successfully"
+          ls -la
 
       - name: Simple setup with run_id
         uses: ./run-${{ github.run_id }}/.github/actions/simple-setup

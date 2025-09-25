@@ -11,6 +11,7 @@ inputs:
   dir:
     description: 'Directory'
     required: true
+    type: string
     default: 'workdir'
   kernel_tree:
     required: false

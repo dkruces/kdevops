@@ -7,6 +7,7 @@ inputs:
   dir:
     description: 'Directory'
     required: true
+    type: string
     default: 'workdir'
   ci_workflow:
     required: false
@@ -15,10 +16,12 @@ inputs:
   test_mode:
     description: 'Testing mode'
     required: false
+    type: string
     default: 'kdevops-ci'
   tests:
     description: 'Custom test to run'
     required: false
+    type: string
     default: ''
 
 runs:

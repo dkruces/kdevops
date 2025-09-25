@@ -84,7 +84,7 @@ runs:
           *) wpath="workflows/selftests" ;;
         esac
 
-        ./scripts/github_output.sh" wpath "$wpath"
+        ./scripts/github_output.sh wpath "$wpath"
 
     - name: Generate CI commit info with workflow-specific logic
       working-directory: ${{ inputs.dir }}

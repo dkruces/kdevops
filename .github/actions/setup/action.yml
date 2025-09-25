@@ -50,7 +50,7 @@ runs:
           exit 1
         fi
 
-          ./scripts/github_output.sh \
+        ./scripts/github_output.sh \
           KDEVOPS_DEFCONFIG "$KDEVOPS_DEFCONFIG"
 
     - name: Initialize CI metadata for kdevops-results-archive
@@ -61,7 +61,6 @@ runs:
         echo "${{ inputs.kernel_tree }}" > ci.trigger
         # Get the kdevops commit subject, not kernel commit
         git log -1 --pretty=format:"%s" > ci.subject
-        cd - > /dev/null
         echo "${{ inputs.kernel_ref }}" > ci.ref
 
         # Start out pessimistic

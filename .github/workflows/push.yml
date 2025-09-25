@@ -63,22 +63,12 @@ jobs:
           tests: ''
         timeout-minutes: 120
 
-      - name: Start SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: kdevops archive
         uses: ./kdevops-run/.github/actions/archive
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
           dir: kdevops-run
-
-      - name: Upload kdevops results archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: kdevops-ci-results-${{ matrix.ci_workflow }}
-          path: kdevops-run/kdevops/archive/*.zip
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: kdevops cleanup
         if: always()

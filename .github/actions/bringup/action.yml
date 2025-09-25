@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Bringup guests
+description: Bringup kdevops guests
+
+inputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run kdevops make bringup
+      shell: bash
+      run: |
+        set -euxo pipefail
+        make destroy
+        make bringup

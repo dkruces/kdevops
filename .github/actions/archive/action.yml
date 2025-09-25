@@ -16,13 +16,15 @@ runs:
   using: "composite"
   steps:
     - name: Get systemd journal files
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
+        set -euxo pipefail
         make journal-dump
 
     - name: Build our kdevops archive results
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
+        set -euxo pipefail
         make ci-archive CI_WORKFLOW="${{ inputs.ci_workflow }}"

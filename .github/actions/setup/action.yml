@@ -38,7 +38,7 @@ runs:
 
     - name: Make sure our repo kdevops defconfig exists
       id: defconfig
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -53,7 +53,7 @@ runs:
           KDEVOPS_DEFCONFIG "$KDEVOPS_DEFCONFIG"
 
     - name: Initialize CI metadata for kdevops-results-archive
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -68,7 +68,7 @@ runs:
         echo "Nothing to write home about." > ci.commit_extra
 
     - name: Run kdevops make defconfig-repo
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       env:
         KDEVOPS_DEFCONFIG: ${{ steps.defconfig.outputs.KDEVOPS_DEFCONFIG }}
       shell: bash
@@ -127,14 +127,14 @@ runs:
         ${VM_CONFIG_ARG}
 
     - name: Run kdevops make
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
         make -j$(nproc)
 
     - name: Run kdevops make bringup
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -142,19 +142,19 @@ runs:
         make bringup
 
     - name: Build linux and boot test nodes on test kernel
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
         make linux
 
     - name: Generate additional CI metadata after linux checkout
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
         # Now that we have the linux git repo, generate additional metadata
-        cd linux
+        cd linux/
         RELEVANT_GIT_TAG="${{ inputs.kernel_ref }}"
         RELEVANT_GIT_REF=$(git rev-parse --short=12 $RELEVANT_GIT_TAG 2>/dev/null || echo $RELEVANT_GIT_TAG)
 
@@ -163,7 +163,7 @@ runs:
         echo "Generated git ref: $RELEVANT_GIT_REF for tag: $RELEVANT_GIT_TAG"
 
     - name: Build required ci tests
-      working-directory: ${{ inputs.dir }}/kdevops
+      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail

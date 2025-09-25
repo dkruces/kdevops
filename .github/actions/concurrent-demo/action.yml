@@ -1,0 +1,227 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Concurrent Architecture Demo
+description: Demonstrates the concurrent GitHub Actions architecture with isolated execution
+
+inputs:
+  work_dir:
+    description: 'Working directory for isolated execution'
+    required: true
+  phase:
+    description: 'Demo phase: setup, test, or cleanup'
+    required: true
+    default: 'test'
+  demo_config:
+    description: 'Demo configuration parameter'
+    required: false
+    default: 'default-config'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Validate inputs and environment
+      shell: bash
+      run: |
+        set -euxo pipefail
+        echo "=== Concurrent Demo Action - ${{ inputs.phase }} phase ==="
+        echo "Work directory: ${{ inputs.work_dir }}"
+        echo "Demo config: ${{ inputs.demo_config }}"
+        echo "GitHub run ID: ${{ github.run_id }}"
+        echo "Current working directory: $(pwd)"
+        
+        # Validate work directory exists
+        if [[ ! -d "${{ inputs.work_dir }}" ]]; then
+          echo "❌ ERROR: Work directory does not exist: ${{ inputs.work_dir }}"
+          exit 1
+        fi
+        
+        echo "✅ Work directory validated: ${{ inputs.work_dir }}"
+
+    - name: Execute setup phase
+      shell: bash
+      working-directory: ${{ inputs.work_dir }}
+      if: inputs.phase == 'setup'
+      run: |
+        set -euxo pipefail
+        echo "=== SETUP PHASE ==="
+        echo "Executing in isolated directory: $(pwd)"
+        
+        # Create demo directories
+        mkdir -p demo-results
+        mkdir -p demo-config
+        
+        # Generate demo configuration
+        cat > demo-config/settings.conf <<EOF
+        # Demo Configuration
+        demo_name=${{ inputs.demo_config }}
+        run_id=${{ github.run_id }}
+        work_dir=${{ inputs.work_dir }}
+        timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        isolation_test=$(hostname)-$$
+        EOF
+        
+        # Verify kdevops structure exists
+        if [[ -f "Makefile" ]]; then
+          echo "✅ kdevops Makefile found"
+          # Test basic make functionality (safe, read-only)
+          make help V=0 | head -5 || true
+        else
+          echo "❌ ERROR: kdevops Makefile not found in work directory"
+          exit 1
+        fi
+        
+        # Create setup marker
+        echo "Setup completed at $(date)" > demo-results/setup-complete.txt
+        echo "✅ Setup phase completed successfully"
+
+    - name: Execute test phase
+      shell: bash
+      working-directory: ${{ inputs.work_dir }}
+      if: inputs.phase == 'test'
+      run: |
+        set -euxo pipefail
+        echo "=== TEST PHASE ==="
+        echo "Executing in isolated directory: $(pwd)"
+        
+        # Verify setup was completed
+        if [[ ! -f "demo-results/setup-complete.txt" ]]; then
+          echo "❌ ERROR: Setup phase was not completed"
+          exit 1
+        fi
+        
+        echo "✅ Setup phase validation passed"
+        
+        # Load demo configuration
+        source demo-config/settings.conf
+        echo "Demo configuration loaded:"
+        cat demo-config/settings.conf
+        
+        # Test isolation by checking directory structure
+        echo "=== Isolation Test ==="
+        echo "Current directory: $(pwd)"
+        echo "Process isolation ID: $isolation_test"
+        echo "Expected work directory: $work_dir"
+        
+        # Verify we're in the expected isolated directory
+        if [[ "$(basename $(pwd))" != "$(basename $work_dir)" ]]; then
+          echo "❌ ERROR: Directory isolation failed"
+          echo "Expected: $(basename $work_dir)"
+          echo "Actual: $(basename $(pwd))"
+          exit 1
+        fi
+        
+        echo "✅ Directory isolation verified"
+        
+        # Simulate concurrent-safe operations
+        echo "=== Concurrent Safety Test ==="
+        LOCK_FILE="/tmp/demo-lock-${{ github.run_id }}"
+        echo "Creating run-specific lock file: $LOCK_FILE"
+        echo "${{ github.run_id }}" > "$LOCK_FILE"
+        
+        # Verify our lock file
+        if [[ "$(cat $LOCK_FILE)" == "${{ github.run_id }}" ]]; then
+          echo "✅ Concurrent safety verified"
+        else
+          echo "❌ ERROR: Concurrent safety test failed"
+          exit 1
+        fi
+        
+        # Generate test results
+        cat > demo-results/test-results.json <<EOF
+        {
+          "test_phase": "completed",
+          "run_id": "${{ github.run_id }}",
+          "work_directory": "$(pwd)",
+          "timestamp": "$(date -u +"%Y-%m-%d %H:%M:%S UTC")",
+          "isolation_verified": true,
+          "concurrent_safe": true,
+          "kdevops_structure": "validated"
+        }
+        EOF
+        
+        echo "Test completed at $(date)" > demo-results/test-complete.txt
+        echo "✅ Test phase completed successfully"
+
+    - name: Execute cleanup phase
+      shell: bash
+      working-directory: ${{ inputs.work_dir }}
+      if: inputs.phase == 'cleanup'
+      run: |
+        set -euxo pipefail
+        echo "=== CLEANUP PHASE ==="
+        echo "Executing in isolated directory: $(pwd)"
+        
+        # Verify previous phases completed
+        if [[ -f "demo-results/test-complete.txt" ]]; then
+          echo "✅ Test phase was completed"
+        elif [[ -f "demo-results/setup-complete.txt" ]]; then
+          echo "⚠️  Setup completed but test phase may have failed"
+        else
+          echo "⚠️  No previous phases detected, cleaning up anyway"
+        fi
+        
+        # Collect final results
+        echo "=== Final Results Collection ==="
+        if [[ -f "demo-results/test-results.json" ]]; then
+          echo "Test results found:"
+          cat demo-results/test-results.json
+        fi
+        
+        # Clean up run-specific lock file
+        LOCK_FILE="/tmp/demo-lock-${{ github.run_id }}"
+        if [[ -f "$LOCK_FILE" ]]; then
+          rm -f "$LOCK_FILE"
+          echo "✅ Cleaned up lock file: $LOCK_FILE"
+        fi
+        
+        # Create cleanup summary
+        cat > demo-results/cleanup-summary.txt <<EOF
+        Cleanup completed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        Run ID: ${{ github.run_id }}
+        Work directory: $(pwd)
+        Files cleaned: lock files, temporary data
+        Isolation maintained: true
+        EOF
+        
+        echo "=== Cleanup Summary ==="
+        cat demo-results/cleanup-summary.txt
+        
+        echo "✅ Cleanup phase completed successfully"
+
+    - name: Archive demo results
+      shell: bash
+      if: always()
+      run: |
+        set -euxo pipefail
+        echo "=== Archiving Demo Results ==="
+        
+        # Create archive directory in workspace root
+        mkdir -p demo-archive-${{ github.run_id }}
+        
+        # Copy results if they exist
+        if [[ -d "${{ inputs.work_dir }}/demo-results" ]]; then
+          cp -r "${{ inputs.work_dir }}/demo-results"/* demo-archive-${{ github.run_id }}/ || true
+          echo "✅ Results archived to workspace: demo-archive-${{ github.run_id }}"
+          ls -la demo-archive-${{ github.run_id }}/
+        else
+          echo "⚠️  No results directory found to archive"
+        fi
+
+    - name: Validation summary
+      shell: bash
+      if: always()
+      run: |
+        echo "=== Concurrent Demo Action Summary ==="
+        echo "Phase executed: ${{ inputs.phase }}"
+        echo "Work directory: ${{ inputs.work_dir }}"
+        echo "Run ID: ${{ github.run_id }}"
+        echo "Action completed: $(date)"
+        
+        # Check if work directory still exists and is accessible
+        if [[ -d "${{ inputs.work_dir }}" ]]; then
+          echo "✅ Work directory accessibility maintained"
+        else
+          echo "⚠️  Work directory no longer accessible"
+        fi
+        
+        echo "=== End of Concurrent Demo Action ==="

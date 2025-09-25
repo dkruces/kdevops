@@ -116,8 +116,8 @@ jobs:
             exit 1
           fi
 
-  ci-matrix:
-    name: CI (${{ matrix.ci_workflow }})
+  kdevops-ci-matrix:
+    name: "${{ github.event.inputs.test_mode || 'kdevops-ci' }}: ${{ matrix.ci_workflow }}"
     runs-on: self-hosted
     needs: [check_ref]
     if: >-

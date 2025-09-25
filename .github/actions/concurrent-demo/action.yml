@@ -56,7 +56,7 @@ runs:
         demo_name=${{ inputs.demo_config }}
         run_id=${{ github.run_id }}
         work_dir=${{ inputs.work_dir }}
-        timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        timestamp="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
         isolation_test=$(hostname)-$$
         EOF
         

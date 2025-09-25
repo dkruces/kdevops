@@ -1,0 +1,183 @@
+# SPDX-License-Identifier: GPL-2.0
+---
+name: Concurrent Architecture Demo
+on:
+  push:
+    branches:
+      - ci-wip
+  workflow_dispatch:
+    inputs:
+      demo_name:
+        description: "Demo instance name (for testing multiple concurrent runs)"
+        required: true
+        default: 'demo'
+        type: string
+      test_concurrent:
+        description: "Test concurrent execution behavior"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  concurrent-demo:
+    name: Concurrent Demo (${{ inputs.demo_name || 'push-trigger' }})
+    runs-on: self-hosted
+    timeout-minutes: 30
+    env:
+      # Create unique work directory: demo_name-run_id
+      WORK_DIR: ${{ inputs.demo_name || 'demo' }}-${{ github.run_id }}
+    
+    steps:
+      - name: Display execution context
+        run: |
+          echo "=== Concurrent Demo Workflow Started ==="
+          echo "Demo name: ${{ inputs.demo_name || 'push-trigger' }}"
+          echo "GitHub run ID: ${{ github.run_id }}"
+          echo "Work directory: ${{ env.WORK_DIR }}"
+          echo "Runner: $(hostname)"
+          echo "Workspace: ${{ github.workspace }}"
+          echo "Current directory: $(pwd)"
+          echo "Trigger: ${{ github.event_name }}"
+          
+      - name: Checkout to isolated directory
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.WORK_DIR }}
+          clean: true
+          fetch-depth: 1
+          
+      - name: Verify checkout isolation
+        run: |
+          echo "=== Checkout Verification ==="
+          echo "Work directory exists: $(test -d "${{ env.WORK_DIR }}" && echo "✅ YES" || echo "❌ NO")"
+          echo "Work directory contents:"
+          ls -la "${{ env.WORK_DIR }}/" | head -10
+          echo "Workspace root contents:"
+          ls -la | head -10
+
+      # SETUP PHASE
+      - name: Setup phase - Update symlink
+        run: |
+          echo "=== Setup Phase: Symlink Update ==="
+          echo "Creating symlink: ./actions -> ${{ env.WORK_DIR }}/.github/actions"
+          ln -sf "${{ env.WORK_DIR }}/.github/actions" ./actions
+          
+          # Verify symlink
+          if [[ -L "./actions" ]]; then
+            echo "✅ Symlink created successfully"
+            echo "Symlink target: $(readlink ./actions)"
+            echo "Action files available:"
+            ls -la ./actions/ || echo "⚠️  No actions directory found"
+          else
+            echo "❌ ERROR: Failed to create symlink"
+            exit 1
+          fi
+
+      - name: Setup phase - Execute
+        uses: ./actions/concurrent-demo
+        with:
+          work_dir: ${{ env.WORK_DIR }}
+          phase: setup
+          demo_config: ${{ inputs.demo_name || 'push-demo' }}
+
+      # TEST PHASE  
+      - name: Test phase - Update symlink
+        run: |
+          echo "=== Test Phase: Symlink Update ==="
+          echo "Updating symlink: ./actions -> ${{ env.WORK_DIR }}/.github/actions"
+          ln -sf "${{ env.WORK_DIR }}/.github/actions" ./actions
+          
+          # Verify symlink is still correct (handles concurrent runner scenarios)
+          CURRENT_TARGET=$(readlink ./actions)
+          EXPECTED_TARGET="${{ env.WORK_DIR }}/.github/actions"
+          
+          if [[ "$CURRENT_TARGET" == "$EXPECTED_TARGET" ]]; then
+            echo "✅ Symlink correctly points to our work directory"
+          else
+            echo "⚠️  Symlink points to: $CURRENT_TARGET"
+            echo "⚠️  Expected: $EXPECTED_TARGET"
+            echo "This may indicate concurrent runner activity - updating symlink"
+            ln -sf "$EXPECTED_TARGET" ./actions
+          fi
+
+      - name: Test phase - Execute
+        uses: ./actions/concurrent-demo
+        with:
+          work_dir: ${{ env.WORK_DIR }}
+          phase: test
+          demo_config: ${{ inputs.demo_name || 'push-demo' }}
+
+      # CLEANUP PHASE
+      - name: Cleanup phase - Update symlink  
+        if: always()
+        run: |
+          echo "=== Cleanup Phase: Symlink Update ==="
+          echo "Ensuring symlink points to our work directory for cleanup"
+          ln -sf "${{ env.WORK_DIR }}/.github/actions" ./actions
+          
+          # Final symlink verification
+          echo "Final symlink target: $(readlink ./actions)"
+
+      - name: Cleanup phase - Execute
+        if: always()
+        uses: ./actions/concurrent-demo
+        with:
+          work_dir: ${{ env.WORK_DIR }}
+          phase: cleanup
+          demo_config: ${{ inputs.demo_name || 'push-demo' }}
+
+      # CONCURRENT TESTING (only if enabled)
+      - name: Concurrent behavior test
+        if: inputs.test_concurrent == true
+        run: |
+          echo "=== Concurrent Behavior Test ==="
+          echo "This run ID: ${{ github.run_id }}"
+          echo "Work directory: ${{ env.WORK_DIR }}"
+          
+          # Check for other concurrent runs
+          echo "Checking for other demo directories..."
+          find . -maxdepth 1 -name "*-[0-9]*" -type d | grep -v "${{ github.run_id }}" | head -5 | while read dir; do
+            echo "Found concurrent directory: $dir"
+          done || echo "No other concurrent directories found"
+          
+          # Test symlink behavior
+          echo "Current symlink target: $(readlink ./actions 2>/dev/null || echo 'No symlink')"
+          
+          # Sleep briefly to allow concurrent workflows to potentially interfere
+          echo "Waiting 10 seconds to test concurrent stability..."
+          sleep 10
+          
+          # Re-verify our symlink
+          FINAL_TARGET=$(readlink ./actions 2>/dev/null || echo 'ERROR')
+          EXPECTED_TARGET="${{ env.WORK_DIR }}/.github/actions"
+          
+          if [[ "$FINAL_TARGET" == "$EXPECTED_TARGET" ]]; then
+            echo "✅ Symlink remained stable during concurrent test"
+          else
+            echo "⚠️  Symlink changed during test:"
+            echo "    Current: $FINAL_TARGET"  
+            echo "    Expected: $EXPECTED_TARGET"
+            echo "This indicates concurrent workflow activity (expected behavior)"
+          fi
+
+      # FINAL VALIDATION
+      - name: Final validation and cleanup
+        if: always()
+        run: |
+          echo "=== Final Validation ==="
+          echo "Work directory status: $(test -d "${{ env.WORK_DIR }}" && echo "EXISTS" || echo "MISSING")"
+          echo "Symlink status: $(test -L "./actions" && echo "EXISTS" || echo "MISSING")"
+          
+          # Archive any results that were created
+          if [[ -d "demo-archive-${{ github.run_id }}" ]]; then
+            echo "Demo results were archived:"
+            ls -la "demo-archive-${{ github.run_id }}/"
+          else
+            echo "No demo archive found"
+          fi
+          
+          # Show final directory state
+          echo "Final workspace state:"
+          ls -la | grep -E "(demo|actions)" || echo "No demo-related files in workspace"
+          
+          echo "=== Concurrent Demo Workflow Completed ==="

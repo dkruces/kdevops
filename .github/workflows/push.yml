@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0
 ---
-name: Run kdevops CI Workflow - Push/PR
+name: Run kdevops CI Workflow - Push/PR/Manual
 
 on:
   push:
@@ -9,17 +9,122 @@ on:
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
+    inputs:
+      ci_workflow:
+        description: "CI Workflow"
+        required: true
+        default: 'blktests_nvme'
+        type: choice
+        options:
+          - blktests
+          - blktests_block
+          - blktests_loop
+          - blktests_meta
+          - blktests_nbd
+          - blktests_nvme
+          - blktests_nvmemp
+          - blktests_scsi
+          - blktests_srp
+          - blktests_zbd
+          - lbs-xfs
+          - lbs-xfs-bdev-large-nvme
+          - lbs-xfs-bdev-nvme
+          - lbs-xfs-small
+          - xfs
+          - xfs_crc
+          - xfs_crc_logdev
+          - xfs_crc_rtdev
+          - xfs_crc_rtdev_extsize_28k
+          - xfs_crc_rtdev_extsize_64k
+          - xfs_nocrc
+          - xfs_nocrc_16k_4ks
+          - xfs_nocrc_1k
+          - xfs_nocrc_2k
+          - xfs_nocrc_32_4ks
+          - xfs_nocrc_4k
+          - xfs_nocrc_512
+          - xfs_nocrc_64_4ks
+          - xfs_nocrc_8k_4ks
+          - xfs_nocrc_lbs
+          - xfs_reflink
+          - xfs_reflink_1024
+          - xfs_reflink_16k_4ks
+          - xfs_reflink_2k
+          - xfs_reflink_32k_4ks
+          - xfs_reflink_4k
+          - xfs_reflink_4k_8ks
+          - xfs_reflink_64k_4ks
+          - xfs_reflink_dir_bsize_8k
+          - xfs_reflink_lbs
+          - xfs_reflink_logdev
+          - xfs_reflink_normapbt
+          - xfs_reflink_nrext64
+          - xfs_reflink_stripe_len
+          - xfs-soak
+      kernel_tree:
+        description: "Linux kernel tree to use"
+        required: true
+        default: 'linux'
+        type: choice
+        options:
+          - linux
+          - linux-next
+          - linux-stable
+      kernel_ref:
+        description: "Linux tree git reference (branch/tag/commit-id)"
+        required: true
+        default: 'master'
+        type: string
+      test_mode:
+        description: 'Testing mode'
+        required: false
+        default: 'kdevops-ci'
+        type: choice
+        options:
+          - 'kdevops-ci'
+          - 'linux-ci'
+      tests:
+        description: 'Custom test to run (for kdevops-ci mode only)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
+  check_ref:
+    name: Check Linux kernel Git Reference
+    runs-on: [self-hosted]
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Check kernel_ref exists
+        id: check_kernel_ref
+        run: |
+          set -euxo pipefail
+
+          ref="${{ github.event.inputs.kernel_ref }}"
+          tree="${{ github.event.inputs.kernel_tree }}"
+          mirror="/mirror/${tree}.git"
+          ls_remote="$(git ls-remote "$mirror" "refs/*/${ref}" || true)"
+          contains_branch="$(git -C "$mirror" branch --contains "${ref}" || true)"
+          contains_tag="$(git -C "$mirror" branch --contains "${ref}" || true)"
+
+          if [ -z "$ls_remote" ] && [ -z "$contains_branch" ] && [ -z "$contains_tag" ]; then
+            echo "Linux kernel ${ref} does not exist."
+            exit 1
+          fi
+
   ci-matrix:
     name: CI (${{ matrix.ci_workflow }})
     runs-on: self-hosted
+    needs: [check_ref]
+    if: always() && (needs.check_ref.result == 'success' || needs.check_ref.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
-        ci_workflow:
-          - blktests_nvme
-          - xfs_reflink_4k
+        ci_workflow: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.ci_workflow)) || fromJSON('["blktests_nvme", "xfs_reflink_4k"]') }}
     steps:
       - name: Checkout repository for ${{ matrix.ci_workflow }}
         shell: bash
@@ -55,16 +160,16 @@ jobs:
         uses: ./.github/actions/setup
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
-          kernel_ref: 'v6.15'
-          kernel_tree: 'linux'
-          test_mode: 'kdevops-ci'
+          kernel_ref: ${{ github.event.inputs.kernel_ref || 'v6.15' }}
+          kernel_tree: ${{ github.event.inputs.kernel_tree || 'linux' }}
+          test_mode: ${{ github.event.inputs.test_mode || 'kdevops-ci' }}
 
       - name: kdevops ci-test
         uses: ./.github/actions/test
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
-          test_mode: 'kdevops-ci'
-          tests: ''
+          test_mode: ${{ github.event.inputs.test_mode || 'kdevops-ci' }}
+          tests: ${{ github.event.inputs.tests || '' }}
         timeout-minutes: 120
 
       - name: kdevops archive

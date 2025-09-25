@@ -64,7 +64,12 @@ runs:
         if [[ -f "Makefile" ]]; then
           echo "✅ kdevops Makefile found"
           # Test basic make functionality (safe, read-only)
-          make help V=0 | head -5 || true
+          echo "Testing make help availability:"
+          if make help V=0 > /dev/null 2>&1; then
+            echo "✅ Make help works correctly"
+          else
+            echo "⚠️  Make help test had issues (non-fatal)"
+          fi
         else
           echo "❌ ERROR: kdevops Makefile not found in work directory"
           exit 1

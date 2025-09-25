@@ -120,11 +120,19 @@ jobs:
     name: CI (${{ matrix.ci_workflow }})
     runs-on: self-hosted
     needs: [check_ref]
-    if: always() && (needs.check_ref.result == 'success' || needs.check_ref.result == 'skipped')
+    if: >-
+      always() &&
+      (
+        needs.check_ref.result == 'success' ||
+        needs.check_ref.result == 'skipped'
+      )
     strategy:
       fail-fast: false
       matrix:
-        ci_workflow: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.ci_workflow)) || fromJSON('["blktests_nvme", "xfs_reflink_4k"]') }}
+        ci_workflow: >-
+          ${{ github.event_name == 'workflow_dispatch'
+            && fromJSON(format('["{0}"]', github.event.inputs.ci_workflow))
+            || fromJSON('["blktests_nvme", "xfs_reflink_4k"]') }}
     steps:
       - name: Checkout repository for ${{ matrix.ci_workflow }}
         shell: bash

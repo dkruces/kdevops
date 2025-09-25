@@ -143,12 +143,11 @@ runs:
         set -euxo pipefail
         # Now that we have the linux git repo, generate additional metadata
         cd linux/
-        RELEVANT_GIT_REF=$(git rev-parse --short=12 $RELEVANT_GIT_TAG 2>/dev/null || echo $RELEVANT_GIT_TAG)
-        RELEVANT_GIT_REF="test-ref"
+        RELEVANT_GIT_REF=$(git rev-parse --short=12)
 
         # Save the git ref for use by the commit message script
-        echo "$RELEVANT_GIT_REF" > ci.git_ref
-        echo "Generated git ref: $RELEVANT_GIT_REF for tag: $RELEVANT_GIT_TAG"
+        echo "$RELEVANT_GIT_REF" > ../ci.git_ref
+        echo "Generated git ref: $RELEVANT_GIT_REF"
 
     - name: Build required ci tests
       shell: bash

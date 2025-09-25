@@ -26,18 +26,27 @@ jobs:
         run: |
           set -euxo pipefail
 
-          # Clean workspace completely - remove everything
-          find . -mindepth 1 -delete
-
-          if [[ -f "/mirror/kdevops.git/HEAD" ]]; then
-            git clone --verbose --progress \
-              --reference /mirror/kdevops.git \
-              --depth=1 \
-              $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
+          # More efficient approach similar to actions/checkout
+          if [[ -d ".git" ]]; then
+            # Repo exists - clean and fetch (like actions/checkout)
+            git clean -ffdx
+            git reset --hard HEAD
+            # Ensure correct remote URL
+            git remote set-url origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+            git fetch --depth=1 origin ${{ github.sha }}
+            git checkout ${{ github.sha }}
           else
-            git clone --verbose --progress \
-              --depth=1 \
-              $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
+            # No repo - fresh clone with local mirror optimization
+            if [[ -f "/mirror/kdevops.git/HEAD" ]]; then
+              git clone --verbose --progress \
+                --reference /mirror/kdevops.git \
+                --depth=1 \
+                $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
+            else
+              git clone --verbose --progress \
+                --depth=1 \
+                $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
+            fi
           fi
 
       - name: kdevops setup

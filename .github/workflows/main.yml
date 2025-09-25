@@ -14,6 +14,7 @@ on:
         description: 'Directory'
         required: true
         default: 'workdir'
+        type: string
       kernel_ref:
         description: "Linux tree git reference (branch/tag/commit-id)"
         required: true

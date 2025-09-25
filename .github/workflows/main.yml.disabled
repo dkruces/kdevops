@@ -10,6 +10,11 @@ on:
         required: true
         default: 'blktests_nvme'
         type: string
+      dir:
+        description: 'Work directory for isolated execution'
+        required: true
+        default: 'workdir'
+        type: string
       kernel_ref:
         description: "Linux tree git reference (branch/tag/commit-id)"
         required: true
@@ -40,16 +45,18 @@ jobs:
         || fromJSON('["self-hosted", "Linux", "X64", "linux-ci"]')
       }}
     steps:
-      - name: Checkout kdevops
-        uses: actions/checkout@v4
-        with:
-          path: ${{ inputs.ci_workflow }}-${{ github.run_id }}/kdevops
+      - name: Update symlink before setup
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -fv kdevops-run
+          ln -sfv "${{ inputs.dir }}" kdevops-run
 
       - name: kdevops setup
-        uses: ./.github/actions/setup
+        uses: ./kdevops-run/.github/actions/setup
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
-          dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
+          dir: ${{ inputs.dir }}
           kernel_ref: ${{ inputs.kernel_ref }}
           kernel_tree: ${{ inputs.kernel_tree }}
           test_mode: ${{ inputs.test_mode }}
@@ -64,11 +71,18 @@ jobs:
     needs: [setup]
     timeout-minutes: 120
     steps:
+      - name: Update symlink before test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -fv kdevops-run
+          ln -sfv "${{ inputs.dir }}" kdevops-run
+
       - name: kdevops ci-test
-        uses: ./.github/actions/test
+        uses: ./kdevops-run/.github/actions/test
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
-          dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
+          dir: ${{ inputs.dir }}
           test_mode: ${{ inputs.test_mode }}
           tests: ${{ inputs.tests }}
 
@@ -86,17 +100,24 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Update symlink before archive
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -fv kdevops-run
+          ln -sfv "${{ inputs.dir }}" kdevops-run
+
       - name: Archive ci-test results
-        uses: ./.github/actions/archive
+        uses: ./kdevops-run/.github/actions/archive
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
-          dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
+          dir: ${{ inputs.dir }}
 
       - name: Upload our kdevops results archive
         uses: actions/upload-artifact@v4
         with:
           name: kdevops-ci-results
-          path: ${{ inputs.ci_workflow }}-${{ github.run_id }}/kdevops/archive/*.zip
+          path: ${{ inputs.dir }}/kdevops/archive/*.zip
 
   cleanup:
     name: Cleanup kdevops workspace
@@ -108,7 +129,14 @@ jobs:
     needs: [setup, test, archive]
     if: always()
     steps:
+      - name: Update symlink before cleanup
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -fv kdevops-run
+          ln -sf "${{ inputs.dir }}" kdevops-run
+
       - name: kdevops cleanup
-        uses: ./.github/actions/cleanup
+        uses: ./kdevops-run/.github/actions/cleanup
         with:
-          dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
+          dir: ${{ inputs.dir }}

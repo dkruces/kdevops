@@ -3,22 +3,13 @@
 name: Cleanup kdevops VMs
 description: Destroy VMs and cleanup workspace
 
-inputs:
-  dir:
-    description: 'Directory'
-    required: true
-    default: 'workdir'
+inputs: {}
 
 runs:
   using: "composite"
   steps:
     - name: Run kdevops make destroy
-      working-directory: ${{ inputs.dir }}/kdevops
       shell: bash
       run: |
+        set -euxo pipefail
         make destroy
-
-    - name: Remove working-directory
-      shell: bash
-      run: |
-        rm --recursive --force --verbose ${{ inputs.dir }}

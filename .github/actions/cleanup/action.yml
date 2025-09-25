@@ -17,7 +17,8 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        make destroy
+        # make destroy
+        echo "destroy"
 
     - name: Remove working-directory
       shell: bash

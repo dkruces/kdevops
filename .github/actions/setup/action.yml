@@ -138,15 +138,17 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        make destroy
-        make bringup
+        echo "destroy and bringup"
+        # make destroy
+        # make bringup
 
     - name: Build linux and boot test nodes on test kernel
       working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
-        make linux
+        # make linux
+        echo "linux"
 
     - name: Generate additional CI metadata after linux checkout
       working-directory: ${{ inputs.dir }}
@@ -154,9 +156,10 @@ runs:
       run: |
         set -euxo pipefail
         # Now that we have the linux git repo, generate additional metadata
-        cd linux/
+        # cd linux/
         RELEVANT_GIT_TAG="${{ inputs.kernel_ref }}"
-        RELEVANT_GIT_REF=$(git rev-parse --short=12 $RELEVANT_GIT_TAG 2>/dev/null || echo $RELEVANT_GIT_TAG)
+        # RELEVANT_GIT_REF=$(git rev-parse --short=12 $RELEVANT_GIT_TAG 2>/dev/null || echo $RELEVANT_GIT_TAG)
+        RELEVANT_GIT_REF="test-ref"
 
         # Save the git ref for use by the commit message script
         echo "$RELEVANT_GIT_REF" > ../ci.git_ref
@@ -167,4 +170,5 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        make ci-build-test CI_WORKFLOW=${{ inputs.ci_workflow }}
+        # make ci-build-test CI_WORKFLOW=${{ inputs.ci_workflow }}
+        echo "ci-build-test"

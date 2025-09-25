@@ -10,6 +10,10 @@ on:
         required: true
         default: 'blktests_nvme'
         type: string
+      dir:
+        description: 'Directory'
+        required: true
+        default: 'workdir'
       kernel_ref:
         description: "Linux tree git reference (branch/tag/commit-id)"
         required: true
@@ -40,16 +44,11 @@ jobs:
         || fromJSON('["self-hosted", "Linux", "X64", "linux-ci"]')
       }}
     steps:
-      - name: Checkout kdevops
-        uses: actions/checkout@v4
-        with:
-          path: ${{ inputs.ci_workflow }}-${{ github.run_id }}/kdevops
-
       - name: kdevops setup
-        uses: ./.github/actions/setup
+        uses: ./kdevops-run/.github/actions/setup
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
-          dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
+          dir: ${{ inputs.dir }}
           kernel_ref: ${{ inputs.kernel_ref }}
           kernel_tree: ${{ inputs.kernel_tree }}
           test_mode: ${{ inputs.test_mode }}
@@ -65,7 +64,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: kdevops ci-test
-        uses: ./.github/actions/test
+        uses: ./kdevops-run/.github/actions/test
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
           dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
@@ -87,7 +86,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Archive ci-test results
-        uses: ./.github/actions/archive
+        uses: ./kdevops-run/.github/actions/archive
         with:
           ci_workflow: ${{ inputs.ci_workflow }}
           dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}
@@ -109,6 +108,6 @@ jobs:
     if: always()
     steps:
       - name: kdevops cleanup
-        uses: ./.github/actions/cleanup
+        uses: ./kdevops-run/.github/actions/cleanup
         with:
           dir: ${{ inputs.ci_workflow }}-${{ github.run_id }}

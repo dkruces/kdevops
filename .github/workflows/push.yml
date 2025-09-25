@@ -13,7 +13,7 @@ on:
 jobs:
   pushpr:
     name: Push/PR kdevops CI
-    uses: ./.github/workflows/main.yml
+    uses: ./kdevops-run/.github/workflows/main.yml
     secrets: inherit
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
@@ -37,7 +37,7 @@ jobs:
             "${{ github.run_id }}-${{ github.run_number }}" \
             kdevops-run
 
-      - name: Checkout kdevops
+      - name: Main
         uses: ./kdevops-run/.github/workflows/main
         with:
           ci_workflow: ${{ matrix.ci_workflow }}

@@ -23,15 +23,13 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        # make journal-dump
-        echo "journal-dump"
+        make journal-dump
 
     - name: Build our kdevops archive results
       shell: bash
       run: |
         set -euxo pipefail
-        # make ci-archive CI_WORKFLOW="${{ inputs.ci_workflow }}"
-        echo "ci-archive"
+        make ci-archive CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
     - name: Upload kdevops results archive
       uses: actions/upload-artifact@v4

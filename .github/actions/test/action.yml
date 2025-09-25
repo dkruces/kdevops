@@ -60,8 +60,7 @@ runs:
         export TESTS="$TESTS"
         ./scripts/github_output.sh TESTS "$TESTS"
 
-        # make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
-        echo "ci-test"
+        make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
     - name: Generate workflow results path
       id: setpath

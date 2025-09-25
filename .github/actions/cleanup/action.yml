@@ -12,12 +12,4 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        # make destroy
-        echo "destroy"
-
-    - name: Remove working-directory
-      shell: bash
-      run: |
-        set -euxo pipefail
-        # No cleanup needed - working in current directory with direct checkout
-        echo "Cleanup completed - current directory will be handled by runner"
+        make destroy

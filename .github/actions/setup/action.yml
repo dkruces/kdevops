@@ -8,11 +8,6 @@ inputs:
     required: false
     type: string
     default: 'demo'
-  dir:
-    description: 'Directory'
-    required: true
-    type: string
-    default: 'workdir'
   kernel_tree:
     required: false
     type: string
@@ -39,7 +34,6 @@ runs:
 
     - name: Make sure our repo kdevops defconfig exists
       id: defconfig
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -54,7 +48,6 @@ runs:
           KDEVOPS_DEFCONFIG "$KDEVOPS_DEFCONFIG"
 
     - name: Initialize CI metadata for kdevops-results-archive
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -68,7 +61,6 @@ runs:
         echo "Nothing to write home about." > ci.commit_extra
 
     - name: Run kdevops make defconfig-repo
-      working-directory: ${{ inputs.dir }}
       env:
         KDEVOPS_DEFCONFIG: ${{ steps.defconfig.outputs.KDEVOPS_DEFCONFIG }}
       shell: bash
@@ -127,14 +119,12 @@ runs:
         ${VM_CONFIG_ARG}
 
     - name: Run kdevops make
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
         make -j$(nproc)
 
     - name: Run kdevops make bringup
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -143,7 +133,6 @@ runs:
         # make bringup
 
     - name: Build linux and boot test nodes on test kernel
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -151,7 +140,6 @@ runs:
         echo "linux"
 
     - name: Generate additional CI metadata after linux checkout
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -162,11 +150,10 @@ runs:
         RELEVANT_GIT_REF="test-ref"
 
         # Save the git ref for use by the commit message script
-        echo "$RELEVANT_GIT_REF" > ../ci.git_ref
+        echo "$RELEVANT_GIT_REF" > ci.git_ref
         echo "Generated git ref: $RELEVANT_GIT_REF for tag: $RELEVANT_GIT_TAG"
 
     - name: Build required ci tests
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail

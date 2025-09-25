@@ -7,10 +7,6 @@ inputs:
     required: false
     type: string
     default: 'demo'
-  dir:
-    description: 'Directory'
-    required: true
-    default: 'workdir'
   ssh_private_key:
     description: 'SSH private key for results repository'
     required: true
@@ -24,7 +20,6 @@ runs:
         ssh-private-key: ${{ inputs.ssh_private_key }}
 
     - name: Get systemd journal files
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -32,7 +27,6 @@ runs:
         echo "journal-dump"
 
     - name: Build our kdevops archive results
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -43,4 +37,4 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: kdevops-ci-results-${{ inputs.ci_workflow }}
-        path: ${{ inputs.dir }}/archive/*.zip
+        path: archive/*.zip

@@ -4,11 +4,6 @@ name: Setup kdevops
 description: Setup kdevops workspace
 
 inputs:
-  dir:
-    description: 'Directory'
-    required: true
-    type: string
-    default: 'workdir'
   ci_workflow:
     required: false
     type: string
@@ -29,7 +24,6 @@ runs:
   steps:
     - name: Run CI tests
       id: ci_test
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -71,7 +65,6 @@ runs:
 
     - name: Generate workflow results path
       id: setpath
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -88,7 +81,6 @@ runs:
         ./scripts/github_output.sh wpath "$wpath"
 
     - name: Generate CI commit info with workflow-specific logic
-      working-directory: ${{ inputs.dir }}
       shell: bash
       run: |
         set -euxo pipefail

@@ -11,19 +11,29 @@ on:
       - '**'
 
 jobs:
-  push-pr:
-    name: Push/PR kdevops CI
-    uses: ./.github/workflows/main.yml
-    secrets: inherit
-    strategy:
-      fail-fast: false  # Don't cancel other jobs if one fails
-      matrix:
-        ci_workflow:
-          - blktests_nvme
-          - xfs_reflink_4k
-    with:
-      ci_workflow: ${{ matrix.ci_workflow }}
-      kernel_ref: 'v6.15'
-      kernel_tree: 'linux'
-      test_mode: 'kdevops-ci'
-      tests: ''
+  checkout:
+    runs-on: kdevops-ci
+    steps:
+      - name: Checkout kdevops
+        run: |
+          git clone --verbose --progress --depth=1 \
+            --reference /mirror/kdevops.git \
+            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
+            "${{ github.run_id }}-${{ github.run_number }}"
+
+      - name: Symlink update
+        run: |
+          ln -sf \
+            "${{ github.run_id }}-${{ github.run_number }}" \
+            kdevops-run
+
+      - name: Dummy test
+        uses: ./kdevops-run/.github/actions/dummy
+        with:
+            dir: ${{ github.run_id }}-${{ github.run_number }}
+
+      - name: Cleanup workdir and symlink
+        if: always()   # ensure cleanup runs no matter what
+        run: |
+          rm -rfv "${{ github.run_id }}-${{ github.run_number }}"
+          rm -fv "kdevops-run"

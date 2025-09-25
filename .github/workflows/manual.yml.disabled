@@ -85,12 +85,21 @@ on:
         default: ''
 
 jobs:
+  checkout:
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Checkout kdevops
+        run: |
+          git clone --reference /mirror/kdevops.git \
+            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
+            "${{ inputs.ci_workflow }}-${{ github.run_id }}-${{ github.run_number }}"
+
   check_ref:
     name: Check Linux kernel Git Reference
     runs-on: [self-hosted]
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
 
       - name: Check kernel_ref exists
         id: check_kernel_ref
@@ -109,14 +118,22 @@ jobs:
             exit 1
           fi
 
-  manual:
-    name: Manual kdevops CI
-    needs: [check_ref]
-    uses: ./.github/workflows/main.yml
-    secrets: inherit
-    with:
-      ci_workflow: ${{ inputs.ci_workflow }}
-      kernel_ref: ${{ inputs.kernel_ref }}
-      kernel_tree: ${{ inputs.kernel_tree }}
-      test_mode: ${{ inputs.test_mode }}
-      tests: ${{ inputs.tests }}
+  # manual:
+  #   name: Manual kdevops CI
+  #   needs: [check_ref]
+  #   steps:
+  #     - name: Checkout kdevops
+  #       run: |
+  #         git clone --reference /mirror/kdevops.git \
+  #           $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
+  #           "${{ inputs.ci_workflow }}-${{ github.run_id }}-${{ github.run_number }}"
+
+      # - name: Checkout kdevops
+      #   uses: ./.github/workflows/main.yml
+      #   secrets: inherit
+      #   with:
+      #     ci_workflow: ${{ inputs.ci_workflow }}
+      #     kernel_ref: ${{ inputs.kernel_ref }}
+      #     kernel_tree: ${{ inputs.kernel_tree }}
+      #     test_mode: ${{ inputs.test_mode }}
+      #     tests: ${{ inputs.tests }}

@@ -106,8 +106,10 @@ runs:
             elif grep -E "[1-9][0-9]* failures|[1-9][0-9]* errors" ci.commit_extra >/dev/null 2>&1; then
               echo "not ok" > ci.result
             else
-              # Fallback: if we can't determine, mark as unknown but lean towards success
-              echo "ok" > ci.result
+              # Fallback: if we can't determine from content, no results were found
+              echo "no results found" > ci.result
+              echo "::warning::No fstests results found - tests may not have executed properly"
+              exit 1
             fi
             ;;
           blktests*)
@@ -161,12 +163,18 @@ runs:
             fi
 
             # blktests success detection - look for .out.bad files (failures)
-            bad_check=$(find "$wpath/results/last-run" -name "*.out.bad" -type f | head -1)
-
-            if [ -n "$bad_check" ]; then
-              echo "not ok" > ci.result
+            if [ -d "$wpath/results/last-run" ]; then
+              bad_check=$(find "$wpath/results/last-run" -name "*.out.bad" -type f | head -1)
+              if [ -n "$bad_check" ]; then
+                echo "not ok" > ci.result
+              else
+                echo "ok" > ci.result
+              fi
             else
-              echo "ok" > ci.result
+              # No results directory - no tests were run
+              echo "no results found" > ci.result
+              echo "::warning::No blktests results directory found - tests may not have executed properly"
+              exit 1
             fi
             ;;
           *selftests*|*modules*|*mm*|*firmware*)
@@ -177,8 +185,13 @@ runs:
             # selftests success detection
             if grep -q "passed\|PASS" ci.commit_extra && ! grep -q "FAIL\|failed\|ERROR" ci.commit_extra; then
               echo "ok" > ci.result
-            else
+            elif grep -q "FAIL\|failed\|ERROR" ci.commit_extra; then
               echo "not ok" > ci.result
+            else
+              # No clear pass/fail indicators - no results found
+              echo "no results found" > ci.result
+              echo "::warning::No selftests results found - tests may not have executed properly"
+              exit 1
             fi
             ;;
           *)

@@ -22,10 +22,12 @@ jobs:
           - xfs_reflink_4k
     steps:
       - name: Checkout repository for ${{ matrix.ci_workflow }}
+        shell: bash
         run: |
           set -euxo pipefail
-          git clean -ffdx || true
-          git reset --hard HEAD || true
+
+          # Clean workspace completely - remove everything
+          find . -mindepth 1 -delete
 
           if [[ -f "/mirror/kdevops.git/HEAD" ]]; then
             git clone --verbose --progress \

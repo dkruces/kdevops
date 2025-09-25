@@ -164,15 +164,26 @@ jobs:
             fi
           fi
 
-      - name: kdevops setup
-        uses: ./.github/actions/setup
+      - name: Configure kdevops
+        uses: ./.github/actions/configure
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
           kernel_ref: ${{ github.event.inputs.kernel_ref || 'v6.15' }}
           kernel_tree: ${{ github.event.inputs.kernel_tree || 'linux' }}
           test_mode: ${{ github.event.inputs.test_mode || 'kdevops-ci' }}
 
-      - name: kdevops ci-test
+      - name: Bringup guests
+        uses: ./.github/actions/bringup
+
+      - name: Install linux
+        uses: ./.github/actions/linux
+
+      - name: Install tests
+        uses: ./.github/actions/build-test
+        with:
+          ci_workflow: ${{ matrix.ci_workflow }}
+
+      - name: Run tests
         uses: ./.github/actions/test
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
@@ -180,12 +191,12 @@ jobs:
           tests: ${{ github.event.inputs.tests || '' }}
         timeout-minutes: 120
 
-      - name: kdevops archive
+      - name: Archive results
         uses: ./.github/actions/archive
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: kdevops cleanup
+      - name: Cleanup
         if: always()
         uses: ./.github/actions/cleanup

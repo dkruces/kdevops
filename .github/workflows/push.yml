@@ -11,44 +11,86 @@ on:
       - '**'
 
 jobs:
-  pushpr:
-    name: Push/PR kdevops CI
-    uses: ./kdevops-run/.github/workflows/main.yml
-    secrets: inherit
+  ci-matrix:
+    name: CI (${{ matrix.ci_workflow }})
+    runs-on: self-hosted
     strategy:
-      fail-fast: false  # Don't cancel other jobs if one fails
+      fail-fast: false
       matrix:
         ci_workflow:
           - blktests_nvme
           - xfs_reflink_4k
     steps:
-      - name: Checkout kdevops
+      - name: Setup work directory for ${{ matrix.ci_workflow }}
+        id: setup
         run: |
           set -euxo pipefail
-          git clone --verbose --progress --depth=1 \
-            --reference /mirror/kdevops.git \
-            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
-            "kdevops-${{ github.run_id }}-${{ github.run_number }}"
+          REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+          DIR="${REPO_NAME}-${{ matrix.ci_workflow }}-${{ github.run_id }}-${{ github.run_number }}"
+          
+          if [[ -f "/mirror/kdevops.git/HEAD" ]]; then
+            git clone --verbose --progress \
+              --reference /mirror/kdevops.git \
+              --depth=1 \
+              $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
+              "$DIR"
+          else
+            git clone --verbose --progress \
+              --depth=1 \
+              $GITHUB_SERVER_URL/$GITHUB_REPOSITORY \
+              "$DIR"
+          fi
+          
+          # Create symlink for actions (uses: paths must be static)
+          rm -f kdevops-run
+          ln -sf "$DIR" kdevops-run
 
-      - name: Symlink update
-        run: |
-          set -euxo pipefail
-          ln -sf \
-            "${{ github.run_id }}-${{ github.run_number }}" \
-            kdevops-run
-
-      - name: Main
-        uses: ./kdevops-run/.github/workflows/main
+      - name: kdevops setup
+        uses: ./kdevops-run/.github/actions/setup  # Static path via symlink
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
-          dir: ${{ github.run_id }}-${{ github.run_number }}
+          dir: kdevops-run  # Can use symlink or $DIR variable
           kernel_ref: 'v6.15'
           kernel_tree: 'linux'
           test_mode: 'kdevops-ci'
-          tests: ''
 
-      - name: Cleanup workdir and symlink
-        if: always()   # ensure cleanup runs no matter what
-        run: |
-          rm -rfv "${{ github.run_id }}-${{ github.run_number }}"
-          rm -fv "kdevops-run"
+      - name: kdevops ci-test
+        uses: ./kdevops-run/.github/actions/test
+        with:
+          ci_workflow: ${{ matrix.ci_workflow }}
+          dir: kdevops-run
+          test_mode: 'kdevops-ci'
+          tests: ''
+        timeout-minutes: 120
+
+      - name: Start SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: kdevops archive
+        uses: ./kdevops-run/.github/actions/archive
+        with:
+          ci_workflow: ${{ matrix.ci_workflow }}
+          dir: kdevops-run
+
+      - name: Upload kdevops results archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: kdevops-ci-results-${{ matrix.ci_workflow }}
+          path: kdevops-run/kdevops/archive/*.zip
+
+      - name: kdevops cleanup
+        if: always()
+        uses: ./kdevops-run/.github/actions/cleanup
+        with:
+          dir: kdevops-run
+
+      # - name: Cleanup work directory and symlink
+      #   if: always()
+      #   run: |
+      #     set -euxo pipefail
+          # REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
+          # DIR="${REPO_NAME}-${{ matrix.ci_workflow }}-${{ github.run_id }}-${{ github.run_number }}"
+          # rm -rfv "$DIR"
+          # rm -fv "kdevops-run"

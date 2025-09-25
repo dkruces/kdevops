@@ -64,7 +64,7 @@ runs:
 
         # Export TESTS for current step and save to GitHub output for later steps
         export TESTS="$TESTS"
-        "${{ github.workspace }}/scripts/github_output.sh" TESTS "$TESTS"
+        ./scripts/github_output.sh TESTS "$TESTS"
 
         make ci-test CI_WORKFLOW="${{ inputs.ci_workflow }}"
 
@@ -84,7 +84,7 @@ runs:
           *) wpath="workflows/selftests" ;;
         esac
 
-        "${{ github.workspace }}/scripts/github_output.sh" wpath "$wpath"
+        ./scripts/github_output.sh" wpath "$wpath"
 
     - name: Generate CI commit info with workflow-specific logic
       working-directory: ${{ inputs.dir }}

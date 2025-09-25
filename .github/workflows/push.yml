@@ -28,23 +28,25 @@ jobs:
 
           # More efficient approach similar to actions/checkout
           if [[ -d ".git" ]]; then
-            # Repo exists - clean and fetch (like actions/checkout)
+            # Repo exists - clean and update (like actions/checkout)
             git clean -ffdx
             git reset --hard HEAD
             # Ensure correct remote URL
             git remote set-url origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-            git fetch --depth=1 origin ${{ github.sha }}
-            git checkout ${{ github.sha }}
+            git fetch --depth=1 origin ${{ github.ref_name }}
+            git reset --hard FETCH_HEAD
           else
             # No repo - fresh clone with local mirror optimization
             if [[ -f "/mirror/kdevops.git/HEAD" ]]; then
               git clone --verbose --progress \
                 --reference /mirror/kdevops.git \
                 --depth=1 \
+                --branch ${{ github.ref_name }} \
                 $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
             else
               git clone --verbose --progress \
                 --depth=1 \
+                --branch ${{ github.ref_name }} \
                 $GITHUB_SERVER_URL/$GITHUB_REPOSITORY .
             fi
           fi

@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0
 ---
-name: Run kdevops CI Workflow - Push/PR/Manual
+name: Run kdevops CI Workflow - Push/PR/Manual/Schedule
 
 on:
+  schedule:
+    - cron: '0 14 * * *'  # Daily at 2 PM UTC
   push:
     branches:
       - '**'
@@ -31,7 +33,11 @@ on:
           - lbs-xfs-bdev-large-nvme
           - lbs-xfs-bdev-nvme
           - lbs-xfs-small
+          - linux-mm-kpd
+          - linux-modules-kpd
+          - tmpfs
           - xfs
+          - xfs-soak
           - xfs_crc
           - xfs_crc_logdev
           - xfs_crc_rtdev
@@ -61,7 +67,6 @@ on:
           - xfs_reflink_normapbt
           - xfs_reflink_nrext64
           - xfs_reflink_stripe_len
-          - xfs-soak
       kernel_tree:
         description: "Linux kernel tree to use"
         required: true
@@ -91,6 +96,36 @@ on:
         default: ''
 
 jobs:
+  generate_kernel_ref:
+    name: Generate Kernel Reference for Scheduled Runs
+    runs-on: [self-hosted]
+    if: github.event_name == 'schedule'
+    outputs:
+      kernel_ref: ${{ steps.kernel_ref.outputs.kernel_ref }}
+      kernel_tree: ${{ steps.kernel_ref.outputs.kernel_tree }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate kernel reference based on day of week
+        id: kernel_ref
+        run: |
+          set -euxo pipefail
+          day_of_week=$(date +%u)
+
+          if [ "$day_of_week" -eq 1 ]; then
+            # Monday: Use mainline
+            kernel_ref=$(./scripts/korg-releases.py --moniker mainline)
+            kernel_tree=linux
+          else
+            # Other days: Use linux-next
+            kernel_ref=$(./scripts/korg-releases.py --moniker linux-next)
+            kernel_tree=linux-next
+          fi
+
+          ./scripts/github_output.sh kernel_ref "$kernel_ref"
+          ./scripts/github_output.sh kernel_tree "$kernel_tree"
+
   check_ref:
     name: Check Linux kernel Git Reference
     runs-on: [self-hosted]
@@ -117,22 +152,35 @@ jobs:
           fi
 
   kdevops-ci-matrix:
-    name: "${{ github.event.inputs.test_mode || 'kdevops-ci' }}: ${{ matrix.ci_workflow }}"
+    name: >-
+      ${{
+        github.event_name == 'schedule' && 'linux-ci'
+        || github.event.inputs.test_mode
+        || 'kdevops-ci'
+      }}: ${{ matrix.ci_workflow }}
     runs-on: self-hosted
-    needs: [check_ref]
+    needs: [check_ref, generate_kernel_ref]
     if: >-
       always() &&
       (
         needs.check_ref.result == 'success' ||
         needs.check_ref.result == 'skipped'
+      ) &&
+      (
+        needs.generate_kernel_ref.result == 'success' ||
+        needs.generate_kernel_ref.result == 'skipped'
       )
     strategy:
       fail-fast: false
       matrix:
         ci_workflow: >-
-          ${{ github.event_name == 'workflow_dispatch'
-            && fromJSON(format('["{0}"]', github.event.inputs.ci_workflow))
-            || fromJSON('["blktests_nvme", "xfs_reflink_4k"]') }}
+          ${{
+            github.event_name == 'schedule'
+              && fromJSON('["blktests", "linux-mm-kpd", "linux-modules-kpd", "tmpfs"]')
+            || github.event_name == 'workflow_dispatch'
+              && fromJSON(format('["{0}"]', github.event.inputs.ci_workflow))
+            || fromJSON('["blktests_nvme", "xfs_reflink_4k"]')
+          }}
     steps:
       - name: Checkout repository for ${{ matrix.ci_workflow }}
         shell: bash
@@ -168,9 +216,24 @@ jobs:
         uses: ./.github/actions/configure
         with:
           ci_workflow: ${{ matrix.ci_workflow }}
-          kernel_ref: ${{ github.event.inputs.kernel_ref || 'v6.15' }}
-          kernel_tree: ${{ github.event.inputs.kernel_tree || 'linux' }}
-          test_mode: ${{ github.event.inputs.test_mode || 'kdevops-ci' }}
+          kernel_ref: >-
+            ${{
+              github.event_name == 'schedule' && needs.generate_kernel_ref.outputs.kernel_ref
+              || github.event.inputs.kernel_ref
+              || 'v6.15'
+            }}
+          kernel_tree: >-
+            ${{
+              github.event_name == 'schedule' && needs.generate_kernel_ref.outputs.kernel_tree
+              || github.event.inputs.kernel_tree
+              || 'linux'
+            }}
+          test_mode: >-
+            ${{
+              github.event_name == 'schedule' && 'linux-ci'
+              || github.event.inputs.test_mode
+              || 'kdevops-ci'
+            }}
 
       - name: Bringup guests
         uses: ./.github/actions/bringup

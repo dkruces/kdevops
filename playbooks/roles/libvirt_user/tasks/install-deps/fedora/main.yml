@@ -1,4 +1,12 @@
 ---
+- name: Set QEMU system package based on architecture
+  set_fact:
+    qemu_system_package: >-
+      {{
+        'qemu-system-aarch64' if (ansible_architecture == 'aarch64' or target_arch_arm64|default(false)|bool)
+        else 'qemu-system-x86'
+      }}
+
 - name: Install libvirt / kvm dependencies
   become: true
   become_method: sudo
@@ -8,7 +16,7 @@
       - libvirt-daemon
       - qemu
       - qemu-kvm
-      - qemu-system-x86
+      - "{{ qemu_system_package }}"
     state: present
 
 - name: Enable libvirtd

@@ -17,6 +17,12 @@
     - "not skip_install|bool"
     - "not only_verify_user|bool"
 
+# Ensure EFI firmware is always available (even if skip_install=True)
+- name: Ensure EFI firmware for UEFI guests
+  ansible.builtin.include_tasks: ensure-efi-firmware/main.yml
+  when:
+    - distro_redhat_based|default(false)|bool
+
 - name: Enables / verifies if user to run libvirt guests
   ansible.builtin.include_tasks: enable-user/main.yml
   when:

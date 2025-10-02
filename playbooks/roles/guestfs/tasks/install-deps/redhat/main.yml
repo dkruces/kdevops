@@ -9,7 +9,7 @@
       - dhcpcd
     state: present
   when:
-    - ansible_facts['distribution']|lower == 'centos'
+    - distro_centos|bool
 
 - name: Install guestfs dependencies for Red Hat Enterprise (non-CentOS)
   become: true
@@ -21,5 +21,5 @@
       - dhcpcd
     state: present
   when:
-    - ansible_distribution != "Fedora"
-    - ansible_facts['distribution']|lower != 'centos'
+    - not distro_fedora|bool
+    - not distro_centos|bool

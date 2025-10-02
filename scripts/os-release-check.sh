@@ -16,6 +16,22 @@ check_distro()
 	exit
 }
 
+check_distro_centos()
+{
+	grep -qi fedora $OS_FILE
+	if [[ $? -eq 0 ]]; then
+		echo n
+		exit
+	fi
+	grep -qi centos $OS_FILE
+	if [[ $? -eq 0 ]]; then
+		echo y
+		exit
+	fi
+	echo n
+	exit
+}
+
 check_distro_redhat()
 {
 	grep -qi fedora $OS_FILE
@@ -57,7 +73,7 @@ check_distro_ubuntu()
 
 case $1 in
 centos)
-	check_distro $1
+	check_distro_centos $1
 	;;
 debian)
 	check_distro $1

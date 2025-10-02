@@ -7,14 +7,6 @@
         else 'qemu-system-x86'
       }}
 
-- name: Set EFI firmware package based on architecture
-  set_fact:
-    efi_firmware_package: >-
-      {{
-        'edk2-aarch64' if (ansible_architecture == 'aarch64' or target_arch_arm64|default(false)|bool)
-        else 'edk2-ovmf'
-      }}
-
 - name: Install libvirt / kvm dependencies
   become: true
   become_method: sudo
@@ -25,7 +17,6 @@
       - qemu
       - qemu-kvm
       - "{{ qemu_system_package }}"
-      - "{{ efi_firmware_package }}"
     state: present
 
 - name: Enable libvirtd

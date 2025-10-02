@@ -1,0 +1,16 @@
+---
+- name: Set EFI firmware package based on architecture
+  set_fact:
+    efi_firmware_package: >-
+      {{
+        'edk2-aarch64' if (ansible_architecture == 'aarch64' or target_arch_arm64|default(false)|bool)
+        else 'edk2-ovmf'
+      }}
+
+- name: Ensure EFI firmware is installed for UEFI boot support
+  become: true
+  become_method: sudo
+  ansible.builtin.dnf:
+    name:
+      - "{{ efi_firmware_package }}"
+    state: present

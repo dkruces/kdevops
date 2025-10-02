@@ -42,6 +42,7 @@ GUESTFS_BRINGUP_DEPS :=
 GUESTFS_BRINGUP_DEPS +=  $(9P_HOST_CLONE)
 GUESTFS_BRINGUP_DEPS +=  $(LIBVIRT_PCIE_PASSTHROUGH)
 GUESTFS_BRINGUP_DEPS +=  install_libguestfs
+GUESTFS_BRINGUP_DEPS +=  configure_libvirt_user
 
 KDEVOPS_PROVISION_METHOD		:= bringup_guestfs
 KDEVOPS_PROVISION_STATUS_METHOD		:= status_guestfs
@@ -71,6 +72,12 @@ install_libguestfs:
 		playbooks/guestfs.yml \
 		--extra-vars=@./extra_vars.yaml \
 		--tags install-deps
+
+configure_libvirt_user:
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
+		playbooks/libvirt_user.yml -e "skip_install=True" \
+		-e 'running_user=$(USER)'
+PHONY += configure_libvirt_user
 
 bringup_guestfs: $(GUESTFS_BRINGUP_DEPS)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \

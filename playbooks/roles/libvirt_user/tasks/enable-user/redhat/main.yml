@@ -9,7 +9,6 @@
   register: user_group_added
   when:
     - not only_verify_user|bool
-    - not libvirt_session
 
 - name: Check if user's effective groups include newly added groups
   ansible.builtin.shell: groups | grep -E 'libvirt|kvm|qemu'
@@ -18,7 +17,6 @@
   failed_when: false
   when:
     - not only_verify_user|bool
-    - not libvirt_session
     - user_group_added is changed
 
 - name: Notify user to re-login if groups were added
@@ -35,7 +33,6 @@
       ==================================================================================
   when:
     - not only_verify_user|bool
-    - not libvirt_session
     - user_group_added is changed
     - effective_groups_check.rc != 0
 

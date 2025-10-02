@@ -8,7 +8,6 @@
     append: true
   register: user_group_added
   when:
-    - not libvirt_session
     - not only_verify_user|bool
 
 - name: Check if user's effective groups include newly added groups
@@ -17,7 +16,6 @@
   changed_when: false
   failed_when: false
   when:
-    - not libvirt_session
     - not only_verify_user|bool
     - user_group_added is changed
 
@@ -34,7 +32,6 @@
       After re-logging in, re-run your kdevops command.
       ==================================================================================
   when:
-    - not libvirt_session
     - not only_verify_user|bool
     - user_group_added is changed
     - effective_groups_check.rc != 0

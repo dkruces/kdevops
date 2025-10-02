@@ -34,6 +34,25 @@ check_distro_centos()
 	exit
 }
 
+check_distro_fedora()
+{
+	# CentOS Stream has ID_LIKE="rhel fedora" but is not actually Fedora
+	# Check for CentOS first and exclude it
+	grep -qi centos $OS_FILE
+	if [[ $? -eq 0 ]]; then
+		echo n
+		exit
+	fi
+	# Now check if it's actually Fedora
+	grep -qi "NAME=.*Fedora" $OS_FILE
+	if [[ $? -eq 0 ]]; then
+		echo y
+		exit
+	fi
+	echo n
+	exit
+}
+
 check_distro_redhat()
 {
 	grep -qi fedora $OS_FILE
@@ -81,7 +100,7 @@ debian)
 	check_distro $1
 	;;
 fedora)
-	check_distro $1
+	check_distro_fedora $1
 	;;
 opensuse)
 	check_distro $1

@@ -1,10 +1,24 @@
 ---
-- name: Install systemd-timesyncd
+- name: Stop and disable chronyd (CentOS uses chronyd by default)
+  become: true
+  become_method: sudo
+  ansible.builtin.systemd_service:
+    name: chronyd
+    state: stopped
+    enabled: false
+  when:
+    - devconfig_enable_systemd_timesyncd|bool
+    - ansible_facts['distribution']|lower == 'centos'
+  ignore_errors: true
+  tags: timesyncd
+
+- name: Install systemd-timesyncd package
   become: true
   become_method: sudo
   ansible.builtin.dnf:
     update_cache: true
-    name: systemd-udev
+    name: systemd-timesyncd
+    state: present
   retries: 3
   delay: 5
   register: result

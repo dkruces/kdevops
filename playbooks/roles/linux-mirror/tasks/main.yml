@@ -68,6 +68,21 @@
     - install_linux_mirror|bool
   tags: ["mirror"]
 
+- name: Create the /mirror/ directory if it doesn't exist (non-NFS setup)
+  become: true
+  become_method: sudo
+  ansible.builtin.file:
+    path: /mirror/
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0755"
+  when:
+    - install_linux_mirror|bool
+    - not install_only_git_daemon|bool
+    - not linux_mirror_nfs | bool
+  tags: ["mirror"]
+
 - name: Start mirroring
   delegate_to: localhost
   run_once: true

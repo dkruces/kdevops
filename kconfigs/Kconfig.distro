@@ -35,6 +35,12 @@ config DISTRO_DEBIAN_HAS_HOP1_SOURCES
 
 endif
 
+config DISTRO_CENTOS
+	bool
+	output yaml
+	default $(shell, scripts/os-release-check.sh centos)
+	select DISTRO_REDHAT_BASED
+
 config DISTRO_FEDORA
 	bool
 	output yaml

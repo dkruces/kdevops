@@ -56,6 +56,9 @@ check_distro_ubuntu()
 
 
 case $1 in
+centos)
+	check_distro $1
+	;;
 debian)
 	check_distro $1
 	;;

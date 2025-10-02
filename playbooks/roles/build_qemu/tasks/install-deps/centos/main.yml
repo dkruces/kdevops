@@ -11,8 +11,6 @@
   become: true
   become_method: sudo
   ansible.builtin.command: dnf config-manager --set-enabled crb
-  args:
-    warn: false
   changed_when: false
 
 - name: Install core QEMU build dependencies for CentOS

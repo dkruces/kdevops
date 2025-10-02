@@ -6,7 +6,7 @@ config DEFAULT_BLKTESTS_URL
 
 config DEFAULT_BLKTRACE_URL
 	string
-	default "https://git.kernel.dk/blktrace"
+	default "https://git.kernel.org/pub/scm/linux/kernel/git/axboe/blktrace.git"
 
 config DEFAULT_DATE_ISO8601
 	string

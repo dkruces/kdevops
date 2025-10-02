@@ -5,7 +5,7 @@ local_systemd_path: "/usr/local/lib/systemd/system/"
 
 install_linux_mirror: false
 # Please keep these in alphabetical order
-defaults_blktrace_git: "https://git.kernel.dk/blktrace"
+defaults_blktrace_git: "https://git.kernel.org/pub/scm/linux/kernel/git/axboe/blktrace.git"
 defaults_dbench_git: "https://github.com/linux-kdevops/dbench.git"
 defaults_kdevops_results_archive_git: "https://github.com/linux-kdevops/kdevops-results-archive.git"
 defaults_git_git: "https://git.kernel.org/pub/scm/git/git.git"

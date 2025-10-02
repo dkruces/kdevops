@@ -18,7 +18,9 @@ check_distro()
 
 check_distro_centos()
 {
-	grep -qi fedora $OS_FILE
+	# CentOS Stream has both "centos" and references to fedora
+	# Check for centos first, excluding if it's actually Fedora (NAME="Fedora")
+	grep -qi "NAME=.*Fedora" $OS_FILE
 	if [[ $? -eq 0 ]]; then
 		echo n
 		exit

@@ -1,5 +1,17 @@
 ---
-- name: Install guestfs dependencies for Red Hat Enterprise
+- name: Install guestfs dependencies for CentOS
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.dnf:
+    update_cache: true
+    name:
+      - guestfs-tools
+      - dhcpcd
+    state: present
+  when:
+    - ansible_facts['distribution']|lower == 'centos'
+
+- name: Install guestfs dependencies for Red Hat Enterprise (non-CentOS)
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.package:
@@ -10,3 +22,4 @@
     state: present
   when:
     - ansible_distribution != "Fedora"
+    - ansible_facts['distribution']|lower != 'centos'

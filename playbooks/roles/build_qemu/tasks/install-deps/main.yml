@@ -13,9 +13,13 @@
   when: ansible_facts['os_family']|lower == 'debian'
 - ansible.builtin.import_tasks: suse/main.yml
   when: ansible_facts['os_family']|lower == 'suse'
+- ansible.builtin.import_tasks: centos/main.yml
+  when:
+    - distro_centos|default(false)|bool
 - ansible.builtin.import_tasks: redhat/main.yml
   when:
     - distro_redhat_based|default(false)|bool
     - not distro_fedora|default(false)|bool
+    - not distro_centos|default(false)|bool
 - ansible.builtin.import_tasks: fedora/main.yml
   when: distro_fedora|default(false)|bool

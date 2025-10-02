@@ -1,0 +1,84 @@
+---
+- name: Enable EPEL repository for additional packages
+  become: true
+  become_method: sudo
+  ansible.builtin.dnf:
+    name:
+      - epel-release
+    state: present
+
+- name: Enable PowerTools/CRB repository for development packages
+  become: true
+  become_method: sudo
+  ansible.builtin.command: dnf config-manager --set-enabled crb
+  args:
+    warn: false
+  changed_when: false
+
+- name: Install core QEMU build dependencies for CentOS
+  become: true
+  become_method: sudo
+  ansible.builtin.dnf:
+    name:
+      # Core build tools
+      - gcc
+      - make
+      - python3
+      - python3-pip
+      - python3-devel
+      - flex
+      - bison
+
+      # Required libraries for basic QEMU functionality
+      - glib2-devel
+      - glibc-devel
+      - pixman-devel
+      - zlib-devel
+
+      # NVMe and storage support (critical for kdevops)
+      - libaio-devel
+      - liburing-devel
+
+      # Networking
+      - libslirp
+
+      # Security and crypto
+      - gnutls-devel
+      - libseccomp-devel
+
+      # Additional useful features
+      - SDL2-devel
+      - libfdt
+      - ncurses-devel
+      - libattr-devel
+      - libcap-ng-devel
+
+      # USB support
+      - libusb1-devel
+
+      # Compression
+      - lzo-devel
+      - snappy-devel
+      - libzstd-devel
+
+      # Additional libraries
+      - libjpeg-turbo-devel
+      - libpng-devel
+      - cyrus-sasl-devel
+      - libssh-devel
+
+      # Development headers
+      - kernel-headers
+      - kernel-devel
+    state: present
+
+- name: Install Python build tools via pip
+  become: true
+  become_method: sudo
+  ansible.builtin.pip:
+    name:
+      - meson
+      - ninja
+      - sphinx
+      - sphinx_rtd_theme
+    state: present

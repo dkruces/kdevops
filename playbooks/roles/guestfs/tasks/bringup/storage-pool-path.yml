@@ -5,11 +5,28 @@
   register: id_group
   changed_when: false
 
+- name: Get groups from /etc/group for the current user
+  ansible.builtin.shell:
+    cmd: "groups {{ ansible_env.USER }}"
+  register: assigned_groups
+  changed_when: false
+
 - name: Group membership check failed
   vars:
     user_groups: "{{ id_group.stdout | split }}"
+    assigned_user_groups: "{{ assigned_groups.stdout | regex_replace('^.*: ', '') | split }}"
   ansible.builtin.fail:
-    msg: "Ansible user is not part of the {{ libvirt_qemu_group }} group."
+    msg: |
+      Ansible user is not part of the {{ libvirt_qemu_group }} group.
+
+      {% if libvirt_qemu_group in assigned_user_groups %}
+      NOTE: You have been added to the {{ libvirt_qemu_group }} group, but the group membership
+      is not effective in your current session. Please log out and log back in, or run:
+        su - {{ ansible_env.USER }}
+      to activate the new group membership, then re-run this command.
+      {% else %}
+      The user needs to be added to the {{ libvirt_qemu_group }} group first.
+      {% endif %}
   when:
     - libvirt_qemu_group not in user_groups
 

@@ -6,9 +6,38 @@
     name: "{{ ansible_env.USER }}"
     groups: libvirt,kvm,qemu
     append: true
+  register: user_group_added
   when:
     - not libvirt_session
     - not only_verify_user|bool
+
+- name: Check if user's effective groups include newly added groups
+  ansible.builtin.shell: groups | grep -E 'libvirt|kvm|qemu'
+  register: effective_groups_check
+  changed_when: false
+  failed_when: false
+  when:
+    - not libvirt_session
+    - not only_verify_user|bool
+    - user_group_added is changed
+
+- name: Notify user to re-login if groups were added
+  ansible.builtin.debug:
+    msg: |
+      ==================================================================================
+      IMPORTANT: You have been added to the libvirt, kvm, and qemu groups.
+
+      Your current session does not have these group memberships active yet.
+      You MUST log out and log back in (or run: su - {{ ansible_env.USER }})
+      before continuing with kdevops bringup.
+
+      After re-logging in, re-run your kdevops command.
+      ==================================================================================
+  when:
+    - not libvirt_session
+    - not only_verify_user|bool
+    - user_group_added is changed
+    - effective_groups_check.rc != 0
 
 - name: Check if apparmor_status exists
   ansible.builtin.stat:

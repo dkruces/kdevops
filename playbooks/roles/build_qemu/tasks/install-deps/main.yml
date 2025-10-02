@@ -15,7 +15,7 @@
   when: ansible_facts['os_family']|lower == 'suse'
 - ansible.builtin.import_tasks: redhat/main.yml
   when:
-    - ansible_facts['os_family']|lower == 'redhat'
-    - ansible_facts['distribution']|lower != "fedora"
+    - distro_redhat_based|default(false)|bool
+    - not distro_fedora|default(false)|bool
 - ansible.builtin.import_tasks: fedora/main.yml
-  when: ansible_facts['distribution']|lower == "fedora"
+  when: distro_fedora|default(false)|bool

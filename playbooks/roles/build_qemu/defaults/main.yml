@@ -1,15 +1,24 @@
 # SPDX-License-Identifier copyleft-next-0.3.1
 ---
+# QEMU build role defaults
+#
+# Most QEMU configuration comes from kconfig (see kconfigs/Kconfig.libvirt):
+#   - qemu_build (bool)
+#   - qemu_build_git (git repo URL)
+#   - qemu_build_git_data_path (clone destination)
+#   - qemu_build_git_version (version/tag/branch)
+#   - qemu_target (architecture: aarch64-softmmu, x86_64-softmmu, ppc64-softmmu)
+#   - qemu_bin_path (installation path)
+#
+# These values are automatically exported via kconfig 'output yaml' directive.
+# Only role-specific variables that are NOT in kconfig should be defined here.
 
-qemu_build: false
-
-# Forces to build and install even if the file is already present
+# Forces rebuild and reinstall even if QEMU is already present
 qemu_force_install_if_present: false
-qemu_bin_path: "/usr/local/bin/qemu-system-aarch64"
-qemu_build_git_data_path: "{{ data_path }}/qemu"
-qemu_build_git: "https://gitlab.com/qemu-project/qemu.git"
-qemu_build_git_version: "v10.1.0"
+
+# Build directory (derived from qemu_build_git_data_path)
 qemu_build_dir: "{{ qemu_build_git_data_path }}/build"
-qemu_target: "aarch64-softmmu"
+
+# Git clone options (not configurable via kconfig)
 build_linux_shallow_clone: true
 build_linux_clone_depth: 1

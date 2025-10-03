@@ -1,6 +1,8 @@
 # SPDX-License-Identifier copyleft-next-0.3.1
 ---
 pcie_passthrough_enable: false
-pcie_passthrough_devices:
+# pcie_passthrough_devices is populated by scripts/gen_pcie_passthrough_vars.sh
+# when KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH is enabled
+pcie_passthrough_devices: []
 pcie_sysfs_device_path_prefix: "/sys/bus/pci/devices/"
 libvirt_qemu_group: libvirt-qemu

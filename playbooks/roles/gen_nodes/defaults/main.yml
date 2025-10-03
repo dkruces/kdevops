@@ -116,6 +116,6 @@ pcie_passthrough_target_type_all_one_guest_name: false
 pcie_passthrough_target_type_each_per_device: false
 pcie_passthrough_target_type: "first_guest"
 pcie_passthrough_target: "ignore"
-pcie_passthrough_devices:
-  - { domain: "0x0000", bus: "0x2d", slot: "0x00", function: "0x0" }
-  - { domain: "0x0000", bus: "0x2e", slot: "0x00", function: "0x0" }
+# pcie_passthrough_devices is populated by scripts/gen_pcie_passthrough_vars.sh
+# when KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH is enabled
+pcie_passthrough_devices: []

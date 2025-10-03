@@ -58,10 +58,11 @@
   delegate_to: localhost
   run_once: true
 
-- name: Set uv binary path
+- name: Set uv binary path as cacheable fact
   tags: ["always"]
   ansible.builtin.set_fact:
     uv_binary_path: "{{ uv_location.stdout }}"
+    cacheable: yes
   delegate_to: localhost
   run_once: true
 

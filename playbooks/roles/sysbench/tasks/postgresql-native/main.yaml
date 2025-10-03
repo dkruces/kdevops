@@ -720,11 +720,20 @@
     sysbench_results_target: "{{ topdir_path }}/workflows/sysbench/results/"
     host_dir: "{{ item.item.path | basename }}"
     output_image: "{{ sysbench_results_target }}{{ host_dir }}/sysbench_tps_plot.png"
-  ansible.builtin.command: >
-    {{ hostvars['localhost']['uv_binary_path'] }} run
-    ./python/workflows/sysbench/sysbench-tps-plot.py
-    {{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps.txt
-    --output {{ output_image }}
+  ansible.builtin.shell: |
+    # Find uv binary
+    if [ -f ~/.cargo/bin/uv ]; then
+      UV_BIN=~/.cargo/bin/uv
+    elif [ -f ~/.local/bin/uv ]; then
+      UV_BIN=~/.local/bin/uv
+    elif command -v uv >/dev/null 2>&1; then
+      UV_BIN=$(command -v uv)
+    else
+      echo "ERROR: uv not found" >&2
+      exit 1
+    fi
+    # Run the plotting script
+    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-plot.py {{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps.txt --output {{ output_image }}
   changed_when: false
   delegate_to: localhost
   with_items: "{{ sysbench_tps_exists.results }}"
@@ -746,13 +755,20 @@
     legend2: "{{ fs_type }} full_page_writes = off"
     file2: "{{ sysbench_results_target }}{{ dev_host }}/sysbench_tps.txt"
     output_image: "{{ sysbench_results_target_ab }}a_vs_b.png"
-  ansible.builtin.shell: >
-    {{ hostvars['localhost']['uv_binary_path'] }} run
-    ./python/workflows/sysbench/sysbench-tps-compare.py
-    --legend1 "{{ legend1 }}"
-    --legend2 "{{ legend2 }}"
-    --output {{ output_image }}
-    {{ file1 }} {{ file2 }}
+  ansible.builtin.shell: |
+    # Find uv binary
+    if [ -f ~/.cargo/bin/uv ]; then
+      UV_BIN=~/.cargo/bin/uv
+    elif [ -f ~/.local/bin/uv ]; then
+      UV_BIN=~/.local/bin/uv
+    elif command -v uv >/dev/null 2>&1; then
+      UV_BIN=$(command -v uv)
+    else
+      echo "ERROR: uv not found" >&2
+      exit 1
+    fi
+    # Run the plotting script
+    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-compare.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --output {{ output_image }} {{ file1 }} {{ file2 }}
   changed_when: false
   delegate_to: localhost
   with_items:
@@ -773,13 +789,20 @@
     dev_host: "{{ item }}-dev"
     legend2: "{{ fs_type }} full_page_writes = off"
     file2: "{{ sysbench_results_target }}/{{ dev_host }}/sysbench_tps.txt"
-  ansible.builtin.shell: >
-    {{ hostvars['localhost']['uv_binary_path'] }} run
-    ./python/workflows/sysbench/sysbench-tps-variance.py
-    --legend1 "{{ legend1 }}"
-    --legend2 "{{ legend2 }}"
-    --dir {{ sysbench_results_target_ab }}
-    {{ file1 }} {{ file2 }}
+  ansible.builtin.shell: |
+    # Find uv binary
+    if [ -f ~/.cargo/bin/uv ]; then
+      UV_BIN=~/.cargo/bin/uv
+    elif [ -f ~/.local/bin/uv ]; then
+      UV_BIN=~/.local/bin/uv
+    elif command -v uv >/dev/null 2>&1; then
+      UV_BIN=$(command -v uv)
+    else
+      echo "ERROR: uv not found" >&2
+      exit 1
+    fi
+    # Run the plotting script
+    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-variance.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --dir {{ sysbench_results_target_ab }} {{ file1 }} {{ file2 }}
   changed_when: false
   delegate_to: localhost
   with_items:

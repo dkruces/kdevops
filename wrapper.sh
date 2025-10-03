@@ -39,7 +39,9 @@ defconfigs/configs/diy.config \
 defconfigs/configs/ci.config \
 defconfigs/configs/advance_pool.config \
 defconfigs/configs/qemu_bin.config \
-defconfigs/configs/pcip.config
+defconfigs/configs/sysbench-postgresql-4k.config \
+defconfigs/configs/pcip.config \
+defconfigs/configs/experiment-0000.config
 
 log_and_execute make -j$(nproc)
 log_and_execute make destroy

@@ -129,6 +129,7 @@
 - name: Check if PostgreSQL Server is Running
   tags: ["always"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.stat:
     path: "{{ sysbench_postgresql_pgdata }}/postmaster.pid"
@@ -137,6 +138,7 @@
 - name: Stop the PostgreSQL Server
   tags: ["always"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_ctl
@@ -256,6 +258,7 @@
   tags: ["setup"]
   become: true
   become_method: sudo
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/initdb
@@ -282,6 +285,7 @@
   tags: ["setup"]
   become: true
   become_method: sudo
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.template:
     src: "{{ sysbench_postgresql_configuration }}.j2"
@@ -352,6 +356,7 @@
 - name: Start the PostgreSQL server
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_ctl
@@ -363,6 +368,7 @@
 - name: Create PostgreSQL database USER
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/psql
@@ -376,6 +382,7 @@
 - name: Create PostgreSQL database DATABASE
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/psql
@@ -389,6 +396,7 @@
 - name: Grant USER privileges to DATABASE
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/psql
@@ -398,6 +406,7 @@
 - name: Grant ALL public Privileges to DATABASE
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/psql
@@ -412,6 +421,7 @@
 - name: Test and Ensure Permissions are Set Correctly
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/psql
@@ -432,6 +442,7 @@
 - name: Populate sysbench database
   tags: ["db_start"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     sysbench
@@ -465,6 +476,7 @@
 - name: Start sysbench run
   tags: ["run_sysbench"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     sysbench
@@ -490,6 +502,7 @@
 - name: Stop the PostgreSQL server (Smart Mode)
   tags: ["run_sysbench"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_ctl
@@ -507,6 +520,7 @@
 - name: Stop the PostgreSQL server (Fast Mode)
   tags: ["run_sysbench"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_ctl
@@ -525,6 +539,7 @@
 - name: Stop the PostgreSQL server (Immediate Mode)
   tags: ["run_sysbench"]
   become: true
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_ctl
@@ -553,6 +568,7 @@
   tags: ["logs"]
   become: true
   become_method: sudo
+  become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
     /usr/local/pgsql/bin/pg_controldata

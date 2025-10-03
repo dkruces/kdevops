@@ -11,6 +11,11 @@
   failed_when: false
   tags: vars
 
+# Install uv on control host for Python plotting scripts - MUST run early
+- name: Install uv on control host
+  ansible.builtin.include_tasks: install-uv.yaml
+  tags: ["always"]
+
 - name: Create a few directories which kdevops uses for sysbench if they do not exist
   tags: ["mkfs"]
   become: true
@@ -26,11 +31,6 @@
 # Distro specific
 - name: Install dependencies
   ansible.builtin.include_tasks: install-deps/main.yml
-
-# Install uv on control host for Python plotting scripts
-- name: Install uv on control host
-  ansible.builtin.include_tasks: install-uv.yaml
-  tags: ["plot", "results"]
 
 - ansible.builtin.include_role:
     name: create_data_partition

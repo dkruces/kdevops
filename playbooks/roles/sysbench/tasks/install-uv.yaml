@@ -4,6 +4,7 @@
 # See: https://github.com/astral-sh/uv
 
 - name: Check if uv is already installed
+  tags: ["always"]
   ansible.builtin.stat:
     path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
   register: uv_check
@@ -11,6 +12,7 @@
   run_once: true
 
 - name: Install uv using standalone installer
+  tags: ["always"]
   ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
     creates: "{{ ansible_env.HOME }}/.cargo/bin/uv"
@@ -19,6 +21,7 @@
   when: not uv_check.stat.exists
 
 - name: Verify uv installation
+  tags: ["always"]
   ansible.builtin.command: "{{ ansible_env.HOME }}/.cargo/bin/uv --version"
   register: uv_version
   changed_when: false
@@ -27,6 +30,7 @@
   when: not uv_check.stat.exists
 
 - name: Display uv version
+  tags: ["always"]
   ansible.builtin.debug:
     msg: "uv installed: {{ uv_version.stdout }}"
   delegate_to: localhost

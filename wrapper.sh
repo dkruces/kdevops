@@ -43,7 +43,7 @@ defconfigs/configs/sysbench-postgresql-4k.config \
 defconfigs/configs/pcip.config \
 defconfigs/configs/experiment-0000.config
 
-log_and_execute make -j$(nproc)
+log_and_execute make
 log_and_execute make destroy
 log_and_execute make bringup
 

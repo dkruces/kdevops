@@ -46,10 +46,12 @@
 
       # Additional useful features
       - SDL2-devel
-      - libfdt
       - ncurses-devel
       - libattr-devel
       - libcap-ng-devel
+
+      # Flattened Device Tree library (required for ARM64 builds)
+      - libfdt-devel
 
       # USB support
       - libusb1-devel

@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+config QEMU_BUILD
+	bool "Should we build QEMU for you?"
+	output yaml
+	select NEEDS_LOCAL_DEVELOPMENT_PATH
+	help
+	  You only want to enable this option if your distribution package
+	  of QEMU does not have support for the features you need. For
+	  example this may be useful if you are a QEMU developer or are
+	  relying on technology is still under development or if you have
+	  a custom QEMU git URL.
+
+if QEMU_BUILD
+
+choice
+	prompt "QEMU git URL to use"
+	default QEMU_BUILD_UPSTREAM
+
+config QEMU_BUILD_UPSTREAM
+	bool "https://gitlab.com/qemu-project/qemu.git"
+	help
+	  Select this option if you want to use the upstream QEMU git repo.
+
+config QEMU_BUILD_JIC23
+	bool "https://gitlab.com/jic23/qemu.git"
+	help
+	  Select this option if you want to use Cameron's QEMU git repo.
+	  This has a few CXL bells and whistles which are not yet upstream.
+
+config QEMU_BUILD_MANUAL
+	bool "Custom QEMU git URL"
+	help
+	  Select this option if you want to specify your own git URL.
+
+endchoice
+
+config QEMU_BUILD_GIT
+	string "Git tree for QEMU to clone on localhost"
+	output yaml
+	default "/mirror/qemu.git" if USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_UPSTREAM || QEMU_BUILD_MANUAL
+	default "/mirror/qemu-jic23.git" if USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_JIC23
+	default DEFAULT_QEMU_GITHUB_HTTPS_URL if !USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_UPSTREAM || QEMU_BUILD_MANUAL
+	default DEFAULT_QEMU_JIC23_GITHUB_HTTPS_URL if !USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_JIC23
+	help
+	  This is the git URL to use to clone and then build QEMU for you on
+	  your localhost.
+
+config QEMU_BUILD_GIT_DATA_PATH
+	string "The destination directory where to clone the QEMU git tree"
+	output yaml
+	default "{{local_dev_path}}/qemu"
+	help
+	  This is the target location of where to clone the above git tree.
+	  Note that {{local_dev_path}} corresponds to the location set by the
+	  configuration option CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH.
+
+config QEMU_BUILD_GIT_VERSION
+	string "The version of QEMU to build"
+	output yaml
+	default "cxl-2023-05-19" if QEMU_BUILD_JIC23
+	default "v10.1.0" if QEMU_BUILD_UPSTREAM
+	help
+	  This is the target build version of QEMU to build. The default
+	  is v10.1.0 which is the latest stable release with full NVMe
+	  support and modern compiler compatibility.
+
+config QEMU_TARGET
+	string "QEMU target architecture to build"
+	output yaml
+	default "aarch64-softmmu" if TARGET_ARCH_ARM64
+	default "x86_64-softmmu" if TARGET_ARCH_X86_64
+	default "ppc64-softmmu" if TARGET_ARCH_PPC64LE
+	help
+	  This is the target architecture for QEMU to build. It should match
+	  the host architecture where QEMU will run.
+
+config QEMU_USE_DEVELOPMENT_VERSION
+	bool
+	default y
+
+endif # QEMU_BUILD

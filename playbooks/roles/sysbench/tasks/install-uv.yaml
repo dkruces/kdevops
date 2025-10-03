@@ -1,0 +1,35 @@
+---
+# Install uv on the control host for running Python plotting scripts
+# uv is a fast Python package installer and resolver written in Rust
+# See: https://github.com/astral-sh/uv
+
+- name: Check if uv is already installed
+  ansible.builtin.command: which uv
+  register: uv_check
+  failed_when: false
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Install uv using standalone installer
+  ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  delegate_to: localhost
+  run_once: true
+  when: uv_check.rc != 0
+
+- name: Verify uv installation
+  ansible.builtin.command: "{{ ansible_env.HOME }}/.cargo/bin/uv --version"
+  register: uv_version
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+  when: uv_check.rc != 0
+
+- name: Display uv version
+  ansible.builtin.debug:
+    msg: "uv installed: {{ uv_version.stdout }}"
+  delegate_to: localhost
+  run_once: true
+  when: uv_check.rc != 0

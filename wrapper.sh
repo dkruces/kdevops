@@ -28,22 +28,25 @@ log_and_execute() {
 
 log_and_execute make destroy V=1 || true
 log_and_execute make mrproper V=1
-log_and_execute make dynamic_pcipassthrough_kconfig V=1 KDEVOPS_ENABLE_PCIE_KCONFIG=1
-log_and_execute make defconfig-sysbench-postgresql-atomic-tps-variability V=1
 
-log_and_execute make KDEVOPS_HOSTS_PREFIX=kci-18051236464-20 LINUX_TREE=/mirror/linux.git LINUX_TREE_REF=v6.15 defconfig-blktests_nvme
+log_and_execute make dynamic_pcipassthrough_kconfig V=1 KDEVOPS_ENABLE_PCIE_KCONFIG=1
+log_and_execute make KDEVOPS_HOSTS_PREFIX=kci-18051236464-20 LINUX_TREE=/mirror/linux.git LINUX_TREE_REF=v6.15 \
+defconfig-sysbench-postgresql-atomic-tps-variability V=1
+
 log_and_execute ./scripts/kconfig/merge_config.sh -n \
 .config \
 defconfigs/configs/diy.config \
 defconfigs/configs/ci.config \
 defconfigs/configs/advance_pool.config \
-defconfigs/configs/qemu_bin.config
+defconfigs/configs/qemu_bin.config \
+defconfigs/configs/pcip.config
 
 log_and_execute make -j$(nproc)
 log_and_execute make destroy
 log_and_execute make bringup
-log_and_execute make linux
-log_and_execute make sysbench V=1
+
+# log_and_execute make linux
+# log_and_execute make sysbench V=1
 
 # log_and_execute make sysbench-test V=1
 # log_and_execute make ci-build-test CI_WORKFLOW=blktests_nvme

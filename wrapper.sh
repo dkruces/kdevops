@@ -47,9 +47,9 @@ log_and_execute make
 log_and_execute make destroy
 log_and_execute make bringup
 
-# log_and_execute make linux
-# log_and_execute make sysbench V=1
+log_and_execute make linux
+log_and_execute make sysbench V=1
 
-# log_and_execute make sysbench-test V=1
+log_and_execute make sysbench-test V=1
 # log_and_execute make ci-build-test CI_WORKFLOW=blktests_nvme
 # log_and_execute make ci-test CI_WORKFLOW=blktests_nvme

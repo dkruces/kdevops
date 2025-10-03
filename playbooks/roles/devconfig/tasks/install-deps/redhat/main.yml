@@ -1,6 +1,16 @@
 ---
 # Install dependenciesfor oscheck on Red Hat based systems
 
+# Bootstrap Python DNF dependencies required for ansible.builtin.dnf module
+- name: Bootstrap Python DNF dependencies on RedHat/CentOS
+  become: true
+  become_method: sudo
+  ansible.builtin.raw: dnf install -y python3-dnf python3-dnf-plugins-core
+  args:
+    warn: false
+  changed_when: false
+  tags: [ 'vars', 'vars_simple', 'firstconfig', 'timesyncd', 'sysctl' ]
+
 - name: Register system with Red Hat
   become: true
   community.general.redhat_subscription:

@@ -1,4 +1,16 @@
 ---
+# Bootstrap Python DNF dependencies required for ansible.builtin.dnf module
+- name: Bootstrap Python DNF dependencies on RedHat/CentOS
+  become: true
+  become_method: sudo
+  ansible.builtin.raw: dnf install -y python3-dnf python3-dnf-plugins-core
+  args:
+    warn: false
+  changed_when: false
+  when:
+    - devconfig_enable_systemd_timesyncd|bool
+  tags: timesyncd
+
 - name: Stop and disable chronyd (CentOS uses chronyd by default)
   become: true
   become_method: sudo

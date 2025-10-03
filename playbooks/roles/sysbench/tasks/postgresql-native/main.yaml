@@ -119,6 +119,7 @@
 - name: Ensure telemetry data directory exists
   tags: ["setup", "db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.file:
@@ -129,6 +130,7 @@
 - name: Check if PostgreSQL Server is Running
   tags: ["always"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.stat:
@@ -138,6 +140,7 @@
 - name: Stop the PostgreSQL Server
   tags: ["always"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -217,6 +220,7 @@
 - name: Unmount {{ sysbench_mnt }}
   tags: ["clean", "mkfs"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_method: sudo
   ansible.posix.mount:
@@ -226,6 +230,7 @@
 - name: Wipe filesystem signatures from the device
   tags: ["clean", "mkfs"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.command:
@@ -356,6 +361,7 @@
 - name: Start the PostgreSQL server
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -368,6 +374,7 @@
 - name: Create PostgreSQL database USER
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -382,6 +389,7 @@
 - name: Create PostgreSQL database DATABASE
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -396,6 +404,7 @@
 - name: Grant USER privileges to DATABASE
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -406,6 +415,7 @@
 - name: Grant ALL public Privileges to DATABASE
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -421,6 +431,7 @@
 - name: Test and Ensure Permissions are Set Correctly
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -442,6 +453,7 @@
 - name: Populate sysbench database
   tags: ["db_start"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -476,6 +488,7 @@
 - name: Start sysbench run
   tags: ["run_sysbench"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -502,6 +515,7 @@
 - name: Stop the PostgreSQL server (Smart Mode)
   tags: ["run_sysbench"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -520,6 +534,7 @@
 - name: Stop the PostgreSQL server (Fast Mode)
   tags: ["run_sysbench"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -539,6 +554,7 @@
 - name: Stop the PostgreSQL server (Immediate Mode)
   tags: ["run_sysbench"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_user: "{{ sysbench_postgresql_user }}"
   ansible.builtin.command: >
@@ -557,6 +573,7 @@
 - name: Write sysbench run output to log file
   tags: ["run_sysbench"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.copy:
@@ -652,6 +669,7 @@
 - name: Remove all results and telemetry directories on the node
   tags: ["clean"]
   become: true
+  become_method: ansible.builtin.sudo
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.file:

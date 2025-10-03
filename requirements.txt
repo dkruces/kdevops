@@ -1,0 +1,12 @@
+# Python dependencies for kdevops control host
+# Install with: pip3 install -r requirements.txt
+
+# Core data processing and visualization
+pandas>=1.3.0
+matplotlib>=3.3.0
+numpy>=1.19.0
+seaborn>=0.11.0
+scipy>=1.5.0
+
+# Test result processing
+junitparser>=2.0.0

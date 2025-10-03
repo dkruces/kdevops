@@ -405,7 +405,7 @@ config KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH
 	bool "Enable PCI-E passthrough support"
 	depends on HAVE_LIBVIRT_PCIE_PASSTHROUGH
 	depends on LIBVIRT
-	depends on LIBVIRT_MACHINE_TYPE_Q35
+	depends on LIBVIRT_MACHINE_TYPE_Q35 || LIBVIRT_MACHINE_TYPE_VIRT
 	default n
 	help
 	  Enable this to configure PCI-E passthrough of devices from the host

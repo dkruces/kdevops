@@ -47,13 +47,13 @@
   when:
     - build_qemu_now|bool
 
-- name: Git clone QEMU using {{ qemu_git }} on {{ qemu_data }}
+- name: Git clone QEMU using {{ qemu_build_git }} on {{ qemu_build_git_data_path }}
   environment:
     GIT_SSL_NO_VERIFY: true
   ansible.builtin.git:
-    repo: "{{ qemu_git }}"
-    dest: "{{ qemu_data }}"
-    version: "{{ qemu_version }}"
+    repo: "{{ qemu_build_git }}"
+    dest: "{{ qemu_build_git_data_path }}"
+    version: "{{ qemu_build_git_version }}"
   when:
     - build_qemu_now|bool
 
@@ -69,7 +69,7 @@
   ansible.builtin.command: "meson subprojects download"
   tags: ["qemu", "configure"]
   args:
-    chdir: "{{ qemu_data }}"
+    chdir: "{{ qemu_build_git_data_path }}"
   when:
     - build_qemu_now|bool
 
@@ -77,7 +77,7 @@
   ansible.builtin.command: "./configure --target-list={{ qemu_target }} --disable-download"
   tags: ["qemu", "configure"]
   args:
-    chdir: "{{ qemu_data }}"
+    chdir: "{{ qemu_build_git_data_path }}"
   when:
     - build_qemu_now|bool
 
@@ -90,7 +90,7 @@
 
 - name: Build QEMU
   community.general.make:
-    chdir: "{{ qemu_data }}"
+    chdir: "{{ qemu_build_git_data_path }}"
     jobs: "{{ nproc.stdout }}"
   tags: ["qemu", "build"]
   when:
@@ -102,7 +102,7 @@
   become_method: sudo
   ansible.builtin.command: "{{ make }} install"
   args:
-    chdir: "{{ qemu_data }}"
+    chdir: "{{ qemu_build_git_data_path }}"
   tags: ["qemu", "install"]
   when:
     - build_qemu_now|bool

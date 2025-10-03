@@ -3,14 +3,13 @@
 
 qemu_build: false
 
-# Forces to build and install even if the file
-# /usr/local/bin/qemu-system-x86_64 is already present
+# Forces to build and install even if the file is already present
 qemu_force_install_if_present: false
-qemu_bin_path: "/usr/local/bin/qemu-system-x86_64"
-qemu_data: "{{ data_path }}/qemu"
-qemu_git: "https://github.com/qemu/qemu.git"
-qemu_version: "v7.2.0-rc4"
-qemu_build_dir: "{{ qemu_data }}/build"
-qemu_target: "x86_64-softmmu"
+qemu_bin_path: "/usr/local/bin/qemu-system-aarch64"
+qemu_build_git_data_path: "{{ data_path }}/qemu"
+qemu_build_git: "https://gitlab.com/qemu-project/qemu.git"
+qemu_build_git_version: "v10.1.0"
+qemu_build_dir: "{{ qemu_build_git_data_path }}/build"
+qemu_target: "aarch64-softmmu"
 build_linux_shallow_clone: true
 build_linux_clone_depth: 1

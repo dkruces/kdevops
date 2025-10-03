@@ -735,8 +735,7 @@
     sysbench_results_target: "{{ topdir_path }}/workflows/sysbench/results/"
     host_dir: "{{ item.item.path | basename }}"
     output_image: "{{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps_plot.png"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
-  ansible.builtin.command: "{{ uv_bin }} run ./python/workflows/sysbench/sysbench-tps-plot.py {{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps.txt --output {{ output_image
+  ansible.builtin.command: "{{ hostvars['localhost']['uv_binary_path'] }} run ./python/workflows/sysbench/sysbench-tps-plot.py {{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps.txt --output {{ output_image
     }}"
   tags: ["plot"]
   delegate_to: localhost
@@ -758,8 +757,7 @@
     legend2: "{{ fs_type }} innodb_doublewrite=OFF"
     file2: "{{ sysbench_results_target }}/{{ dev_host }}/sysbench_tps.txt"
     output_image: "{{ sysbench_results_target }}a_vs_b.png"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
-  ansible.builtin.command: "{{ uv_bin }} run ./python/workflows/sysbench/sysbench-tps-compare.py --legend1 \"{{ legend1 }}\" --legend2 \"{{ legend2 }}\" --output {{ output_image }}
+  ansible.builtin.command: "{{ hostvars['localhost']['uv_binary_path'] }} run ./python/workflows/sysbench/sysbench-tps-compare.py --legend1 \"{{ legend1 }}\" --legend2 \"{{ legend2 }}\" --output {{ output_image }}
     {{ file1 }} {{ file2 }}"
   tags: ["plot"]
   delegate_to: localhost
@@ -780,8 +778,7 @@
     dev_host: "{{ item }}-dev"
     legend2: "{{ fs_type }} innodb_doublewrite=OFF"
     file2: "{{ sysbench_results_target }}/{{ dev_host }}/sysbench_tps.txt"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
-  ansible.builtin.command: "{{ uv_bin }} run ./python/workflows/sysbench/sysbench-tps-variance.py --legend1 \"{{ legend1 }}\" --legend2 \"{{ legend2 }}\" --dir {{ sysbench_results_target
+  ansible.builtin.command: "{{ hostvars['localhost']['uv_binary_path'] }} run ./python/workflows/sysbench/sysbench-tps-variance.py --legend1 \"{{ legend1 }}\" --legend2 \"{{ legend2 }}\" --dir {{ sysbench_results_target
     }} {{ file1 }} {{ file2}}"
   tags: ["plot"]
   delegate_to: localhost

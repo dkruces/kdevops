@@ -3,36 +3,81 @@
 # uv is a fast Python package installer and resolver written in Rust
 # See: https://github.com/astral-sh/uv
 
-- name: Check if uv is already installed
+- name: Check if uv is already installed in common locations
   tags: ["always"]
-  ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  ansible.builtin.shell: |
+    if [ -f ~/.cargo/bin/uv ]; then
+      echo "EXISTS"
+    elif [ -f ~/.local/bin/uv ]; then
+      echo "EXISTS"
+    elif command -v uv >/dev/null 2>&1; then
+      echo "EXISTS"
+    else
+      echo "NOT_FOUND"
+    fi
   register: uv_check
   delegate_to: localhost
   run_once: true
+  changed_when: false
 
 - name: Install uv using standalone installer
   tags: ["always"]
-  ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
-  args:
-    creates: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  ansible.builtin.shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    # Show where it was installed
+    echo "Installation complete. Checking location..."
+    ls -la ~/.cargo/bin/ 2>/dev/null || echo "~/.cargo/bin/ does not exist"
+    ls -la ~/.local/bin/ 2>/dev/null || echo "~/.local/bin/ does not exist"
+    which uv 2>/dev/null || echo "uv not in PATH"
+  register: uv_install_output
   delegate_to: localhost
   run_once: true
-  when: not uv_check.stat.exists
+  when: uv_check.stdout == "NOT_FOUND"
+
+- name: Display uv installation output
+  tags: ["always"]
+  ansible.builtin.debug:
+    var: uv_install_output.stdout_lines
+  delegate_to: localhost
+  run_once: true
+  when: uv_check.stdout == "NOT_FOUND"
+
+- name: Find uv binary location
+  tags: ["always"]
+  ansible.builtin.shell: |
+    if [ -f ~/.cargo/bin/uv ]; then
+      echo "~/.cargo/bin/uv"
+    elif [ -f ~/.local/bin/uv ]; then
+      echo "~/.local/bin/uv"
+    elif command -v uv >/dev/null 2>&1; then
+      command -v uv
+    else
+      echo "NOT_FOUND"
+    fi
+  register: uv_location
+  delegate_to: localhost
+  run_once: true
+
+- name: Set uv binary path
+  tags: ["always"]
+  ansible.builtin.set_fact:
+    uv_binary_path: "{{ uv_location.stdout }}"
+  delegate_to: localhost
+  run_once: true
 
 - name: Verify uv installation
   tags: ["always"]
-  ansible.builtin.command: "{{ ansible_env.HOME }}/.cargo/bin/uv --version"
+  ansible.builtin.command: "{{ uv_binary_path }} --version"
   register: uv_version
   changed_when: false
   delegate_to: localhost
   run_once: true
-  when: not uv_check.stat.exists
+  when: uv_binary_path != "NOT_FOUND"
 
 - name: Display uv version
   tags: ["always"]
   ansible.builtin.debug:
-    msg: "uv installed: {{ uv_version.stdout }}"
+    msg: "uv installed at {{ uv_binary_path }}: {{ uv_version.stdout }}"
   delegate_to: localhost
   run_once: true
-  when: not uv_check.stat.exists
+  when: uv_binary_path != "NOT_FOUND"

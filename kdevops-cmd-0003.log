@@ -1,1 +1,2 @@
-2025-10-03 16:06:27 - Executing: make sysbench-test HOSTS=baseline
+2025-10-03 17:13:54 - Executing: make sysbench
+2025-10-03 17:16:25 - Executing: make sysbench-test

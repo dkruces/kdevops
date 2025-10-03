@@ -720,9 +720,8 @@
     sysbench_results_target: "{{ topdir_path }}/workflows/sysbench/results/"
     host_dir: "{{ item.item.path | basename }}"
     output_image: "{{ sysbench_results_target }}{{ host_dir }}/sysbench_tps_plot.png"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
   ansible.builtin.command: >
-    {{ uv_bin }} run
+    {{ hostvars['localhost']['uv_binary_path'] }} run
     ./python/workflows/sysbench/sysbench-tps-plot.py
     {{ sysbench_results_target }}/{{ host_dir }}/sysbench_tps.txt
     --output {{ output_image }}
@@ -747,9 +746,8 @@
     legend2: "{{ fs_type }} full_page_writes = off"
     file2: "{{ sysbench_results_target }}{{ dev_host }}/sysbench_tps.txt"
     output_image: "{{ sysbench_results_target_ab }}a_vs_b.png"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
   ansible.builtin.shell: >
-    {{ uv_bin }} run
+    {{ hostvars['localhost']['uv_binary_path'] }} run
     ./python/workflows/sysbench/sysbench-tps-compare.py
     --legend1 "{{ legend1 }}"
     --legend2 "{{ legend2 }}"
@@ -775,9 +773,8 @@
     dev_host: "{{ item }}-dev"
     legend2: "{{ fs_type }} full_page_writes = off"
     file2: "{{ sysbench_results_target }}/{{ dev_host }}/sysbench_tps.txt"
-    uv_bin: "{{ ansible_env.HOME }}/.cargo/bin/uv"
   ansible.builtin.shell: >
-    {{ uv_bin }} run
+    {{ hostvars['localhost']['uv_binary_path'] }} run
     ./python/workflows/sysbench/sysbench-tps-variance.py
     --legend1 "{{ legend1 }}"
     --legend2 "{{ legend2 }}"

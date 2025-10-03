@@ -1,0 +1,7 @@
+2025-10-03 16:34:05 - Executing: make destroy V=1
+2025-10-03 16:34:17 - Executing: make mrproper V=1
+2025-10-03 16:34:17 - Executing: make dynamic_pcipassthrough_kconfig V=1 KDEVOPS_ENABLE_PCIE_KCONFIG=1
+2025-10-03 16:34:19 - Executing: make defconfig-sysbench-postgresql-atomic-tps-variability V=1
+2025-10-03 16:34:29 - Executing: ./scripts/kconfig/merge_config.sh -n .config defconfigs/configs/linux_kdevops.config defconfigs/configs/diy.config defconfigs/configs/monitor_smart_log.config defconfigs/configs/monitor_ocp_smart.config defconfigs/configs/sysbench-postgresql-4k.config defconfigs/configs/dagomez.config defconfigs/configs/pci.config defconfigs/configs/linux_v6.15.config defconfigs/configs/pci2.config
+2025-10-03 16:34:37 - Executing: make V=1
+2025-10-03 16:35:18 - Executing: make bringup V=1

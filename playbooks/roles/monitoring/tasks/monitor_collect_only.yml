@@ -13,6 +13,11 @@
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
 
+# Import NVMe OCP SMART interim collection tasks
+- ansible.builtin.import_tasks: monitors/nvme_ocp_smart/collect_only.yml
+  when:
+    - monitor_nvme_ocp_smart|default(false)|bool
+
 - name: Check if fragmentation tracker is running
   become: true
   become_method: sudo

@@ -9,7 +9,7 @@
   when:
     - ansible_distribution != "Fedora"
 
-- name: Install docker
+- name: Install sysbench dependencies
   become: true
   become_method: sudo
   ansible.builtin.dnf:
@@ -23,3 +23,11 @@
     packages:
       - docker
       - python3-bcc
+      - git
+      - libicu-devel
+      - bison
+      - flex
+      - readline-devel
+      - zlib-devel
+      - sysbench
+      - perl-core

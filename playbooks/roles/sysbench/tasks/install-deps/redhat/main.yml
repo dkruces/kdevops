@@ -31,3 +31,4 @@
       - zlib-devel
       - sysbench
       - perl-core
+      - rsync

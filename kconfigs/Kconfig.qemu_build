@@ -1,15 +1,42 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# QEMU Build Configuration
+#
+# This file manages QEMU binary selection and build options for kdevops.
+# There are three scenarios for QEMU usage:
+#
+# 1. QEMU_BUILD=y (kdevops builds QEMU)
+#    - kdevops clones, builds, and installs QEMU to /usr/local/bin/
+#    - QEMU_USE_DEVELOPMENT_VERSION is automatically set to y
+#    - Use case: Need specific QEMU features (NVMe, CXL, custom patches)
+#
+# 2. QEMU_BUILD=n, QEMU_USE_DEVELOPMENT_VERSION=y (manually built QEMU)
+#    - User built QEMU themselves outside kdevops
+#    - Binary expected at /usr/local/bin/qemu-system-*
+#    - Use case: Custom QEMU build workflow, testing local patches
+#
+# 3. QEMU_BUILD=n, QEMU_USE_DEVELOPMENT_VERSION=n (distro QEMU)
+#    - Use distribution-provided QEMU package
+#    - Binary location is distro-specific (/usr/bin/, /usr/libexec/, etc.)
+#    - Use case: Standard kernel testing without special QEMU features
+#
+# See docs/qemu-configuration.md for detailed explanation.
 
 config QEMU_BUILD
 	bool "Should we build QEMU for you?"
 	output yaml
 	select NEEDS_LOCAL_DEVELOPMENT_PATH
 	help
-	  You only want to enable this option if your distribution package
-	  of QEMU does not have support for the features you need. For
-	  example this may be useful if you are a QEMU developer or are
-	  relying on technology is still under development or if you have
-	  a custom QEMU git URL.
+	  Enable this to have kdevops clone, build, and install QEMU from
+	  source on your localhost. This is useful when your distribution's
+	  QEMU package lacks features you need (e.g., NVMe, CXL emulation,
+	  or custom patches).
+
+	  When enabled, QEMU will be installed to /usr/local/bin/ and
+	  QEMU_USE_DEVELOPMENT_VERSION will be automatically set.
+
+	  If you've already built QEMU manually, say N here and enable
+	  QEMU_USE_DEVELOPMENT_VERSION instead.
 
 if QEMU_BUILD
 
@@ -78,5 +105,32 @@ config QEMU_TARGET
 config QEMU_USE_DEVELOPMENT_VERSION
 	bool
 	default y
+	help
+	  Internal flag automatically set when QEMU_BUILD is enabled.
+	  This tells libvirt configuration to look for QEMU binaries
+	  at /usr/local/bin/ where kdevops installs built QEMU.
 
 endif # QEMU_BUILD
+
+if !QEMU_BUILD
+
+config QEMU_USE_DEVELOPMENT_VERSION
+	bool "Are you using a manually built development version of QEMU?"
+	help
+	  Enable this if you built QEMU yourself (outside of kdevops) and
+	  installed it to /usr/local/bin/.
+
+	  This option tells the libvirt configuration where to find your
+	  QEMU binary:
+	    - If YES: /usr/local/bin/qemu-system-* (custom build location)
+	    - If NO:  /usr/bin/qemu-system-* (distro package location)
+
+	  Common scenarios for enabling this:
+	    - Testing local QEMU patches before upstream submission
+	    - Using QEMU features not yet in your distro's package
+	    - Following your own QEMU development workflow
+
+	  If you want kdevops to build QEMU for you instead, say N here
+	  and enable QEMU_BUILD above.
+
+endif # !QEMU_BUILD

@@ -37,7 +37,7 @@ defconfig-sysbench-postgresql-atomic-tps-variability V=1
 
 log_and_execute ./scripts/kconfig/merge_config.sh -n \
 .config \
-defconfigs/configs/diy.config \
+defconfigs/configs/debug.config \
 defconfigs/configs/ci.config \
 defconfigs/configs/advance_pool.config \
 defconfigs/configs/qemu_bin.config \

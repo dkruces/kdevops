@@ -277,9 +277,10 @@ qemu_build_dir: "{{ qemu_build_git_data_path }}/build"
 
 - [x] Add `output yaml` to all QEMU kconfig variables (done in recent commits)
 - [x] Update playbook to use kconfig variable names (done in recent commits)
-- [ ] Remove Makefile variable extraction from `Makefile.build_qemu`
-- [ ] Remove ANSIBLE_EXTRA_ARGS injection for QEMU
-- [ ] Clean up role defaults/main.yml
+- [x] Remove Makefile variable extraction from `Makefile.build_qemu`
+- [x] Remove ANSIBLE_EXTRA_ARGS injection for QEMU
+- [x] Update role defaults/main.yml with proper documentation
+- [x] Add `output yaml` to QEMU_BIN_PATH
 - [ ] Test on ARM64
 - [ ] Test on x86_64
 - [ ] Test with different QEMU sources (upstream vs jic23)

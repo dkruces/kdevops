@@ -15,6 +15,10 @@ interpreter_python = {{ ansible_cfg_interpreter_python_string }}
 forks = {{ ansible_cfg_forks }}
 enable_task_debugger = {{ ansible_cfg_task_debugger }}
 inventory = {{ ansible_cfg_inventory }}
+allow_world_readable_tmpfiles = True
+
+[privilege_escalation]
+become_allow_same_user = True
 
 {% if ansible_cfg_callback_plugin_string == 'community.general.diy' %}
 [callback_diy]

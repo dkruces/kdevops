@@ -770,7 +770,7 @@
     elif command -v uv >/dev/null 2>&1; then UV_BIN=$(command -v uv)
     else echo "ERROR: uv not found" >&2; exit 1
     fi
-    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-compare.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --output {{ output_image }} {{ file1 }} {{ file2 }}"
+    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-compare.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --output {{ output_image }} {{ file1 }} {{ file2 }}
   tags: ["plot"]
   delegate_to: localhost
   with_items:
@@ -797,7 +797,7 @@
     elif command -v uv >/dev/null 2>&1; then UV_BIN=$(command -v uv)
     else echo "ERROR: uv not found" >&2; exit 1
     fi
-    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-variance.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --dir {{ sysbench_results_target }} {{ file1 }} {{ file2}}"
+    $UV_BIN run ./python/workflows/sysbench/sysbench-tps-variance.py --legend1 "{{ legend1 }}" --legend2 "{{ legend2 }}" --dir {{ sysbench_results_target }} {{ file1 }} {{ file2 }}
   tags: ["plot"]
   delegate_to: localhost
   with_items:

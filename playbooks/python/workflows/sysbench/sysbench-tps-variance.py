@@ -1,4 +1,13 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "numpy>=1.19.0",
+#     "matplotlib>=3.3.0",
+#     "seaborn>=0.11.0",
+#     "scipy>=1.5.0",
+# ]
+# ///
 # SPDX-License-Identifier: copyleft-next-0.3.1
 # Accepts sysbench json output and outputs TPS variability graphs.
 

@@ -1,0 +1,537 @@
+2025-10-03 16:06:27 - Executing: make sysbench-test HOSTS=baseline
+----------------------------------------
+workflows/sysbench/Makefile:67: warning: overriding recipe for target 'monitor-results'
+workflows/sysbench/Makefile:51: warning: ignoring old recipe for target 'monitor-results'
+==> [sysbench-test]
++ ansible-playbook playbooks/sysbench.yml --tags vars,db_start,db_test_connection,post_entrypoint,populate_sbtest,run_sysbench,telemetry,logs,results,plot
+[WARNING]: Collection community.docker does not support Ansible version 2.14.18
+[WARNING]: Collection ansible.posix does not support Ansible version 2.14.18
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/playbooks/roles/sysbench/tasks/postgresql-
+native/main.yaml, line 119, column 3, found a duplicate dict key
+(become_method). Using last defined value only.
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/playbooks/roles/sysbench/tasks/postgresql-
+native/main.yaml, line 220, column 3, found a duplicate dict key
+(become_method). Using last defined value only.
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/playbooks/roles/sysbench/tasks/postgresql-
+native/main.yaml, line 230, column 3, found a duplicate dict key
+(become_method). Using last defined value only.
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/playbooks/roles/sysbench/tasks/postgresql-
+native/main.yaml, line 573, column 3, found a duplicate dict key
+(become_method). Using last defined value only.
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/playbooks/roles/sysbench/tasks/postgresql-
+native/main.yaml, line 669, column 3, found a duplicate dict key
+(become_method). Using last defined value only.
+[WARNING]: Collection community.general does not support Ansible version
+2.14.18
+PLAY: CONFIGURE AND RUN THE SYSBENCH WORKFLOW
+TASK: Gathering Facts [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/extra_vars.yaml, line 2, column 1, found a duplicate
+dict key (qemu_bin_path). Using last defined value only.
+[WARNING]: While constructing a mapping from
+/data1-xfs/dagomez/kdevops/extra_vars.yaml, line 2, column 1, found a duplicate
+dict key (qemu_bin_path). Using last defined value only.
+⠀⠀✓ [host]
+⠀⠀✓ [host]
+TASK: Check if folio migration stats are available [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Create monitoring directory [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Start folio migration monitoring in background [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Verify monitoring started successfully [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Check if NVMe OCP SMART monitoring is enabled [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Create monitoring directory for OCP SMART logs [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Discover OCP-compatible NVMe devices [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Create fragmentation scripts directory [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Create fragmentation monitoring output directory [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Start fragmentation monitoring in background [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Verify fragmentation monitoring started successfully [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Remove any old MySQL container [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Set sysbench_mysql_innodb_doublewrite based on ansible_host [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Get used target kernel version [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Wait for for it... (MySQL data port to be up) [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Wait for MySQL socket file inside Docker container [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Verify MySQL client works inside Docker container using explicit socket [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Verify MySQL client works on server and capture output [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Flush privileges [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Install pip using MySQL container [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Install Python packages we need for telemetry pip using the MySQL container [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Collect sysbench docker logs for MySQL container [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Gather kernel logs from each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Gather memory fragmentation index on each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK: Gather memory unusable index on each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [host]
+⠀⠀⊘ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Get number of processing units available [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Set threads manually [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Ensure telemetry data directory exists [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK: Check if PostgreSQL Server is Running [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Stop the PostgreSQL Server [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [host]
+⠀⠀✓ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [host]
+⠀⠀✓ [host]
+TASK: Set sysbench_postgresql_full_page_writes based on ansible_host [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Get used target kernel version [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Start the PostgreSQL server [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Stop the PostgreSQL server (Smart Mode) [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Stop the PostgreSQL server (Fast Mode) [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Stop the PostgreSQL server (Immediate Mode) [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀⊘ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Collect PostgreSQL database cluster control information [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+[WARNING]: Using world-readable permissions for temporary files Ansible needs
+to create when becoming an unprivileged user. This may be insecure. For
+information on securing this, see https://docs.ansible.com/ansible-
+core/2.14/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-
+an-unprivileged-user#risks-of-becoming-an-unprivileged-user
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Gather kernel logs from each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Gather memory fragmentation index on each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK: Gather memory unusable index on each node [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k]
+⠀⠀✓ [kci-18051236464-20-xfs-reflink-4k-dev]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+⠀⠀✓ [host]
+⠀⠀✓ [host]
+TASK:  [kci-18051236464-20-xfs-reflink-4k,kci-18051236464-20-xfs-reflink-4k-dev]
+
+TASK [sysbench : Plot sysbench tps plot for each node] *************************
+failed: [kci-18051236464-20-xfs-reflink-4k -> localhost] (item=Generating plot for /data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k/sysbench_tps_plot.png) => {"ansible_loop_var": "item", "changed": false, "cmd": ["./python/workflows/sysbench/sysbench-tps-plot.py", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt", "--output", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k/sysbench_tps_plot.png"], "delta": "0:00:00.031247", "end": "2025-10-03 16:14:04.501920", "item": {"ansible_loop_var": "item", "changed": false, "failed": false, "invocation": {"module_args": {"checksum_algorithm": "sha1", "follow": false, "get_attributes": true, "get_checksum": true, "get_md5": false, "get_mime": true, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt"}}, "item": {"atime": 1759522004.53801, "ctime": 1759522442.937203, "dev": 66305, "gid": 1001, "gr_name": "dagomez", "inode": 537989731, "isblk": false, "ischr": false, "isdir": true, "isfifo": false, "isgid": false, "islnk": false, "isreg": false, "issock": false, "isuid": false, "mode": "0755", "mtime": 1759522442.937203, "nlink": 2, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k", "pw_name": "dagomez", "rgrp": true, "roth": true, "rusr": true, "size": 4096, "uid": 1001, "wgrp": false, "woth": false, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}, "stat": {"atime": 1759522438.5472002, "attr_flags": "", "attributes": [], "block_size": 4096, "blocks": 80, "charset": "us-ascii", "checksum": "3a355d79e0a11b841f20600c8f0bdfc6fc7842b7", "ctime": 1759522438.5472002, "dev": 66305, "device_type": 0, "executable": true, "exists": true, "gid": 1001, "gr_name": "dagomez", "inode": 537989748, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mimetype": "text/plain", "mode": "0755", "mtime": 1759522432.6242473, "nlink": 1, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt", "pw_name": "dagomez", "readable": true, "rgrp": true, "roth": true, "rusr": true, "size": 37948, "uid": 1001, "version": "1093486426", "wgrp": false, "woth": false, "writeable": true, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}}, "msg": "non-zero return code", "rc": 1, "start": "2025-10-03 16:14:04.470673", "stderr": "Traceback (most recent call last):\n  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>\n    import pandas as pd\nModuleNotFoundError: No module named 'pandas'", "stderr_lines": ["Traceback (most recent call last):", "  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>", "    import pandas as pd", "ModuleNotFoundError: No module named 'pandas'"], "stdout": "", "stdout_lines": []}
+failed: [kci-18051236464-20-xfs-reflink-4k-dev -> localhost] (item=Generating plot for /data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k/sysbench_tps_plot.png) => {"ansible_loop_var": "item", "changed": false, "cmd": ["./python/workflows/sysbench/sysbench-tps-plot.py", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt", "--output", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k/sysbench_tps_plot.png"], "delta": "0:00:00.031457", "end": "2025-10-03 16:14:04.536912", "item": {"ansible_loop_var": "item", "changed": false, "failed": false, "invocation": {"module_args": {"checksum_algorithm": "sha1", "follow": false, "get_attributes": true, "get_checksum": true, "get_md5": false, "get_mime": true, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt"}}, "item": {"atime": 1759522004.53801, "ctime": 1759522442.937203, "dev": 66305, "gid": 1001, "gr_name": "dagomez", "inode": 537989731, "isblk": false, "ischr": false, "isdir": true, "isfifo": false, "isgid": false, "islnk": false, "isreg": false, "issock": false, "isuid": false, "mode": "0755", "mtime": 1759522442.937203, "nlink": 2, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k", "pw_name": "dagomez", "rgrp": true, "roth": true, "rusr": true, "size": 4096, "uid": 1001, "wgrp": false, "woth": false, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}, "stat": {"atime": 1759522443.5872033, "attr_flags": "", "attributes": [], "block_size": 4096, "blocks": 80, "charset": "us-ascii", "checksum": "3a355d79e0a11b841f20600c8f0bdfc6fc7842b7", "ctime": 1759522438.5472002, "dev": 66305, "device_type": 0, "executable": true, "exists": true, "gid": 1001, "gr_name": "dagomez", "inode": 537989748, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mimetype": "text/plain", "mode": "0755", "mtime": 1759522432.6242473, "nlink": 1, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k/sysbench_tps.txt", "pw_name": "dagomez", "readable": true, "rgrp": true, "roth": true, "rusr": true, "size": 37948, "uid": 1001, "version": "1093486426", "wgrp": false, "woth": false, "writeable": true, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}}, "msg": "non-zero return code", "rc": 1, "start": "2025-10-03 16:14:04.505455", "stderr": "Traceback (most recent call last):\n  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>\n    import pandas as pd\nModuleNotFoundError: No module named 'pandas'", "stderr_lines": ["Traceback (most recent call last):", "  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>", "    import pandas as pd", "ModuleNotFoundError: No module named 'pandas'"], "stdout": "", "stdout_lines": []}
+failed: [kci-18051236464-20-xfs-reflink-4k -> localhost] (item=Generating plot for /data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps_plot.png) => {"ansible_loop_var": "item", "changed": false, "cmd": ["./python/workflows/sysbench/sysbench-tps-plot.py", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt", "--output", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps_plot.png"], "delta": "0:00:00.031038", "end": "2025-10-03 16:14:04.745958", "item": {"ansible_loop_var": "item", "changed": false, "failed": false, "invocation": {"module_args": {"checksum_algorithm": "sha1", "follow": false, "get_attributes": true, "get_checksum": true, "get_md5": false, "get_mime": true, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt"}}, "item": {"atime": 1759522004.5580096, "ctime": 1759522442.957203, "dev": 66305, "gid": 1001, "gr_name": "dagomez", "inode": 1075534916, "isblk": false, "ischr": false, "isdir": true, "isfifo": false, "isgid": false, "islnk": false, "isreg": false, "issock": false, "isuid": false, "mode": "0755", "mtime": 1759522442.957203, "nlink": 2, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev", "pw_name": "dagomez", "rgrp": true, "roth": true, "rusr": true, "size": 4096, "uid": 1001, "wgrp": false, "woth": false, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}, "stat": {"atime": 1759522438.5772002, "attr_flags": "", "attributes": [], "block_size": 4096, "blocks": 72, "charset": "us-ascii", "checksum": "5c029eec8a32da8793ba1392b5ad2f96258a70dc", "ctime": 1759522438.5772002, "dev": 66305, "device_type": 0, "executable": true, "exists": true, "gid": 1001, "gr_name": "dagomez", "inode": 1075534926, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mimetype": "text/plain", "mode": "0755", "mtime": 1759522432.676048, "nlink": 1, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt", "pw_name": "dagomez", "readable": true, "rgrp": true, "roth": true, "rusr": true, "size": 34520, "uid": 1001, "version": "3020756798", "wgrp": false, "woth": false, "writeable": true, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}}, "msg": "non-zero return code", "rc": 1, "start": "2025-10-03 16:14:04.714920", "stderr": "Traceback (most recent call last):\n  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>\n    import pandas as pd\nModuleNotFoundError: No module named 'pandas'", "stderr_lines": ["Traceback (most recent call last):", "  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>", "    import pandas as pd", "ModuleNotFoundError: No module named 'pandas'"], "stdout": "", "stdout_lines": []}
+⠀⠀FAILED: [host] => One or more items failed
+failed: [kci-18051236464-20-xfs-reflink-4k-dev -> localhost] (item=Generating plot for /data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps_plot.png) => {"ansible_loop_var": "item", "changed": false, "cmd": ["./python/workflows/sysbench/sysbench-tps-plot.py", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt", "--output", "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps_plot.png"], "delta": "0:00:00.030810", "end": "2025-10-03 16:14:04.786685", "item": {"ansible_loop_var": "item", "changed": false, "failed": false, "invocation": {"module_args": {"checksum_algorithm": "sha1", "follow": false, "get_attributes": true, "get_checksum": true, "get_md5": false, "get_mime": true, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt"}}, "item": {"atime": 1759522004.5580096, "ctime": 1759522442.957203, "dev": 66305, "gid": 1001, "gr_name": "dagomez", "inode": 1075534916, "isblk": false, "ischr": false, "isdir": true, "isfifo": false, "isgid": false, "islnk": false, "isreg": false, "issock": false, "isuid": false, "mode": "0755", "mtime": 1759522442.957203, "nlink": 2, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results/kci-18051236464-20-xfs-reflink-4k-dev", "pw_name": "dagomez", "rgrp": true, "roth": true, "rusr": true, "size": 4096, "uid": 1001, "wgrp": false, "woth": false, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}, "stat": {"atime": 1759522443.8172033, "attr_flags": "", "attributes": [], "block_size": 4096, "blocks": 72, "charset": "us-ascii", "checksum": "5c029eec8a32da8793ba1392b5ad2f96258a70dc", "ctime": 1759522438.5772002, "dev": 66305, "device_type": 0, "executable": true, "exists": true, "gid": 1001, "gr_name": "dagomez", "inode": 1075534926, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mimetype": "text/plain", "mode": "0755", "mtime": 1759522432.676048, "nlink": 1, "path": "/data1-xfs/dagomez/kdevops/workflows/sysbench/results//kci-18051236464-20-xfs-reflink-4k-dev/sysbench_tps.txt", "pw_name": "dagomez", "readable": true, "rgrp": true, "roth": true, "rusr": true, "size": 34520, "uid": 1001, "version": "3020756798", "wgrp": false, "woth": false, "writeable": true, "wusr": true, "xgrp": true, "xoth": true, "xusr": true}}, "msg": "non-zero return code", "rc": 1, "start": "2025-10-03 16:14:04.755875", "stderr": "Traceback (most recent call last):\n  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>\n    import pandas as pd\nModuleNotFoundError: No module named 'pandas'", "stderr_lines": ["Traceback (most recent call last):", "  File \"/data1-xfs/dagomez/kdevops/playbooks/./python/workflows/sysbench/sysbench-tps-plot.py\", line 6, in <module>", "    import pandas as pd", "ModuleNotFoundError: No module named 'pandas'"], "stdout": "", "stdout_lines": []}
+⠀⠀FAILED: [host] => One or more items failed
+PLAYBOOK SUMMARY
+================
+STATUS        OK  CHANGED  FAILED  HOST
+FAILED        39       12       1  kci-18051236464-20-xfs-reflink-4k
+FAILED        35       10       1  kci-18051236464-20-xfs-reflink-4k-dev
+
+TASKS RECAP ********************************************************************
+Friday 03 October 2025  16:14:04 -0400 (0:07:36.401)       0:07:36.401 ******** 
+=============================================================================== 
+sysbench : Start sysbench run ----------------------------------------- 361.92s
+sysbench : Populate sysbench database ---------------------------------- 47.33s
+Gathering Facts --------------------------------------------------------- 4.70s
+sysbench : Stop the PostgreSQL server (Smart Mode) ---------------------- 3.49s
+sysbench : Grant USER privileges to DATABASE ---------------------------- 2.59s
+sysbench : Collect PostgreSQL database cluster control information ------ 2.50s
+sysbench : Write sysbench run output to log file ------------------------ 1.99s
+sysbench : Save the output of populating the initial sysbench database --- 1.94s
+sysbench : Create PostgreSQL database DATABASE -------------------------- 1.80s
+sysbench : Write PostgreSQL database cluster control information to log file --- 1.77s
+sysbench : Start the PostgreSQL server ---------------------------------- 1.69s
+sysbench : Create PostgreSQL database USER ------------------------------ 1.69s
+sysbench : Grant ALL public Privileges to DATABASE ---------------------- 1.67s
+sysbench : Check if PostgreSQL Server is Running ------------------------ 1.66s
+sysbench : Test and Ensure Permissions are Set Correctly ---------------- 1.62s
+sysbench : Ensure telemetry data directory exists ----------------------- 1.32s
+sysbench : Gather kernel logs from each node ---------------------------- 1.10s
+sysbench : Get number of processing units available --------------------- 0.98s
+sysbench : Gather memory unusable index on each node -------------------- 0.94s
+sysbench : Gather memory fragmentation index on each node --------------- 0.94s
+make: *** [workflows/sysbench/Makefile:34: sysbench-test] Error 2

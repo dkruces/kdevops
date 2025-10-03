@@ -1,4 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "pandas>=1.3.0",
+#     "matplotlib>=3.3.0",
+# ]
+# ///
 # SPDX-License-Identifier: copyleft-next-0.3.1
 
 # Accepts sysbench output and provides a plot

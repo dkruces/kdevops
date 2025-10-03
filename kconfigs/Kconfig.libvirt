@@ -233,7 +233,7 @@ if QEMU_BUILD
 
 choice
 	prompt "QEMU git URL to use"
-	default QEMU_BUILD_JIC23
+	default QEMU_BUILD_UPSTREAM
 
 config QEMU_BUILD_UPSTREAM
 	bool "https://gitlab.com/qemu-project/qemu.git"
@@ -274,11 +274,11 @@ config QEMU_BUILD_GIT_DATA_PATH
 config QEMU_BUILD_GIT_VERSION
 	string "The version of QEMU to build"
 	default "cxl-2023-05-19" if QEMU_BUILD_JIC23
-	default "v8.0.0-rc1" if QEMU_BUILD_UPSTREAM
+	default "v10.1.0" if QEMU_BUILD_UPSTREAM
 	help
-	  This is the target build version of QEMU to build. Please use
-	  at least v7.2.0 for CXL support. v8.0.0-rc1 has some build fixes
-	  for newer compilers so it is the default now.
+	  This is the target build version of QEMU to build. The default
+	  is v10.1.0 which is the latest stable release with full NVMe
+	  support and modern compiler compatibility.
 
 config QEMU_USE_DEVELOPMENT_VERSION
 	bool

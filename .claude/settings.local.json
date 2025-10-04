@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git grep:*)"
+      "Bash(git grep:*)",
+      "Bash(true\" to prevent monitoring loop from exiting on errors\n   - Write all output including error messages to stats file\n   - This preserves whatever data nvme-cli does output\n\nBenefits:\n- Works with both real OCP-compatible cloud SSDs and QEMU NVMe\n- Collects useful telemetry even when GUID checks fail\n- Monitoring results directory now populated with data\n- Error messages logged for debugging device compatibility\n\nTesting:\n- Real OCP SSDs: Works as before (command returns 0)\n- QEMU NVMe: Now discovered and monitored (partial success detected)\n- Empty results directory issue: Fixed\n\nGenerated-by: Claude AI\nSigned-off-by: Daniel Gomez <da.gomez@samsung.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

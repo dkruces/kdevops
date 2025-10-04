@@ -22,8 +22,13 @@
     devices=()
     for dev in /dev/nvme*n1; do
       if [ -e "$dev" ]; then
-        # Test OCP compatibility
-        if nvme ocp smart-add-log "$dev" --output-format=json >/dev/null 2>&1; then
+        # Test if nvme ocp command produces any output (even with errors)
+        # QEMU NVMe devices may fail GUID checks but still produce useful data
+        if output=$(nvme ocp smart-add-log "$dev" --output-format=json 2>&1); then
+          # Command succeeded fully (real OCP device)
+          devices+=("$dev")
+        elif echo "$output" | grep -q "NVMe Status:Successful Completion"; then
+          # Command partially succeeded (QEMU NVMe with incomplete OCP support)
           devices+=("$dev")
         fi
       fi
@@ -55,11 +60,9 @@
     device_name=$(echo "{{ item }}" | sed 's|/dev/||g')
     nohup bash -c 'while true; do
       echo "$(date +"%Y-%m-%d %H:%M:%S")" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      if nvme ocp smart-add-log "{{ item }}" --output-format=json 2>/dev/null; then
-        echo "" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      else
-        echo "Error: OCP SMART collection failed for {{ item }}" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
-      fi
+      # Capture output even if command fails (QEMU NVMe may have GUID errors)
+      nvme ocp smart-add-log "{{ item }}" --output-format=json 2>&1 >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt || true
+      echo "" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
       sleep {{ monitor_nvme_ocp_smart_interval|default(120) }}
     done' > /root/monitoring/nvme_ocp_smart_${device_name}.log 2>&1 &
     echo $! > /root/monitoring/nvme_ocp_smart_${device_name}.pid

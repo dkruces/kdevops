@@ -14,7 +14,7 @@
     - monitor_folio_migration|default(false)|bool
 
 # Import NVMe OCP SMART interim collection tasks
-- ansible.builtin.import_tasks: monitors/nvme_ocp_smart/collect_only.yml
+- ansible.builtin.include_tasks: monitors/nvme_ocp_smart/collect_only.yml
   when:
     - monitor_nvme_ocp_smart|default(false)|bool
 

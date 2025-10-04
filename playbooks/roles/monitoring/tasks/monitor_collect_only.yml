@@ -276,6 +276,9 @@
       {% if monitor_developmental_stats|default(false)|bool and monitor_memory_fragmentation|default(false)|bool %}
       - Fragmentation interim data collected
       {% endif %}
+      {% if monitor_nvme_ocp_smart|default(false)|bool %}
+      - NVMe OCP SMART interim data collected
+      {% endif %}
       {% if localhost_matplotlib_check is defined and localhost_matplotlib_check.rc is defined and localhost_matplotlib_check.rc == 0 %}
       Plot generation status:
       {% if folio_interim_plot_generation is defined and folio_interim_plot_generation.rc is defined and folio_interim_plot_generation.rc == 0 %}

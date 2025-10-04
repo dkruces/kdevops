@@ -32,3 +32,5 @@
       - sysbench
       - perl-core
       - rsync
+      - nvme-cli
+      - xfsprogs

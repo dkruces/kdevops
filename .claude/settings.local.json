@@ -1,23 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git reset:*)",
-      "Bash(git checkout:*)",
-      "Read(///**)",
-      "Bash(grep:*)",
-      "Bash(cat:*)",
-      "Bash(awk:*)",
-      "Bash(python3:*)",
-      "Read(//volumes/src/linux-kdevops/kdevops-history/**)",
-      "Bash(scripts/kconfig/conf:*)",
-      "Bash(find:*)",
-      "Bash(libvirt_machine_type: virt)",
-      "Bash(git branch:*)",
-      "Bash(for commit in b6ce71f6 627ba0a0 cd8378a4 7f8995d5 160c2e76 4095f211 5166a5af ad1fc08f 67c71353 e67d0ca2 44c118da)",
-      "Bash(do echo \"=== Commit $commit ===\")",
-      "Bash(done)",
-      "Bash(git fetch:*)",
-      "Bash(either an unbalanced jinja2 block or quotes\" when running sysbench-test\ntarget on CentOS Stream 9 ARM64.\n\nGenerated-by: Claude AI\nSigned-off-by: Daniel Gomez <da.gomez@samsung.com>\nEOF\n)\")"
+      "Bash(git grep:*)"
     ],
     "deny": [],
     "ask": []

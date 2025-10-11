@@ -1,0 +1,147 @@
+---
+# Build and deploy blkalgn eBPF tool from BCC repository
+- name: Check if blkalgn build is enabled
+  ansible.builtin.set_fact:
+    blkalgn_build_enabled: "{{ monitor_blkalgn_build_from_source|default(true)|bool }}"
+  when:
+    - monitor_blkalgn|default(false)|bool
+
+- name: Install blkalgn build dependencies on Debian/Ubuntu
+  become: true
+  become_method: sudo
+  ansible.builtin.apt:
+    name:
+      - git
+      - build-essential
+      - clang
+      - llvm
+      - libelf-dev
+      - libbpf-dev
+      - libjson-c-dev
+      - pkg-config
+    state: present
+    update_cache: yes
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - ansible_os_family == "Debian"
+
+- name: Install blkalgn build dependencies on RHEL/Fedora
+  become: true
+  become_method: sudo
+  ansible.builtin.dnf:
+    name:
+      - git
+      - gcc
+      - clang
+      - llvm
+      - elfutils-libelf-devel
+      - libbpf-devel
+      - json-c-devel
+      - pkgconfig
+    state: present
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - ansible_os_family == "RedHat"
+
+- name: Install blkalgn build dependencies on SUSE
+  become: true
+  become_method: sudo
+  community.general.zypper:
+    name:
+      - git
+      - gcc
+      - clang
+      - llvm
+      - libelf-devel
+      - libbpf-devel
+      - libjson-c-devel
+      - pkg-config
+    state: present
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - ansible_os_family == "Suse"
+
+- name: Clone BCC repository with blkalgn
+  ansible.builtin.git:
+    repo: "{{ monitor_blkalgn_bcc_repo }}"
+    dest: "/tmp/bcc-blkalgn"
+    version: "{{ monitor_blkalgn_bcc_branch }}"
+    recursive: yes
+    force: yes
+  become: true
+  become_method: sudo
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+
+- name: Build blkalgn binary
+  ansible.builtin.shell: |
+    cd /tmp/bcc-blkalgn/libbpf-tools
+    make blkalgn -j$(nproc)
+  become: true
+  become_method: sudo
+  register: blkalgn_build
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+
+- name: Check if blkalgn binary was built
+  ansible.builtin.stat:
+    path: /tmp/bcc-blkalgn/libbpf-tools/blkalgn
+  register: blkalgn_built_binary
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+
+- name: Fail if blkalgn build failed
+  ansible.builtin.fail:
+    msg: "blkalgn build failed. Check build output above."
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - not blkalgn_built_binary.stat.exists
+
+- name: Deploy blkalgn binary to /usr/local/sbin
+  ansible.builtin.copy:
+    src: /tmp/bcc-blkalgn/libbpf-tools/blkalgn
+    dest: /usr/local/sbin/blkalgn
+    mode: '0755'
+    remote_src: yes
+  become: true
+  become_method: sudo
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - blkalgn_built_binary.stat.exists
+
+- name: Verify blkalgn deployment
+  ansible.builtin.command: /usr/local/sbin/blkalgn --version
+  register: blkalgn_version
+  become: true
+  become_method: sudo
+  changed_when: false
+  failed_when: false
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+
+- name: Display blkalgn version
+  ansible.builtin.debug:
+    msg: "blkalgn deployed successfully: {{ blkalgn_version.stdout }}"
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool
+    - blkalgn_version.rc == 0
+
+- name: Clean up BCC build directory
+  ansible.builtin.file:
+    path: /tmp/bcc-blkalgn
+    state: absent
+  become: true
+  become_method: sudo
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - blkalgn_build_enabled|bool

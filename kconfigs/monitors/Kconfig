@@ -161,6 +161,93 @@ config MONITOR_NVME_OCP_SMART_DEVICES
 
 	  Manual specification: "/dev/nvme0n1 /dev/nvme1n1"
 
+config MONITOR_BLKALGN
+	bool "Monitor block I/O with blkalgn eBPF tool"
+	output yaml
+	default n
+	help
+	  Enable monitoring of block I/O operations using the blkalgn eBPF
+	  tool. This captures host write operations at the block layer,
+	  enabling real Write Amplification Factor (WAF) calculation when
+	  combined with NVMe OCP SMART physical media writes.
+
+	  The blkalgn tool uses eBPF to trace block_rq_issue events,
+	  collecting I/O granularity, alignment, and total host writes
+	  in JSON format.
+
+	  Key metrics collected:
+	  - Total host I/O bytes and operation count
+	  - I/O size distribution (granularity histogram)
+	  - I/O alignment distribution
+	  - Workload WAF (WWAF) estimates for different IU sizes
+
+	  Requirements:
+	  - blkalgn binary deployed to target nodes
+	  - Kernel with eBPF and BTF support
+	  - Root privileges for eBPF program loading
+
+	  This monitor is typically used alongside MONITOR_NVME_OCP_SMART
+	  to enable real WAF analysis: WAF = Physical Writes / Host Writes
+
+if MONITOR_BLKALGN
+
+config MONITOR_BLKALGN_DEVICE
+	string "Device to monitor with blkalgn"
+	output yaml
+	default "auto"
+	help
+	  Single block device to monitor with blkalgn.
+
+	  Use "auto" to automatically use the first OCP-compatible device
+	  discovered by OCP SMART monitoring.
+
+	  Manual specification: "/dev/nvme0n1" (single device only)
+
+	  Note: blkalgn currently supports monitoring one device at a time.
+	  Multi-device support may be added in future versions.
+
+config MONITOR_BLKALGN_BUILD_FROM_SOURCE
+	bool "Build and deploy blkalgn from source"
+	output yaml
+	default y
+	help
+	  Automatically build blkalgn from the BCC repository and deploy
+	  the binary to target nodes.
+
+	  This will:
+	  - Clone the BCC repository with submodules
+	  - Install build dependencies (libbpf, json-c, clang, llvm)
+	  - Build blkalgn binary in libbpf-tools directory
+	  - Deploy binary to /usr/local/sbin/blkalgn on all target nodes
+
+	  If disabled, you must manually deploy blkalgn binary to
+	  /usr/local/sbin/blkalgn on all target nodes before running
+	  monitoring.
+
+config MONITOR_BLKALGN_BCC_REPO
+	string "BCC repository URL"
+	output yaml
+	default "https://github.com/dkruces/bcc.git"
+	depends on MONITOR_BLKALGN_BUILD_FROM_SOURCE
+	help
+	  Git repository URL for BCC fork containing blkalgn tool.
+	  Default uses the dkruces fork which includes blkalgn.
+
+	  Note: blkalgn is not yet in the official BCC upstream repository.
+	  It is currently maintained in a fork until upstream integration.
+
+config MONITOR_BLKALGN_BCC_BRANCH
+	string "BCC repository branch"
+	output yaml
+	default "lbs"
+	depends on MONITOR_BLKALGN_BUILD_FROM_SOURCE
+	help
+	  Git branch to use when cloning BCC repository.
+	  Default is "lbs" which contains the blkalgn tool with logical
+	  block size support.
+
+endif # MONITOR_BLKALGN
+
 # Future monitoring options can be added here
 # Examples:
 # - Memory pressure monitoring

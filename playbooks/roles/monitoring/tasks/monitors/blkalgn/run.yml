@@ -1,0 +1,72 @@
+---
+# blkalgn eBPF monitoring startup for block I/O tracing
+- name: Check if blkalgn monitoring is enabled
+  ansible.builtin.set_fact:
+    blkalgn_enabled: "{{ monitor_blkalgn|default(false)|bool }}"
+
+- name: Set blkalgn device from auto discovery
+  ansible.builtin.set_fact:
+    blkalgn_device: "{{ ocp_device_list[0] if ocp_device_list|default([])|length > 0 else '' }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - monitor_blkalgn_device|default("auto") == "auto"
+
+- name: Set blkalgn device from manual configuration
+  ansible.builtin.set_fact:
+    blkalgn_device: "{{ monitor_blkalgn_device }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - monitor_blkalgn_device|default("auto") != "auto"
+
+- name: Check if blkalgn binary exists
+  ansible.builtin.stat:
+    path: /usr/local/sbin/blkalgn
+  register: blkalgn_binary
+  become: true
+  become_method: sudo
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+
+- name: Fail if blkalgn not installed
+  ansible.builtin.fail:
+    msg: "blkalgn binary not found at /usr/local/sbin/blkalgn. Enable MONITOR_BLKALGN_BUILD_FROM_SOURCE or deploy manually."
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - not blkalgn_binary.stat.exists
+
+- name: Fail if no device configured for blkalgn
+  ansible.builtin.fail:
+    msg: "No device configured for blkalgn monitoring. Set MONITOR_BLKALGN_DEVICE or enable OCP SMART auto-discovery."
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_device == ""
+
+- name: Start blkalgn monitoring
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    device_name=$(echo "{{ blkalgn_device }}" | sed 's|/dev/||g')
+    nohup /usr/local/sbin/blkalgn \
+      --disk=${device_name} \
+      --json=/root/monitoring/blkalgn_${device_name}.json \
+      > /root/monitoring/blkalgn_${device_name}.log 2>&1 &
+    echo $! > /root/monitoring/blkalgn_${device_name}.pid
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_device != ""
+
+- name: Display blkalgn monitoring startup status
+  ansible.builtin.debug:
+    msg: |
+      Started blkalgn eBPF monitoring on device: {{ blkalgn_device }}
+      Output: /root/monitoring/blkalgn_{{ blkalgn_device | basename }}.json
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_device != ""

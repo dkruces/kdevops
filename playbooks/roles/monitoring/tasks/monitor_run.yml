@@ -1,6 +1,14 @@
 ---
 # Monitoring orchestrator - includes individual monitor modules
 
+# Build and deploy blkalgn if needed
+- name: Build and deploy blkalgn from source
+  ansible.builtin.include_role:
+    name: blkalgn_build
+  when:
+    - monitor_blkalgn|default(false)|bool
+    - monitor_blkalgn_build_from_source|default(true)|bool
+
 # Import folio migration monitoring tasks
 - ansible.builtin.import_tasks: monitors/folio_migration/run.yml
   when:
@@ -11,6 +19,11 @@
 - ansible.builtin.include_tasks: monitors/nvme_ocp_smart/run.yml
   when:
     - monitor_nvme_ocp_smart|default(false)|bool
+
+# Import blkalgn eBPF monitoring tasks
+- ansible.builtin.include_tasks: monitors/blkalgn/run.yml
+  when:
+    - monitor_blkalgn|default(false)|bool
 
 # Fragmentation monitoring tasks
 - name: Create fragmentation scripts directory

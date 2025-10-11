@@ -1,0 +1,15 @@
+---
+# blkalgn interim collection (without stopping monitoring)
+- name: Check if blkalgn monitoring is enabled
+  ansible.builtin.set_fact:
+    blkalgn_enabled: "{{ monitor_blkalgn|default(false)|bool }}"
+
+- name: Display warning about blkalgn collect_only limitation
+  ansible.builtin.debug:
+    msg: |
+      WARNING: blkalgn only writes JSON output at termination (SIGINT).
+      Interim collection not available. Use full collect to stop and retrieve data.
+      Skipping blkalgn interim collection...
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool

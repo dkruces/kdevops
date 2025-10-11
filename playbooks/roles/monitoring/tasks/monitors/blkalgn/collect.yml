@@ -1,0 +1,101 @@
+---
+# blkalgn monitoring collection
+- name: Check if blkalgn monitoring is enabled
+  ansible.builtin.set_fact:
+    blkalgn_enabled: "{{ monitor_blkalgn|default(false)|bool }}"
+
+- name: Check for blkalgn monitoring processes
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/blkalgn_*.pid 2>/dev/null || true"
+  register: blkalgn_pids
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+
+- name: Stop blkalgn monitoring processes with SIGINT
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: |
+    for pidfile in /root/monitoring/blkalgn_*.pid; do
+      if [ -f "$pidfile" ]; then
+        device_name=$(basename "$pidfile" .pid | sed 's/blkalgn_//')
+        pid=$(cat "$pidfile")
+        if ps -p $pid > /dev/null 2>&1; then
+          kill -INT $pid
+          echo "Sent SIGINT to blkalgn for device $device_name (PID $pid)"
+          sleep 2
+          if ps -p $pid > /dev/null 2>&1; then
+            echo "Waiting for blkalgn to write JSON..."
+            sleep 3
+          fi
+        else
+          echo "blkalgn for device $device_name (PID $pid) was not running"
+        fi
+        rm -f "$pidfile"
+      fi
+    done
+  register: blkalgn_stop_monitor
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_pids.stdout != ""
+
+- name: Collect blkalgn JSON data files
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/blkalgn_*.json 2>/dev/null || true"
+  register: blkalgn_json_files
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+
+- name: Copy blkalgn JSON data to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: "{{ item }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ blkalgn_json_files.stdout_lines|default([]) }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_json_files.stdout != ""
+
+- name: Collect blkalgn log files for debugging
+  become: true
+  become_method: sudo
+  ansible.builtin.shell: "ls /root/monitoring/blkalgn_*.log 2>/dev/null || true"
+  register: blkalgn_log_files
+  changed_when: false
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+
+- name: Copy blkalgn log files to localhost
+  become: true
+  become_method: sudo
+  ansible.builtin.fetch:
+    src: "{{ item }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item | basename }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ blkalgn_log_files.stdout_lines|default([]) }}"
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_log_files.stdout != ""
+
+- name: Display blkalgn data collection summary
+  ansible.builtin.debug:
+    msg: |
+      blkalgn monitoring collection complete.
+      JSON files copied: {{ blkalgn_json_files.stdout_lines|default([])|length }}
+      Log files copied: {{ blkalgn_log_files.stdout_lines|default([])|length }}
+      Results directory: {{ monitoring_results_path }}
+  when:
+    - enable_monitoring|default(false)|bool
+    - blkalgn_enabled|bool
+    - blkalgn_json_files.stdout != ""

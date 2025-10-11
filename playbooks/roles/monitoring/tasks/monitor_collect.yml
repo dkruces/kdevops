@@ -17,6 +17,11 @@
   when:
     - monitor_nvme_ocp_smart|default(false)|bool
 
+# Import blkalgn collection tasks
+- ansible.builtin.include_tasks: monitors/blkalgn/collect.yml
+  when:
+    - monitor_blkalgn|default(false)|bool
+
 # Plot-fragmentation collection tasks
 - name: Check if fragmentation monitoring was started
   become: true

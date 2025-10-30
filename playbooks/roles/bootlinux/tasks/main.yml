@@ -205,9 +205,21 @@
     fstype: "9p"
     opts: "ro,trans=virtio,version=9p2000.L,posixacl,cache=none"
     state: "mounted"
+  register: bootlinux_9p_mount_result
   tags: ["data_partition", "9p_mount"]
   when:
     - bootlinux_9p|bool
+
+- name: Reboot target nodes after 9P mount setup to establish virtio-9p connection
+  become: true
+  become_method: sudo
+  ansible.builtin.reboot:
+    msg: "Rebooting to establish 9P filesystem connection"
+    reboot_timeout: 600
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_mount_result.changed
 
 - name: Debug kernel build command configuration
   ansible.builtin.debug:

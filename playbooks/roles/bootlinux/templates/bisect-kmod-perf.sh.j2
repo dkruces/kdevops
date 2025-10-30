@@ -44,6 +44,7 @@ echo "[2/5] Merging config fragments..." | tee -a "$LOG_FILE"
 if ! ./scripts/kconfig/merge_config.sh -n .config \
         defconfigs/configs/diy.config \
         defconfigs/configs/ci.config \
+        defconfigs/configs/bisection.config \
         defconfigs/configs/selftests-kmod-no-timeout.config 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Fragment merge failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125

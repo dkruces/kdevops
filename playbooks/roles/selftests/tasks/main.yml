@@ -364,6 +364,8 @@
     command_to_run: >-
       {%- if selftest_vma -%} ./vma{%- elif selftest_xarray -%} ./xarray && modprobe test_xarray{%- elif selftest_maple -%} ./maple && modprobe test_maple_tree{%-
       else -%} echo missing command{%- endif -%}
+    ansible_callback_diy_runner_on_start_msg: |
+      $ {{ ansible_callback_diy.task.args._raw_params | default('command') }}
 
 - name: Run kernelspace selftests
   tags: ["selftests", "run_tests"]
@@ -373,6 +375,9 @@
   ansible.builtin.command: "./run_kselftest.sh -s {{ selftest_timeout_argument }}"
   args:
     chdir: "{{ selftests_workdir }}"
+  vars:
+    ansible_callback_diy_runner_on_start_msg: |
+      $ {{ ansible_callback_diy.task.args._raw_params | default('command') }}
   register: selftests_out
   when:
     - kdevops_run_selftests|bool

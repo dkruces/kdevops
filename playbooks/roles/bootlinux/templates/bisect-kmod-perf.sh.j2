@@ -1,0 +1,98 @@
+#!/bin/bash
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# Git bisection script for kmod performance regression
+# This script tests each commit to determine if kmod selftests
+# run within acceptable time limits.
+#
+# Exit codes:
+#   0   - Good commit (test passes performance threshold)
+#   1   - Bad commit (test fails performance threshold)
+#   125 - Skip commit (build failed or test couldn't run)
+
+set -euo pipefail
+
+KDEVOPS_DIR="{{ topdir_path }}"
+cd "$KDEVOPS_DIR"
+
+# Get current commit being tested
+COMMIT=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse --short HEAD)
+COMMIT_FULL=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse HEAD)
+
+# Log file with commit info
+LOG_FILE="bisect-kmod-${COMMIT}-$(date +%Y%m%d-%H%M%S).log"
+
+echo "=========================================" | tee -a "$LOG_FILE"
+echo "Bisecting kmod performance regression" | tee -a "$LOG_FILE"
+echo "Commit: $COMMIT_FULL" | tee -a "$LOG_FILE"
+echo "Short:  $COMMIT" | tee -a "$LOG_FILE"
+echo "Date:   $(date)" | tee -a "$LOG_FILE"
+echo "=========================================" | tee -a "$LOG_FILE"
+
+# Step 1: Configure kernel
+echo "[1/5] Configuring kernel..." | tee -a "$LOG_FILE"
+if ! make KDEVOPS_HOSTS_PREFIX={{ kdevops_host_prefix }} \
+          LINUX_TREE={{ bootlinux_9p_host_path }} \
+          ANSIBLE_CFG_CALLBACK_PLUGIN=debug \
+          defconfig-linux-modules-kpd 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Config failed - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Step 2: Merge config fragments
+echo "[2/5] Merging config fragments..." | tee -a "$LOG_FILE"
+if ! ./scripts/kconfig/merge_config.sh -n .config \
+        defconfigs/configs/diy.config \
+        defconfigs/configs/ci.config \
+        defconfigs/configs/selftests-kmod-no-timeout.config 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Fragment merge failed - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Step 3: Regenerate extra_vars.yaml
+echo "[3/5] Regenerating extra_vars.yaml..." | tee -a "$LOG_FILE"
+if ! make 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Make failed - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Step 4: Build and deploy kernel
+echo "[4/5] Building and deploying kernel..." | tee -a "$LOG_FILE"
+if ! make linux 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Kernel build/deploy failed - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Step 5: Run selftests-kmod
+echo "[5/5] Running selftests-kmod..." | tee -a "$LOG_FILE"
+if ! make selftests-kmod 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Selftests failed to run - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Parse timing from Ansible profile_tasks callback output
+# Pattern: "selftests : Run kernelspace selftests --------------------------------- XXX.XXs"
+TIMING=$(grep -oP 'selftests : Run kernelspace selftests.*?-+\s+\K\d+\.\d+(?=s)' "$LOG_FILE" | head -1)
+
+if [ -z "$TIMING" ]; then
+    echo "ERROR: Failed to extract timing from output - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+echo "=========================================" | tee -a "$LOG_FILE"
+echo "Kmod test timing: ${TIMING}s" | tee -a "$LOG_FILE"
+
+# Threshold: 250s (midpoint between good ~190s and bad ~305s)
+# Good commits: v6.16 (193s), v6.17 (189s)
+# Bad commits:  v6.18-rc1 (303s), v6.18-rc2 (304s), v6.18-rc3 (307s)
+THRESHOLD=250
+
+if (( $(echo "$TIMING > $THRESHOLD" | bc -l) )); then
+    echo "Result: BAD (${TIMING}s > ${THRESHOLD}s threshold)" | tee -a "$LOG_FILE"
+    echo "=========================================" | tee -a "$LOG_FILE"
+    exit 1
+else
+    echo "Result: GOOD (${TIMING}s <= ${THRESHOLD}s threshold)" | tee -a "$LOG_FILE"
+    echo "=========================================" | tee -a "$LOG_FILE"
+    exit 0
+fi

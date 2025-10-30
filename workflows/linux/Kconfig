@@ -365,13 +365,11 @@ config BOOTLINUX_TREE_CUSTOM_URL
 
 config BOOTLINUX_TREE_CUSTOM_REF
 	string "Custom Linux kernel tag or branch to use"
-	default BOOTLINUX_BISECT_REF_GOOD if BOOTLINUX_BISECT_ENABLE && !BOOTLINUX_TREE_REF_SET_BY_CLI
-	default $(shell, ./scripts/append-makefile-vars.sh $(GOOD)) if BOOTLINUX_BISECT_REF_GOOD_CLI && !BOOTLINUX_TREE_REF_SET_BY_CLI && !BOOTLINUX_BISECT_ENABLE
+	default $(shell, ./scripts/append-makefile-vars.sh $(GOOD)) if BOOTLINUX_BISECT_REF_GOOD_CLI && !BOOTLINUX_TREE_REF_SET_BY_CLI
 	default $(shell, ./scripts/append-makefile-vars.sh $(LINUX_TREE_REF)) if BOOTLINUX_TREE_REF_SET_BY_CLI && !BOOTLINUX_BISECT_REF_GOOD_CLI
 	default "master" if !BOOTLINUX_TREE_REF_SET_BY_CLI
 	help
 	  The git ID or branch name to check out to compile linux.
-	  When bisection is enabled, this defaults to the GOOD ref.
 
 endif # BOOTLINUX_CUSTOM
 

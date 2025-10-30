@@ -26,6 +26,7 @@ include $(TOPDIR)/workflows/selftests/tests/Makefile.module
 include $(TOPDIR)/workflows/selftests/tests/Makefile.kmod
 include $(TOPDIR)/workflows/selftests/tests/Makefile.maple
 include $(TOPDIR)/workflows/selftests/tests/Makefile.sysctl
+include $(TOPDIR)/workflows/selftests/tests/Makefile.vma
 include $(TOPDIR)/workflows/selftests/tests/Makefile.xarray
 
 selftests:

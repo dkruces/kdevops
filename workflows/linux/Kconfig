@@ -10,6 +10,21 @@ config BOOTLINUX_TREE_REF_SET_BY_CLI
 	output yaml
 	default $(shell, scripts/check-cli-set-var.sh LINUX_TREE_REF)
 
+config BOOTLINUX_BISECT_ENABLE_CLI
+	bool
+	output yaml
+	default $(shell, scripts/check-cli-set-var.sh LINUX_BISECT)
+
+config BOOTLINUX_BISECT_REF_GOOD_CLI
+	bool
+	output yaml
+	default $(shell, scripts/check-cli-set-var.sh GOOD)
+
+config BOOTLINUX_BISECT_REF_BAD_CLI
+	bool
+	output yaml
+	default $(shell, scripts/check-cli-set-var.sh BAD)
+
 config BOOTLINUX_HAS_PURE_IOMAP_CONFIG
 	bool
 
@@ -350,7 +365,8 @@ config BOOTLINUX_TREE_CUSTOM_URL
 
 config BOOTLINUX_TREE_CUSTOM_REF
 	string "Custom Linux kernel tag or branch to use"
-	default $(shell, ./scripts/append-makefile-vars.sh $(LINUX_TREE_REF)) if BOOTLINUX_TREE_REF_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(GOOD)) if BOOTLINUX_BISECT_REF_GOOD_CLI && !BOOTLINUX_TREE_REF_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(LINUX_TREE_REF)) if BOOTLINUX_TREE_REF_SET_BY_CLI && !BOOTLINUX_BISECT_REF_GOOD_CLI
 	default "master" if !BOOTLINUX_TREE_REF_SET_BY_CLI
 	help
 	  The git ID or branch name to check out to compile linux.
@@ -476,10 +492,72 @@ config BOOTLINUX_TREE_LOCALVERSION
 	help
 	  The Linux local version to use (for uname).
 
+config BOOTLINUX_BISECT_ENABLE
+	bool "Do you want to bisect a broken kernel?"
+	default y
+	depends on BOOTLINUX_9P
+	output yaml
+	help
+	  Do you need to automate bisecting some broken kernel?
+
+if BOOTLINUX_BISECT_ENABLE
+
+choice
+	prompt "Bisection script to use"
+	default BOOTLINUX_BISECT_SCRIPT_BOOT
+
+config BOOTLINUX_BISECT_SCRIPT_BOOT
+	bool "Ensures we can at least boot"
+	help
+	  This helps ensure we can at least boot into the host. That's it.
+
+config BOOTLINUX_BISECT_SCRIPT_CUSTOM
+	bool "You will provide your own bisection script"
+	help
+	  If you to test a new bisection script you can use this.
+
+endchoice
+
+config BOOTLINUX_BISECT_SCRIPT_CUSTOM_PATH
+	string "Custom path to git bisection script to use"
+	depends on BOOTLINUX_BISECT_SCRIPT_CUSTOM
+	default ""
+	output yaml
+	help
+	  The custom path to the bisect script we will use. Instead of building
+	  the kernel and booting it, 'make linux' will do the bisection
+	  automatically for you based on the script.
+
+config BOOTLINUX_BISECT_SCRIPT
+	string
+	output yaml
+	default "bisect-boot.sh" if BOOTLINUX_BISECT_SCRIPT_BOOT
+	default BOOTLINUX_BISECT_SCRIPT_CUSTOM_PATH if BOOTLINUX_BISECT_SCRIPT_CUSTOM
+
+
+config BOOTLINUX_BISECT_REF_GOOD
+	string "The last known good commit"
+	default BOOTLINUX_TREE_REF if !BOOTLINUX_BISECT_REF_GOOD_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(GOOD)) if BOOTLINUX_BISECT_REF_GOOD_CLI
+	output yaml
+	help
+	  The known kernel commit to be good.
+
+config BOOTLINUX_BISECT_REF_BAD
+	string "The known broken commit"
+	default BOOTLINUX_TREE_STABLE_REF if !BOOTLINUX_BISECT_REF_BAD_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(BAD)) if BOOTLINUX_BISECT_REF_BAD_CLI
+	output yaml
+	help
+	  The first broken tag.
+
+endif # BOOTLINUX_BISECT_ENABLE
+
 config BOOTLINUX_SHALLOW_CLONE
 	bool "Shallow git clone"
 	default y if !KDEVOPS_BASELINE_AND_DEV
 	depends on !BOOTLINUX_AB_DIFFERENT_REF
+	depends on !BOOTLINUX_BISECT_ENABLE
 	help
 	  If enabled the git tree cloned with be cloned using a shallow tree
 	  with history truncated. You want to enable this if you really don't

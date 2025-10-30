@@ -148,6 +148,13 @@ linux-mount:
 		--tags vars,9p_mount \
 		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
 
+PHONY += linux-bisect
+linux-bisect:
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
+		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
+		--tags vars,bisect \
+		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+
 PHONY += linux-deploy
 linux-deploy:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
@@ -233,6 +240,14 @@ linux-help-cxl:
 	@echo "linux-cxl          - Builds cxl_test only and installs it"
 
 LINUX_HELP_EXTRA += linux-help-cxl
+endif
+
+ifeq (y,$(CONFIG_BOOTLINUX_BISECT_ENABLE))
+PHONY += linux-help-bisection
+linux-help-bisection:
+	@echo "linux-bisect       - Bisects the kernel automatically for you"
+
+LINUX_HELP_EXTRA += linux-help-bisection
 endif
 
 HELP_TARGETS+=linux-help-menu

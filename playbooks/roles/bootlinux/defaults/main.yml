@@ -141,6 +141,12 @@ bootlinux_fragment_x86: false
 bootlinux_fragment_xarray: false
 bootlinux_fragment_xarray_no_multi: false
 
+bootlinux_bisect_enable: false
+bootlinux_bisect_enable_cli: false
+bootlinux_bisect_ref_good_cli: false
+bootlinux_bisect_ref_bad_cli: false
+bootlinux_bisect_script_boot: false
+bootlinux_bisect_script_custom: false
 
 # Distro controls
 distro_debian_based: false

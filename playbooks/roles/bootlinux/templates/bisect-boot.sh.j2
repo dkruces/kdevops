@@ -1,0 +1,8 @@
+#!/bin/bash
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# If make linux-deploy fails for reasons unrelated to the bug we're tracking
+# (e.g., a build error) we bail with exit code 125 to allow git to skip that
+# commit.
+cd {{ topdir_path }}
+make linux-deploy || exit 125

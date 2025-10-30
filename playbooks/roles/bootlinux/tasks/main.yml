@@ -407,3 +407,48 @@
   vars:
     running_kernel: "{{ uname_cmd.stdout_lines.0 }}"
   tags: ["uname"]
+
+- name: Copy git bisection script over
+  ansible.builtin.template:
+    src: "{{ bootlinux_bisect_script }}.j2"
+    dest: "{{ bootlinux_9p_host_path }}/{{ bootlinux_bisect_script }}"
+    mode: "0644"
+  tags: ["bisect"]
+  when:
+    - bootlinux_bisect_enable|bool
+  run_once: true
+  delegate_to: localhost
+
+- name: Set up bisection for git
+  ansible.builtin.command: "git bisect start {{ bootlinux_bisect_ref_bad }} {{ bootlinux_bisect_ref_good }}"
+  register: build
+  changed_when: "build.rc == 0"
+  args:
+    chdir: "{{ bootlinux_9p_host_path }}"
+  tags: ["bisect"]
+  when:
+    - bootlinux_bisect_enable|bool
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure bisection script is executable
+  ansible.builtin.file:
+    path: "{{ bootlinux_9p_host_path }}/{{ bootlinux_bisect_script }}"
+    mode: "0755"
+    state: file
+  when: bootlinux_bisect_enable | bool
+  delegate_to: localhost
+  run_once: true
+  tags: ["bisect"]
+
+- name: Run the the bisection script
+  ansible.builtin.command: "git bisect run {{ bootlinux_9p_host_path }}/{{ bootlinux_bisect_script }}"
+  register: build
+  changed_when: "build.rc == 0"
+  args:
+    chdir: "{{ bootlinux_9p_host_path }}"
+  tags: ["bisect"]
+  when:
+    - bootlinux_bisect_enable|bool
+  run_once: true
+  delegate_to: localhost

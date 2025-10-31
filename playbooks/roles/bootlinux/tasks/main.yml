@@ -205,9 +205,83 @@
     fstype: "9p"
     opts: "ro,trans=virtio,version=9p2000.L,posixacl,cache=none"
     state: "mounted"
+  register: bootlinux_9p_mount_result
   tags: ["data_partition", "9p_mount"]
   when:
     - bootlinux_9p|bool
+
+- name: Check if 9P mount is accessible on target nodes
+  ansible.builtin.stat:
+    path: "{{ target_linux_dir_path }}/Makefile"
+  register: bootlinux_9p_mount_accessible
+  ignore_errors: true
+  tags: ["9p_mount"]
+  when:
+    - bootlinux_9p|bool
+
+- name: Set flag if 9P mount needs refresh (Makefile not accessible)
+  ansible.builtin.set_fact:
+    bootlinux_9p_needs_reboot: true
+  tags: ["9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - not bootlinux_9p_mount_accessible.stat.exists|default(false)
+
+- name: Shutdown VM from hypervisor to reset virtio-9p connection
+  ansible.builtin.command:
+    cmd: "virsh shutdown {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  register: virsh_shutdown_result
+  failed_when: false
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_mount_result.changed or
+      (bootlinux_9p_git_clone_result is defined and bootlinux_9p_git_clone_result.changed) or
+      (bootlinux_9p_needs_reboot is defined and bootlinux_9p_needs_reboot|bool)
+
+- name: Wait for VM to be fully shut down
+  ansible.builtin.command:
+    cmd: "virsh domstate {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  register: virsh_domstate
+  until: virsh_domstate.stdout.strip() == "shut off"
+  retries: 60
+  delay: 5
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_mount_result.changed or
+      (bootlinux_9p_git_clone_result is defined and bootlinux_9p_git_clone_result.changed) or
+      (bootlinux_9p_needs_reboot is defined and bootlinux_9p_needs_reboot|bool)
+
+- name: Start VM from hypervisor to establish fresh virtio-9p connection
+  ansible.builtin.command:
+    cmd: "virsh start {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_mount_result.changed or
+      (bootlinux_9p_git_clone_result is defined and bootlinux_9p_git_clone_result.changed) or
+      (bootlinux_9p_needs_reboot is defined and bootlinux_9p_needs_reboot|bool)
+
+- name: Wait for VM to become accessible after restart
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 600
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_mount_result.changed or
+      (bootlinux_9p_git_clone_result is defined and bootlinux_9p_git_clone_result.changed) or
+      (bootlinux_9p_needs_reboot is defined and bootlinux_9p_needs_reboot|bool)
 
 - name: Debug kernel build command configuration
   ansible.builtin.debug:

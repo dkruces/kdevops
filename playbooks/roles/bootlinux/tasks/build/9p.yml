@@ -39,11 +39,22 @@
     version: "{{ active_linux_ref | default(target_linux_ref) }}"
   retries: 3
   delay: 5
-  register: result
-  until: not result.failed
+  register: bootlinux_9p_git_clone_result
+  until: not bootlinux_9p_git_clone_result.failed
   tags: ["clone"]
   run_once: true
   delegate_to: localhost
+
+- name: Reboot target nodes after fresh git clone to sync 9P mount
+  become: true
+  become_method: sudo
+  ansible.builtin.reboot:
+    msg: "Rebooting after fresh git clone to sync 9P filesystem"
+    reboot_timeout: 600
+  tags: ["clone", "9p_mount"]
+  when:
+    - bootlinux_9p_git_clone_result is defined
+    - bootlinux_9p_git_clone_result.changed
 
 - name: Copy kernel delta if requested on the control node
   ansible.builtin.template:

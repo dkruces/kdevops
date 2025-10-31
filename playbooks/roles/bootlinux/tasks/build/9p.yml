@@ -30,24 +30,6 @@
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
       {{ ansible_callback_diy.result.output.stdout | default('') }}
 
-- name: Check if target directory exists when using 9p and Linux CLI was set
-  ansible.builtin.stat:
-    path: "{{ bootlinux_9p_host_path }}"
-  register: target_directory_stat
-  run_once: true
-  delegate_to: localhost
-  when:
-    - bootlinux_tree_set_by_cli|bool
-
-- name: Fail if target directory does not exist when using 9p and Linux CLI was set
-  ansible.builtin.fail:
-    msg: "The target directory {{ bootlinux_9p_host_path }} does not exist."
-  run_once: true
-  delegate_to: localhost
-  when:
-    - bootlinux_tree_set_by_cli|bool
-    - not target_directory_stat.stat.exists
-
 - name: Git clone {{ target_linux_tree }} on the control node
   ansible.builtin.git:
     repo: "{{ target_linux_git }}"
@@ -60,8 +42,6 @@
   register: result
   until: not result.failed
   tags: ["clone"]
-  when:
-    - not bootlinux_tree_set_by_cli|bool
   run_once: true
   delegate_to: localhost
 

@@ -216,6 +216,80 @@
 # We use the target node only, not the host as if you've enaabled
 # 9p the path will be available and everything will have been built
 # for us.
+#
+# However, after fresh VM creation (make bringup), the 9P mount may be stale
+# even though it appears mounted. We must verify accessibility before install.
+- name: Check if 9P mount is accessible before selftests install
+  ansible.builtin.stat:
+    path: "{{ target_linux_dir_path }}/tools/testing/selftests/Makefile"
+  register: selftests_9p_mount_accessible
+  ignore_errors: true
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+
+- name: Set flag if 9P mount needs refresh for selftests
+  ansible.builtin.set_fact:
+    selftests_9p_needs_reboot: true
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+    - not selftests_9p_mount_accessible.stat.exists|default(false)
+
+- name: Shutdown VM from hypervisor to reset virtio-9p for selftests
+  ansible.builtin.command:
+    cmd: "virsh shutdown {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  register: virsh_shutdown_selftests_result
+  failed_when: false
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+    - selftests_9p_needs_reboot is defined and selftests_9p_needs_reboot|bool
+
+- name: Wait for VM to be fully shut down before selftests install
+  ansible.builtin.command:
+    cmd: "virsh domstate {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  register: virsh_domstate_selftests
+  until: virsh_domstate_selftests.stdout.strip() == "shut off"
+  retries: 60
+  delay: 5
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+    - selftests_9p_needs_reboot is defined and selftests_9p_needs_reboot|bool
+
+- name: Start VM from hypervisor to establish fresh virtio-9p for selftests
+  ansible.builtin.command:
+    cmd: "virsh start {{ inventory_hostname }}"
+  delegate_to: localhost
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+    - selftests_9p_needs_reboot is defined and selftests_9p_needs_reboot|bool
+
+- name: Wait for VM to become accessible after restart for selftests
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 600
+  tags: ["selftests", "build", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - selftest_kernelspace|bool
+    - selftests_9p_needs_reboot is defined and selftests_9p_needs_reboot|bool
+
 - name: Install selftests
   tags: ["selftests", "build"]
   become: true

@@ -69,6 +69,33 @@
         chdir: "{{ custom_image_dir }}"
       changed_when: false
 
+- name: Get current virtual size of custom image if it exists
+  ansible.builtin.shell:
+    cmd: "qemu-img info --output=json {{ custom_image }} | grep -Po '\"virtual-size\":\\s*\\K[0-9]+'"
+  register: custom_image_current_size
+  changed_when: false
+  failed_when: false
+  when:
+    - custom_image_stat.stat.exists
+    - guestfs_has_custom_raw_image_url|bool
+
+- name: Convert configured size to bytes for comparison
+  ansible.builtin.set_fact:
+    libvirt_image_size_bytes: "{{ (libvirt_image_size | regex_replace('G$', '') | int) * 1024 * 1024 * 1024 }}"
+  when:
+    - custom_image_stat.stat.exists
+    - guestfs_has_custom_raw_image_url|bool
+    - custom_image_current_size.rc == 0
+
+- name: Set flag if image needs resize
+  ansible.builtin.set_fact:
+    custom_image_needs_resize: true
+  when:
+    - custom_image_stat.stat.exists
+    - guestfs_has_custom_raw_image_url|bool
+    - custom_image_current_size.rc == 0
+    - custom_image_current_size.stdout|int != libvirt_image_size_bytes|int
+
 - name: Resize custom image to match configured size
   become: true
   become_method: ansible.builtin.sudo
@@ -76,8 +103,8 @@
     cmd: "qemu-img resize -f raw {{ custom_image }} {{ libvirt_image_size }}"
   changed_when: true
   when:
-    - custom_image_download is changed
     - guestfs_has_custom_raw_image_url|bool
+    - custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
 
 - name: Create temporary file for partition-expanded image
   become: true
@@ -87,8 +114,8 @@
     suffix: .raw
   register: temp_resized_image
   when:
-    - custom_image_download is changed
     - guestfs_has_custom_raw_image_url|bool
+    - custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
 
 - name: Pre-allocate space for the resized image
   become: true
@@ -97,9 +124,9 @@
     cmd: "qemu-img create -f raw {{ temp_resized_image.path }} {{ libvirt_image_size }}"
   changed_when: true
   when:
-    - custom_image_download is changed
     - guestfs_has_custom_raw_image_url|bool
     - temp_resized_image.path is defined
+    - custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
 
 - name: Expand root partition to use full disk
   become: true
@@ -108,8 +135,8 @@
     cmd: "virt-resize --expand /dev/sda1 {{ custom_image }} {{ temp_resized_image.path }}"
   changed_when: true
   when:
-    - custom_image_download is changed
     - guestfs_has_custom_raw_image_url|bool
+    - custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
 
 - name: Replace original image with partition-expanded one
   become: true
@@ -118,8 +145,8 @@
     cmd: "mv -f {{ temp_resized_image.path }} {{ custom_image }}"
   changed_when: true
   when:
-    - custom_image_download is changed
     - guestfs_has_custom_raw_image_url|bool
+    - custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
 
 - name: Check if the custom image sentinel file already exists
   ansible.builtin.stat:
@@ -344,7 +371,7 @@
   ansible.builtin.command:
     cmd: "cp --reflink=auto '{{ custom_image }}' '{{ base_image_pathname }}'"
   when:
-    - custom_image_stat.stat.exists or custom_image_download is changed
+    - custom_image_stat.stat.exists or custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)
     - custom_image != base_image_pathname
 
 - name: Set proper ownership on base image for rcloud access
@@ -356,4 +383,4 @@
     group: "{{ libvirt_qemu_group | default('libvirt-qemu') }}"
     mode: "0640"
   when:
-    - custom_image_stat.stat.exists or custom_image_download is changed
+    - custom_image_stat.stat.exists or custom_image_download is changed or (custom_image_needs_resize is defined and custom_image_needs_resize|bool)

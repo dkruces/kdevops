@@ -158,8 +158,9 @@ linux-mount:
 
 PHONY += linux-bisect
 linux-bisect:
-	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -i \
-		$(KDEVOPS_HOSTFILE) $(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
+	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
+		--limit 'baseline:dev' \
+		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
 		--tags vars,bisect \
 		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
 

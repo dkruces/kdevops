@@ -44,7 +44,7 @@ echo "[1/7] Configuring kernel..." | tee -a "$LOG_FILE"
 if ! make KDEVOPS_HOSTS_PREFIX={{ kdevops_host_prefix }} \
           LINUX_TREE={{ bootlinux_9p_host_path }} \
           ANSIBLE_CFG_CALLBACK_PLUGIN=debug \
-          defconfig-linux-modules-kpd 2>&1 | tee -a "$LOG_FILE"; then
+          defconfig-selftests-kmod 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Config failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi

@@ -35,7 +35,7 @@ echo "Commit: $COMMIT_FULL" | tee -a "$LOG_FILE"
 echo "Short:  $COMMIT" | tee -a "$LOG_FILE"
 echo "Base kernel version: $KERNEL_VERSION" | tee -a "$LOG_FILE"
 echo "Unique localversion: $LOCALVERSION" | tee -a "$LOG_FILE"
-echo "Expected uname: ${KERNEL_VERSION}${LOCALVERSION}" | tee -a "$LOG_FILE"
+echo "Note: Final kernel version will include LOCALVERSION_AUTO suffix" | tee -a "$LOG_FILE"
 echo "Date:   $(date)" | tee -a "$LOG_FILE"
 echo "=========================================" | tee -a "$LOG_FILE"
 
@@ -79,8 +79,9 @@ fi
 
 # Step 5: Verify the correct kernel is running
 echo "[5/7] Verifying correct kernel is running..." | tee -a "$LOG_FILE"
-EXPECTED_KERNEL="${KERNEL_VERSION}${LOCALVERSION}"
-RUNNING_KERNEL=$(ansible baseline -m command -a "uname -r" -o 2>/dev/null | grep -oP 'stdout \| \K.*' | head -1 || echo "UNKNOWN")
+# Read the actual kernel version from the build (includes LOCALVERSION_AUTO)
+EXPECTED_KERNEL=$(cat {{ bootlinux_9p_host_path }}/include/config/kernel.release 2>/dev/null || echo "UNKNOWN")
+RUNNING_KERNEL=$(ansible baseline -m command -a "uname -r" -o 2>/dev/null | awk '{print $NF}' || echo "UNKNOWN")
 
 echo "Expected kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
 echo "Running kernel:  $RUNNING_KERNEL" | tee -a "$LOG_FILE"

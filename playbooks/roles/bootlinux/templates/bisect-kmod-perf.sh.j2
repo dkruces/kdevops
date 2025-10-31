@@ -59,7 +59,7 @@ fi
 
 # Step 4: Build and deploy kernel
 echo "[4/5] Building and deploying kernel..." | tee -a "$LOG_FILE"
-if ! make linux 2>&1 | tee -a "$LOG_FILE"; then
+if ! make linux ANSIBLE_PLAYBOOK_ARGS="--skip-tags bisect" 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Kernel build/deploy failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi

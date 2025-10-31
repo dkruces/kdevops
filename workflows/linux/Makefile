@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
 
+# Allow passing extra ansible-playbook options (e.g., --skip-tags, --tags)
+# Note: ANSIBLE_EXTRA_ARGS is already used for extra_vars.yaml generation
+ANSIBLE_PLAYBOOK_ARGS ?=
+
 TREE_URL:=$(subst ",,$(CONFIG_BOOTLINUX_TREE))
 TREE_NAME:=$(notdir $(TREE_URL))
 TREE_NAME:=$(subst .git,,$(TREE_NAME))
@@ -104,14 +108,16 @@ linux: $(KDEVOPS_NODES)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		--limit 'baseline:dev' \
 		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) \
+		$(ANSIBLE_PLAYBOOK_ARGS)
 endif
 else
 linux: $(KDEVOPS_NODES)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		--limit 'baseline:dev' \
 		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS)
+		--extra-vars="$(BOOTLINUX_ARGS)" $(LIMIT_HOSTS) \
+		$(ANSIBLE_PLAYBOOK_ARGS)
 endif
 
 PHONY += linux-baseline
@@ -120,7 +126,8 @@ linux-baseline: $(KDEVOPS_NODES)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		--limit baseline \
 		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)"
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(ANSIBLE_PLAYBOOK_ARGS)
 else
 linux-baseline:
 	@echo "linux-baseline requires KDEVOPS_BASELINE_AND_DEV=y"
@@ -133,7 +140,8 @@ linux-dev: $(KDEVOPS_NODES)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		--limit dev \
 		$(KDEVOPS_PLAYBOOKS_DIR)/bootlinux.yml \
-		--extra-vars="$(BOOTLINUX_ARGS)"
+		--extra-vars="$(BOOTLINUX_ARGS)" \
+		$(ANSIBLE_PLAYBOOK_ARGS)
 else
 linux-dev:
 	@echo "linux-dev requires KDEVOPS_BASELINE_AND_DEV=y"

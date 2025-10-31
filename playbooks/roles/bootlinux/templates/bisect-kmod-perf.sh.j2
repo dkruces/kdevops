@@ -15,9 +15,16 @@ set -euo pipefail
 KDEVOPS_DIR="{{ topdir_path }}"
 cd "$KDEVOPS_DIR"
 
-# Get current commit being tested
+# Get current commit being tested by git bisect
 COMMIT=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse --short HEAD)
 COMMIT_FULL=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse HEAD)
+
+# Get base kernel version for the commit
+KERNEL_VERSION=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" describe --tags --abbrev=0 HEAD 2>/dev/null | sed 's/^v//' || echo "6.0.0")
+
+# Create unique localversion suffix for this commit
+# Format: <base_version>-bisect-<short_commit>
+LOCALVERSION="-bisect-${COMMIT}"
 
 # Log file with commit info
 LOG_FILE="bisect-kmod-${COMMIT}-$(date +%Y%m%d-%H%M%S).log"
@@ -26,11 +33,14 @@ echo "=========================================" | tee -a "$LOG_FILE"
 echo "Bisecting kmod performance regression" | tee -a "$LOG_FILE"
 echo "Commit: $COMMIT_FULL" | tee -a "$LOG_FILE"
 echo "Short:  $COMMIT" | tee -a "$LOG_FILE"
+echo "Base kernel version: $KERNEL_VERSION" | tee -a "$LOG_FILE"
+echo "Unique localversion: $LOCALVERSION" | tee -a "$LOG_FILE"
+echo "Expected uname: ${KERNEL_VERSION}${LOCALVERSION}" | tee -a "$LOG_FILE"
 echo "Date:   $(date)" | tee -a "$LOG_FILE"
 echo "=========================================" | tee -a "$LOG_FILE"
 
 # Step 1: Configure kernel
-echo "[1/5] Configuring kernel..." | tee -a "$LOG_FILE"
+echo "[1/7] Configuring kernel..." | tee -a "$LOG_FILE"
 if ! make KDEVOPS_HOSTS_PREFIX={{ kdevops_host_prefix }} \
           LINUX_TREE={{ bootlinux_9p_host_path }} \
           ANSIBLE_CFG_CALLBACK_PLUGIN=debug \
@@ -40,7 +50,7 @@ if ! make KDEVOPS_HOSTS_PREFIX={{ kdevops_host_prefix }} \
 fi
 
 # Step 2: Merge config fragments
-echo "[2/5] Merging config fragments..." | tee -a "$LOG_FILE"
+echo "[2/7] Merging config fragments..." | tee -a "$LOG_FILE"
 if ! ./scripts/kconfig/merge_config.sh -n .config \
         defconfigs/configs/diy.config \
         defconfigs/configs/ci.config \
@@ -51,25 +61,46 @@ if ! ./scripts/kconfig/merge_config.sh -n .config \
 fi
 
 # Step 3: Regenerate extra_vars.yaml
-echo "[3/5] Regenerating extra_vars.yaml..." | tee -a "$LOG_FILE"
+echo "[3/7] Regenerating extra_vars.yaml..." | tee -a "$LOG_FILE"
 if ! make 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Make failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi
 
-# Step 4: Build and deploy kernel
-echo "[4/5] Building and deploying kernel..." | tee -a "$LOG_FILE"
-if ! make linux ANSIBLE_PLAYBOOK_ARGS="--skip-tags bisect" 2>&1 | tee -a "$LOG_FILE"; then
+# Step 4: Build and deploy kernel for the bisected commit
+echo "[4/7] Building and deploying kernel for commit $COMMIT..." | tee -a "$LOG_FILE"
+# Override the configured ref and localversion to build the actual commit being tested
+if ! make linux \
+    ANSIBLE_PLAYBOOK_ARGS="--skip-tags bisect --extra-vars '{\"target_linux_ref\": \"$COMMIT_FULL\", \"target_linux_localversion\": \"$LOCALVERSION\"}'" \
+    2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Kernel build/deploy failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi
 
-# Step 5: Run selftests-kmod
-echo "[5/5] Running selftests-kmod..." | tee -a "$LOG_FILE"
+# Step 5: Verify the correct kernel is running
+echo "[5/7] Verifying correct kernel is running..." | tee -a "$LOG_FILE"
+EXPECTED_KERNEL="${KERNEL_VERSION}${LOCALVERSION}"
+RUNNING_KERNEL=$(ansible baseline -m command -a "uname -r" -o 2>/dev/null | grep -oP 'stdout \| \K.*' | head -1 || echo "UNKNOWN")
+
+echo "Expected kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
+echo "Running kernel:  $RUNNING_KERNEL" | tee -a "$LOG_FILE"
+
+if [[ "$RUNNING_KERNEL" != "$EXPECTED_KERNEL" ]]; then
+    echo "ERROR: Wrong kernel running! Expected $EXPECTED_KERNEL but got $RUNNING_KERNEL" | tee -a "$LOG_FILE"
+    echo "This indicates GRUB may not have selected the correct kernel." | tee -a "$LOG_FILE"
+    exit 125
+fi
+echo "✓ Correct kernel is running" | tee -a "$LOG_FILE"
+
+# Step 6: Run selftests-kmod
+echo "[6/7] Running selftests-kmod..." | tee -a "$LOG_FILE"
 if ! make selftests-kmod 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Selftests failed to run - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi
+
+# Step 7: Parse and evaluate test results
+echo "[7/7] Evaluating test results..." | tee -a "$LOG_FILE"
 
 # Parse timing from Ansible profile_tasks callback output
 # Pattern: "selftests : Run kernelspace selftests --------------------------------- XXX.XXs"
@@ -81,6 +112,8 @@ if [ -z "$TIMING" ]; then
 fi
 
 echo "=========================================" | tee -a "$LOG_FILE"
+echo "Commit: $COMMIT ($COMMIT_FULL)" | tee -a "$LOG_FILE"
+echo "Kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
 echo "Kmod test timing: ${TIMING}s" | tee -a "$LOG_FILE"
 
 # Threshold: 250s (midpoint between good ~190s and bad ~305s)

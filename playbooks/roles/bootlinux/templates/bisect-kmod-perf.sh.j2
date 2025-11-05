@@ -15,6 +15,11 @@ set -euo pipefail
 KDEVOPS_DIR="{{ topdir_path }}"
 cd "$KDEVOPS_DIR"
 
+# VM and libvirt configuration
+VM_NAME="{{ kdevops_host_prefix }}-kmod"
+LIBVIRT_URI="{{ libvirt_uri }}"
+export LIBVIRT_DEFAULT_URI="$LIBVIRT_URI"
+
 # Get current commit being tested by git bisect
 COMMIT=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse --short HEAD)
 COMMIT_FULL=$(git --git-dir="{{ bootlinux_9p_host_path }}/.git" rev-parse HEAD)
@@ -67,20 +72,173 @@ if ! make 2>&1 | tee -a "$LOG_FILE"; then
     exit 125
 fi
 
+# Step 3.5: Set GRUB fallback to base kernel (for boot failure recovery)
+echo "[3.5/10] Setting GRUB fallback to base kernel..." | tee -a "$LOG_FILE"
+
+# Get base kernel entry (debian packaged kernel, not bisect kernel)
+BASE_KERNEL_ENTRY=$(ansible baseline -m shell \
+    -a "awk -F\\' '/menuentry / {print NR-1 \" \" \$2}' /boot/grub/grub.cfg | grep -E 'Linux [0-9]+\.[0-9]+.*-amd64' | grep -v bisect | head -1 | awk '{print \$1}'" \
+    -o 2>/dev/null | awk '{print $NF}' || echo "UNKNOWN")
+
+if [ "$BASE_KERNEL_ENTRY" = "UNKNOWN" ]; then
+    echo "WARNING: Could not detect base kernel GRUB entry, assuming entry 0" | tee -a "$LOG_FILE"
+    BASE_KERNEL_ENTRY=0
+fi
+
+echo "Base kernel GRUB entry: $BASE_KERNEL_ENTRY" | tee -a "$LOG_FILE"
+
+# Gracefully shut down VM
+ansible baseline -b -m command -a "shutdown -h now" 2>&1 | tee -a "$LOG_FILE" || true
+sleep 5
+
+# Wait for VM to be fully shut down (max 60 seconds)
+echo "Waiting for VM to shut down..." | tee -a "$LOG_FILE"
+for i in {1..12}; do
+    STATE=$(virsh domstate "$VM_NAME" 2>/dev/null || echo "unknown")
+    if [ "$STATE" = "shut off" ]; then
+        echo "VM shut down successfully" | tee -a "$LOG_FILE"
+        break
+    fi
+    sleep 5
+done
+
+# Get VM disk path
+DISK=$(virsh dumpxml "$VM_NAME" | xmllint --xpath "string(//devices/disk[@device='disk']/source/@file)" - 2>/dev/null || echo "")
+if [ -z "$DISK" ]; then
+    echo "ERROR: Could not find VM disk path - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+echo "VM disk: $DISK" | tee -a "$LOG_FILE"
+
+# Set GRUB default to base kernel (fallback)
+echo "Setting GRUB default to entry $BASE_KERNEL_ENTRY..." | tee -a "$LOG_FILE"
+if ! virt-customize --format raw -a "$DISK" --run-command "grub-set-default $BASE_KERNEL_ENTRY" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: virt-customize failed to set GRUB default - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Start VM
+echo "Starting VM..." | tee -a "$LOG_FILE"
+if ! virsh start "$VM_NAME" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Failed to start VM - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Wait for VM to become accessible
+echo "Waiting for VM to become accessible..." | tee -a "$LOG_FILE"
+if ! ansible baseline -m wait_for_connection -a "timeout=120" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: VM did not become accessible after setting fallback - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+echo "✓ GRUB fallback configured successfully" | tee -a "$LOG_FILE"
+
 # Step 4: Build and deploy kernel for the bisected commit
-echo "[4/7] Building and deploying kernel for commit $COMMIT..." | tee -a "$LOG_FILE"
+echo "[4/10] Building and deploying kernel for commit $COMMIT..." | tee -a "$LOG_FILE"
 # Override the configured ref and localversion to build the actual commit being tested
+# Skip reboot tag - we will control the boot process manually
 if ! make linux \
-    ANSIBLE_PLAYBOOK_ARGS="--skip-tags bisect --extra-vars '{\"target_linux_ref\": \"$COMMIT_FULL\", \"target_linux_localversion\": \"$LOCALVERSION\"}'" \
+    ANSIBLE_PLAYBOOK_ARGS="--skip-tags bisect,reboot --extra-vars '{\"target_linux_ref\": \"$COMMIT_FULL\", \"target_linux_localversion\": \"$LOCALVERSION\"}'" \
     2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Kernel build/deploy failed - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi
 
-# Step 5: Verify the correct kernel is running
-echo "[5/7] Verifying correct kernel is running..." | tee -a "$LOG_FILE"
+echo "✓ Kernel built and installed successfully" | tee -a "$LOG_FILE"
+
+# Step 4.5: Set grub-reboot for one-time boot of bisect kernel
+echo "[4.5/10] Setting grub-reboot for one-time boot of bisect kernel..." | tee -a "$LOG_FILE"
+
 # Read the actual kernel version from the build (includes LOCALVERSION_AUTO)
 EXPECTED_KERNEL=$(cat {{ bootlinux_9p_host_path }}/include/config/kernel.release 2>/dev/null || echo "UNKNOWN")
+if [ "$EXPECTED_KERNEL" = "UNKNOWN" ]; then
+    echo "ERROR: Could not read kernel version from build - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+echo "Expected kernel version: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
+
+# Get bisect kernel GRUB entry number
+BISECT_KERNEL_ENTRY=$(ansible baseline -m shell \
+    -a "awk -F\\' '/menuentry / {print NR-1 \" \" \$2}' /boot/grub/grub.cfg | grep '$EXPECTED_KERNEL' | head -1 | awk '{print \$1}'" \
+    -o 2>/dev/null | awk '{print $NF}' || echo "UNKNOWN")
+
+if [ "$BISECT_KERNEL_ENTRY" = "UNKNOWN" ]; then
+    echo "ERROR: Could not find bisect kernel in GRUB menu - skipping commit" | tee -a "$LOG_FILE"
+    echo "Expected kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
+    ansible baseline -m shell -a "awk -F\\' '/menuentry / {print NR-1 \" ... \" \$2}' /boot/grub/grub.cfg" 2>&1 | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+echo "Bisect kernel GRUB entry: $BISECT_KERNEL_ENTRY" | tee -a "$LOG_FILE"
+
+# Shut down VM to modify GRUB
+ansible baseline -b -m command -a "shutdown -h now" 2>&1 | tee -a "$LOG_FILE" || true
+sleep 5
+
+# Wait for shutdown
+echo "Waiting for VM to shut down..." | tee -a "$LOG_FILE"
+for i in {1..12}; do
+    STATE=$(virsh domstate "$VM_NAME" 2>/dev/null || echo "unknown")
+    if [ "$STATE" = "shut off" ]; then
+        echo "VM shut down successfully" | tee -a "$LOG_FILE"
+        break
+    fi
+    sleep 5
+done
+
+# Set grub-reboot for ONE-TIME boot of bisect kernel
+# After this boot, GRUB will revert to default (base kernel)
+echo "Setting grub-reboot to entry $BISECT_KERNEL_ENTRY (one-time boot)..." | tee -a "$LOG_FILE"
+if ! virt-customize --format raw -a "$DISK" --run-command "grub-reboot $BISECT_KERNEL_ENTRY" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: virt-customize failed to set grub-reboot - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+echo "✓ GRUB configured for one-time boot of bisect kernel" | tee -a "$LOG_FILE"
+
+# Step 4.6: Boot with timeout and automatic recovery
+echo "[4.6/10] Booting bisect kernel with timeout protection..." | tee -a "$LOG_FILE"
+
+# Start VM
+echo "Starting VM..." | tee -a "$LOG_FILE"
+if ! virsh start "$VM_NAME" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "ERROR: Failed to start VM - skipping commit" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+# Wait for boot with 120 second timeout
+echo "Waiting for VM to boot (120s timeout)..." | tee -a "$LOG_FILE"
+if ! timeout 120 ansible baseline -m wait_for_connection -a "timeout=120" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "=========================================" | tee -a "$LOG_FILE"
+    echo "ERROR: Bisect kernel failed to boot within 120 seconds" | tee -a "$LOG_FILE"
+    echo "This kernel appears to have boot problems." | tee -a "$LOG_FILE"
+    echo "Recovering to fallback kernel..." | tee -a "$LOG_FILE"
+    echo "=========================================" | tee -a "$LOG_FILE"
+
+    # Force shutdown
+    virsh destroy "$VM_NAME" 2>&1 | tee -a "$LOG_FILE" || true
+    sleep 2
+
+    # Start VM again - will boot to fallback (base kernel) due to grub-reboot
+    virsh start "$VM_NAME" 2>&1 | tee -a "$LOG_FILE"
+
+    # Wait for fallback to boot
+    if ansible baseline -m wait_for_connection -a "timeout=120" 2>&1 | tee -a "$LOG_FILE"; then
+        RECOVERY_KERNEL=$(ansible baseline -m command -a "uname -r" -o 2>/dev/null | awk '{print $NF}')
+        echo "✓ Successfully recovered to fallback kernel: $RECOVERY_KERNEL" | tee -a "$LOG_FILE"
+    else
+        echo "CRITICAL: Fallback kernel also failed to boot!" | tee -a "$LOG_FILE"
+    fi
+
+    # Skip this commit - kernel doesn't boot
+    echo "Skipping commit $COMMIT (boot failure)" | tee -a "$LOG_FILE"
+    exit 125
+fi
+
+echo "✓ VM booted successfully" | tee -a "$LOG_FILE"
+
+# Step 5: Verify the correct kernel is running
+echo "[5/10] Verifying correct kernel is running..." | tee -a "$LOG_FILE"
 RUNNING_KERNEL=$(ansible baseline -m command -a "uname -r" -o 2>/dev/null | awk '{print $NF}' || echo "UNKNOWN")
 
 echo "Expected kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
@@ -88,20 +246,21 @@ echo "Running kernel:  $RUNNING_KERNEL" | tee -a "$LOG_FILE"
 
 if [[ "$RUNNING_KERNEL" != "$EXPECTED_KERNEL" ]]; then
     echo "ERROR: Wrong kernel running! Expected $EXPECTED_KERNEL but got $RUNNING_KERNEL" | tee -a "$LOG_FILE"
-    echo "This indicates GRUB may not have selected the correct kernel." | tee -a "$LOG_FILE"
+    echo "This indicates the bisect kernel booted but is not the expected version." | tee -a "$LOG_FILE"
+    echo "This should not happen with grub-reboot management." | tee -a "$LOG_FILE"
     exit 125
 fi
-echo "✓ Correct kernel is running" | tee -a "$LOG_FILE"
+echo "✓ Correct bisect kernel is running" | tee -a "$LOG_FILE"
 
 # Step 6: Run selftests-kmod
-echo "[6/7] Running selftests-kmod..." | tee -a "$LOG_FILE"
+echo "[6/10] Running selftests-kmod..." | tee -a "$LOG_FILE"
 if ! make selftests-kmod 2>&1 | tee -a "$LOG_FILE"; then
     echo "ERROR: Selftests failed to run - skipping commit" | tee -a "$LOG_FILE"
     exit 125
 fi
 
 # Step 7: Parse and evaluate test results
-echo "[7/7] Evaluating test results..." | tee -a "$LOG_FILE"
+echo "[7/10] Evaluating test results..." | tee -a "$LOG_FILE"
 
 # Parse timing from Ansible profile_tasks callback output
 # Pattern: "selftests : Run kernelspace selftests --------------------------------- XXX.XXs"
@@ -122,12 +281,65 @@ echo "Kmod test timing: ${TIMING}s" | tee -a "$LOG_FILE"
 # Bad commits:  v6.18-rc1 (303s), v6.18-rc2 (304s), v6.18-rc3 (307s)
 THRESHOLD=250
 
+# Store result before cleanup
 if (( $(echo "$TIMING > $THRESHOLD" | bc -l) )); then
-    echo "Result: BAD (${TIMING}s > ${THRESHOLD}s threshold)" | tee -a "$LOG_FILE"
-    echo "=========================================" | tee -a "$LOG_FILE"
-    exit 1
+    BISECT_RESULT=1  # BAD
+    RESULT_TEXT="BAD (${TIMING}s > ${THRESHOLD}s threshold)"
 else
-    echo "Result: GOOD (${TIMING}s <= ${THRESHOLD}s threshold)" | tee -a "$LOG_FILE"
-    echo "=========================================" | tee -a "$LOG_FILE"
-    exit 0
+    BISECT_RESULT=0  # GOOD
+    RESULT_TEXT="GOOD (${TIMING}s <= ${THRESHOLD}s threshold)"
 fi
+
+echo "Result: $RESULT_TEXT" | tee -a "$LOG_FILE"
+
+# Step 8: Clean up old bisect kernels to save disk space
+echo "[8/10] Cleaning up old bisect kernels..." | tee -a "$LOG_FILE"
+
+# Get list of all bisect kernels EXCEPT the current running one
+OLD_KERNELS=$(ansible baseline -m shell \
+    -a "cd /lib/modules && ls -d *bisect* 2>/dev/null | grep -v '$EXPECTED_KERNEL' | head -n -1" \
+    -o 2>/dev/null | tail -n +2 || echo "")
+
+if [ -n "$OLD_KERNELS" ]; then
+    echo "Found old kernels to remove:" | tee -a "$LOG_FILE"
+    echo "$OLD_KERNELS" | tee -a "$LOG_FILE"
+
+    # Remove old kernel files from /boot and /lib/modules
+    while IFS= read -r VERSION; do
+        [ -z "$VERSION" ] && continue
+        echo "Removing kernel $VERSION..." | tee -a "$LOG_FILE"
+
+        # Remove from /boot
+        ansible baseline -b -m shell \
+            -a "rm -f /boot/vmlinuz-$VERSION /boot/initrd.img-$VERSION /boot/config-$VERSION /boot/System.map-$VERSION" \
+            2>&1 | tee -a "$LOG_FILE" || true
+
+        # Remove from /lib/modules
+        ansible baseline -b -m shell \
+            -a "rm -rf /lib/modules/$VERSION" \
+            2>&1 | tee -a "$LOG_FILE" || true
+
+    done <<< "$OLD_KERNELS"
+
+    # Step 9: Update GRUB to remove old entries
+    echo "[9/10] Updating GRUB..." | tee -a "$LOG_FILE"
+    ansible baseline -b -m command -a "update-grub" 2>&1 | tee -a "$LOG_FILE" || true
+
+    echo "✓ Cleanup completed" | tee -a "$LOG_FILE"
+else
+    echo "No old kernels to remove" | tee -a "$LOG_FILE"
+fi
+
+# Step 10: Report disk space
+echo "[10/10] Disk space status..." | tee -a "$LOG_FILE"
+DISK_SPACE=$(ansible baseline -m shell -a "df -h | grep kdevops0" -o 2>/dev/null | tail -1 || echo "Unknown")
+echo "Disk usage: $DISK_SPACE" | tee -a "$LOG_FILE"
+
+# Report final result
+echo "=========================================" | tee -a "$LOG_FILE"
+echo "Commit: $COMMIT ($COMMIT_FULL)" | tee -a "$LOG_FILE"
+echo "Kernel: $EXPECTED_KERNEL" | tee -a "$LOG_FILE"
+echo "Result: $RESULT_TEXT" | tee -a "$LOG_FILE"
+echo "=========================================" | tee -a "$LOG_FILE"
+
+exit $BISECT_RESULT

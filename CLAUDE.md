@@ -128,6 +128,22 @@ make fix-whitespace-last-commit # Fixes commit white space damage
 make mrproper           # Clean everything and restart from scratch
 ```
 
+### Ansible Callbacks
+
+kdevops uses the lucid callback plugin for clean Ansible output.
+
+Enable via:
+```bash
+./scripts/kconfig/merge_config.sh -n defconfigs/configs/lucid.config
+make
+```
+
+See [docs/ansible-callbacks.md](docs/ansible-callbacks.md) for:
+- Configuration options
+- Task-level output control
+- Dynamic mode behavior
+- Logging details
+
 ## Key Workflows
 
 ### fstests (Filesystem Testing)

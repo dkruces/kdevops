@@ -56,8 +56,25 @@ endif # ANSIBLE_CFG_FILE_CUSTOM
 menu "Ansible Callback Plugin Configuration"
 choice
 	prompt "Ansible Callback Plugin"
-	default ANSIBLE_CFG_CALLBACK_PLUGIN_DENSE if !ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
+	default ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID if !ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
 	default ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM if ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
+
+config ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+	bool "Ansible Lucid Callback Plugin (recommended)"
+	help
+	  Lucid: Modern, clean Ansible output with progressive verbosity levels.
+
+	  Features:
+	  - Clean, minimal output by default (shows only changes and errors)
+	  - Progressive verbosity: -v shows all tasks, -vv shows debug tasks
+	  - Dynamic live display for interactive terminals (BitBake/Yocto style)
+	  - Static output for CI/CD and piped output
+	  - Task-level output control via output_verbosity variable
+	  - Comprehensive logging (always max verbosity, independent of display)
+	  - Time tracking for tasks > 3 seconds
+
+	  Lucid is designed by kernel developers for kernel testing workflows
+	  where human-readable output and silent operation are essential.
 
 config ANSIBLE_CFG_CALLBACK_PLUGIN_DEBUG
 	bool "Ansible Debug Callback Plugin"
@@ -93,6 +110,7 @@ endif # ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM
 config ANSIBLE_CFG_CALLBACK_PLUGIN_STRING
 	string
 	output yaml
+	default "lucid" if ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
 	default "debug" if ANSIBLE_CFG_CALLBACK_PLUGIN_DEBUG
 	default "dense" if ANSIBLE_CFG_CALLBACK_PLUGIN_DENSE
 	default "community.general.diy" if ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
@@ -170,6 +188,134 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_PROFILE_TASKS
 	  and generates a "TASKS RECAP" section showing execution times.
 
 	  https://docs.ansible.com/ansible/latest/collections/ansible/posix/profile_tasks_callback.html
+
+if ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+
+menu "Lucid Callback Configuration"
+
+config ANSIBLE_CFG_LUCID_TIME_THRESHOLD
+	string "Time threshold for displaying task durations (seconds)"
+	output yaml
+	default "3.0"
+	help
+	  Only show task execution times if the duration exceeds this threshold.
+	  This keeps output clean by hiding times for quick tasks.
+
+	  Default: 3.0 seconds
+
+	  Set to 0 to show all task times.
+
+config ANSIBLE_CFG_LUCID_SHOW_ALL_TIMES
+	bool "Show all task times regardless of threshold"
+	output yaml
+	default n
+	help
+	  When enabled, show execution times for all tasks regardless of the
+	  time_threshold setting. Useful for performance analysis.
+
+config ANSIBLE_CFG_LUCID_SHOW_TIMESTAMPS
+	bool "Show timestamps in output"
+	output yaml
+	default n
+	help
+	  Add timestamps to console output. Timestamps are always included
+	  in log files regardless of this setting.
+
+choice
+	prompt "Timestamp format"
+	default ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_TIME
+	depends on ANSIBLE_CFG_LUCID_SHOW_TIMESTAMPS
+
+config ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_TIME
+	bool "Time only (HH:MM:SS)"
+	help
+	  Format: [14:30:45]
+
+config ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_DATETIME
+	bool "Date and time (YYYY-MM-DD HH:MM:SS)"
+	help
+	  Format: [2025-11-13 14:30:45]
+
+config ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_ISO8601
+	bool "ISO 8601 (YYYY-MM-DDTHH:MM:SS.mmmmm)"
+	help
+	  Format: [2025-11-13T14:30:45.123456]
+
+endchoice
+
+config ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_STRING
+	string
+	output yaml
+	default "time" if ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_TIME
+	default "datetime" if ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_DATETIME
+	default "iso8601" if ANSIBLE_CFG_LUCID_TIMESTAMP_FORMAT_ISO8601
+
+choice
+	prompt "Output display mode"
+	default ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
+
+config ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
+	bool "Auto (dynamic if interactive, static otherwise)"
+	help
+	  Automatically select output mode based on terminal detection.
+
+	  Uses dynamic live updating display (similar to BitBake/Yocto) when
+	  running in an interactive terminal with spinner animations, live
+	  task timers, and parallel task visualization.
+
+	  Automatically falls back to traditional static output for CI/CD,
+	  piped output, and non-TTY contexts.
+
+	  This is the recommended default for most use cases.
+
+config ANSIBLE_CFG_LUCID_OUTPUT_MODE_STATIC
+	bool "Static (always use traditional output)"
+	help
+	  Force static output mode regardless of terminal type.
+
+	  Always use traditional static output with no live updates or
+	  animations. Each task result is printed as it completes.
+
+	  Useful for users who prefer traditional Ansible output or when
+	  dynamic mode causes issues with specific terminal emulators.
+
+config ANSIBLE_CFG_LUCID_OUTPUT_MODE_DYNAMIC
+	bool "Dynamic (always attempt live display)"
+	help
+	  Force dynamic output mode even in non-interactive contexts.
+
+	  Always attempt to use live updating display with ANSI escape codes
+	  even if terminal detection suggests static mode should be used.
+
+	  Warning: May produce garbled output in CI/CD, piped contexts, or
+	  terminals that don't support ANSI escape sequences. Only use this
+	  if you know your environment supports dynamic output but the
+	  automatic detection fails.
+
+endchoice
+
+config ANSIBLE_CFG_LUCID_OUTPUT_MODE_STRING
+	string
+	output yaml
+	default "auto" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
+	default "static" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_STATIC
+	default "dynamic" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_DYNAMIC
+
+config ANSIBLE_CFG_LUCID_LOG_APPEND
+	bool "Append to existing log file instead of creating new"
+	output yaml
+	default n
+	help
+	  When enabled, append to existing log file. When disabled (default),
+	  create a new timestamped log file for each playbook run.
+
+	  Log file location is auto-detected (tries .ansible/logs/ in project
+	  directory first, then ~/.ansible/logs/, then /var/log/ansible/).
+
+endmenu
+
+endif # ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+
 endmenu
 
 config ANSIBLE_CFG_DEPRECATION_WARNINGS

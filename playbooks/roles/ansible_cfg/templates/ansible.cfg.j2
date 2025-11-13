@@ -1,6 +1,10 @@
 [defaults]
+{% if ansible_cfg_callback_plugin_string == 'lucid' %}
+callback_plugins = ./callback_plugins
+{% endif %}
 {% if ansible_cfg_callback_plugin_profile_tasks %}
-callbacks_enabled = ansible.posix.profile_tasks, {{ ansible_cfg_callback_plugin_string }}
+callbacks_enabled = ansible.posix.profile_tasks{% if ansible_cfg_callback_plugin_string == 'lucid' %}, {{ ansible_cfg_callback_plugin_string }}{% endif %}
+
 {% endif %}
 deprecation_warnings = {{ ansible_cfg_deprecation_warnings }}
 stdout_callback = {{ ansible_cfg_callback_plugin_string }}
@@ -47,6 +51,18 @@ playbook_on_stats_msg_color = bright green
 [callback_profile_tasks]
 summary_only = true
 {% endif %}
+{% if ansible_cfg_callback_plugin_string == 'lucid' %}
+
+[callback_lucid]
+time_threshold = {{ ansible_cfg_lucid_time_threshold | default('3.0') }}
+show_all_times = {{ ansible_cfg_lucid_show_all_times | default('False') }}
+show_timestamps = {{ ansible_cfg_lucid_show_timestamps | default('False') }}
+timestamp_format = {{ ansible_cfg_lucid_timestamp_format_string | default('time') }}
+output_mode = {{ ansible_cfg_lucid_output_mode_string | default('auto') }}
+log_file =
+log_append = {{ ansible_cfg_lucid_log_append | default('False') }}
+{% endif %}
+
 [ssh_connection]
 remote_port = {{ ansible_cfg_ssh_port }}
 {% if ansible_facts['distribution'] == 'openSUSE' %}

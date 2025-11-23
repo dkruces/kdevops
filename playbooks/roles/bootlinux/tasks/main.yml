@@ -195,6 +195,97 @@
   when:
     - not workflow_linux_packaged|bool
 
+- name: Check if 9p mount tag is already mounted elsewhere
+  become: true
+  become_flags: "su - -c"
+  become_method: sudo
+  ansible.builtin.shell: "mount | grep '{{ bootlinux_9p_mount_tag }}' | awk '{print $3}'"
+  register: existing_9p_mount
+  changed_when: false
+  failed_when: false
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+
+- name: Get running VM domain XML to check 9P fsdev path
+  delegate_to: localhost
+  community.libvirt.virt:
+    command: get_xml
+    name: "{{ inventory_hostname }}"
+  register: vm_domain_xml
+  failed_when: false
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+
+- name: Extract current 9P source path from domain XML
+  ansible.builtin.set_fact:
+    qemu_fsdev_path: >-
+      {{
+        vm_domain_xml.get_xml |
+        default('') |
+        regex_search("<source dir=['\"]([^'\"]+)['\"]", '\1') |
+        default([''], true) |
+        first
+      }}
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+    - vm_domain_xml.get_xml is defined
+
+- name: Set 9p_needs_power_cycle fact
+  ansible.builtin.set_fact:
+    bootlinux_9p_needs_power_cycle: >-
+      {{
+        (existing_9p_mount.stdout is defined and
+         existing_9p_mount.stdout != "" and
+         existing_9p_mount.stdout != target_linux_dir_path) or
+        (qemu_fsdev_path | default('') != '' and
+         qemu_fsdev_path != bootlinux_9p_host_path)
+      }}
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+
+- name: Debug 9P path mismatch detection
+  ansible.builtin.debug:
+    msg: |
+      9P Path Check Results:
+      - Guest mount point: {{ existing_9p_mount.stdout | default('not mounted') }}
+      - Expected mount point: {{ target_linux_dir_path }}
+      - Libvirt 9P source path: {{ qemu_fsdev_path | default('not found') }}
+      - Expected host path: {{ bootlinux_9p_host_path }}
+      - Needs power cycle: {{ bootlinux_9p_needs_power_cycle | default(false) }}
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+  vars:
+    output_verbosity: 1
+
+- name: Remove old 9P mount from fstab before power cycle
+  become: true
+  become_flags: "su - -c"
+  become_method: sudo
+  ansible.posix.mount:
+    name: "{{ existing_9p_mount.stdout }}"
+    src: "{{ bootlinux_9p_mount_tag }}"
+    fstype: "9p"
+    state: "absent"
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_needs_power_cycle | default(false) | bool
+    - existing_9p_mount.stdout is defined
+    - existing_9p_mount.stdout != ""
+  tags: ["data_partition", "9p_mount"]
+
+- name: Power cycle VM if 9p host path changed (QEMU caches fsdev path)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/power-cycle-vm.yml"
+  when:
+    - bootlinux_9p|bool
+    - bootlinux_9p_needs_power_cycle | default(false) | bool
+  tags: ["data_partition", "9p_mount"]
+
 - name: Mount bootlinux 9p on each target node
   become: true
   become_flags: "su - -c"

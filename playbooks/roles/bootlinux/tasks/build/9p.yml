@@ -30,40 +30,91 @@
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
       {{ ansible_callback_diy.result.output.stdout | default('') }}
 
-- name: Check if target directory exists when using 9p and Linux CLI was set
+- name: Check if kernel source directory exists
   ansible.builtin.stat:
     path: "{{ bootlinux_9p_host_path }}"
-  register: target_directory_stat
+  register: kernel_dir_stat
   run_once: true
   delegate_to: localhost
-  when:
-    - bootlinux_tree_set_by_cli|bool
+  tags: ["clone", "checkout"]
 
-- name: Fail if target directory does not exist when using 9p and Linux CLI was set
-  ansible.builtin.fail:
-    msg: "The target directory {{ bootlinux_9p_host_path }} does not exist."
+- name: Check for required kernel tree markers
+  ansible.builtin.stat:
+    path: "{{ bootlinux_9p_host_path }}/{{ item }}"
+  register: kernel_markers
+  loop:
+    - COPYING
+    - MAINTAINERS
+    - Makefile
+    - arch
+    - drivers
+    - kernel
+  when:
+    - kernel_dir_stat.stat.exists
   run_once: true
   delegate_to: localhost
+  tags: ["clone", "checkout"]
+
+- name: Validate kernel tree
+  ansible.builtin.assert:
+    that:
+      - kernel_markers.results | selectattr('stat.exists') | list | length == 6
+    fail_msg: |
+      ERROR: {{ bootlinux_9p_host_path }} exists but is NOT a valid Linux kernel tree.
+
+      Missing required files/directories. A valid kernel tree must contain:
+      COPYING, MAINTAINERS, Makefile, arch/, drivers/, kernel/
+
+      Please either:
+      1. Remove/rename the directory and let kdevops clone
+      2. Point BOOTLINUX_9P_HOST_PATH to a valid kernel tree
+    success_msg: "Validated {{ bootlinux_9p_host_path }} is a kernel tree"
   when:
-    - bootlinux_tree_set_by_cli|bool
-    - not target_directory_stat.stat.exists
+    - kernel_dir_stat.stat.exists
+  run_once: true
+  delegate_to: localhost
+  tags: ["clone", "checkout"]
+
+- name: Check if kernel tree is a git repository
+  ansible.builtin.stat:
+    path: "{{ bootlinux_9p_host_path }}/.git"
+  register: kernel_git_stat
+  when:
+    - kernel_dir_stat.stat.exists
+  run_once: true
+  delegate_to: localhost
+  tags: ["clone", "checkout"]
 
 - name: Git clone {{ target_linux_tree }} on the control node
   ansible.builtin.git:
     repo: "{{ target_linux_git }}"
     dest: "{{ bootlinux_9p_host_path }}"
-    update: true
+    update: false
     depth: "{{ target_linux_shallow_depth }}"
     version: "{{ active_linux_ref | default(target_linux_ref) }}"
   retries: 3
   delay: 5
-  register: result
-  until: not result.failed
-  tags: ["clone"]
+  register: git_clone_result
+  until: not git_clone_result.failed
   when:
-    - not bootlinux_tree_set_by_cli|bool
+    - not kernel_dir_stat.stat.exists
   run_once: true
   delegate_to: localhost
+  tags: ["clone"]
+
+- name: Checkout git ref {{ active_linux_ref | default(target_linux_ref) }} in existing tree
+  ansible.builtin.command:
+    cmd: git checkout {{ active_linux_ref | default(target_linux_ref) }}
+    chdir: "{{ bootlinux_9p_host_path }}"
+  register: git_checkout
+  failed_when: git_checkout.rc != 0
+  changed_when: "'Switched to' in git_checkout.stderr or 'Already on' in git_checkout.stdout"
+  when:
+    - kernel_dir_stat.stat.exists
+    - kernel_git_stat.stat.exists
+  run_once: true
+  delegate_to: localhost
+  tags: ["clone", "checkout"]
 
 - name: Copy kernel delta if requested on the control node
   ansible.builtin.template:

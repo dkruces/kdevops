@@ -1,0 +1,150 @@
+---
+# Power cycle VM to clear 9P cache and reload virtio device configuration
+# This is necessary when the 9P host path changes because:
+# - Simple remount doesn't clear virtio device state
+# - Restart doesn't properly clear 9P caches
+# - Full shutdown + start is required
+
+- name: Shutdown VM to clear 9P cache
+  community.libvirt.virt:
+    name: "{{ ansible_hostname }}"
+    state: shutdown
+    uri: "{{ libvirt_uri }}"
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Wait for SSH to become unreachable (VM shutting down)
+  ansible.builtin.wait_for:
+    host: "{{ inventory_hostname }}"
+    port: 22
+    state: stopped
+    timeout: 120
+    delay: 2
+  delegate_to: localhost
+  register: shutdown_wait_result
+  ignore_errors: true
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Give VM a moment to fully transition to shut off state
+  ansible.builtin.pause:
+    seconds: 3
+  delegate_to: localhost
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Check if VM actually shut down
+  community.libvirt.virt:
+    name: "{{ ansible_hostname }}"
+    command: status
+    uri: "{{ libvirt_uri }}"
+  register: vm_state_after_shutdown
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Debug VM state after shutdown check
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "VM {{ ansible_hostname }} state after shutdown: {{ vm_state_after_shutdown.status }}"
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Notify user if graceful shutdown failed
+  delegate_to: localhost
+  ansible.builtin.pause:
+    prompt: |
+
+      ============================================================
+      WARNING: VM {{ ansible_hostname }} did not shut down gracefully
+      ============================================================
+
+      Current VM state: {{ vm_state_after_shutdown.status }}
+
+      The VM needs to be shut down to reload the 9P filesystem configuration.
+      Graceful shutdown (virsh shutdown) timed out after 120 seconds.
+
+      Please manually shut down the VM using one of these methods:
+
+      1. PREFERRED - Investigate why shutdown failed:
+         sudo virsh console {{ ansible_hostname }}
+         (Check if system is hung, then try clean shutdown from inside VM)
+
+      2. Force shutdown (may cause data loss):
+         sudo virsh destroy {{ ansible_hostname }}
+
+      3. Try graceful shutdown again:
+         sudo virsh shutdown {{ ansible_hostname }}
+         (Wait and check: sudo virsh domstate {{ ansible_hostname }})
+
+      After the VM shows "shut off" state, press ENTER to continue.
+      The playbook will then redefine and restart the VM with the new 9P path.
+
+      To check VM state: sudo virsh domstate {{ ansible_hostname }}
+
+      ============================================================
+  when:
+    - vm_state_after_shutdown.status != "shutdown"
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Verify VM is shut off before continuing
+  community.libvirt.virt:
+    name: "{{ ansible_hostname }}"
+    command: status
+    uri: "{{ libvirt_uri }}"
+  register: vm_state_verified
+  failed_when: vm_state_verified.status != "shutdown"
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Undefine VM to clear cached device configuration
+  community.libvirt.virt:
+    name: "{{ ansible_hostname }}"
+    command: undefine
+    flags: "--nvram"
+    uri: "{{ libvirt_uri }}"
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  failed_when: false
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Redefine VM with updated 9P host path from XML
+  community.libvirt.virt:
+    command: define
+    xml: "{{ lookup('file', topdir_path + '/guestfs/' + ansible_hostname + '/' + ansible_hostname + '.xml') }}"
+    uri: "{{ libvirt_uri }}"
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  failed_when: false
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Start VM with fresh 9P device configuration
+  community.libvirt.virt:
+    name: "{{ ansible_hostname }}"
+    state: running
+    uri: "{{ libvirt_uri }}"
+  delegate_to: localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  become_flags: "su - -c"
+  failed_when: false
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Wait for VM to become reachable after restart
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    delay: 5
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]
+
+- name: Gather facts after VM restart
+  ansible.builtin.setup:
+  tags: ["data_partition", "9p_mount", "vm_power_cycle"]

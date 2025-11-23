@@ -195,6 +195,44 @@
   when:
     - not workflow_linux_packaged|bool
 
+- name: Check if 9p mount tag is already mounted elsewhere
+  become: true
+  become_flags: "su - -c"
+  become_method: sudo
+  ansible.builtin.shell: "mount | grep '{{ bootlinux_9p_mount_tag }}' | awk '{print $3}'"
+  register: existing_9p_mount
+  changed_when: false
+  failed_when: false
+  tags: ["data_partition", "9p_mount"]
+  when:
+    - bootlinux_9p|bool
+
+- name: Remove old 9P mount from fstab before power cycle
+  become: true
+  become_flags: "su - -c"
+  become_method: sudo
+  ansible.posix.mount:
+    name: "{{ existing_9p_mount.stdout }}"
+    src: "{{ bootlinux_9p_mount_tag }}"
+    fstype: "9p"
+    state: "absent"
+  when:
+    - bootlinux_9p|bool
+    - existing_9p_mount.stdout is defined
+    - existing_9p_mount.stdout != ""
+    - existing_9p_mount.stdout != target_linux_dir_path
+  tags: ["data_partition", "9p_mount"]
+
+- name: Power cycle VM if 9p mounted at different location (clears cache)
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/power-cycle-vm.yml"
+  when:
+    - bootlinux_9p|bool
+    - existing_9p_mount.stdout is defined
+    - existing_9p_mount.stdout != ""
+    - existing_9p_mount.stdout != target_linux_dir_path
+  tags: ["data_partition", "9p_mount"]
+
 - name: Mount bootlinux 9p on each target node
   become: true
   become_flags: "su - -c"

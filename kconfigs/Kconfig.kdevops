@@ -95,6 +95,31 @@ config KDEVOPS_MAKE_VERBOSE
 
 	  If unsure, say N.
 
+config KDEVOPS_ANSIBLE_VERBOSE
+	int "Ansible verbosity level (AV=0-6)"
+	range 0 6
+	default 0
+	help
+	  Set the default Ansible verbosity level for all playbook runs.
+	  This is equivalent to running 'make AV=N' where N is the level.
+
+	  Verbosity levels:
+	  - 0: Normal output (default)
+	  - 1: Verbose (-v) - shows task results and commands
+	  - 2: More verbose (-vv) - adds task configuration
+	  - 3: Debug (-vvv) - adds connection debugging
+	  - 4-6: Increasingly detailed connection debugging
+
+	  For the lucid callback plugin, level 1 shows all tasks including
+	  ok and skipped, plus executed commands and full stdout/stderr.
+	  This is recommended for CI environments where console output
+	  serves as the primary log.
+
+	  You can still override this setting on the command line with
+	  'make AV=N' for any specific invocation.
+
+	  If unsure, leave at 0.
+
 config KDEVOPS_BASELINE_AND_DEV_SET_BY_CLI
 	bool
 	output yaml

@@ -230,6 +230,7 @@
     file: "{{ role_path }}/tasks/build/9p.yml"
   when:
     - bootlinux_9p|bool
+  tags: ["clone", "build-linux"]
 
 - name: Build the Linux kernel on the target nodes
   ansible.builtin.include_tasks:

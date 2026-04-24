@@ -142,6 +142,7 @@ class CallbackModule(CallbackBase):
         self.display_failed_stderr = self.get_option("display_failed_stderr")
         self.check_mode_markers = self.get_option("check_mode_markers")
         self.show_custom_stats = self.get_option("show_custom_stats")
+        self.show_task_path_on_failure = self.get_option("show_task_path_on_failure")
 
         # Determine display mode based on configuration
         is_interactive = self._detect_interactive()
@@ -758,11 +759,27 @@ class CallbackModule(CallbackBase):
                         stderr=use_stderr,
                     )
 
+        # Surface the task path on failure when the option is set or -vv+.
+        task_path = ""
+        if status in ("failed", "unreachable") and (
+            self.show_task_path_on_failure or self._display.verbosity >= 2
+        ):
+            try:
+                task_path = result.task.get_path() or ""
+            except AttributeError:
+                task_path = ""
+
         # Show output if conditions met
         if show_output:
-            self._display_output(result, stderr=use_stderr)
+            self._display_output(result, stderr=use_stderr, task_path=task_path)
+        elif task_path:
+            # Still surface the failing task's source location even when the
+            # body is suppressed (e.g. no stdout/stderr/msg to display).
+            self._display_message(
+                f"task path: {task_path}", color=C.COLOR_VERBOSE, stderr=use_stderr
+            )
 
-    def _display_output(self, result, stderr: bool = False):
+    def _display_output(self, result, stderr: bool = False, task_path: str = ""):
         """Display stdout/stderr/msg from task result"""
         output = []
         res = result.result
@@ -786,6 +803,11 @@ class CallbackModule(CallbackBase):
         # exception (Python traceback from module failures)
         if "exception" in res and res["exception"]:
             output.append(f"\nEXCEPTION:\n{res['exception']}")
+
+        # Task source path for failures, mirroring the default callback's
+        # show_task_path_on_failure behavior.
+        if task_path:
+            output.append(f"\ntask path: {task_path}")
 
         if output:
             with self.output_lock:
@@ -831,6 +853,17 @@ class CallbackModule(CallbackBase):
 
         if status == "failed" and "exception" in res:
             self._write_to_log(f"\nEXCEPTION:\n{res['exception']}\n")
+
+        # Always record the failing task's source path in the log, regardless
+        # of the show_task_path_on_failure option or verbosity, so the log
+        # stays self-sufficient for post-hoc debugging of failures.
+        if status in ("failed", "unreachable"):
+            try:
+                task_path = result.task.get_path()
+            except AttributeError:
+                task_path = None
+            if task_path:
+                self._write_to_log(f"task path: {task_path}")
 
     def _display_recap(self, stats):
         """Display final statistics"""

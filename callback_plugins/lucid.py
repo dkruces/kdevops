@@ -560,6 +560,7 @@ class CallbackModule(CallbackBase):
     def v2_runner_item_on_failed(self, result):
         """Loop item failed — log per-item command and output"""
         self._log_item_result(result)
+        # Item label comes from the raw result; redacted body from cleaned.
         res = result.result
         item = res.get("_ansible_item_label")
         if item is None:
@@ -567,11 +568,12 @@ class CallbackModule(CallbackBase):
             item = res.get(loop_var, "")
         if isinstance(item, dict):
             item = item.get("name", item.get("group", str(item)))
+        cleaned = self._cleaned_result(result)
         self.failed_items.append({
             "item": item,
-            "stderr": res.get("stderr", ""),
-            "stdout": res.get("stdout", ""),
-            "msg": res.get("msg", ""),
+            "stderr": cleaned.get("stderr", ""),
+            "stdout": cleaned.get("stdout", ""),
+            "msg": cleaned.get("msg", ""),
             "cmd": self._get_task_command(result),
         })
 
@@ -779,30 +781,53 @@ class CallbackModule(CallbackBase):
                 f"task path: {task_path}", color=C.COLOR_VERBOSE, stderr=use_stderr
             )
 
+    def _cleaned_result(self, result):
+        """Return a cleaned copy of result.result suitable for display.
+
+        CallbackBase._clean_results mutates in place, so we copy first to
+        preserve the original for other observers. The returned dict has
+        debug-module specific redaction applied; the _ansible_* bookkeeping
+        keys are only stripped when we subsequently pass through
+        _dump_results (which calls strip_internal_keys on its own deep copy).
+        For the ad-hoc stdout/stderr/msg reads the lucid compact format does
+        at verbosity 0–1, reading cleaned[...] is safe because no_log results
+        arrive at callbacks with their payload already replaced by a
+        'censored' placeholder at the executor level.
+        """
+        cleaned = result.result.copy()
+        self._clean_results(cleaned, result.task.action)
+        return cleaned
+
     def _display_output(self, result, stderr: bool = False, task_path: str = ""):
         """Display stdout/stderr/msg from task result"""
         output = []
-        res = result.result
+        cleaned = self._cleaned_result(result)
 
         # stdout
-        if "stdout" in res and res["stdout"]:
-            output.append(f"\nSTDOUT:\n{res['stdout']}")
+        if "stdout" in cleaned and cleaned["stdout"]:
+            output.append(f"\nSTDOUT:\n{cleaned['stdout']}")
 
         # stderr
-        if "stderr" in res and res["stderr"]:
-            output.append(f"\nSTDERR:\n{res['stderr']}")
+        if "stderr" in cleaned and cleaned["stderr"]:
+            output.append(f"\nSTDERR:\n{cleaned['stderr']}")
 
         # msg (only if no stdout content)
-        if "msg" in res and res["msg"] and not res.get("stdout"):
-            msg_text = res["msg"]
+        if "msg" in cleaned and cleaned["msg"] and not cleaned.get("stdout"):
+            msg_text = cleaned["msg"]
             # Handle lists/dicts in msg
             if isinstance(msg_text, (list, dict)):
                 msg_text = json.dumps(msg_text, indent=2)
             output.append(f"\nMSG:\n{msg_text}")
 
         # exception (Python traceback from module failures)
-        if "exception" in res and res["exception"]:
-            output.append(f"\nEXCEPTION:\n{res['exception']}")
+        if "exception" in cleaned and cleaned["exception"]:
+            output.append(f"\nEXCEPTION:\n{cleaned['exception']}")
+
+        # At -vvv+ delegate to _dump_results so the user's result_format
+        # and friends apply; it strips _ansible_* keys on its own.
+        if self._display.verbosity >= 3:
+            dump = self._dump_results(cleaned, keep_invocation=False)
+            output.append(f"\n{dump}")
 
         # Task source path for failures, mirroring the default callback's
         # show_task_path_on_failure behavior.
@@ -818,7 +843,10 @@ class CallbackModule(CallbackBase):
         host = result.host.get_name()
         res = result.result
 
-        # Get delegation info for logging
+        # Copy first; CallbackBase._clean_results mutates in place.
+        cleaned = res.copy()
+        self._clean_results(cleaned, result.task.action)
+
         delegated_vars = res.get("_ansible_delegated_vars", {})
         delegate_to = delegated_vars.get("ansible_delegated_host")
         if delegate_to:
@@ -838,25 +866,23 @@ class CallbackModule(CallbackBase):
             if command:
                 self._write_to_log(f"\n$ {command}")
 
-        # Always log full output
-        if "stdout" in res and res["stdout"]:
-            self._write_to_log(f"\nSTDOUT:\n{res['stdout']}\n")
+        # Read from cleaned: no_log payload is already redacted.
+        if "stdout" in cleaned and cleaned["stdout"]:
+            self._write_to_log(f"\nSTDOUT:\n{cleaned['stdout']}\n")
 
-        if "stderr" in res and res["stderr"]:
-            self._write_to_log(f"\nSTDERR:\n{res['stderr']}\n")
+        if "stderr" in cleaned and cleaned["stderr"]:
+            self._write_to_log(f"\nSTDERR:\n{cleaned['stderr']}\n")
 
-        if "msg" in res and res["msg"]:
-            msg_text = res["msg"]
+        if "msg" in cleaned and cleaned["msg"]:
+            msg_text = cleaned["msg"]
             if isinstance(msg_text, (list, dict)):
                 msg_text = json.dumps(msg_text, indent=2)
             self._write_to_log(f"\nMSG:\n{msg_text}\n")
 
-        if status == "failed" and "exception" in res:
-            self._write_to_log(f"\nEXCEPTION:\n{res['exception']}\n")
+        if status == "failed" and "exception" in cleaned:
+            self._write_to_log(f"\nEXCEPTION:\n{cleaned['exception']}\n")
 
-        # Always record the failing task's source path in the log, regardless
-        # of the show_task_path_on_failure option or verbosity, so the log
-        # stays self-sufficient for post-hoc debugging of failures.
+        # The log always records the failing task path, regardless of options.
         if status in ("failed", "unreachable"):
             try:
                 task_path = result.task.get_path()
@@ -864,6 +890,11 @@ class CallbackModule(CallbackBase):
                 task_path = None
             if task_path:
                 self._write_to_log(f"task path: {task_path}")
+
+        # Full structured dump for post-hoc debugging; indent=4 keeps the
+        # log shape stable regardless of on-screen result_format.
+        full_dump = self._dump_results(cleaned, indent=4, keep_invocation=False)
+        self._write_to_log(f"FULL RESULT:\n{full_dump}")
 
     def _display_recap(self, stats):
         """Display final statistics"""

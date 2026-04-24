@@ -468,9 +468,7 @@ class CallbackModule(CallbackBase):
             self.pending_play_header = None
         if header and not self.dynamic_mode:
             with self.output_lock:
-                self._display.banner(
-                    header, color=C.COLOR_HIGHLIGHT, cows=False
-                )
+                self._display.banner(header, color=C.COLOR_HIGHLIGHT, cows=False)
 
     def v2_playbook_on_task_start(self, task, is_conditional):
         """Task started"""
@@ -720,13 +718,15 @@ class CallbackModule(CallbackBase):
         if isinstance(item, dict):
             item = item.get("name", item.get("group", str(item)))
         cleaned = self._cleaned_result(result)
-        self.failed_items.append({
-            "item": item,
-            "stderr": cleaned.get("stderr", ""),
-            "stdout": cleaned.get("stdout", ""),
-            "msg": cleaned.get("msg", ""),
-            "cmd": self._get_task_command(result),
-        })
+        self.failed_items.append(
+            {
+                "item": item,
+                "stderr": cleaned.get("stderr", ""),
+                "stdout": cleaned.get("stdout", ""),
+                "msg": cleaned.get("msg", ""),
+                "cmd": self._get_task_command(result),
+            }
+        )
 
     def v2_runner_item_on_skipped(self, result):
         """Loop item skipped"""
@@ -775,8 +775,10 @@ class CallbackModule(CallbackBase):
             return
 
         # Handle loop tasks: diffs can be nested under results[*].diff.
-        if isinstance(diff_data, list) and diff_data and all(
-            isinstance(d, dict) for d in diff_data
+        if (
+            isinstance(diff_data, list)
+            and diff_data
+            and all(isinstance(d, dict) for d in diff_data)
         ):
             diffs_to_render = diff_data
         elif isinstance(diff_data, dict):
@@ -1087,9 +1089,7 @@ class CallbackModule(CallbackBase):
     def _display_recap(self, stats):
         """Display final statistics"""
         with self.output_lock:
-            self._display.banner(
-                "PLAY RECAP", color=C.COLOR_HIGHLIGHT, cows=False
-            )
+            self._display.banner("PLAY RECAP", color=C.COLOR_HIGHLIGHT, cows=False)
 
         hosts = sorted(stats.processed.keys())
         for host in hosts:

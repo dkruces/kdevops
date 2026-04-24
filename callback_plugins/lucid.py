@@ -253,19 +253,14 @@ class CallbackModule(CallbackBase):
 
     def _get_task_verbosity(self, result) -> int:
         """Get the output_verbosity setting for a task (default is 1)"""
-        task_verbosity = 1
-        if hasattr(result, "_task_fields"):
-            task_vars = result._task_fields.get("vars", {})
-            task_verbosity = task_vars.get("output_verbosity", 1)
-        elif hasattr(result, "_task"):
-            task_vars = getattr(result._task, "vars", {})
-            task_verbosity = task_vars.get("output_verbosity", 1)
-        return task_verbosity
+        task_vars = getattr(result.task, "vars", {}) or {}
+        return task_vars.get("output_verbosity", 1)
 
     def _get_task_command(self, result) -> Optional[str]:
         """
-        Extract the command from modules that execute shell commands.
+        Extract the resolved command from modules that execute shell commands.
         Returns None for modules that don't expose their commands.
+        Only returns fully resolved commands — never raw Jinja2 templates.
 
         Supported modules:
         - ansible.builtin.shell/command: returns cmd (string or list)
@@ -275,11 +270,10 @@ class CallbackModule(CallbackBase):
         - community.general.flatpak_remote: returns command (string)
         - community.general.terraform: returns command (string)
         """
-        task = result._task
-        action = task.action
-        res = result._result
+        res = result.result
+        action = result.task.action
 
-        # Modules that return 'cmd' key
+        # Modules that return 'cmd' key in the result (already resolved)
         if action in (
             "ansible.builtin.shell",
             "ansible.builtin.command",
@@ -293,23 +287,9 @@ class CallbackModule(CallbackBase):
                 if isinstance(cmd, list):
                     return " ".join(cmd)
                 return cmd
-
-            # Fall back to task args for shell/command
-            if action in (
-                "ansible.builtin.shell",
-                "ansible.builtin.command",
-                "shell",
-                "command",
-            ):
-                args = task.args
-                if "_raw_params" in args:
-                    return args["_raw_params"]
-                if "cmd" in args:
-                    return args["cmd"]
-
             return None
 
-        # Modules that return 'command' key
+        # Modules that return 'command' key in the result
         if action in (
             "community.general.make",
             "community.general.flatpak",
@@ -328,7 +308,7 @@ class CallbackModule(CallbackBase):
 
     def _has_significant_output(self, result) -> bool:
         """Check if result has stdout, stderr, or msg content worth showing"""
-        res = result._result
+        res = result.result
         return bool(
             (res.get("stdout") and res["stdout"].strip())
             or (res.get("stderr") and res["stderr"].strip())
@@ -472,7 +452,7 @@ class CallbackModule(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         """Task succeeded"""
-        changed = result._result.get("changed", False)
+        changed = result.result.get("changed", False)
         status = "changed" if changed else "ok"
         self._handle_result(result, status)
 
@@ -490,12 +470,12 @@ class CallbackModule(CallbackBase):
 
     def v2_runner_retry(self, result):
         """Task is being retried after failure"""
-        host = result._host.name
-        task_uuid = result._task._uuid
+        host = result.host.get_name()
+        task_uuid = result.task._uuid
         key = (host, task_uuid)
 
-        retries = result._result.get("retries", 0)
-        attempts = result._result.get("attempts", 0)
+        retries = result.result.get("retries", 0)
+        attempts = result.result.get("attempts", 0)
 
         # Update retry info in running_tasks
         with self.task_lock:
@@ -537,8 +517,8 @@ class CallbackModule(CallbackBase):
 
     def _handle_result(self, result, status: str, ignore_errors: bool = False):
         """Unified result handler for all task outcomes"""
-        host = result._host.name
-        task_uuid = result._task._uuid
+        host = result.host.get_name()
+        task_uuid = result.task._uuid
         key = (host, task_uuid)
 
         # Calculate duration with defensive access
@@ -550,7 +530,7 @@ class CallbackModule(CallbackBase):
         duration = time.time() - start_time
 
         # Get delegation info from result (more reliable than task attribute)
-        delegated_vars = result._result.get("_ansible_delegated_vars", {})
+        delegated_vars = result.result.get("_ansible_delegated_vars", {})
         delegate_to = delegated_vars.get("ansible_delegated_host")
 
         # Store result data for dynamic mode display
@@ -560,7 +540,7 @@ class CallbackModule(CallbackBase):
             "duration": duration,
             "host": host,
             "delegate_to": delegate_to,
-            "task_name": result._task.get_name().strip(),
+            "task_name": result.task.get_name().strip(),
         }
 
         # Add to completed tasks (last 3 for dynamic mode)
@@ -581,7 +561,7 @@ class CallbackModule(CallbackBase):
 
     def _display_result_static(self, result, status: str, duration: float):
         """Display result in static mode"""
-        host = result._host.name
+        host = result.host.get_name()
 
         # Early exit for tasks that shouldn't be shown at current verbosity
         # At verbosity 0: only show changed, failed, unreachable
@@ -596,7 +576,7 @@ class CallbackModule(CallbackBase):
         color = self.STATUS_COLORS.get(status, C.COLOR_OK)
 
         # Get delegation info for display (like Ansible default: [host -> delegate])
-        delegated_vars = result._result.get("_ansible_delegated_vars", {})
+        delegated_vars = result.result.get("_ansible_delegated_vars", {})
         delegate_to = delegated_vars.get("ansible_delegated_host")
         if delegate_to:
             host_display = f"{host} -> {delegate_to}"
@@ -626,7 +606,7 @@ class CallbackModule(CallbackBase):
     def _display_output(self, result):
         """Display stdout/stderr/msg from task result"""
         output = []
-        res = result._result
+        res = result.result
 
         # stdout
         if "stdout" in res and res["stdout"]:
@@ -649,8 +629,8 @@ class CallbackModule(CallbackBase):
 
     def _log_result(self, result, status: str, duration: float):
         """Write result to log file (always max verbosity)"""
-        host = result._host.name
-        res = result._result
+        host = result.host.get_name()
+        res = result.result
 
         # Get delegation info for logging
         delegated_vars = res.get("_ansible_delegated_vars", {})

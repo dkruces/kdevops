@@ -95,3 +95,5 @@ source "kconfigs/Kconfig.declared_hosts"
 if LIBVIRT
 source "kconfigs/Kconfig.libvirt"
 endif
+
+source "kconfigs/Kconfig.qemu_build"

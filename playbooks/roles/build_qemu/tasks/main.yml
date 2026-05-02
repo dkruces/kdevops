@@ -13,7 +13,7 @@
 # cannot see source edits and silently skipped the build for the
 # iteration case this path exists to serve.
 #
-# install lands under qemu_destdir (not /usr/local), so no sudo
+# install lands under qemu_build_destdir (not /usr/local), so no sudo
 # is required for the install step and the host's system prefixes
 # are never touched. Build deps still install with the system
 # package manager (sudo) once on first invocation; subsequent
@@ -43,9 +43,9 @@
     state: directory
     mode: '0755'
   loop:
-    - "{{ qemu_tree_path }}"
-    - "{{ qemu_builddir }}"
-    - "{{ qemu_destdir }}"
+    - "{{ qemu_build_tree_path }}"
+    - "{{ qemu_build_builddir }}"
+    - "{{ qemu_build_destdir }}"
   when:
     - qemu_build | bool
   tags: ["qemu", "vars"]
@@ -53,14 +53,14 @@
 # Detect a tree the user populated already — manual git clone, a
 # git worktree (.git is a file pointing at the parent's gitdir),
 # a symlink to another checkout, or a previous kdevops bringup.
-# When such a tree exists at qemu_tree_path, kdevops uses it in
+# When such a tree exists at qemu_build_tree_path, kdevops uses it in
 # place; the clone step below is skipped. This lets a user point
 # QEMU_BUILD_TREE_PATH at their own QEMU worktree and iterate
 # against working-tree changes without kdevops switching branches
 # or refs under them.
-- name: Detect a pre-existing QEMU tree under qemu_tree_path
+- name: Detect a pre-existing QEMU tree under qemu_build_tree_path
   ansible.builtin.stat:
-    path: "{{ qemu_tree_path }}/.git"
+    path: "{{ qemu_build_tree_path }}/.git"
   register: qemu_existing_tree
   when:
     - qemu_build | bool
@@ -71,7 +71,7 @@
     GIT_SSL_NO_VERIFY: true
   ansible.builtin.git:
     repo: "{{ qemu_git }}"
-    dest: "{{ qemu_tree_path }}"
+    dest: "{{ qemu_build_tree_path }}"
     version: "{{ qemu_version }}"
   when:
     - qemu_build | bool
@@ -86,15 +86,15 @@
 - name: Ensure meson subprojects are present
   ansible.builtin.command:
     cmd: meson subprojects download
-    chdir: "{{ qemu_tree_path }}"
+    chdir: "{{ qemu_build_tree_path }}"
   when:
     - qemu_build | bool
   tags: ["qemu", "configure"]
 
-- name: Run configure for QEMU (out-of-tree, prefix=qemu_destdir)
+- name: Run configure for QEMU (out-of-tree, prefix=qemu_build_destdir)
   ansible.builtin.command:
-    cmd: "{{ qemu_tree_path }}/configure --target-list={{ qemu_target }} --prefix={{ qemu_destdir }} --disable-download"
-    chdir: "{{ qemu_builddir }}"
+    cmd: "{{ qemu_build_tree_path }}/configure --target-list={{ qemu_target }} --prefix={{ qemu_build_destdir }} --disable-download"
+    chdir: "{{ qemu_build_builddir }}"
   when:
     - qemu_build | bool
   tags: ["qemu", "configure"]
@@ -102,15 +102,15 @@
 - name: Build QEMU with ninja
   ansible.builtin.command:
     cmd: ninja
-    chdir: "{{ qemu_builddir }}"
+    chdir: "{{ qemu_build_builddir }}"
   when:
     - qemu_build | bool
   tags: ["qemu", "build"]
 
-- name: Install QEMU into qemu_destdir (no sudo)
+- name: Install QEMU into qemu_build_destdir (no sudo)
   ansible.builtin.command:
     cmd: ninja install
-    chdir: "{{ qemu_builddir }}"
+    chdir: "{{ qemu_build_builddir }}"
   when:
     - qemu_build | bool
   tags: ["qemu", "install"]

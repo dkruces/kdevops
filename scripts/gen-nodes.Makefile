@@ -8,26 +8,14 @@ GEN_NODES_EXTRA_ARGS += libvirt_vcpus_count='$(subst ",,$(CONFIG_LIBVIRT_VCPUS_C
 GEN_NODES_EXTRA_ARGS += libvirt_mem_mb='$(subst ",,$(CONFIG_LIBVIRT_MEM_MB))'
 
 ifeq (y,$(CONFIG_QEMU_BUILD))
-
-  # build_qemu role installs into CONFIG_QEMU_BUILD_DESTDIR with
-  # ninja install (no sudo, no /usr/local pollution). The libvirt
-  # domain XML <emulator> element points at the per-arch binary
-  # under that destdir's bin/ directory. The CONFIG_QEMU_BUILD_DESTDIR
-  # value is a Jinja2 template ({{ kdevops_controller_data_path }}/
-  # qemu-destdir); Ansible expands it at use-time when the
-  # gen_nodes role consumes qemu_bin_path.
-  ifeq (y,$(CONFIG_TARGET_ARCH_X86_64))
-  GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BUILD_DESTDIR))/bin/qemu-system-x86_64'
-  endif
-
-  ifeq (y,$(CONFIG_TARGET_ARCH_ARM64))
-  GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BUILD_DESTDIR))/bin/qemu-system-aarch64'
-  endif
-
-  ifeq (y,$(CONFIG_TARGET_ARCH_PPC64LE))
-  GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BUILD_DESTDIR))/bin/qemu-system-ppc64'
-  endif
-
+  # When QEMU_BUILD=y, qemu_bin_path comes from the gen_nodes
+  # role's default (playbooks/roles/gen_nodes/defaults/main.yml),
+  # which chains through qemu_build_bin_path from the Kconfig
+  # output yaml stream. Injecting it here would break Make's
+  # foreach iteration over ANSIBLE_EXTRA_ARGS, because the value
+  # is a Jinja2 template that contains whitespace
+  # ({{ qemu_build_destdir }}/bin/...) and foreach splits on
+  # whitespace.
 else
 GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BIN_PATH))'
 endif

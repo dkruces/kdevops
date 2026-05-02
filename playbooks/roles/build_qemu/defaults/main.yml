@@ -3,14 +3,19 @@
 
 qemu_build: false
 
-# Forces to build and install even if the file
-# /usr/local/bin/qemu-system-x86_64 is already present
-qemu_force_install_if_present: false
-qemu_bin_path: "/usr/local/bin/qemu-system-x86_64"
-qemu_data: "{{ data_path }}/qemu"
+# Mirrors bootlinux's controller-mode path layout (linux/,
+# linux-build/, linux-destdir/ under KDEVOPS_CONTROLLER_DATA_PATH).
+# The actual values come from extra_vars (Makefile.build_qemu
+# feeds them in from CONFIG_QEMU_BUILD_TREE_PATH,
+# CONFIG_QEMU_BUILD_BUILDDIR, CONFIG_QEMU_BUILD_DESTDIR); these
+# defaults are only consulted when the role is invoked without
+# kdevops's Make plumbing.
+qemu_tree_path: "{{ kdevops_controller_data_path | default('/data') }}/qemu"
+qemu_builddir: "{{ kdevops_controller_data_path | default('/data') }}/qemu-build"
+qemu_destdir:  "{{ kdevops_controller_data_path | default('/data') }}/qemu-destdir"
+
 qemu_git: "https://github.com/qemu/qemu.git"
 qemu_version: "v7.2.0-rc4"
-qemu_build_dir: "{{ qemu_data }}/build"
 qemu_target: "x86_64-softmmu"
 build_linux_shallow_clone: true
 build_linux_clone_depth: 1

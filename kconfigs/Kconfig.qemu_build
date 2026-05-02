@@ -9,13 +9,19 @@
 
 config QEMU_BUILD
 	bool "Should we build QEMU for you?"
-	select NEEDS_LOCAL_DEVELOPMENT_PATH
 	help
 	  You only want to enable this option if your distribution package
 	  of QEMU does not have support for the features you need. For
 	  example this may be useful if you are a QEMU developer or are
 	  relying on technology is still under development or if you have
 	  a custom QEMU git URL.
+
+	  The build runs entirely under KDEVOPS_CONTROLLER_DATA_PATH.
+	  ninja install lands the artefacts in QEMU_BUILD_DESTDIR
+	  without sudo and without polluting the host's /usr or
+	  /usr/local prefixes. Both the libvirt and qsu bringup
+	  paths consume the resulting binary via the synthetic
+	  QEMU_BUILD_BIN_PATH symbol.
 
 if !QEMU_BUILD
 
@@ -64,13 +70,92 @@ config QEMU_BUILD_GIT
 	  This is the git URL to use to clone and then build QEMU for you on
 	  your localhost.
 
+# Deprecated alias for QEMU_BUILD_TREE_PATH. Promptable so an
+# existing out-of-tree defconfig that still sets
+# CONFIG_QEMU_BUILD_GIT_DATA_PATH continues to be honoured;
+# QEMU_BUILD_TREE_PATH below picks the value up via its first
+# default branch. The symbol stays in menuconfig as
+# "(deprecated)" so users see the rename guidance. Drop in a
+# follow-up cleanup once no defconfig still references the old
+# name.
 config QEMU_BUILD_GIT_DATA_PATH
-	string "The destination directory where to clone the QEMU git tree"
-	default "{{local_dev_path}}/qemu"
+	string "(deprecated) Use QEMU_BUILD_TREE_PATH instead"
+	default ""
 	help
-	  This is the target location of where to clone the above git tree.
-	  Note that {{local_dev_path}} corresponds to the location set by the
-	  configuration option CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH.
+	  Deprecated. Set QEMU_BUILD_TREE_PATH instead. Kept for
+	  backward compatibility with defconfigs predating the
+	  rename. When set non-empty, QEMU_BUILD_TREE_PATH defaults
+	  to this value.
+
+config QEMU_BUILD_TREE_PATH
+	string "QEMU source tree path"
+	output yaml
+	default QEMU_BUILD_GIT_DATA_PATH if QEMU_BUILD_GIT_DATA_PATH != ""
+	default "{{ kdevops_controller_data_path }}/qemu"
+	help
+	  Absolute path on the control node where the QEMU source
+	  tree lives. Defaults to a qemu/ subdirectory of
+	  KDEVOPS_CONTROLLER_DATA_PATH so it sits alongside the other
+	  controller-side build artefacts (qemu-build/, qemu-destdir/),
+	  mirroring the BOOTLINUX_CONTROLLER_TREE_PATH convention used
+	  by the kernel build.
+
+	  kdevops manages the tree only when this path is empty: the
+	  initial bringup clones QEMU_BUILD_GIT at QEMU_BUILD_GIT_VERSION
+	  into the path. If the path already contains a git checkout —
+	  manually cloned, a git worktree (whose .git is a file
+	  pointing at the parent's gitdir), a symlink to another
+	  checkout, or a previous kdevops bringup — kdevops detects
+	  it and skips clone, fetch, and checkout entirely. Subsequent
+	  invocations build against whatever HEAD the tree happens to
+	  be on. This is the supported way to point kdevops at your
+	  own QEMU checkout (set this to your checkout path and
+	  iterate against working-tree changes; ninja's source-level
+	  dependency tracking handles incrementality).
+
+config QEMU_BUILD_BUILDDIR
+	string "Out-of-tree QEMU build directory"
+	output yaml
+	default "{{ kdevops_controller_data_path }}/qemu-build"
+	help
+	  Absolute path to the QEMU out-of-tree build directory.
+	  Defaults to a sibling of the QEMU source tree under
+	  KDEVOPS_CONTROLLER_DATA_PATH. configure runs with this
+	  directory as cwd so meson lays its build artefacts here
+	  rather than polluting the source tree, exactly the way
+	  BOOTLINUX_CONTROLLER_BUILDDIR works for the kernel out-of-
+	  tree build (passed as O= to make).
+
+config QEMU_BUILD_DESTDIR
+	string "QEMU install destdir"
+	output yaml
+	default "{{ kdevops_controller_data_path }}/qemu-destdir"
+	help
+	  Absolute path where ninja install places the built QEMU
+	  binaries and supporting files. The build is configured with
+	  --prefix=<this>, so ninja install populates a self-contained
+	  tree at <destdir>/bin, <destdir>/share, <destdir>/lib without
+	  touching /usr, /usr/local, or any system path, and without
+	  requiring sudo. Consumers locate the binary at
+	  <destdir>/bin/qemu-system-<arch>. Mirrors
+	  BOOTLINUX_CONTROLLER_DESTDIR for the kernel install.
+
+config QEMU_BUILD_BIN_PATH
+	string
+	output yaml
+	default "{{ qemu_build_destdir }}/bin/qemu-system-x86_64" if TARGET_ARCH_X86_64
+	default "{{ qemu_build_destdir }}/bin/qemu-system-aarch64" if TARGET_ARCH_ARM64
+	default "{{ qemu_build_destdir }}/bin/qemu-system-ppc64" if TARGET_ARCH_PPC64LE
+	help
+	  Synthetic, derived. Absolute path to the QEMU binary that
+	  the build_qemu role's ninja install step writes. Both the
+	  libvirt path (gen-nodes Makefile, libvirt domain XML
+	  emulator element) and the qsu path
+	  (Kconfig.qemu_system_units QEMU_SYSTEM_UNITS_QEMU_BINARY
+	  default) consume this when QEMU_BUILD=y. The value is a
+	  Jinja2 template that resolves at Ansible-use time against
+	  qemu_build_destdir, which itself resolves against
+	  kdevops_controller_data_path.
 
 config QEMU_BUILD_GIT_VERSION
 	string "The version of QEMU to build"

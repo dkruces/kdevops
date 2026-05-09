@@ -127,6 +127,14 @@ T:	git https://github.com/linux-kdevops/kdevops.git
 F:	workflows/ltp/
 F:	playbooks/roles/ltp/
 
+LUCID CALLBACK PLUGIN
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	callback_plugins/lucid.py
+F:	tests/callback_plugins/
+
 NFSTEST WORKFLOW
 M:	Chuck Lever <cel@kernel.org>
 L:	kdevops@lists.linux.dev

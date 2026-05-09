@@ -321,6 +321,25 @@ kconfig-help-menu:
 	$(Q)$(MAKE) -s -C scripts/kconfig help
 	$(Q)$(MAKE) -f scripts/build.Makefile help
 
+PHONY += env
+env: $(KDEVOPS_EXTRA_VARS) $(ANSIBLE_CFG_FILE) $(ANSIBLE_INVENTORY_FILE)
+
+PHONY += controller-setup
+controller-setup: env $(KDEVOPS_DEPCHECK) $(LOCALHOST_SETUP_WORK)
+
+HELP_TARGETS += help-targets
+PHONY += help-targets
+help-targets:
+	@echo "Primary kdevops workflow:"
+	@echo "  make defconfig-<X>      Configure (writes .config)"
+	@echo "  make env                Render ansible.cfg + hosts"
+	@echo "  make controller-setup   First-run controller deps (sudo)"
+	@echo "  make bringup            Provision guests"
+	@echo "  make <workflow>         Run a workflow (fstests, blktests, ...)"
+	@echo "  make destroy            Tear down guests"
+	@echo
+	@echo "Use 'make help' for the full target list."
+
 PHONY += $(HELP_TARGETS)
 
 PHONY += help

@@ -6,6 +6,12 @@ PATCHLEVEL = 0
 SUBLEVEL = 2
 EXTRAVERSION =
 
+# Bare `make` shows the primary-workflow help. Explicit targets (env,
+# controller-setup, bringup, <workflow>) do the work. `make all` keeps the
+# legacy "run DEFAULT_DEPS" behaviour for muscle-memory; `make deps` is the
+# same. See make.texi "Other Special Variables" for .DEFAULT_GOAL.
+.DEFAULT_GOAL := help-targets
+
 all: deps
 
 export KCONFIG_DIR=$(CURDIR)/scripts/kconfig

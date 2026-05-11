@@ -130,11 +130,9 @@ ifeq (y,$(CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH))
 include Makefile.local
 endif # CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH
 
-# To not clutter the top level Makefile, work which requires to be made
-# on the localhost can be augmented on the LOCALHOST_SETUP_WORK variable.
-# This will run after the extra_vars.yaml file is created and so you can
-# rely on it. The work in LOCALHOST_SETUP_WORK is run when you just run
-# make with no arguments.
+# Controller-side first-run work (sudo, package installs, hypervisor
+# tuning). Contributors are pulled in only by `make controller-setup`,
+# not by bare make. Add via `LOCALHOST_SETUP_WORK += <phony target>`.
 LOCALHOST_SETUP_WORK :=
 
 ANSIBLE_EXTRA_ARGS += $(LOCAL_DEVELOPMENT_ARGS)
@@ -278,7 +276,6 @@ $(KDEVOPS_NODES): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_NODES_TEMPLATE) $(KDEVOP
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
 		--extra-vars=@./extra_vars.yaml
 
-DEFAULT_DEPS += $(LOCALHOST_SETUP_WORK)
 
 include scripts/tests.Makefile
 include scripts/linux-ab-testing.Makefile

@@ -1,5 +1,8 @@
 # Adding a new workflow to kdevops
 
+The authoritative reference for module structure (files required,
+naming, integration contracts) is `docs/module-spec.md`. Read it first.
+
 A demo workflow has been introduced to kdevops to serve the purpose of
 a simple demo but also to help with documentation. The best documentation
 is for now to tell refer you to the upstream commit for the workflow

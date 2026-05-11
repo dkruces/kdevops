@@ -143,6 +143,4 @@ ai-help-menu:
 
 HELP_TARGETS += ai-help-menu
 
-EXTRA_VAR_INPUTS += AI_ARGS_SEPARATED
-
 .PHONY: $(PHONY)

@@ -94,8 +94,6 @@ DEFAULT_DEPS += $(KDEVOPS_DEPCHECK)
 
 # This will be used to generate our extra_args.yml file used to pass on
 # configuration data for ansible roles through kconfig.
-EXTRA_VAR_INPUTS :=
-EXTRA_VAR_INPUTS_LAST :=
 ANSIBLE_EXTRA_ARGS :=
 ANSIBLE_EXTRA_ARGS_SEPARATED :=
 ANSIBLE_EXTRA_ARGS_DIRECT :=
@@ -249,10 +247,6 @@ $(ANSIBLE_CFG_FILE): .config
 		$(KDEVOPS_PLAYBOOKS_DIR)/ansible_cfg.yml \
 		--extra-vars=@./.extra_vars_auto.yaml
 
-PHONY += $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
-
-$(KDEVOPS_EXTRA_VARS): .config $(EXTRA_VAR_INPUTS) $(EXTRA_VAR_INPUTS_LAST)
-
 playbooks/secret.yml:
 	@if [[ "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" == "" ]]; then \
 		echo "Registration code is not set, this must be set for this configuration" ;\
@@ -316,6 +310,7 @@ mrproper:
 	$(Q)rm -f $(KDEVOPS_NODES)
 	$(Q)rm -f $(ANSIBLE_INVENTORY_FILE) $(KDEVOPS_MRPROPER)
 	$(Q)rm -f .config .config.old extra_vars.yaml $(KCONFIG_YAMLCFG)
+	$(Q)rm -rf $(EXTRA_VAR_FRAGMENTS_DIR)
 	$(Q)rm -f $(ANSIBLE_CFG_FILE)
 	$(Q)rm -f playbooks/secret.yml $(KDEVOPS_EXTRA_ADDON_DEST)
 	$(Q)rm -rf include

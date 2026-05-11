@@ -40,7 +40,7 @@ BLKTESTS_ARGS += blktests_data_target='$(BLKTESTS_DATA_TARGET)'
 WORKFLOW_ARGS += $(BLKTESTS_ARGS)
 
 
-EXTRA_VAR_INPUTS += extend-extra-args-blktests
+EXTRA_VAR_FRAGMENTS += $(EXTRA_VAR_FRAGMENTS_DIR)/blktests.yml
 
 BLKTESTS_DYNAMIC_RUNTIME_VARS := "kdevops_run_blktests": True
 ifneq (,$(RUN_FAILURES))
@@ -51,10 +51,10 @@ ifneq (,$(SKIP_RUN))
 BLKTESTS_DYNAMIC_RUNTIME_VARS += , "blktests_skip_run": True
 endif
 
-extend-extra-args-blktests:
-	@if [[ "$(CONFIG_KDEVOPS_WORKFLOW_ENABLE_BLKTESTS)" == "y" ]]; then \
-		echo "blktests_test_devs: '$(CONFIG_BLKTESTS_TEST_DEVS)'" >> $(KDEVOPS_EXTRA_VARS) ;\
-	fi
+$(EXTRA_VAR_FRAGMENTS_DIR)/blktests.yml: .config | $(EXTRA_VAR_FRAGMENTS_DIR)
+	@{ if [[ "$(CONFIG_KDEVOPS_WORKFLOW_ENABLE_BLKTESTS)" == "y" ]]; then \
+		echo "blktests_test_devs: '$(CONFIG_BLKTESTS_TEST_DEVS)'" ;\
+	fi; } > $@
 
 blktests:
 	$(Q)ansible-playbook \

@@ -17,7 +17,7 @@ endif
 
 ifeq (y,$(CONFIG_KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH))
 
-EXTRA_VAR_INPUTS_LAST += extend-extra-args-pcie-passthrough
+EXTRA_VAR_FRAGMENTS_LAST += $(EXTRA_VAR_FRAGMENTS_DIR)/pcie-passthrough.yml
 
 DYNAMIC_KCONFIG_PCIE_ARGS += pcie_passthrough_enable=True
 
@@ -52,10 +52,8 @@ dynamic-kconfig-pci-help:
 
 PHONY += dynamic-kconfig-pci-help
 
-extend-extra-args-pcie-passthrough:
-	$(Q)$(TOPDIR)/scripts/gen_pcie_passthrough_vars.sh >> $(TOPDIR)/$(KDEVOPS_EXTRA_VARS)
-
-PHONY += extend-extra-args-pcie-passthrough
+$(EXTRA_VAR_FRAGMENTS_DIR)/pcie-passthrough.yml: .config | $(EXTRA_VAR_FRAGMENTS_DIR)
+	$(Q)$(TOPDIR)/scripts/gen_pcie_passthrough_vars.sh > $@
 
 dynconfig-pci:
 	$(Q)$(MAKE) menuconfig KDEVOPS_ENABLE_PCIE_KCONFIG=1

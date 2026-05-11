@@ -1,19 +1,20 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
 #
-# This specifies how we generate the extra_vars.yaml file
+# extra_vars.yaml is the union of:
+#   - .extra_vars_auto.yaml (kconfig solver, via "output yaml" in Kconfig)
+#   - the three ANSIBLE_EXTRA_ARGS* lists aggregated from every Makefile fragment
+#   - per-module real-file fragments registered on EXTRA_VAR_FRAGMENTS
+#   - late fragments registered on EXTRA_VAR_FRAGMENTS_LAST (concatenated after
+#     the regular set; preserves the historical EXTRA_VAR_INPUTS_LAST ordering
+#     for callers that need it, e.g. PCIE passthrough)
+#
+# A module contributes additional keys by writing a fragment under
+# $(EXTRA_VAR_FRAGMENTS_DIR) and appending its path to EXTRA_VAR_FRAGMENTS
+# (or EXTRA_VAR_FRAGMENTS_LAST).
 
-EXTRA_VAR_INPUTS += most_extra_vars
-EXTRA_VAR_INPUTS += most_extra_vars_separated
-EXTRA_VAR_INPUTS += most_extra_vars_direct
-
-# This ensures that for instance running 'make fstests-baseline-loop' will
-# have the respective filesystem configuration file
-# /var/lib/xfstests/configs/${HOST}.config get updated *with* a respective
-# correct value in case you do dynamic updates to the .config.
-# The extra_vars.yaml file will get the correct updated values, not the
-# defaults from fstests/defaults/main.yml so long as the file
-# workflows/fstests/Makefile also updates
-EXTRA_VAR_INPUTS += $(KDEVOPS_PLAYBOOKS_DIR)/roles/*/defaults/main.yml
+EXTRA_VAR_FRAGMENTS_DIR := .extra_vars.d
+EXTRA_VAR_FRAGMENTS :=
+EXTRA_VAR_FRAGMENTS_LAST :=
 
 null :=
 space := ${null} ${null}
@@ -33,34 +34,26 @@ endef
 # firstword only works with spaces, so we must introduce artificial spaces
 # so we capture the first entry, we peg the '=' at the end after that and
 # use that to substitute $first=% / $first:%
-#
-# We may be able to use YAML_ENTRY_DIRECT for all variables and then we
-# phase out the others. This requires more inspection. But best would be
-# for us to just add yaml output support directly upstream to kconfig.
 define YAML_ENTRY_DIRECT
 $(patsubst $(firstword $(subst =, ,$(1)))=%,$(firstword $(subst =, ,$(1))): "%",$(1))
 
 endef
 
-#$(patsubst $(firstword $(subst =, ,$(1)))=%,$(firstword $(subst =, ,$(1))):%,$(1))
-#$(patsubst $(firstword $(subst =, ,$(1))=)%,$(firstword $(subst =, , $(1):)%,$(1)),$(1))
+ROLE_DEFAULTS := $(wildcard $(KDEVOPS_PLAYBOOKS_DIR)/roles/*/defaults/main.yml)
 
-# extra_vars.yaml first gets the selective yaml entries which kconfig writes
-# to for us in KCONFIG_YAMLCFG, then we expand on it with more dynamic data.
-# We use awk NF to just remove empty lines.
-most_extra_vars:
-	@awk NF $(KCONFIG_YAMLCFG) > $(KDEVOPS_EXTRA_VARS)
-	@echo "# end of of yamlconfig auto output yaml variables " >> $(KDEVOPS_EXTRA_VARS)
-	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS),echo $(call YAML_ENTRY,$(subst =,: ,$(exp)) >> $(KDEVOPS_EXTRA_VARS)))
+$(EXTRA_VAR_FRAGMENTS_DIR):
+	@mkdir -p $@
 
-# ANSIBLE_EXTRA_ARGS_SEPARATED is to be used for variables in .config
-# which are separted by spaces. We use a trick and assume .config variables
-# won't have the sign "+" so substitute spaces for "+" for looping over them and
-# then substitute the "+" for the space when echoing the variable again.
-most_extra_vars_separated:
-	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS_SEPARATED),echo $(call YAML_ENTRY_SEP,$(subst =,: ,"$(exp)") >> $(KDEVOPS_EXTRA_VARS)))
+# Workflow Makefiles append to EXTRA_VAR_FRAGMENTS after this file is
+# included, so defer prerequisite expansion via secondary expansion
+# (make.texi "Secondary Expansion").
+.SECONDEXPANSION:
 
-# These are variable we want to express as-is, and which may also contain
-# a '=' inside of it.
-most_extra_vars_direct:
-	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS_DIRECT),echo $(call YAML_ENTRY_DIRECT,$(exp) >> $(KDEVOPS_EXTRA_VARS)))
+$(KDEVOPS_EXTRA_VARS): .config $(KCONFIG_YAMLCFG) $$(EXTRA_VAR_FRAGMENTS) $$(EXTRA_VAR_FRAGMENTS_LAST) $(ROLE_DEFAULTS) | $(EXTRA_VAR_FRAGMENTS_DIR)
+	@awk NF $(KCONFIG_YAMLCFG) > $(KDEVOPS_EXTRA_VARS).tmp
+	@echo "# end of of yamlconfig auto output yaml variables " >> $(KDEVOPS_EXTRA_VARS).tmp
+	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS),echo $(call YAML_ENTRY,$(subst =,: ,$(exp)) >> $(KDEVOPS_EXTRA_VARS).tmp))
+	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS_SEPARATED),echo $(call YAML_ENTRY_SEP,$(subst =,: ,"$(exp)") >> $(KDEVOPS_EXTRA_VARS).tmp))
+	@$(foreach exp,$(ANSIBLE_EXTRA_ARGS_DIRECT),echo $(call YAML_ENTRY_DIRECT,$(exp) >> $(KDEVOPS_EXTRA_VARS).tmp))
+	@for f in $(EXTRA_VAR_FRAGMENTS) $(EXTRA_VAR_FRAGMENTS_LAST); do test -s "$$f" && cat "$$f" >> $(KDEVOPS_EXTRA_VARS).tmp || true; done
+	@mv $(KDEVOPS_EXTRA_VARS).tmp $(KDEVOPS_EXTRA_VARS)

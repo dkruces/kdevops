@@ -46,7 +46,7 @@ journal-ln:
 		--tags vars_extra,journal_ln \
 		$(KDEVOPS_PLAYBOOKS_DIR)/devconfig.yml
 
-LOCALHOST_SETUP_WORK += journal-server
+KDEVOPS_BRING_UP_DEPS_EARLY += journal-server
 KDEVOPS_BRING_UP_DEPS_EARLY += journal-client
 KDEVOPS_BRING_UP_LATE_DEPS += journal-ln
 

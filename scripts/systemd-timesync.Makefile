@@ -34,7 +34,7 @@ timesyncd-status:
 	$(Q)timedatectl status
 
 
-LOCALHOST_SETUP_WORK += timesyncd-server
+KDEVOPS_BRING_UP_DEPS_EARLY += timesyncd-server
 KDEVOPS_BRING_UP_DEPS_EARLY += timesyncd-client
 
 timesyncd-help:

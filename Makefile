@@ -64,6 +64,7 @@ DEFAULT_DEPS :=
 DEFAULT_DEPS_REQS_EXTRA_VARS :=
 MAKEFLAGS += --no-print-directory
 SHELL := /bin/bash
+.DELETE_ON_ERROR:
 HELP_TARGETS := kconfig-help-menu
 KDEVOPS_DEPCHECK = .kdevops.depcheck
 

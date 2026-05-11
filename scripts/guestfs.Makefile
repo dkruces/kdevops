@@ -91,19 +91,27 @@ bringup_guestfs: $(GUESTFS_BRINGUP_DEPS)
 		--tags console
 PHONY += bringup_guestfs
 
-status_guestfs:
-	$(Q)ansible-playbook \
-		playbooks/guestfs.yml \
-		--extra-vars=@./extra_vars.yaml \
-		--tags status
+status_guestfs: $(if $(wildcard $(KDEVOPS_PROVISIONED_SSH)),$(KDEVOPS_EXTRA_VARS) $(ANSIBLE_INVENTORY_FILE))
+	@if [ -f $(KDEVOPS_PROVISIONED_SSH) ]; then \
+		ansible-playbook \
+			playbooks/guestfs.yml \
+			--extra-vars=@./extra_vars.yaml \
+			--tags status ;\
+	else \
+		echo "status_guestfs: no provisioned state" ;\
+	fi
 PHONY += status_guestfs
 
-destroy_guestfs:
-	$(Q)ansible-playbook \
-		--limit 'baseline:dev:service' \
-		playbooks/guestfs.yml \
-		--extra-vars=@./extra_vars.yaml \
-		--tags destroy
+destroy_guestfs: $(if $(wildcard $(KDEVOPS_PROVISIONED_SSH)),$(KDEVOPS_EXTRA_VARS) $(ANSIBLE_INVENTORY_FILE))
+	@if [ -f $(KDEVOPS_PROVISIONED_SSH) ]; then \
+		ansible-playbook \
+			--limit 'baseline:dev:service' \
+			playbooks/guestfs.yml \
+			--extra-vars=@./extra_vars.yaml \
+			--tags destroy ;\
+	else \
+		echo "destroy_guestfs: no provisioned state, nothing to do" ;\
+	fi
 	$(Q)rm -f $(KDEVOPS_PROVISIONED_SSH) $(KDEVOPS_PROVISIONED_DEVCONFIG)
 PHONY += destroy_guestfs
 

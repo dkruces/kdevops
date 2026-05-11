@@ -16,7 +16,7 @@ endif
 
 endif
 
-bringup: $(KDEVOPS_BRING_UP_DEPS)
+bringup: env $(KDEVOPS_BRING_UP_DEPS)
 
 status: $(KDEVOPS_STATUS_DEPS)
 

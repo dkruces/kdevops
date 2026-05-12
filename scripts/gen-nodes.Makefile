@@ -4,12 +4,9 @@ GEN_NODES_EXTRA_ARGS += kdevops_nodes='$(KDEVOPS_NODES)'
 GEN_NODES_EXTRA_ARGS += kdevops_nodes_template='$(KDEVOPS_NODES_TEMPLATE)'
 GEN_NODES_EXTRA_ARGS += kdevops_nodes_template_full_path='$(TOPDIR_PATH)/$(KDEVOPS_NODES_TEMPLATE)'
 
-GEN_NODES_EXTRA_ARGS += libvirt_vcpus_count='$(subst ",,$(CONFIG_LIBVIRT_VCPUS_COUNT))'
-GEN_NODES_EXTRA_ARGS += libvirt_mem_mb='$(subst ",,$(CONFIG_LIBVIRT_MEM_MB))'
-
 ifeq (y,$(CONFIG_QEMU_BUILD))
-  # When QEMU_BUILD=y, qemu_bin_path comes from the gen_nodes
-  # role's default (playbooks/roles/gen_nodes/defaults/main.yml),
+  # When QEMU_BUILD=y, qemu_bin_path comes from the nodes
+  # role's default (playbooks/roles/nodes/defaults/main.yml),
   # which chains through qemu_build_bin_path from the Kconfig
   # output yaml stream. Injecting it here would break Make's
   # foreach iteration over ANSIBLE_EXTRA_ARGS, because the value
@@ -18,25 +15,6 @@ ifeq (y,$(CONFIG_QEMU_BUILD))
   # whitespace.
 else
 GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BIN_PATH))'
-endif
-
-
-GEN_NODES_EXTRA_ARGS += libvirt_uri='$(subst ",,$(CONFIG_LIBVIRT_URI))'
-GEN_NODES_EXTRA_ARGS += libvirt_system_uri='$(subst ",,$(CONFIG_LIBVIRT_SYSTEM_URI))'
-
-ifeq (y,$(CONFIG_LIBVIRT_HOST_PASSTHROUGH))
-GEN_NODES_EXTRA_ARGS += libvirt_host_passthrough='True'
-endif
-
-ifeq (y,$(CONFIG_LIBVIRT))
-GEN_NODES_EXTRA_ARGS += libvirt_qemu_group='$(subst ",,$(CONFIG_LIBVIRT_QEMU_GROUP))'
-endif
-
-ifeq (y,$(CONFIG_LIBVIRT_SESSION))
-GEN_NODES_EXTRA_ARGS += libvirt_session='True'
-GEN_NODES_EXTRA_ARGS += libvirt_session_socket='$(subst ",,$(CONFIG_LIBVIRT_SESSION_SOCKET))'
-GEN_NODES_EXTRA_ARGS += libvirt_session_management_network_device='$(subst ",,$(CONFIG_LIBVIRT_SESSION_MANAGEMENT_NETWORK_DEVICE))'
-GEN_NODES_EXTRA_ARGS += libvirt_session_public_network_dev='$(subst ",,$(CONFIG_LIBVIRT_SESSION_PUBLIC_NETWORK_DEV))'
 endif
 
 GEN_NODES_EXTRA_ARGS += libvirt_extra_storage_aio_mode='$(subst ",,$(CONFIG_LIBVIRT_AIO_MODE))'

@@ -153,6 +153,7 @@ config LIBVIRT_SYSTEM_URI_PATH
 
 config LIBVIRT_QEMU_GROUP
 	string
+	output yaml
 	default "qemu" if !DISTRO_DEBIAN && !DISTRO_UBUNTU
 	default "libvirt-qemu" if DISTRO_DEBIAN || DISTRO_UBUNTU
 
@@ -171,16 +172,19 @@ config QEMU_BIN_PATH
 
 config LIBVIRT_URI
 	string
+	output yaml
 	default "qemu:///system" if !LIBVIRT
 	default LIBVIRT_URI_PATH if LIBVIRT
 
 config LIBVIRT_SYSTEM_URI
 	string
+	output yaml
 	default "qemu:///system" if !LIBVIRT
 	default LIBVIRT_SYSTEM_URI_PATH if LIBVIRT
 
 config LIBVIRT_SESSION
 	bool
+	output yaml
 	default LIBVIRT_URI_SESSION
 
 # Only fedora is using this for now. We can add options to modify
@@ -189,14 +193,17 @@ if LIBVIRT_SESSION
 
 config LIBVIRT_SESSION_SOCKET
 	string
+	output yaml
 	default "/run/libvirt/libvirt-sock-ro"
 
 config LIBVIRT_SESSION_MANAGEMENT_NETWORK_DEVICE
 	string
+	output yaml
 	default "virbr0"
 
 config LIBVIRT_SESSION_PUBLIC_NETWORK_DEV
 	string
+	output yaml
 	default "virbr0"
 
 endif # LIBVIRT_SESSION
@@ -314,6 +321,7 @@ endchoice
 
 config LIBVIRT_VCPUS_COUNT
 	int
+	output yaml
 	default 2 if LIBVIRT_VCPUS_2
 	default 4 if LIBVIRT_VCPUS_4
 	default 8 if LIBVIRT_VCPUS_8
@@ -386,6 +394,7 @@ endchoice
 
 config LIBVIRT_MEM_MB
 	int
+	output yaml
 	default 2048 if LIBVIRT_MEM_2G
 	default 3072 if LIBVIRT_MEM_3G
 	default 4096 if LIBVIRT_MEM_4G
@@ -484,6 +493,7 @@ config LIBVIRT_MACHINE_TYPE_STRING
 
 config LIBVIRT_HOST_PASSTHROUGH
 	bool "Use CPU host-passthrough"
+	output yaml
 	default y
 	help
 	  Enable this to be able to also carry the same CPU your host has to

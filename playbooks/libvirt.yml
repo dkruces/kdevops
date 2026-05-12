@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# One orchestrator playbook for the libvirt module. The parent role
+# (playbooks/roles/libvirt/) conditionally includes its nested
+# sub-roles based on tags supplied by the invoking Make target:
+#
+#   make libvirt-user-setup            -> --tags libvirt_user_setup
+#   make libvirt-storage-pool-setup    -> --tags libvirt_storage_pool_setup
+#   make libvirt-pcie-passthrough-setup-> --tags libvirt_pcie_passthrough_setup
+#
+# Bare `ansible-playbook playbooks/libvirt.yml` (no --tags) runs
+# only the non-sudo verify paths, which fail with structured
+# diagnostics when the host setup is missing.
+
+- name: Configure libvirt on the controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - role: libvirt

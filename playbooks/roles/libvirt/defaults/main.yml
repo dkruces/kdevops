@@ -1,0 +1,5 @@
+# SPDX-License-Identifier GPL-2.0+
+---
+# Role-private defaults only. Tree-wide libvirt_* / qemu_* vars come
+# from extra_vars.yaml via the Kconfig output yaml path. See
+# docs/module-spec.md "Configuration flow".

@@ -1,0 +1,25 @@
+---
+# Orchestrator for the libvirt module's sub-roles.
+#
+# Default (no --tags) execution runs only the non-sudo verify paths.
+# The sudo opt-in setup paths are tagged with `never` plus a per-sub
+# tag and are reached only via the dedicated Make targets:
+#
+#   make libvirt-user-setup
+#   make libvirt-storage-pool-setup
+#   make libvirt-pcie-passthrough-setup
+#
+# Sub-role include_role lines are added in subsequent phases as each
+# sub-role lands; this stub keeps the orchestrator parseable in the
+# meantime.
+
+- name: Import optional extra_args file
+  ansible.builtin.include_vars: "{{ item }}"
+  failed_when: false
+  with_first_found:
+    - files:
+        - "../extra_vars.yml"
+        - "../extra_vars.yaml"
+        - "../extra_vars.json"
+      skip: true
+  tags: [always]

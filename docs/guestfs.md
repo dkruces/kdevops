@@ -10,38 +10,51 @@ nixos module.
 ## Quick start
 
 ```
-make defconfig-<workflow>          # picks a guestfs backend by default
-make libvirt-user-setup            # one-time sudo: libvirt group membership
+make defconfig-<workflow>            # picks a guestfs backend by default
+make libvirt-user-setup              # one-time sudo: libvirt group membership
 # log out and back in
-make guestfs-host-setup            # one-time sudo: libguestfs + pool + network
-make bringup                       # spawn VMs
+make libvirt-storage-pool-setup      # one-time sudo: pool dir + libvirt pool object
+make guestfs-runtime-deps-setup      # one-time sudo: libguestfs + OVMF + python libvirt
+make guestfs-network-setup           # one-time sudo: dnsmasq + libvirt default network
+make bringup                         # spawn VMs
 ```
 
-After `make libvirt-user-setup` and `make guestfs-host-setup`, the
-controller is configured and bringup runs without prompting for
-sudo on per-VM setup (the per-VM cp/sysprep calls do still use
-sudo internally — see "Sudo footprint" below).
+The order is intentional: `libvirt/user` first because the other
+sub-modules check for libvirt group membership in their verify
+paths; `libvirt/storage_pool` next because the pool directory
+needs to exist before bringup tries to drop disks into it; the
+guestfs-side `runtime_deps` and `network` after because they
+build on libvirt being set up.
+
+Each opt-in target is idempotent. Once the controller is
+configured, only `make bringup` is needed for subsequent
+workflow runs.
 
 ## Sudo footprint
 
 guestfs has two distinct sudo contexts on the controller. The
-first is one-time host configuration — installing distro
-libguestfs packages, creating the libvirt storage pool directory
-with the right group ownership, and getting the libvirt default
-network up. That work lives in the [`host_setup`
-sub-module](guestfs-host_setup.md) and is opt-in via
-`make guestfs-host-setup`. Per the module spec's controller-side
-sudo isolation rule, none of it runs on bare `make` or as a side
-effect of `make bringup`; the bringup-time verify path catches
-missing pieces and tells you which target to run.
+first is one-time host configuration, split across the four Make
+targets above per the spec's "Module vocabulary":
 
-The second is per-VM bringup sudo: `cp --reflink=auto` of the
-base image into each VM's storage directory, `virt-sysprep`
+| Sub-module | Vocabulary | Purpose |
+|---|---|---|
+| `libvirt/user` | host-configuration | Controller user in `libvirt`, `kvm`, and the per-distro qemu group |
+| `libvirt/storage_pool` | host-configuration | On-disk pool directory + virsh pool object |
+| `guestfs/runtime_deps` | RDEPENDS | libguestfs-tools, OVMF, python libvirt, DHCP client |
+| `guestfs/network` | host-configuration | dnsmasq state + libvirt default network |
+
+Per the spec's controller-side sudo isolation rule, none of these
+run on bare `make` or as a side effect of `make bringup`; the
+bringup-time verify paths catch missing pieces and tell the user
+which target to run.
+
+The second sudo context is per-VM bringup: `cp --reflink=auto` of
+the base image into each VM's storage directory, `virt-sysprep`
 customisation of the per-VM root image, and `chown` of the
 console log file. These are intrinsic to libvirt-system-uri
 domain creation and run on every `make bringup` invocation. They
-are not gated separately because the user has already opted in
-by typing `make bringup`; the spec's "default execution path"
+are not gated separately because the user has already opted in by
+typing `make bringup`; the spec's "default execution path"
 exemption applies to bare `make`, not to explicit workflow
 targets.
 
@@ -54,27 +67,28 @@ all per-VM `become: true` blocks in that mode.
 ```
 modules/guestfs/
 ├── Kconfig
-├── Makefile                       module-private Make plumbing
-├── README.md                      contributor reference
-└── host_setup/                    sudo opt-in sub-module
-    ├── Makefile                   `make guestfs-host-setup`
+├── Makefile
+├── README.md
+├── runtime_deps/                  RDEPENDS sub-module (libguestfs install)
+│   ├── Makefile                   `make guestfs-runtime-deps-setup`
+│   └── README.md
+└── network/                       host-configuration sub-module
+    ├── Makefile                   `make guestfs-network-setup`
     └── README.md
 
 playbooks/guestfs.yml
 playbooks/roles/guestfs/
 ├── defaults/main.yml              role-private (tree-wide vars stay in extra_vars)
-├── tasks/main.yml                 orchestrator (verify → bringup)
+├── tasks/main.yml                 orchestrator
 ├── tasks/bringup/                 per-VM bringup work (sudo intrinsic)
-├── tasks/destroy.yml              per-VM teardown (sudo intrinsic)
+├── tasks/destroy.yml              per-VM teardown (sudo intrinsic, do_clean)
 ├── tasks/status/main.yml          status report (no sudo)
-└── host_setup/                    sub-role
-    ├── verify/tasks/main.yml      non-sudo precheck (default path)
-    └── setup/                      sudo work (opt-in via tag)
-        └── tasks/
-            ├── main.yml
-            ├── install-deps/      distro package install
-            ├── network.yml        dnsmasq + libvirt default network
-            └── storage-pool-path.yml   pool directory + ownership
+├── runtime_deps/                  RDEPENDS sub-role
+│   ├── verify/tasks/main.yml      non-sudo precheck
+│   └── setup/                      sudo install (apt/dnf/zypper)
+└── network/                       host-configuration sub-role
+    ├── verify/tasks/main.yml      non-sudo precheck
+    └── setup/                      sudo (dnsmasq + virsh net-start default)
 ```
 
 ## Make targets
@@ -82,9 +96,15 @@ playbooks/roles/guestfs/
 | Target | Notes |
 |---|---|
 | `make bringup` | spawn target VMs |
-| `make destroy` | tear down VMs |
+| `make destroy` | tear down VMs (tagged `do_clean`) |
 | `make status` | per-VM status report |
-| `make guestfs-host-setup` | one-time sudo host setup |
+| `make guestfs-runtime-deps-setup` | one-time sudo: distro packages |
+| `make guestfs-network-setup` | one-time sudo: libvirt default network |
+
+The libvirt-owned targets (`libvirt-user-setup`,
+`libvirt-storage-pool-setup`, `libvirt-pcie-passthrough-setup`)
+live in the libvirt module and are documented in
+[`docs/libvirt.md`](libvirt.md).
 
 `make bringup` is wired through `KDEVOPS_PROVISION_METHOD =
 bringup_guestfs` in the module's Makefile when `CONFIG_GUESTFS=y`.
@@ -93,19 +113,20 @@ bringup_guestfs` in the module's Makefile when `CONFIG_GUESTFS=y`.
 
 ## Tag taxonomy
 
-The role's tasks carry the spec's `do_*` operation-kind tags:
+The role's tasks carry the spec's `do_*` operation-kind tags
+from the [Module vocabulary](module-spec.md):
 
 | Tag | Tasks |
 |---|---|
-| `do_install` | distro package install, root-image cp, qemu-img create for extra disks |
-| `do_configure` | storage pool directory mkdir + chown, virt-sysprep customisation, console.log chown |
+| `do_install` | distro package install, root-image cp, qemu-img create for extra disks, virt-sysprep image customisation |
+| `do_configure` | console.log chown, per-VM storage pool directory mkdir |
 | `do_deploy` | libvirt default network start, virsh define + start of each VM, PCIe passthrough attach |
-| `do_destroy` | virsh shutdown + undefine + storage volume cleanup |
+| `do_clean` | virsh shutdown + undefine + storage volume cleanup |
 
 A power user invoking ansible-playbook directly can combine
 sub-module gate tags with do_* tags, e.g.
-`--tags guestfs_host_setup,do_install` to run only the package
-install step inside the host_setup sub-module.
+`--tags guestfs_runtime_deps_setup,do_install` to run only the
+package install step inside the runtime_deps sub-module.
 
 ## Configuration
 
@@ -123,7 +144,8 @@ Key Kconfig symbols (all emit through `output yaml`):
 ## Dependencies
 
 - `libvirt` supplies the configuration surface (libvirt_*, qemu_*
-  extra_vars).
+  extra_vars) and owns the user/storage_pool/pcie_passthrough
+  sudo sub-modules guestfs depends on.
 - `qemu` supplies the controller-built binary path via the
   `QEMU_BIN_PATH` chain when `CONFIG_QEMU_BUILD=y`.
 - `nodes` supplies the `kdevops_nodes.yaml` file that lists

@@ -129,7 +129,8 @@ L:	kdevops@lists.linux.dev
 S:	Maintained
 T:	git https://github.com/linux-kdevops/kdevops.git
 F:	docs/guestfs.md
-F:	docs/guestfs-host_setup.md
+F:	docs/guestfs-runtime_deps.md
+F:	docs/guestfs-network.md
 F:	modules/guestfs/
 F:	playbooks/guestfs.yml
 F:	playbooks/roles/guestfs/

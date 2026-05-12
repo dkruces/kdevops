@@ -60,10 +60,10 @@ the drives can vary by type, so we have one macro by type of drive.
 {% endfor %}
 <!-- End of scsi drives-->
 {%- endmacro -%}
-{%- macro gen_drive_large_io_virtio(libvirt_largeio_logical_compat,
-				    libvirt_largeio_logical_compat_size,
-				    libvirt_largeio_pow_limit,
-				    libvirt_largeio_drives_per_space,
+{%- macro gen_drive_large_io_virtio(qemu_extra_drive_largeio_compat,
+				    qemu_largeio_compat_size,
+				    qemu_largeio_max_pow_limit,
+				    qemu_extra_drive_largeio_num_drives_per_space,
 				    hostname,
 				    libvirt_extra_drive_format,
 				    libvirt_aio_mode,
@@ -71,13 +71,13 @@ the drives can vary by type, so we have one macro by type of drive.
 				    kdevops_storage_pool_path) -%}
 <!-- These are virtio drives used for large IO experimentation, with LBS support -->
 {% set ns = namespace(lbs_idx=0)  %}
-{% set max_pbs = libvirt_largeio_logical_compat_size  * (2 ** libvirt_largeio_pow_limit) %}
-{% for n in range(0,libvirt_largeio_pow_limit+1) %}
-{% for x in range(0,libvirt_largeio_drives_per_space) %}
-{% set ns2 = namespace(pbs=libvirt_largeio_logical_compat_size  * (2 ** n)) %}
+{% set max_pbs = qemu_largeio_compat_size  * (2 ** qemu_largeio_max_pow_limit) %}
+{% for n in range(0,qemu_largeio_max_pow_limit+1) %}
+{% for x in range(0,qemu_extra_drive_largeio_num_drives_per_space) %}
+{% set ns2 = namespace(pbs=qemu_largeio_compat_size  * (2 ** n)) %}
 {% set ns3 = namespace(pbs_next_two=ns2.pbs * (2*(x-1))) %}
-{% if libvirt_largeio_logical_compat | default(false) %}
-{% set ns4 = namespace(lbs=libvirt_largeio_logical_compat_size) %}
+{% if qemu_extra_drive_largeio_compat | default(false) %}
+{% set ns4 = namespace(lbs=qemu_largeio_compat_size) %}
 {% else %}
 {% set ns4 = namespace(lbs=ns2.pbs) %}
 {% endif %}
@@ -117,10 +117,10 @@ the drives can vary by type, so we have one macro by type of drive.
 {% endfor %}
 <!-- End of NVMe drives-->
 {%- endmacro -%}
-{%- macro gen_drive_large_io_nvme(libvirt_largeio_logical_compat,
-				  libvirt_largeio_logical_compat_size,
-				  libvirt_largeio_pow_limit,
-				  libvirt_largeio_drives_per_space,
+{%- macro gen_drive_large_io_nvme(qemu_extra_drive_largeio_compat,
+				  qemu_largeio_compat_size,
+				  qemu_largeio_max_pow_limit,
+				  qemu_extra_drive_largeio_num_drives_per_space,
 				  hostname,
 				  libvirt_extra_drive_format,
 				  libvirt_aio_mode,
@@ -128,13 +128,13 @@ the drives can vary by type, so we have one macro by type of drive.
 				  kdevops_storage_pool_path) -%}
 <!-- These are NVMe drives used for large IO experimentation, with LBS support -->
 {% set ns = namespace(lbs_idx=0)  %}
-{% set max_pbs = libvirt_largeio_logical_compat_size  * (2 ** libvirt_largeio_pow_limit) %}
-{% for n in range(0,libvirt_largeio_pow_limit+1) %}
-{% for x in range(0,libvirt_largeio_drives_per_space) %}
-{% set ns2 = namespace(pbs=libvirt_largeio_logical_compat_size  * (2 ** n)) %}
+{% set max_pbs = qemu_largeio_compat_size  * (2 ** qemu_largeio_max_pow_limit) %}
+{% for n in range(0,qemu_largeio_max_pow_limit+1) %}
+{% for x in range(0,qemu_extra_drive_largeio_num_drives_per_space) %}
+{% set ns2 = namespace(pbs=qemu_largeio_compat_size  * (2 ** n)) %}
 {% set ns3 = namespace(pbs_next_two=ns2.pbs * (2*(x-1))) %}
-{% if libvirt_largeio_logical_compat | default(false) %}
-{% set ns4 = namespace(lbs=libvirt_largeio_logical_compat_size) %}
+{% if qemu_extra_drive_largeio_compat | default(false) %}
+{% set ns4 = namespace(lbs=qemu_largeio_compat_size) %}
 {% else %}
 {% set ns4 = namespace(lbs=ns2.pbs) %}
 {% endif %}

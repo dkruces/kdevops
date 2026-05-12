@@ -1,7 +1,7 @@
 ---
 - name: Compute the total number of devices to build
   ansible.builtin.set_fact:
-    total_devices: "{{ libvirt_largeio_pow_limit * libvirt_largeio_drives_per_space }}"
+    total_devices: "{{ qemu_largeio_max_pow_limit * qemu_extra_drive_largeio_num_drives_per_space }}"
 
 - name: Create largeio block devices
   ansible.builtin.include_tasks:

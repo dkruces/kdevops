@@ -138,24 +138,4 @@ GEN_NODES_EXTRA_ARGS += libvirt_largeio_logical_compat_size='$(subst ",,$(CONFIG
 GEN_NODES_EXTRA_ARGS += libvirt_largeio_pow_limit='$(subst ",,$(CONFIG_QEMU_LARGEIO_MAX_POW_LIMIT))'
 endif
 
-ifeq (y,$(CONFIG_LIBVIRT_MACHINE_TYPE_Q35))
-
-ifeq (y,$(CONFIG_QEMU_ENABLE_CXL))
-GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl='True'
-ifeq (y,$(CONFIG_QEMU_ENABLE_CXL_DEMO_TOPOLOGY_1))
-GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl_demo_topo1='True'
-endif # QEMU_ENABLE_CXL_DEMO_TOPOLOGY_1
-ifeq (y,$(CONFIG_QEMU_ENABLE_CXL_DEMO_TOPOLOGY_2))
-GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl_demo_topo2='True'
-endif # QEMU_ENABLE_CXL_DEMO_TOPOLOGY_2
-ifeq (y,$(CONFIG_QEMU_ENABLE_CXL_SWITCH_TOPOLOGY_1))
-GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl_switch_topo1='True'
-endif # QEMU_ENABLE_CXL_SWITCH_TOPOLOGY_1
-ifeq (y,$(CONFIG_QEMU_ENABLE_CXL_DEMO_DCD_TOPOLOGY_1))
-GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl_dcd_topo1='True'
-endif # QEMU_ENABLE_CXL_DEMO_DCD_TOPOLOGY_1
-endif # CONFIG_QEMU_ENABLE_CXL
-
-endif # CONFIG_LIBVIRT_MACHINE_TYPE_Q35
-
 ANSIBLE_EXTRA_ARGS += $(GEN_NODES_EXTRA_ARGS)

@@ -1,3 +1,18 @@
+config TOPDIR_PATH
+	string
+	output yaml
+	default "$(TOPDIR_PATH)"
+
+config KDEVOPS_PLAYBOOKS_DIR
+	string
+	output yaml
+	default "$(KDEVOPS_PLAYBOOKS_DIR)"
+
+config KDEVOPS_PLAYBOOKS_DIR_FULL_PATH
+	string
+	output yaml
+	default "$(TOPDIR_PATH)/$(KDEVOPS_PLAYBOOKS_DIR)"
+
 config HAVE_DISTRO_SUSE
 	bool
 	default n
@@ -102,6 +117,7 @@ config KDEVOPS_BASELINE_AND_DEV_SET_BY_CLI
 
 config KDEVOPS_BASELINE_AND_DEV
 	bool "Enable both a baseline and development system per target test"
+	output yaml
 	default y if KDEVOPS_BASELINE_AND_DEV_SET_BY_CLI
 	default n
 	help

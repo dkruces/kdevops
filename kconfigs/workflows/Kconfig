@@ -98,8 +98,9 @@ config WORKFLOWS_LINUX_TESTS
 
 if WORKFLOWS_LINUX_TESTS
 
-config WORKFLOWS_DEDICATED_WORKFLOW
+config KDEVOPS_WORKFLOWS_DEDICATED_WORKFLOW
 	bool "Are you only targeting one subsystem test?"
+	output yaml
 	default y
 	help
 	 Enable this to if you are only wanting to test one main Linux
@@ -116,7 +117,7 @@ config WORKFLOWS_DEDICATED_WORKFLOW
 	 dedicated to only one subsystem test. In other words, if you disable
 	 this option you are on your own, good luck!
 
-if WORKFLOWS_DEDICATED_WORKFLOW
+if KDEVOPS_WORKFLOWS_DEDICATED_WORKFLOW
 
 choice
 	prompt "Dedicated target Linux test workflow"
@@ -280,7 +281,7 @@ config KDEVOPS_WORKFLOW_NAME
 
 endif
 
-if !WORKFLOWS_DEDICATED_WORKFLOW
+if !KDEVOPS_WORKFLOWS_DEDICATED_WORKFLOW
 
 config KDEVOPS_WORKFLOW_NAME
 	string
@@ -413,7 +414,7 @@ config KDEVOPS_WORKFLOW_NOT_DEDICATED_ENABLE_VLLM
 	  Select this option if you want to provision vLLM Production Stack
 	  on a single target node for by-hand testing and development.
 
-endif # !WORKFLOWS_DEDICATED_WORKFLOW
+endif # !KDEVOPS_WORKFLOWS_DEDICATED_WORKFLOW
 
 config KDEVOPS_WORKFLOW_ENABLE_FSTESTS
 	bool

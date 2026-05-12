@@ -1,0 +1,28 @@
+---
+# Opt-in sudo path: claim ownership of a stale kdevops_nodes file
+# left behind by a prior run under a different account. Invoked only
+# via `make nodes-cleanup`, never by bare make or bringup.
+
+- name: Get our user
+  ansible.builtin.command: "whoami"
+  changed_when: false
+  register: nodes_cleanup_my_user
+
+- name: Get our primary group
+  ansible.builtin.command: "id -g -n"
+  changed_when: false
+  register: nodes_cleanup_my_group
+
+- name: Stat the kdevops_nodes file
+  ansible.builtin.stat:
+    path: "{{ topdir_path }}/{{ kdevops_nodes }}"
+  register: nodes_cleanup_dest_stat
+
+- name: Claim ownership of the kdevops_nodes file
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ topdir_path }}/{{ kdevops_nodes }}"
+    owner: "{{ nodes_cleanup_my_user.stdout }}"
+    group: "{{ nodes_cleanup_my_group.stdout }}"
+  when: nodes_cleanup_dest_stat.stat.exists

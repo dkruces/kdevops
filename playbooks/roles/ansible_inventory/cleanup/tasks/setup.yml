@@ -1,0 +1,28 @@
+---
+# Opt-in sudo path: claim ownership of a stale inventory file left
+# behind by a prior run under a different account. Invoked only via
+# `make ansible-inventory-cleanup`, never by bare make or bringup.
+
+- name: Get our user
+  ansible.builtin.command: "whoami"
+  changed_when: false
+  register: ansible_inventory_cleanup_my_user
+
+- name: Get our primary group
+  ansible.builtin.command: "id -g -n"
+  changed_when: false
+  register: ansible_inventory_cleanup_my_group
+
+- name: Stat the inventory file
+  ansible.builtin.stat:
+    path: "{{ ansible_config_inventory }}"
+  register: ansible_inventory_cleanup_dest_stat
+
+- name: Claim ownership of the inventory file
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ ansible_config_inventory }}"
+    owner: "{{ ansible_inventory_cleanup_my_user.stdout }}"
+    group: "{{ ansible_inventory_cleanup_my_group.stdout }}"
+  when: ansible_inventory_cleanup_dest_stat.stat.exists

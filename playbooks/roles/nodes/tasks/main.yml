@@ -126,21 +126,18 @@
   when:
     - nodes_is_fstests|bool
 
-- name: Check if kdevops_nodes exists already
-  ansible.builtin.stat:
-    path: "{{ topdir_path }}/{{ kdevops_nodes }}"
-  register: nodes_dest_stat
+- name: Verify the kdevops_nodes file is writable by us (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: nodes/cleanup
+    tasks_from: verify
 
-- name: Ensure proper permission on kdevops_nodes
-  become: true
-  become_flags: "su - -c"
-  become_method: ansible.builtin.sudo
-  ansible.builtin.file:
-    path: "{{ topdir_path }}/{{ kdevops_nodes }}"
-    owner: "{{ nodes_my_user.stdout }}"
-    group: "{{ nodes_my_group.stdout }}"
-  when:
-    - nodes_dest_stat.stat.exists
+- name: Cleanup sub-role — sudo opt-in (only runs with --tags cleanup_setup)
+  ansible.builtin.include_role:
+    name: nodes/cleanup
+    tasks_from: setup
+    apply:
+      tags: [cleanup_setup]
+  tags: [never, cleanup_setup]
 
 - name: Generate the generic kdevops nodes file using nodes file using template as jinja2 source template
   tags: ["nodes"]

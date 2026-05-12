@@ -1,0 +1,43 @@
+---
+# Non-sudo precheck for the inventory file's ownership.
+#
+# The inventory at $ANSIBLE_CONFIG_INVENTORY is owned by the user who
+# generated it. A previous run that ran under a different account (a
+# foreign sudo run, a cross-tree kdevops invocation) can leave the
+# file owned by root or another user; the next non-sudo write then
+# fails with EACCES. This precheck catches that state without
+# touching it, and points the user at the opt-in repair target.
+
+- name: Stat the inventory file
+  ansible.builtin.stat:
+    path: "{{ ansible_config_inventory }}"
+  register: ansible_inventory_cleanup_dest_stat
+
+- name: Capture current user/group on the controller
+  when: ansible_inventory_cleanup_dest_stat.stat.exists
+  block:
+    - name: Get our user
+      ansible.builtin.command: "whoami"
+      changed_when: false
+      register: ansible_inventory_cleanup_my_user
+    - name: Get our primary group
+      ansible.builtin.command: "id -g -n"
+      changed_when: false
+      register: ansible_inventory_cleanup_my_group
+
+- name: Fail with actionable diagnostic when ownership is wrong
+  ansible.builtin.fail:
+    msg: |
+      The inventory file {{ ansible_config_inventory }} exists but is
+      owned by {{ ansible_inventory_cleanup_dest_stat.stat.pw_name }}:{{ ansible_inventory_cleanup_dest_stat.stat.gr_name }},
+      not {{ ansible_inventory_cleanup_my_user.stdout }}:{{ ansible_inventory_cleanup_my_group.stdout }}.
+      The non-sudo write that follows will fail.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make ansible-inventory-cleanup
+        2. Remove the file manually, then re-run:
+               rm {{ ansible_config_inventory }}
+  when:
+    - ansible_inventory_cleanup_dest_stat.stat.exists
+    - ansible_inventory_cleanup_dest_stat.stat.pw_name != ansible_inventory_cleanup_my_user.stdout

@@ -1,0 +1,42 @@
+---
+# Non-sudo precheck for the kdevops_nodes file's ownership.
+#
+# The kdevops_nodes file at $TOPDIR/$KDEVOPS_NODES is owned by the
+# user who generated it. A prior run under a different account
+# (foreign sudo, cross-tree kdevops invocation) can leave it owned
+# by root or another user; the next non-sudo write then fails with
+# EACCES. This precheck catches that state without touching it.
+
+- name: Stat the kdevops_nodes file
+  ansible.builtin.stat:
+    path: "{{ topdir_path }}/{{ kdevops_nodes }}"
+  register: nodes_cleanup_dest_stat
+
+- name: Capture current user/group on the controller
+  when: nodes_cleanup_dest_stat.stat.exists
+  block:
+    - name: Get our user
+      ansible.builtin.command: "whoami"
+      changed_when: false
+      register: nodes_cleanup_my_user
+    - name: Get our primary group
+      ansible.builtin.command: "id -g -n"
+      changed_when: false
+      register: nodes_cleanup_my_group
+
+- name: Fail with actionable diagnostic when ownership is wrong
+  ansible.builtin.fail:
+    msg: |
+      The kdevops_nodes file {{ topdir_path }}/{{ kdevops_nodes }} exists
+      but is owned by {{ nodes_cleanup_dest_stat.stat.pw_name }}:{{ nodes_cleanup_dest_stat.stat.gr_name }},
+      not {{ nodes_cleanup_my_user.stdout }}:{{ nodes_cleanup_my_group.stdout }}.
+      The non-sudo write that follows will fail.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make nodes-cleanup
+        2. Remove the file manually, then re-run:
+               rm {{ topdir_path }}/{{ kdevops_nodes }}
+  when:
+    - nodes_cleanup_dest_stat.stat.exists
+    - nodes_cleanup_dest_stat.stat.pw_name != nodes_cleanup_my_user.stdout

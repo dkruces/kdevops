@@ -33,21 +33,18 @@
   changed_when: false
   register: ansible_inventory_my_group
 
-- name: Check if the inventory file exists already
-  ansible.builtin.stat:
-    path: "{{ ansible_config_inventory }}"
-  register: ansible_inventory_dest_stat
+- name: Verify the inventory file is writable by us (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: ansible_inventory/cleanup
+    tasks_from: verify
 
-- name: Ensure proper permission on the inventory file
-  become: true
-  become_flags: "su - -c"
-  become_method: ansible.builtin.sudo
-  ansible.builtin.file:
-    path: "{{ ansible_config_inventory }}"
-    owner: "{{ ansible_inventory_my_user.stdout }}"
-    group: "{{ ansible_inventory_my_group.stdout }}"
-  when:
-    - ansible_inventory_dest_stat.stat.exists
+- name: Cleanup sub-role — sudo opt-in (only runs with --tags cleanup_setup)
+  ansible.builtin.include_role:
+    name: ansible_inventory/cleanup
+    tasks_from: setup
+    apply:
+      tags: [cleanup_setup]
+  tags: [never, cleanup_setup]
 
 - name: Verify Ansible inventory template file exists
   ansible.builtin.stat:

@@ -8,3 +8,5 @@ $(ANSIBLE_INVENTORY_FILE): .config $(ANSIBLE_CONFIG_PATH) $(ANSIBLE_INVENTORY_TE
 	$(call run-ansible-playbook, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/ansible_inventory.yml \
 		--extra-vars=@./extra_vars.yaml)
+
+include modules/ansible_inventory/cleanup/Makefile

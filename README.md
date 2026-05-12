@@ -400,6 +400,8 @@ Below is kdevops' recommended documentation reading.
   * [kdevops PCIe passthrough support](docs/libvirt-pcie_passthrough.md)
   * [kdevops qemu module overview](docs/qemu.md)
   * [kdevops qemu build dependencies](docs/qemu-build_deps.md)
+  * [kdevops guestfs module overview](docs/guestfs.md)
+  * [kdevops guestfs host setup](docs/guestfs-host_setup.md)
   * [kdevops running make bringup](docs/running-make-bringup.md)
   * [kdevops running make destroy](docs/kdevops-make-destroy.md)
   * [kdevops make mrproper](docs/kdevops-restarting-from-scratch.md)

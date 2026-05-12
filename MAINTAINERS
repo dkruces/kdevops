@@ -123,6 +123,17 @@ F:	modules/qemu/
 F:	playbooks/qemu.yml
 F:	playbooks/roles/qemu/
 
+GUESTFS
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	docs/guestfs.md
+F:	docs/guestfs-host_setup.md
+F:	modules/guestfs/
+F:	playbooks/guestfs.yml
+F:	playbooks/roles/guestfs/
+
 KDEVOPS CI
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev

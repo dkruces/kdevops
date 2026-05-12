@@ -57,7 +57,7 @@ endif # CONFIG_TERRAFORM
 
 
 ifeq (y,$(CONFIG_GUESTFS))
-include scripts/guestfs.Makefile
+include modules/guestfs/Makefile
 endif
 
 ifeq (y,$(CONFIG_NIXOS))

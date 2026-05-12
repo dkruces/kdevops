@@ -7,8 +7,9 @@
 .kdevops/
 .provisioned_once*
 
-guestfs/
+/guestfs/
 !playbooks/roles/guestfs/
+!modules/guestfs/
 
 linux/
 !workflows/linux/

@@ -88,7 +88,7 @@ config LIBVIRT
 	depends on GUESTFS || NIXOS
 	default y
 
-source "kconfigs/Kconfig.guestfs"
+source "modules/guestfs/Kconfig"
 source "kconfigs/Kconfig.nixos"
 source "terraform/Kconfig"
 source "kconfigs/Kconfig.declared_hosts"

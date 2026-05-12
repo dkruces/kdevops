@@ -3,6 +3,6 @@
 # nodes: renders the kdevops node-list file consumed by the
 # provisioner backends (guestfs/libvirt, terraform/cloud, nixos).
 # The active backend selects the template via the Make variable
-# KDEVOPS_NODES_TEMPLATE (set by scripts/guestfs.Makefile,
+# KDEVOPS_NODES_TEMPLATE (set by modules/guestfs/Makefile,
 # scripts/terraform.Makefile, scripts/nixos.Makefile). The output
 # path lives in KDEVOPS_NODES, set by the workflow.

@@ -99,6 +99,19 @@ F:	modules/nodes/
 F:	playbooks/nodes.yml
 F:	playbooks/roles/nodes/
 
+LIBVIRT
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	docs/libvirt.md
+F:	docs/libvirt-user.md
+F:	docs/libvirt-storage_pool.md
+F:	docs/libvirt-pcie_passthrough.md
+F:	modules/libvirt/
+F:	playbooks/libvirt.yml
+F:	playbooks/roles/libvirt/
+
 KDEVOPS CI
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev

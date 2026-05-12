@@ -34,3 +34,14 @@
     apply:
       tags: [libvirt_user_setup]
   tags: [never, libvirt_user_setup]
+
+- name: Verify libvirt storage pool exists (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: libvirt/storage_pool/verify
+
+- name: libvirt storage_pool sudo opt-in (only with --tags libvirt_storage_pool_setup)
+  ansible.builtin.include_role:
+    name: libvirt/storage_pool/setup
+    apply:
+      tags: [libvirt_storage_pool_setup]
+  tags: [never, libvirt_storage_pool_setup]

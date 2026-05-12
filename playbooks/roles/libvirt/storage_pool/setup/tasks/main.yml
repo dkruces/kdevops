@@ -1,0 +1,35 @@
+---
+# libvirt/storage_pool/setup — define and start the libvirt storage
+# pool. Sudo on most distros; runs as the regular user under
+# libvirt_session (Fedora's qemu:///session). Invoked via
+# `make libvirt-storage-pool-setup`.
+
+- name: Check whether the pool exists
+  become: "{{ not (libvirt_session | default(false) | bool) }}"
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: "virsh pool-info {{ libvirt_storage_pool_name }}"
+  register: libvirt_storage_pool_check
+  failed_when: libvirt_storage_pool_check.rc != 0 and libvirt_storage_pool_check.rc != 1
+  changed_when: false
+
+- name: Define the {{ libvirt_storage_pool_name }} pool
+  become: "{{ not (libvirt_session | default(false) | bool) }}"
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: "virsh pool-define-as {{ libvirt_storage_pool_name }} dir --target {{ libvirt_storage_pool_path }}"
+  when: libvirt_storage_pool_check.rc == 1
+
+- name: Start the {{ libvirt_storage_pool_name }} pool
+  become: "{{ not (libvirt_session | default(false) | bool) }}"
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: "virsh pool-start {{ libvirt_storage_pool_name }}"
+  when: libvirt_storage_pool_check.rc == 1
+
+- name: Enable autostart for the {{ libvirt_storage_pool_name }} pool
+  become: "{{ not (libvirt_session | default(false) | bool) }}"
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: "virsh pool-autostart {{ libvirt_storage_pool_name }}"
+  when: libvirt_storage_pool_check.rc == 1

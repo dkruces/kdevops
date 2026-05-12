@@ -13,12 +13,6 @@ kdevops_terraform_deps:
 		$(KDEVOPS_PLAYBOOKS_DIR)/install_terraform.yml
 PHONY += kdevops_terraform_deps
 
-kdevops_libvirt_storage_pool_create:
-	$(Q)ansible-playbook \
-		$(KDEVOPS_PLAYBOOKS_DIR)/libvirt_storage_pool_create.yml
-
-PHONY += kdevops_libvirt_storage_pool_create
-
 kdevops_deps: kdevops_terraform_deps $(KDEVOPS_DEPS)
 	@echo Installed dependencies
 PHONY += kdevops_deps

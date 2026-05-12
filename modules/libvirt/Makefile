@@ -7,3 +7,4 @@
 # sub-module migrates.
 
 include modules/libvirt/user/Makefile
+include modules/libvirt/storage_pool/Makefile

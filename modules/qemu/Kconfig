@@ -9,6 +9,7 @@
 
 config QEMU_BUILD
 	bool "Should we build QEMU for you?"
+	output yaml
 	help
 	  You only want to enable this option if your distribution package
 	  of QEMU does not have support for the features you need. For
@@ -62,6 +63,7 @@ endchoice
 
 config QEMU_BUILD_GIT
 	string "Git tree for QEMU to clone on localhost"
+	output yaml
 	default "/mirror/qemu.git" if USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_UPSTREAM || QEMU_BUILD_MANUAL
 	default "/mirror/qemu-jic23.git" if USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_JIC23
 	default DEFAULT_QEMU_GITHUB_HTTPS_URL if !USE_LOCAL_LINUX_MIRROR && QEMU_BUILD_UPSTREAM || QEMU_BUILD_MANUAL
@@ -158,12 +160,27 @@ config QEMU_BUILD_BIN_PATH
 
 config QEMU_BUILD_GIT_VERSION
 	string "The version of QEMU to build"
+	output yaml
 	default "cxl-2023-05-19" if QEMU_BUILD_JIC23
 	default "v8.0.0-rc1" if QEMU_BUILD_UPSTREAM
 	help
 	  This is the target build version of QEMU to build. Please use
 	  at least v7.2.0 for CXL support. v8.0.0-rc1 has some build fixes
 	  for newer compilers so it is the default now.
+
+config QEMU_BUILD_TARGET
+	string
+	output yaml
+	default "x86_64-softmmu" if TARGET_ARCH_X86_64
+	default "aarch64-softmmu" if TARGET_ARCH_ARM64
+	default "ppc64-softmmu" if TARGET_ARCH_PPC64LE
+	help
+	  Synthetic, derived. The QEMU configure --target-list value
+	  matching the host's selected target architecture. Lands in
+	  extra_vars as qemu_build_target and the role consumes it as
+	  the --target-list= argument to QEMU's configure script. The
+	  binary that ninja install writes is QEMU_BUILD_BIN_PATH,
+	  derived from the same arch axis.
 
 config QEMU_USE_DEVELOPMENT_VERSION
 	bool

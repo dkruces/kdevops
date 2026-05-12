@@ -1,30 +1,12 @@
 # SPDX-License-Identifier: copyleft-next-0.3.1
 
-QEMU_BUILD_SETUP_ARGS :=
-QEMU_BUILD_SETUP_ARGS += qemu_build=True
-
-# CONFIG_QEMU_BUILD_TREE_PATH, _BUILDDIR, _DESTDIR, and _BIN_PATH
-# already use Kconfig "output yaml" so they land in extra_vars
-# directly as qemu_build_tree_path, qemu_build_builddir,
-# qemu_build_destdir, qemu_build_bin_path. The role consumes
-# those names. Adding them here as well would break Make's
-# foreach iteration over ANSIBLE_EXTRA_ARGS, because the values
-# are Jinja templates that contain whitespace
-# ({{ kdevops_controller_data_path }}/...) and foreach splits
-# on whitespace.
-QEMU_GIT:=$(subst ",,$(CONFIG_QEMU_BUILD_GIT))
-QEMU_GIT_VERSION:=$(subst ",,$(CONFIG_QEMU_BUILD_GIT_VERSION))
-
-QEMU_BUILD_SETUP_ARGS += qemu_git=$(QEMU_GIT)
-QEMU_BUILD_SETUP_ARGS += qemu_version='$(QEMU_GIT_VERSION)'
-
-ifeq (y,$(CONFIG_TARGET_ARCH_X86_64))
-QEMU_BUILD_SETUP_ARGS += qemu_target="x86_64-softmmu"
-endif
-
-ifeq (y,$(CONFIG_TARGET_ARCH_PPC64LE))
-QEMU_BUILD_SETUP_ARGS += qemu_target="ppc64-softmmu"
-endif
+# All extra_vars consumed by the qemu role flow through Kconfig
+# "output yaml": QEMU_BUILD, QEMU_BUILD_GIT, QEMU_BUILD_GIT_VERSION,
+# QEMU_BUILD_TARGET, QEMU_BUILD_TREE_PATH, QEMU_BUILD_BUILDDIR,
+# QEMU_BUILD_DESTDIR, and QEMU_BUILD_BIN_PATH. The module spec
+# requires this single canonical path for Make → Ansible value
+# propagation; ANSIBLE_EXTRA_ARGS += foo=$(CONFIG_X) appenders
+# are legacy.
 
 qemu: $(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook \
@@ -60,8 +42,6 @@ qemu-help-menu:
 	@echo ""
 
 HELP_TARGETS += qemu-help-menu
-
-ANSIBLE_EXTRA_ARGS += $(QEMU_BUILD_SETUP_ARGS)
 
 # Build QEMU as a bringup-time dependency rather than a default-make
 # step. LOCALHOST_SETUP_WORK feeds DEFAULT_DEPS in the top-level

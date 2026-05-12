@@ -71,9 +71,9 @@
   environment:
     GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
-    repo: "{{ qemu_git }}"
+    repo: "{{ qemu_build_git }}"
     dest: "{{ qemu_build_tree_path }}"
-    version: "{{ qemu_version }}"
+    version: "{{ qemu_build_git_version }}"
   when:
     - qemu_build | bool
     - not (qemu_existing_tree.stat.exists | default(false))
@@ -94,7 +94,7 @@
 
 - name: Run configure for QEMU (out-of-tree, prefix=qemu_build_destdir)
   ansible.builtin.command:
-    cmd: "{{ qemu_build_tree_path }}/configure --target-list={{ qemu_target }} --prefix={{ qemu_build_destdir }} --disable-download"
+    cmd: "{{ qemu_build_tree_path }}/configure --target-list={{ qemu_build_target }} --prefix={{ qemu_build_destdir }} --disable-download"
     chdir: "{{ qemu_build_builddir }}"
   when: qemu_build | bool
   changed_when: true

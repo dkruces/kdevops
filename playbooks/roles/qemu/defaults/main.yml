@@ -13,6 +13,6 @@ qemu_build_tree_path: "{{ kdevops_controller_data_path | default('/data') }}/qem
 qemu_build_builddir: "{{ kdevops_controller_data_path | default('/data') }}/qemu-build"
 qemu_build_destdir: "{{ kdevops_controller_data_path | default('/data') }}/qemu-destdir"
 
-qemu_git: "https://github.com/qemu/qemu.git"
-qemu_version: "v7.2.0-rc4"
-qemu_target: "x86_64-softmmu"
+qemu_build_git: "https://github.com/qemu/qemu.git"
+qemu_build_git_version: "v7.2.0-rc4"
+qemu_build_target: "x86_64-softmmu"

@@ -1,20 +1,60 @@
 ---
-# libvirt/storage_pool/verify — non-sudo precheck for storage pool
-# existence. Fails with an actionable diagnostic when the pool is
+# libvirt/storage_pool/verify — non-sudo precheck for the on-disk
+# storage pool directory and the libvirt pool object that points
+# at it. Fails with a structured diagnostic when either piece is
 # missing while pool creation is enabled.
 
 - name: Skip the storage-pool precheck when pool creation is disabled
   ansible.builtin.meta: end_play
   when: not (libvirt_storage_pool_create | default(false) | bool)
 
-- name: Check whether the storage pool exists (no sudo)
+- name: Stat the storage pool directory
+  ansible.builtin.stat:
+    path: "{{ libvirt_storage_pool_path }}"
+  register: libvirt_storage_pool_dir_stat
+
+- name: Fail with actionable diagnostic when the pool directory is missing
+  ansible.builtin.fail:
+    msg: |
+      The libvirt storage pool directory {{ libvirt_storage_pool_path }}
+      does not exist on the controller. Guest bringup will fail
+      because there is nowhere to place domain disks.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make libvirt-storage-pool-setup
+        2. Create the directory manually following
+           docs/libvirt-storage_pool.md, then re-run the original
+           make target.
+  when: not libvirt_storage_pool_dir_stat.stat.exists
+
+- name: Fail with actionable diagnostic when the pool directory has wrong group
+  ansible.builtin.fail:
+    msg: |
+      The libvirt storage pool directory {{ libvirt_storage_pool_path }}
+      is owned by group `{{ libvirt_storage_pool_dir_stat.stat.gr_name }}`,
+      not `{{ libvirt_qemu_group }}`. libvirt cannot write domain
+      disks there without sudo.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make libvirt-storage-pool-setup
+        2. Adjust ownership manually following
+           docs/libvirt-storage_pool.md, then re-run the original
+           make target.
+  when:
+    - libvirt_uri_system | default(false) | bool
+    - libvirt_storage_pool_dir_stat.stat.exists
+    - libvirt_storage_pool_dir_stat.stat.gr_name != libvirt_qemu_group
+
+- name: Check whether the libvirt pool object exists (no sudo)
   ansible.builtin.command:
     cmd: "virsh pool-info {{ libvirt_storage_pool_name }}"
   register: libvirt_storage_pool_verify
   failed_when: false
   changed_when: false
 
-- name: Fail with actionable diagnostic when the pool is missing
+- name: Fail with actionable diagnostic when the pool object is missing
   ansible.builtin.fail:
     msg: |
       The libvirt storage pool `{{ libvirt_storage_pool_name }}` is
@@ -25,6 +65,6 @@
       Two ways to fix this:
         1. Run the opt-in sudo target:
                make libvirt-storage-pool-setup
-        2. Create the pool manually following docs/libvirt-storage_pool.md,
+        2. Define the pool manually following docs/libvirt-storage_pool.md,
            then re-run the original make target.
   when: libvirt_storage_pool_verify.rc != 0

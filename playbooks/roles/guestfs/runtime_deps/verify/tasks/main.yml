@@ -1,0 +1,53 @@
+---
+# guestfs/runtime_deps/verify — non-sudo precheck for the runtime
+# tools guestfs uses (virt-builder + virt-sysprep from
+# libguestfs-tools). Fails with a structured diagnostic when any
+# is missing.
+
+- name: Check libvirt is installed (virsh binary)
+  ansible.builtin.shell: |
+    set -o pipefail
+    command -v virsh
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+  register: guestfs_runtime_deps_virsh
+
+- name: Check libguestfs is installed (virt-builder binary)
+  ansible.builtin.shell: |
+    set -o pipefail
+    command -v virt-builder
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+  register: guestfs_runtime_deps_virt_builder
+
+- name: Fail with actionable diagnostic when libvirt is not installed
+  ansible.builtin.fail:
+    msg: |
+      libvirt is not installed on the controller: the `virsh` binary
+      is not on PATH.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make guestfs-runtime-deps-setup
+        2. Install libvirt and libguestfs manually following
+           docs/guestfs-runtime_deps.md, then re-run the original
+           make target.
+  when: guestfs_runtime_deps_virsh.rc != 0
+
+- name: Fail with actionable diagnostic when libguestfs is not installed
+  ansible.builtin.fail:
+    msg: |
+      libguestfs is not installed on the controller: the `virt-builder`
+      binary is not on PATH.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make guestfs-runtime-deps-setup
+        2. Install libguestfs manually following
+           docs/guestfs-runtime_deps.md, then re-run the original
+           make target.
+  when: guestfs_runtime_deps_virt_builder.rc != 0

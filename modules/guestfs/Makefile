@@ -42,7 +42,10 @@ GUESTFS_BRINGUP_DEPS :=
 GUESTFS_BRINGUP_DEPS +=  $(KDEVOPS_NODES)
 GUESTFS_BRINGUP_DEPS +=  $(9P_HOST_CLONE)
 GUESTFS_BRINGUP_DEPS +=  $(LIBVIRT_PCIE_PASSTHROUGH)
-GUESTFS_BRINGUP_DEPS +=  install_libguestfs
+# Distro package install (libguestfs-tools, OVMF, ...) is opt-in via
+# `make guestfs-runtime-deps-setup` per the controller-side sudo
+# isolation rule. The verify path in the role catches missing tools
+# and fails with an actionable diagnostic naming the target.
 
 KDEVOPS_PROVISION_METHOD		:= bringup_guestfs
 KDEVOPS_PROVISION_STATUS_METHOD		:= status_guestfs
@@ -62,19 +65,12 @@ $(KDEVOPS_PROVISIONED_SSH):
 	$(Q)ansible 'baseline:dev:service' -m wait_for_connection
 	$(Q)touch $(KDEVOPS_PROVISIONED_SSH)
 
-install_libguestfs:
-	$(Q)ansible-playbook \
-		--limit 'localhost' \
-		playbooks/guestfs.yml \
-		--extra-vars=@./extra_vars.yaml \
-		--tags install-deps
-
 bringup_guestfs: $(GUESTFS_BRINGUP_DEPS)
 	$(Q)ansible-playbook \
 		--limit 'localhost' \
 		$(KDEVOPS_PLAYBOOKS_DIR)/guestfs.yml \
 		--extra-vars=@./extra_vars.yaml \
-		--tags network,pool,base_image
+		--tags base_image
 	$(Q)ansible-playbook \
 		--limit 'baseline:dev:service:ai' \
 		playbooks/guestfs.yml \
@@ -113,3 +109,6 @@ PHONY += destroy_guestfs
 
 cleancache:
 	$(Q)rm -f $(CONFIG_LIBVIRT_STORAGE_POOL_PATH)/$(CONFIG_KDEVOPS_STORAGE_POOL_USER)/guestfs/base_images/*
+
+include modules/guestfs/runtime_deps/Makefile
+include modules/guestfs/network/Makefile

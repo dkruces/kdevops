@@ -1,0 +1,34 @@
+---
+# guestfs/network/verify — non-sudo precheck for the libvirt
+# default network and dnsmasq state. Fails with a structured
+# diagnostic when the network is not running on libvirt-system
+# URI bringups.
+
+- name: Skip the network precheck when using libvirt session URI
+  ansible.builtin.meta: end_play
+  when: not (libvirt_uri_system | default(false) | bool)
+
+- name: Check whether the libvirt default network is up
+  environment:
+    LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
+  ansible.builtin.command:
+    cmd: virsh net-list --name
+  register: guestfs_network_verify
+  changed_when: false
+  failed_when: false
+
+- name: Fail with actionable diagnostic when the default network is down
+  ansible.builtin.fail:
+    msg: |
+      The libvirt default network is not running on the controller.
+      Guest bringup will fail to bring up the NAT bridge.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make guestfs-network-setup
+        2. Start the network manually following
+           docs/guestfs-network.md, then re-run the original make
+           target.
+  when:
+    - guestfs_network_verify.rc == 0
+    - "'default' not in (guestfs_network_verify.stdout_lines | default([]))"

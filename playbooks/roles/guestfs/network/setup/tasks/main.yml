@@ -1,0 +1,8 @@
+---
+# guestfs/network/setup — ensure libvirt's default network is up
+# and that no standalone dnsmasq conflicts with libvirt's bundled
+# dnsmasq instance. Invoked via `make guestfs-network-setup`,
+# never on bare `make` or `make bringup`.
+
+- name: Configure libvirt default network and dnsmasq state
+  ansible.builtin.include_tasks: network.yml

@@ -1,14 +1,25 @@
 ---
-- name: Verify host_setup state (non-sudo precheck)
+- name: Verify guestfs runtime dependencies are installed (non-sudo precheck)
   ansible.builtin.include_role:
-    name: guestfs/host_setup/verify
+    name: guestfs/runtime_deps/verify
 
-- name: Guestfs host_setup sudo opt-in (only with --tags guestfs_host_setup)
+- name: Guestfs runtime_deps sudo opt-in (only with --tags guestfs_runtime_deps_setup)
   ansible.builtin.include_role:
-    name: guestfs/host_setup/setup
+    name: guestfs/runtime_deps/setup
     apply:
-      tags: [guestfs_host_setup]
-  tags: [never, guestfs_host_setup]
+      tags: [guestfs_runtime_deps_setup]
+  tags: [never, guestfs_runtime_deps_setup]
+
+- name: Verify guestfs libvirt default network is up (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: guestfs/network/verify
+
+- name: Guestfs network sudo opt-in (only with --tags guestfs_network_setup)
+  ansible.builtin.include_role:
+    name: guestfs/network/setup
+    apply:
+      tags: [guestfs_network_setup]
+  tags: [never, guestfs_network_setup]
 
 - name: Set the pathname of storage pool directory
   tags:

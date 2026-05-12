@@ -1,0 +1,11 @@
+---
+# guestfs/runtime_deps/setup — install the distro packages
+# guestfs needs at runtime to orchestrate libvirt-backed VMs
+# (libguestfs-tools, the python libvirt bindings, OVMF firmware,
+# the DHCP client guests use through the default network).
+# Invoked via `make guestfs-runtime-deps-setup`, never on bare
+# `make` or `make bringup`. The spec calls this kind of package
+# install the runtime_deps sub-module per Yocto RDEPENDS semantics.
+
+- name: Distribution-specific guestfs runtime dependencies
+  ansible.builtin.include_tasks: install-deps/main.yml

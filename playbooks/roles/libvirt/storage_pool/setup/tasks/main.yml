@@ -1,8 +1,31 @@
 ---
-# libvirt/storage_pool/setup — define and start the libvirt storage
-# pool. Sudo on most distros; runs as the regular user under
-# libvirt_session (Fedora's qemu:///session). Invoked via
-# `make libvirt-storage-pool-setup`.
+# libvirt/storage_pool/setup — prepare the libvirt storage pool
+# end-to-end: create the on-disk directory with correct group
+# ownership, then define + start + autostart the libvirt pool
+# object that points at it. Sudo on most distros; runs as the
+# regular user under libvirt_session (Fedora's qemu:///session).
+# Invoked via `make libvirt-storage-pool-setup`.
+
+- name: Create the storage pool directory (libvirt session uri)
+  ansible.builtin.file:
+    path: "{{ libvirt_storage_pool_path }}"
+    state: directory
+    mode: "0755"
+  when: not (libvirt_uri_system | default(false) | bool)
+  tags: do_configure
+
+- name: Create the storage pool directory with group ownership (libvirt system uri)
+  become: true
+  become_flags: "su - -c"
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ libvirt_storage_pool_path }}"
+    state: directory
+    owner: root
+    group: "{{ libvirt_qemu_group }}"
+    mode: "u=rwx,g=rwx,o=rx"
+  when: libvirt_uri_system | default(false) | bool
+  tags: do_configure
 
 - name: Check whether the pool exists
   become: "{{ not (libvirt_session | default(false) | bool) }}"

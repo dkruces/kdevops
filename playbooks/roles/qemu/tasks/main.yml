@@ -106,7 +106,7 @@
     chdir: "{{ qemu_build_builddir }}"
   when: qemu_build | bool
   changed_when: true
-  tags: do_build
+  tags: do_compile
 
 - name: Install QEMU into qemu_build_destdir (no sudo)
   ansible.builtin.command:

@@ -124,7 +124,7 @@
       when:
         - libvirt_uri_system|bool
       changed_when: true
-      tags: do_configure
+      tags: do_install
 
     - name: Build the root image for each target node (non-root)
       ansible.builtin.command:
@@ -132,7 +132,7 @@
       when:
         - not libvirt_uri_system|bool
       changed_when: true
-      tags: do_configure
+      tags: do_install
 
     - name: Create largeio devices
       ansible.builtin.include_tasks:

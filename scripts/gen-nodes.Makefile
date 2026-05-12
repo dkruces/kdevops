@@ -142,8 +142,6 @@ GEN_NODES_EXTRA_ARGS += libvirt_largeio_pow_limit='$(subst ",,$(CONFIG_QEMU_LARG
 endif
 
 ifeq (y,$(CONFIG_LIBVIRT_MACHINE_TYPE_Q35))
-GEN_NODES_EXTRA_ARGS += libvirt_override_machine_type='True'
-GEN_NODES_EXTRA_ARGS += libvirt_machine_type='q35'
 
 ifeq (y,$(CONFIG_QEMU_ENABLE_CXL))
 GEN_NODES_EXTRA_ARGS += libvirt_enable_cxl='True'
@@ -171,10 +169,5 @@ endif # QEMU_ENABLE_CXL_DEMO_DCD_TOPOLOGY_1
 endif # CONFIG_QEMU_ENABLE_CXL
 
 endif # CONFIG_LIBVIRT_MACHINE_TYPE_Q35
-
-ifeq (y,$(CONFIG_LIBVIRT_MACHINE_TYPE_VIRT))
-GEN_NODES_EXTRA_ARGS += libvirt_override_machine_type='True'
-GEN_NODES_EXTRA_ARGS += libvirt_machine_type='virt'
-endif # CONFIG_LIBVIRT_MACHINE_TYPE_VIRT
 
 ANSIBLE_EXTRA_ARGS += $(GEN_NODES_EXTRA_ARGS)

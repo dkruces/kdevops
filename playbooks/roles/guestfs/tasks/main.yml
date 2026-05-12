@@ -1,21 +1,14 @@
 ---
-- name: Install guestfs dependencies on the Ansible controller
-  tags:
-    - install-deps
-  ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/install-deps/main.yml"
+- name: Verify host_setup state (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: guestfs/host_setup/verify
 
-- name: Ensure a storage pool for guestfs exists
-  tags:
-    - pool
-  ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/storage-pool-path.yml"
-
-- name: Ensure libvirt networking has started
-  tags:
-    - network
-  ansible.builtin.import_tasks:
-    file: "{{ role_path }}/tasks/bringup/network.yml"
+- name: Guestfs host_setup sudo opt-in (only with --tags guestfs_host_setup)
+  ansible.builtin.include_role:
+    name: guestfs/host_setup/setup
+    apply:
+      tags: [guestfs_host_setup]
+  tags: [never, guestfs_host_setup]
 
 - name: Set the pathname of storage pool directory
   tags:

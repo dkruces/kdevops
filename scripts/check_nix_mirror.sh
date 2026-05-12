@@ -21,7 +21,7 @@ check_http_mirror() {
 check_local_mirror() {
     if [[ -d "$NIX_CACHE_PATH" ]]; then
         # Check if directory has some cache files
-        if find "$NIX_CACHE_PATH" -name "*.narinfo" -o -name "*.nar*" | head -1 | grep -q .; then
+        if find "$NIX_CACHE_PATH" -name "*.narinfo" -o -name "*.nar*" 2>/dev/null | head -1 | grep -q .; then
             return 0
         fi
         # Even if empty, the directory exists so mirror is configured

@@ -115,16 +115,4 @@ ifeq (y,$(CONFIG_LIBVIRT_EXTRA_DRIVE_FORMAT_RAW))
 GEN_NODES_EXTRA_ARGS += libvirt_extra_drive_format='raw'
 endif
 
-ifeq (y,$(CONFIG_LIBVIRT_ENABLE_ZNS))
-GEN_NODES_EXTRA_ARGS += nvme_zone_enable='True'
-GEN_NODES_EXTRA_ARGS += nvme_zone_drive_size='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_DRIVE_SIZE))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_size='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_SIZE))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_zasl='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_ZASL))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_capacity='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_CAPACITY))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_max_active='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_MAX_ACTIVE))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_max_open='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_MAX_OPEN))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_physical_block_size='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_PHYSICAL_BLOCK_SIZE))'
-GEN_NODES_EXTRA_ARGS += nvme_zone_logical_block_size='$(subst ",,$(CONFIG_QEMU_NVME_ZONE_LOGICAL_BLOCK_SIZE))'
-endif
-
 ANSIBLE_EXTRA_ARGS += $(GEN_NODES_EXTRA_ARGS)

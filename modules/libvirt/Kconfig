@@ -421,7 +421,7 @@ config LIBVIRT_IMAGE_SIZE
 
 config HAVE_LIBVIRT_PCIE_PASSTHROUGH
 	bool
-	default $(shell, scripts/check_pciepassthrough_kconfig.sh passthrough_libvirt.generated)
+	default $(shell, scripts/check_pciepassthrough_kconfig.sh modules/libvirt/pcie_passthrough/Kconfig.generated)
 
 config KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH
 	bool "Enable PCI-E passthrough support"
@@ -461,7 +461,7 @@ config KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH_TYPE_ROUNDROBIN
 
 endchoice
 
-source "Kconfig.passthrough_libvirt.generated"
+source "modules/libvirt/pcie_passthrough/Kconfig.generated"
 
 endmenu
 

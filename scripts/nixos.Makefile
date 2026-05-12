@@ -24,7 +24,7 @@ endif
 
 LIBVIRT_PCIE_PASSTHROUGH :=
 ifeq (y,$(CONFIG_KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH))
-LIBVIRT_PCIE_PASSTHROUGH := libvirt_pcie_passthrough_permissions
+LIBVIRT_PCIE_PASSTHROUGH := libvirt-pcie-passthrough-setup
 endif
 
 ANSIBLE_EXTRA_ARGS += $(NIXOS_ARGS)
@@ -40,10 +40,6 @@ KDEVOPS_PROVISION_DESTROY_METHOD	:= destroy_nixos
 
 9p_linux_clone:
 	$(Q)make linux-clone
-
-libvirt_pcie_passthrough_permissions:
-	$(Q)ansible-playbook \
-		playbooks/libvirt_pcie_passthrough.yml
 
 $(KDEVOPS_PROVISIONED_SSH): $(KDEVOPS_HOSTS_PREFIX)
 	$(Q)# The SSH connectivity is verified during NixOS VM provisioning

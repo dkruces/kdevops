@@ -1,0 +1,39 @@
+---
+# libvirt/pcie_passthrough/verify — non-sudo precheck for VFIO
+# passthrough state. Fails with an actionable diagnostic when a
+# device flagged for passthrough has the wrong driver bound or the
+# wrong group ownership on its sysfs override file.
+
+- name: Skip the passthrough precheck when passthrough is disabled
+  ansible.builtin.meta: end_play
+  when: not (pcie_passthrough_enable | default(false) | bool)
+
+- name: Stat each device's sysfs driver_override file
+  ansible.builtin.stat:
+    path: "{{ pcie_sysfs_device_path_prefix }}/{{ item.pcie_id }}/driver_override"
+  register: libvirt_passthrough_overrides
+  with_items: "{{ pcie_passthrough_devices }}"
+  loop_control:
+    label: "{{ item.pcie_human_name }}"
+
+- name: Fail with actionable diagnostic when the sysfs override is wrongly owned
+  ansible.builtin.fail:
+    msg: |
+      The sysfs driver_override file for {{ item.item.pcie_human_name }}
+      ({{ item.item.pcie_id }}) is owned by group `{{ item.stat.gr_name }}`,
+      not `{{ libvirt_qemu_group | default('libvirt-qemu') }}`. libvirt
+      cannot rebind the device to vfio-pci without sudo unless this
+      group owns the override file.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make libvirt-pcie-passthrough-setup
+        2. Adjust the sysfs permissions manually following
+           docs/libvirt-pcie_passthrough.md, then re-run the
+           original make target.
+  loop: "{{ libvirt_passthrough_overrides.results }}"
+  loop_control:
+    label: "{{ item.item.pcie_human_name }}"
+  when:
+    - item.stat.exists
+    - item.stat.gr_name != (libvirt_qemu_group | default('libvirt-qemu'))

@@ -45,3 +45,14 @@
     apply:
       tags: [libvirt_storage_pool_setup]
   tags: [never, libvirt_storage_pool_setup]
+
+- name: Verify libvirt PCIe passthrough sysfs ownership (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: libvirt/pcie_passthrough/verify
+
+- name: libvirt pcie_passthrough sudo opt-in (only with --tags libvirt_pcie_passthrough_setup)
+  ansible.builtin.include_role:
+    name: libvirt/pcie_passthrough/setup
+    apply:
+      tags: [libvirt_pcie_passthrough_setup]
+  tags: [never, libvirt_pcie_passthrough_setup]

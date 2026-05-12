@@ -24,7 +24,7 @@ endif
 
 LIBVIRT_PCIE_PASSTHROUGH :=
 ifeq (y,$(CONFIG_KDEVOPS_LIBVIRT_PCIE_PASSTHROUGH))
-LIBVIRT_PCIE_PASSTHROUGH := libvirt_pcie_passthrough_permissions
+LIBVIRT_PCIE_PASSTHROUGH := libvirt-pcie-passthrough-setup
 endif
 
 ifneq ($(strip $(CONFIG_RHEL_ORG_ID)),)
@@ -50,10 +50,6 @@ KDEVOPS_PROVISION_DESTROY_METHOD	:= destroy_guestfs
 
 9p_linux_clone:
 	$(Q)make linux-clone
-
-libvirt_pcie_passthrough_permissions:
-	$(Q)ansible-playbook \
-		playbooks/libvirt_pcie_passthrough.yml
 
 $(KDEVOPS_PROVISIONED_SSH):
 	$(Q)if [[ "$(CONFIG_KDEVOPS_SSH_CONFIG_UPDATE)" == "y" ]]; then \

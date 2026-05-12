@@ -1,5 +1,0 @@
----
-- name: Configure PCIe passthrough for libvirt VMs
-  hosts: localhost
-  roles:
-    - role: libvirt_pcie_passthrough

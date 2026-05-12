@@ -105,7 +105,7 @@ workflows/linux/refs/user
 
 scripts/kconfig/.nconf-cfg
 .dynamic-kconfig.*
-Kconfig.passthrough_libvirt.generated
+modules/libvirt/pcie_passthrough/Kconfig.generated
 
 archive/
 

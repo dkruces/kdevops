@@ -22,9 +22,10 @@ style:
 PHONY += ansible-lint-module
 ansible-lint-module:
 	$(Q)test -n "$(MODULE)" || { echo "Usage: make ansible-lint-module MODULE=<name>"; exit 1; }
-	$(Q)ansible-lint --profile=production --fix=all \
-		playbooks/$(MODULE).yml \
-		playbooks/roles/$(MODULE)/
+	$(Q)ANSIBLE_ROLES_PATH="$(TOPDIR_PATH)/playbooks/roles" \
+		ansible-lint --profile=production --fix=all \
+			playbooks/$(MODULE).yml \
+			playbooks/roles/$(MODULE)/
 
 PHONY += python-lint-module
 python-lint-module:

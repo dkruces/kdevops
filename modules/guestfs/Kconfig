@@ -1,5 +1,42 @@
 if GUESTFS
 
+config GUESTFS_PATH
+	string
+	output yaml
+	default "$(shell, pwd)/guestfs"
+	help
+	  Synthetic, derived. Absolute path on the controller where the
+	  per-VM guestfs working directories live (one subdirectory per
+	  inventory hostname, containing the qcow2 disk, the libvirt
+	  domain XML, the console log, and the per-VM SSH key). Defaults
+	  to a guestfs/ subdirectory of the kdevops tree so the artefacts
+	  sit alongside .config and extra_vars.yaml. The role consumes
+	  this as guestfs_path; the nodes role's libvirt domain XML
+	  templates and the SSH-config update scripts also read it.
+
+config LIBVIRT_PROVIDER
+	bool
+	output yaml
+	default y
+	help
+	  Synthetic, derived. Marks libvirt as the bringup provider so
+	  consumers can branch on the backend without having to inspect
+	  CONFIG_GUESTFS / CONFIG_NIXOS directly. scripts/workflows/lib/crash.py
+	  and scripts/workflows/fstests/copy-results.sh consume this.
+
+config DATA_HOME_DIR
+	string
+	output yaml
+	default "/home/kdevops"
+	help
+	  Synthetic, derived. The HOME directory of the target user
+	  inside guestfs-spawned guests. The devconfig role uses this as
+	  the base for dev_gitconfig_dest, dev_bash_config, and the
+	  dev_bash_config_hacks_dest paths. Cloud backends (terraform)
+	  and NixOS guests pick their own value from their own
+	  bringup Makefiles for now; once those modules migrate, this
+	  symbol will hoist into a shared Kconfig.
+
 config GUESTFS_STORAGE_DIR
 	string
 	output yaml
@@ -233,6 +270,7 @@ config GUESTFS_FEDORA_BOX_SHORT
 
 config VIRT_BUILDER_OS_VERSION
 	string "virt-builder os-version"
+	output yaml
 	default "fedora-39" if GUESTFS_FEDORA
 	default GUESTFS_DEBIAN_IMAGE_NAME if GUESTFS_DEBIAN
 	help

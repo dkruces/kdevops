@@ -34,7 +34,7 @@
     - base_image
     - bringup
   ansible.builtin.set_fact:
-    guestfs_base_image: "{{ guestfs_storagedir }}/base_images/{{ virtbuilder_os_version }}.raw"
+    guestfs_base_image: "{{ guestfs_storagedir }}/base_images/{{ virt_builder_os_version }}.raw"
   delegate_to: localhost
 
 - name: Ensure the required base OS image exists
@@ -43,7 +43,7 @@
   ansible.builtin.import_role:
     name: base_image
   vars:
-    base_image_os_version: "{{ virtbuilder_os_version }}"
+    base_image_os_version: "{{ virt_builder_os_version }}"
     base_image_pathname: "{{ guestfs_base_image }}"
   delegate_to: localhost
 

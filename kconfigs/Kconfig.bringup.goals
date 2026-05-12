@@ -37,6 +37,7 @@ config RHEL_REGISTER
 
 config RHEL_ORG_ID
 	string "Red Hat Organization Identifier"
+	output yaml
 	depends on RHEL_REGISTER
 	default ""
 	help
@@ -44,6 +45,7 @@ config RHEL_ORG_ID
 
 config RHEL_ACTIVATION_KEY
 	string "Red Hat Activation Key"
+	output yaml
 	depends on RHEL_REGISTER
 	default ""
 	help

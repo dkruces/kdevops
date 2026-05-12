@@ -1,4 +1,4 @@
-{% if rhel_org_id is defined %}
+{% if rhel_org_id is defined and rhel_org_id | length > 0 %}
 run-command subscription-manager register --org={{ rhel_org_id }} --activationkey={{ rhel_activation_key }}
 {% endif %}
 
@@ -27,7 +27,7 @@ edit /etc/default/grub:s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAU
 run-command {{ update_grub_cmd }}
 root-password password:kdevops
 
-{% if rhel_org_id is defined %}
+{% if rhel_org_id is defined and rhel_org_id | length > 0 %}
 sm-unregister
 {% endif %}
 

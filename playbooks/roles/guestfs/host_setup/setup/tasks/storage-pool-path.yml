@@ -21,6 +21,7 @@
   # mode: "u=rwx,g=rwx,o=rx"
   when:
     - not libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Create storage pool path directory and set group (libvirt system uri)
   become: true
@@ -34,6 +35,7 @@
     mode: "u=rwx,g=rwx,o=rx"
   when:
     - libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Create kdevops guestfs storage directory (libvirt session uri)
   ansible.builtin.file:
@@ -42,6 +44,7 @@
     mode: "u=rwx,g=rx,o=rx"
   when:
     - not libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Create kdevops guestfs storage directory (libvirt system uri)
   become: true
@@ -54,6 +57,7 @@
     group: "{{ libvirt_qemu_group }}"
   when:
     - libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Check if directory is owned by the correct group (libvirt system uri)
   become: true
@@ -65,6 +69,7 @@
   changed_when: false
   when:
     - libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Check if directory has group write permissions (libvirt system uri)
   become: true
@@ -76,6 +81,7 @@
   changed_when: false
   when:
     - libvirt_uri_system|bool
+  tags: do_configure
 
 - name: Verify storage pool path directory is group-writable (libvirt system uri)
   become: true

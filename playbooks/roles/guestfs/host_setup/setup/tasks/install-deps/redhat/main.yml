@@ -10,3 +10,4 @@
     state: present
   when:
     - ansible_distribution != "Fedora"
+  tags: do_install

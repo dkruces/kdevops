@@ -2,6 +2,7 @@
 - name: Compute the total number of devices to build
   ansible.builtin.set_fact:
     guestfs_total_devices: "{{ qemu_largeio_max_pow_limit * qemu_extra_drive_largeio_num_drives_per_space }}"
+  tags: do_install
 
 - name: Create largeio block devices
   ansible.builtin.include_tasks:
@@ -9,3 +10,4 @@
   vars:
     path: "{{ guestfs_storagedir }}/{{ inventory_hostname }}/extra{{ item }}.{{ libvirt_extra_drive_format }}"
   loop: "{{ range(0, guestfs_total_devices) | list }}"
+  tags: do_install

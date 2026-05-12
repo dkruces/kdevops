@@ -6,6 +6,7 @@
     update_cache: true
     allow_change_held_packages: true
   failed_when: false
+  tags: do_install
 
 - name: Install guestfs dependencies for Debian
   become: true
@@ -20,3 +21,4 @@
       - python3-libvirt
       - ovmf
     state: present
+  tags: do_install

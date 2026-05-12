@@ -86,3 +86,4 @@
   when:
     - libvirt_uri_system|bool
     - "'default' not in (guestfs_libvirt_default_net.stdout_lines | default([]))"
+  tags: do_deploy

@@ -7,3 +7,4 @@
       - libguestfs-tools
       - dhcpcd
     state: present
+  tags: do_install

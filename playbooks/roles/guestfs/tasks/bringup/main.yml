@@ -64,6 +64,7 @@
       when:
         - libvirt_uri_system|bool
       changed_when: true
+      tags: do_install
 
     - name: Duplicate the root disk image for each target node (non-root)
       ansible.builtin.command:
@@ -72,6 +73,7 @@
       when:
         - not libvirt_uri_system|bool
       changed_when: true
+      tags: do_install
 
     - name: Get the timezone of the control host
       ansible.builtin.command:
@@ -122,6 +124,7 @@
       when:
         - libvirt_uri_system|bool
       changed_when: true
+      tags: do_configure
 
     - name: Build the root image for each target node (non-root)
       ansible.builtin.command:
@@ -129,6 +132,7 @@
       when:
         - not libvirt_uri_system|bool
       changed_when: true
+      tags: do_configure
 
     - name: Create largeio devices
       ansible.builtin.include_tasks:
@@ -154,6 +158,7 @@
         xml: "{{ lookup('file', xml_file) }}"
         uri: "{{ libvirt_uri }}"
       delegate_to: localhost
+      tags: do_deploy
 
     - name: Find PCIe passthrough devices
       ansible.builtin.find:
@@ -180,6 +185,7 @@
       when:
         - guestfs_passthrough_devices.matched > 0
       changed_when: true
+      tags: do_deploy
 
 - name: Ensure 9P host directory exists before bringing nodes on libvirt
   ansible.builtin.file:
@@ -197,3 +203,4 @@
     uri: "{{ libvirt_uri }}"
     state: running
   delegate_to: localhost
+  tags: do_deploy

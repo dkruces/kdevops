@@ -29,3 +29,4 @@
     label: "{{ item.path | regex_replace('^.*guestfs/', 'guestfs/') }}"
   when:
     - guestfs_console_log_files.matched > 0
+  tags: do_configure

@@ -15,6 +15,7 @@
   changed_when: true
   when:
     - inventory_hostname in guestfs_running_vms.list_vms
+  tags: do_destroy
 
 - name: Gather the list of stopped libvirt guests
   run_once: true
@@ -37,6 +38,7 @@
   when:
     - inventory_hostname in guestfs_shutdown_vms.list_vms
   failed_when: false
+  tags: do_destroy
 
 - name: Clean up storage volumes for target nodes
   ansible.builtin.shell: |
@@ -44,6 +46,7 @@
     virsh -c {{ libvirt_uri }} vol-delete --pool {{ kdevops_storage_pool_path }} {{ inventory_hostname }}.raw 2>/dev/null || true
   changed_when: false
   failed_when: false
+  tags: do_destroy
 
 - name: Remove per-node configuration files
   ansible.builtin.file:
@@ -52,6 +55,7 @@
   loop:
     - "{{ guestfs_path }}/{{ inventory_hostname }}"
     - "{{ kdevops_storage_pool_path }}/guestfs/{{ inventory_hostname }}"
+  tags: do_destroy
 
 - name: Remove global configuration files
   run_once: true
@@ -61,3 +65,4 @@
   loop:
     - "{{ kdevops_ssh_config }}"
     - "{{ topdir_path }}/{{ kdevops_nodes }}"
+  tags: do_destroy

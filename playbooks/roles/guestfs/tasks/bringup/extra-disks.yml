@@ -8,6 +8,7 @@
       - "{{ libvirt_extra_drive_format }}"
       - "{{ path }}"
       - "100G"
+  changed_when: true
 
 - name: Update the permission settings of the drive image file
   ansible.builtin.file:

@@ -2,7 +2,7 @@
 - name: Get the user who invoked Ansible
   ansible.builtin.command:
     cmd: whoami
-  register: reg_user
+  register: guestfs_reg_user
   changed_when: false
 
 - name: Look for console.log files in guestfs subdirectories to check for CI enablement
@@ -14,7 +14,7 @@
     patterns: "console.log"
     file_type: file
     recurse: true
-  register: console_log_files
+  register: guestfs_console_log_files
 
 - name: Ensure console.log files are owned by the main user for CI monitoring
   become: true
@@ -22,10 +22,10 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ item.path }}"
-    owner: "{{ reg_user.stdout }}"
-    group: "{{ reg_user.stdout }}"
-  loop: "{{ console_log_files.files }}"
+    owner: "{{ guestfs_reg_user.stdout }}"
+    group: "{{ guestfs_reg_user.stdout }}"
+  loop: "{{ guestfs_console_log_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace('^.*guestfs/', 'guestfs/') }}"
   when:
-    - console_log_files.matched > 0
+    - guestfs_console_log_files.matched > 0

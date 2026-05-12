@@ -5,7 +5,7 @@
     command: list_vms
     state: running
     uri: "{{ libvirt_uri }}"
-  register: running_vms
+  register: guestfs_running_vms
 
 - name: Shut down each running target node
   community.libvirt.virt:
@@ -14,7 +14,7 @@
     uri: "{{ libvirt_uri }}"
   changed_when: true
   when:
-    - inventory_hostname in running_vms.list_vms
+    - inventory_hostname in guestfs_running_vms.list_vms
 
 - name: Gather the list of stopped libvirt guests
   run_once: true
@@ -22,7 +22,7 @@
     command: list_vms
     state: shutdown
     uri: "{{ libvirt_uri }}"
-  register: shutdown_vms
+  register: guestfs_shutdown_vms
 
 - name: Undefine each stopped target node
   community.libvirt.virt:
@@ -35,15 +35,15 @@
     uri: "{{ libvirt_uri }}"
   changed_when: true
   when:
-    - inventory_hostname in shutdown_vms.list_vms
-  ignore_errors: true
+    - inventory_hostname in guestfs_shutdown_vms.list_vms
+  failed_when: false
 
 - name: Clean up storage volumes for target nodes
   ansible.builtin.shell: |
     virsh -c {{ libvirt_uri }} vol-delete --pool {{ kdevops_storage_pool_path }} {{ inventory_hostname }}/root.raw 2>/dev/null || true
     virsh -c {{ libvirt_uri }} vol-delete --pool {{ kdevops_storage_pool_path }} {{ inventory_hostname }}.raw 2>/dev/null || true
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
 - name: Remove per-node configuration files
   ansible.builtin.file:

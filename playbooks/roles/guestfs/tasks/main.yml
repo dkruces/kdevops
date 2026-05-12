@@ -15,7 +15,7 @@
     - base_image
     - bringup
   ansible.builtin.set_fact:
-    storagedir: "{{ kdevops_storage_pool_path }}/guestfs"
+    guestfs_storagedir: "{{ kdevops_storage_pool_path }}/guestfs"
   delegate_to: localhost
 
 - name: Set the pathname of the base image in base_images directory
@@ -23,7 +23,7 @@
     - base_image
     - bringup
   ansible.builtin.set_fact:
-    base_image: "{{ storagedir }}/base_images/{{ virtbuilder_os_version }}.raw"
+    guestfs_base_image: "{{ guestfs_storagedir }}/base_images/{{ virtbuilder_os_version }}.raw"
   delegate_to: localhost
 
 - name: Ensure the required base OS image exists
@@ -33,7 +33,7 @@
     name: base_image
   vars:
     base_image_os_version: "{{ virtbuilder_os_version }}"
-    base_image_pathname: "{{ base_image }}"
+    base_image_pathname: "{{ guestfs_base_image }}"
   delegate_to: localhost
 
 - name: Bring up each target node

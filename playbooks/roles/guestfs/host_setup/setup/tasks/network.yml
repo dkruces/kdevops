@@ -5,7 +5,7 @@
   loop:
     - /etc/dnsmasq.conf
     - /etc/dnsmasq.d
-  register: dnsmasq_config_files
+  register: guestfs_dnsmasq_config_files
   when:
     - distro_debian_based|bool
 
@@ -14,10 +14,10 @@
     msg: |
       dnsmasq configuration files or directories still exist.
       Please remove the following to fully uninstall
-      dnsmasq:\n{{ dnsmasq_config_files | join('\n') }}
+      dnsmasq:\n{{ guestfs_dnsmasq_config_files | join('\n') }}
   when:
     - distro_debian_based|bool
-    - dnsmasq_config_files.results | selectattr('stat.exists') | list | length > 0
+    - guestfs_dnsmasq_config_files.results | selectattr('stat.exists') | list | length > 0
 
 - name: Check if dnsmasq service is enabled
   # noqa: command-instead-of-module
@@ -26,12 +26,12 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command:
     cmd: "systemctl is-enabled dnsmasq"
-  register: dnsmasq_enabled
+  register: guestfs_dnsmasq_enabled
   failed_when: false
   changed_when: false
   when:
     - distro_debian_based|bool
-    - dnsmasq_config_files | length > 0
+    - guestfs_dnsmasq_config_files | length > 0
 
 - name: Check if dnsmasq service is active
   # noqa: command-instead-of-module
@@ -40,25 +40,25 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command:
     cmd: "systemctl is-active dnsmasq"
-  register: dnsmasq_active
+  register: guestfs_dnsmasq_active
   failed_when: false
   changed_when: false
   when:
     - distro_debian_based|bool
-    - dnsmasq_config_files | length > 0
+    - guestfs_dnsmasq_config_files | length > 0
 
 - name: Fail if dnsmasq service is enabled or active
   ansible.builtin.fail:
     msg: |
       dnsmasq service is
-      {{ 'enabled' if dnsmasq_enabled.rc == 0 else 'active' if dnsmasq_active.rc == 0 else 'present' }}.
+      {{ 'enabled' if guestfs_dnsmasq_enabled.rc == 0 else 'active' if guestfs_dnsmasq_active.rc == 0 else 'present' }}.
       Please ensure dnsmasq is fully uninstalled and disabled.
       Run 'sudo systemctl disable dnsmasq' and 'sudo systemctl
       stop dnsmasq' to disable and stop the service.
   when:
     - distro_debian_based|bool
-    - dnsmasq_config_files | length > 0
-    - (dnsmasq_enabled.rc == 0) or (dnsmasq_active.rc == 0)
+    - guestfs_dnsmasq_config_files | length > 0
+    - (guestfs_dnsmasq_enabled.rc == 0) or (guestfs_dnsmasq_active.rc == 0)
 
 - name: Check if libvirt default network is running
   become: true
@@ -66,9 +66,10 @@
   become_method: ansible.builtin.sudo
   environment:
     LIBVIRT_DEFAULT_URI: "{{ libvirt_uri }}"
-  ansible.builtin.shell: virsh net-list | grep -q default
-  register: libvirt_default_net
-  ignore_errors: true
+  ansible.builtin.command:
+    cmd: virsh net-list --name
+  register: guestfs_libvirt_default_net
+  failed_when: false
   changed_when: false
   when:
     - libvirt_uri_system|bool
@@ -84,4 +85,4 @@
   changed_when: true
   when:
     - libvirt_uri_system|bool
-    - libvirt_default_net.rc != 0
+    - "'default' not in (guestfs_libvirt_default_net.stdout_lines | default([]))"

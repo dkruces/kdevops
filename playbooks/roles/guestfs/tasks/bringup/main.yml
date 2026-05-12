@@ -5,90 +5,106 @@
   community.libvirt.virt:
     command: list_vms
     uri: "{{ libvirt_uri }}"
-  register: defined_vms
+  register: guestfs_defined_vms
 
 - name: Debug defined VMs
-  debug:
-    msg: "Hostname: {{ inventory_hostname }}, Defined VMs: {{ hostvars['localhost']['defined_vms']['list_vms'] | default([]) }}, Check: {{ inventory_hostname not in (hostvars['localhost']['defined_vms']['list_vms'] | default([])) }}"
   vars:
     ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
+    defined_list: "{{ hostvars['localhost'].get('guestfs_defined_vms', {}).get('list_vms', []) }}"
+  ansible.builtin.debug:
+    msg: >-
+      Hostname: {{ inventory_hostname }},
+      Defined VMs: {{ defined_list }},
+      Check: {{ inventory_hostname not in defined_list }}
 
 - name: Provision each target node
   when:
-    - "inventory_hostname not in defined_vms.list_vms"
+    - "inventory_hostname not in guestfs_defined_vms.list_vms"
   block:
     - name: Set the pathname of the ssh directory for each target node
       ansible.builtin.set_fact:
-        ssh_key_dir: "{{ guestfs_path }}/{{ inventory_hostname }}/ssh"
+        guestfs_ssh_key_dir: "{{ guestfs_path }}/{{ inventory_hostname }}/ssh"
 
     - name: Set the pathname of the ssh key for each target node
       ansible.builtin.set_fact:
-        ssh_key: "{{ ssh_key_dir }}/id_ed25519"
+        guestfs_ssh_key: "{{ guestfs_ssh_key_dir }}/id_ed25519"
 
     - name: Generate ssh keys for each target node
       block:
         - name: Create the ssh key directory on the control host
           ansible.builtin.file:
-            path: "{{ ssh_key_dir }}"
+            path: "{{ guestfs_ssh_key_dir }}"
             state: directory
             mode: "u=rwx"
           delegate_to: localhost
 
         - name: Generate fresh keys for each target node
           ansible.builtin.command:
-            cmd: 'ssh-keygen -q -t ed25519 -f {{ ssh_key }} -N ""'
-            creates: "{{ ssh_key }}"
+            cmd: 'ssh-keygen -q -t ed25519 -f {{ guestfs_ssh_key }} -N ""'
+            creates: "{{ guestfs_ssh_key }}"
           delegate_to: localhost
 
     - name: Set the pathname of the root disk image for each target node
       ansible.builtin.set_fact:
-        root_image: "{{ storagedir }}/{{ inventory_hostname }}/root.raw"
+        guestfs_root_image: "{{ guestfs_storagedir }}/{{ inventory_hostname }}/root.raw"
 
     - name: Create the storage pool directory for each target node
       ansible.builtin.file:
-        path: "{{ storagedir }}/{{ inventory_hostname }}"
+        path: "{{ guestfs_storagedir }}/{{ inventory_hostname }}"
         state: directory
+        mode: "0755"
       delegate_to: localhost
 
     - name: Duplicate the root disk image for each target node (as root)
       become: true
       become_method: ansible.builtin.sudo
       ansible.builtin.command:
-        cmd: "cp --reflink=auto {{ base_image }} {{ root_image }}"
+        cmd: "cp --reflink=auto {{ guestfs_base_image }} {{ guestfs_root_image }}"
       delegate_to: localhost
       when:
         - libvirt_uri_system|bool
+      changed_when: true
 
     - name: Duplicate the root disk image for each target node (non-root)
       ansible.builtin.command:
-        cmd: "cp --reflink=auto {{ base_image }} {{ root_image }}"
+        cmd: "cp --reflink=auto {{ guestfs_base_image }} {{ guestfs_root_image }}"
       delegate_to: localhost
       when:
         - not libvirt_uri_system|bool
+      changed_when: true
 
     - name: Get the timezone of the control host
       ansible.builtin.command:
         cmd: "timedatectl show -p Timezone --value"
-      register: host_timezone
+      register: guestfs_host_timezone
       delegate_to: localhost
+      changed_when: false
 
     - name: Build virt-sysprep command arguments for each target node
       ansible.builtin.set_fact:
-        virt_sysprep_args: >-
+        guestfs_virt_sysprep_args: >-
           {{
             [
               "virt-sysprep",
-              "-a", root_image,
+              "-a", guestfs_root_image,
               "--hostname", inventory_hostname,
-              "--ssh-inject", "kdevops:file:" + ssh_key + ".pub",
-              "--timezone", host_timezone.stdout
+              "--ssh-inject", "kdevops:file:" + guestfs_ssh_key + ".pub",
+              "--timezone", guestfs_host_timezone.stdout
             ] + (
               [
                 "--run-command", "sed -i '/^#*Port /d' /etc/ssh/sshd_config",
                 "--append-line", "/etc/ssh/sshd_config:Port " + (ansible_config_ssh_port | string),
-                "--firstboot-command", "semanage port -a -t ssh_port_t -p tcp " + (ansible_config_ssh_port | string) + " 2>/dev/null || semanage port -m -t ssh_port_t -p tcp " + (ansible_config_ssh_port | string) + "; systemctl restart sshd",
-                "--firstboot-command", "if command -v firewall-cmd >/dev/null 2>&1 && systemctl is-enabled firewalld >/dev/null 2>&1; then firewall-cmd --permanent --add-port=" + (ansible_config_ssh_port | string) + "/tcp && firewall-cmd --reload; fi",
-                "--firstboot-command", "if command -v ufw >/dev/null 2>&1 && systemctl is-active ufw >/dev/null 2>&1; then ufw allow " + (ansible_config_ssh_port | string) + "/tcp; fi"
+                "--firstboot-command",
+                  "semanage port -a -t ssh_port_t -p tcp " + (ansible_config_ssh_port | string) +
+                  " 2>/dev/null || semanage port -m -t ssh_port_t -p tcp " +
+                  (ansible_config_ssh_port | string) + "; systemctl restart sshd",
+                "--firstboot-command",
+                  "if command -v firewall-cmd >/dev/null 2>&1 && systemctl is-enabled firewalld >/dev/null 2>&1; then" +
+                  " firewall-cmd --permanent --add-port=" + (ansible_config_ssh_port | string) +
+                  "/tcp && firewall-cmd --reload; fi",
+                "--firstboot-command",
+                  "if command -v ufw >/dev/null 2>&1 && systemctl is-active ufw >/dev/null 2>&1; then" +
+                  " ufw allow " + (ansible_config_ssh_port | string) + "/tcp; fi"
               ]
               if ansible_config_ssh_port | int != 22 else []
             ) + (
@@ -102,15 +118,17 @@
       become: true
       become_method: ansible.builtin.sudo
       ansible.builtin.command:
-        argv: "{{ virt_sysprep_args }}"
+        argv: "{{ guestfs_virt_sysprep_args }}"
       when:
         - libvirt_uri_system|bool
+      changed_when: true
 
     - name: Build the root image for each target node (non-root)
       ansible.builtin.command:
-        argv: "{{ virt_sysprep_args }}"
+        argv: "{{ guestfs_virt_sysprep_args }}"
       when:
         - not libvirt_uri_system|bool
+      changed_when: true
 
     - name: Create largeio devices
       ansible.builtin.include_tasks:
@@ -120,7 +138,7 @@
 
     - name: Create extra disks
       vars:
-        path: "{{ storagedir }}/{{ inventory_hostname }}/extra{{ item }}.{{ libvirt_extra_drive_format }}"
+        path: "{{ guestfs_storagedir }}/{{ inventory_hostname }}/extra{{ item }}.{{ libvirt_extra_drive_format }}"
       ansible.builtin.include_tasks:
         file: "{{ role_path }}/tasks/bringup/extra-disks.yml"
       loop: "{{ range(0, libvirt_extra_storage_drive_count) | list }}"
@@ -142,7 +160,7 @@
         paths: "{{ guestfs_path }}/{{ inventory_hostname }}"
         file_type: file
         patterns: "pcie_passthrough_*.xml"
-      register: passthrough_devices
+      register: guestfs_passthrough_devices
       delegate_to: localhost
 
     - name: Attach PCIe passthrough devices to each target node
@@ -155,12 +173,13 @@
           - "{{ inventory_hostname }}"
           - "{{ item.path }}"
           - "--config"
-      loop: "{{ passthrough_devices.files }}"
+      loop: "{{ guestfs_passthrough_devices.files }}"
       loop_control:
         label: "Doing PCI-E passthrough for device {{ item }}"
       delegate_to: localhost
       when:
-        - passthrough_devices.matched > 0
+        - guestfs_passthrough_devices.matched > 0
+      changed_when: true
 
 - name: Ensure 9P host directory exists before bringing nodes on libvirt
   ansible.builtin.file:

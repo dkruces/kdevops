@@ -2,12 +2,12 @@
 - name: Get the user who invoked Ansible
   ansible.builtin.command:
     cmd: "id -Gn"
-  register: id_group
+  register: guestfs_id_group
   changed_when: false
 
 - name: Group membership check failed
   vars:
-    user_groups: "{{ id_group.stdout | split }}"
+    user_groups: "{{ guestfs_id_group.stdout | split }}"
   ansible.builtin.fail:
     msg: "Ansible user is not part of the {{ libvirt_qemu_group }} group."
   when:
@@ -61,7 +61,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command:
     cmd: stat -c '%G' "{{ libvirt_storage_pool_path }}"
-  register: dir_group
+  register: guestfs_dir_group
   changed_when: false
   when:
     - libvirt_uri_system|bool
@@ -72,7 +72,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command:
     cmd: stat -c '%A' "{{ libvirt_storage_pool_path }}"
-  register: dir_perms
+  register: guestfs_dir_perms
   changed_when: false
   when:
     - libvirt_uri_system|bool
@@ -85,8 +85,8 @@
     msg: |
       The permissions for {{ libvirt_storage_pool_path }} should be group
       writeable by the group used by libvirt: {{ libvirt_qemu_group }}
-      Current group: {{ dir_group.stdout }}
-      Current permissions: {{ dir_perms.stdout }}
+      Current group: {{ guestfs_dir_group.stdout }}
+      Current permissions: {{ guestfs_dir_perms.stdout }}
   when:
     - libvirt_uri_system|bool
-    - (dir_group.stdout != libvirt_qemu_group) or (dir_perms.stdout[5] != 'w')
+    - (guestfs_dir_group.stdout != libvirt_qemu_group) or (guestfs_dir_perms.stdout[5] != 'w')

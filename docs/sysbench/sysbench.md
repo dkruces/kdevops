@@ -11,7 +11,7 @@ MySQL double write buffer only across a series of different filesystems. kdevops
 makes adding support for testing TPS variability on different filesystems
 easy, and allows you to easily run these tests on bare metal, virtualized
 guests (optionally with
-[kdevops PCIe passthrough](../libvirt-pcie-passthrough.md))
+[kdevops PCIe passthrough](../libvirt-pcie_passthrough.md))
 and on different cloud providers which kdevops supports.
 
 Support was based on transcribing an initial simple shell docker proof of
@@ -25,7 +25,7 @@ sysbench images and plots for a 12 hour run collected below to demonstrate what
 you should expect with automation from kdevops. Initial testing with of the TPS
 variability workflow on kdevops has been done with VMs only, but enough work is
 in place to easily verify / extend it with
-[kdevops PCIe passthrough](../libvirt-pcie-passthrough.md)
+[kdevops PCIe passthrough](../libvirt-pcie_passthrough.md)
 and cloud support, it should just be a matter of a few Kconfig changes, and then
 also for cloud making sure we move around some folders into partitions with more
 space like the docker folders as some cloud instances use a small root disk. For
@@ -145,6 +145,6 @@ kdevops should be done for cloud providers per type of target instance to
 adjust data.
 
 Since we already have support for testing fstests with real NVMe drives with
-[kdevops PCIe passthrough](../libvirt-pcie-passthrough.md) support, it should
+[kdevops PCIe passthrough](../libvirt-pcie_passthrough.md) support, it should
 easily be possible to leverage that as a way to also support for
-[kdevops PCIe passthrough](../libvirt-pcie-passthrough.md) for sysbench testing.
+[kdevops PCIe passthrough](../libvirt-pcie_passthrough.md) for sysbench testing.

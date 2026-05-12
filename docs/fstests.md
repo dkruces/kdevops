@@ -60,7 +60,7 @@ For more details refer to [test using real NVMe drives](docs/testing-with-nvme.m
 The symlinks are used to ensure the same drives are used upon reboot.
 
 You can use real NVMe drives on nodes which are on baremetal, the cloud,
-or virtualization using [PCIe passthrough](docs/libvirt-pcie-passthrough.md).
+or virtualization using [PCIe passthrough](docs/libvirt-pcie_passthrough.md).
 kdevops supports all these and automates it setup for you.
 
 # Running fstests

@@ -54,14 +54,14 @@ Variability is provided through the same variability language used in the Linux
 kernel, kconfig. It is written by Linux kernel developers, for Linux kernel
 developers. The project aims to enable support for all Linux distributions.
 
-kdevops supports [PCIe passthrough](docs/libvirt-pcie-passthrough.md)
+kdevops supports [PCIe passthrough](docs/libvirt-pcie_passthrough.md)
 when using virtualization and allows you to pick and choose onto which guest
 any PCIe device gets passed onto. This could be all devices to one guest
 or you get to pick what device goes to a specific guest. You can for example
 even end up with many guests and each guest gets one PCIe passthrough device
 assigned, all through kconfig.
 
-kdevops [PCIe passthrough](docs/libvirt-pcie-passthrough.md) support is
+kdevops [PCIe passthrough](docs/libvirt-pcie_passthrough.md) support is
 supported using [kdevops dynamic kconfig](docs/kdevops-dynamic-configuration.md), a
 new target is provided 'make dynconfig' which let's kdevops generate Kconfig
 files dynamically based on your system environment. This mechanism will be
@@ -238,7 +238,7 @@ performance graphs, and statistical analysis for easy regression detection.
 ### CXL
 
 There is CXL support. You can either use virtualized CXL devices or with
-[PCIe passthrough](docs/libvirt-pcie-passthrough.md) you can assign devices
+[PCIe passthrough](docs/libvirt-pcie_passthrough.md) you can assign devices
 to guests and create custom topologies. kdevops let you build and install
 the latest CXL enabled qemu version as well for you. For more details
 refer to [kdevops cxl docs](docs/cxl.md)
@@ -261,7 +261,7 @@ and kernel stability problems. For more details see [kdevops reboot-limit docs](
 ### sysbench
 
 kdevops supports automation of sysbench tests on VMs with or without
-[PCIe passthrough](docs/libvirt-pcie-passthrough.md) and different cloud
+[PCIe passthrough](docs/libvirt-pcie_passthrough.md) and different cloud
 providers. For details refer to the
 [kdevops sysbench documentation](docs/sysbench/sysbench.md).
 
@@ -394,8 +394,10 @@ Below is kdevops' recommended documentation reading.
   * [kdevops monitoring services](docs/monitoring.md)
   * [kdevops first run](docs/kdevops-first-run.md)
   * [kdevops running make](docs/running-make.md)
-  * [kdevops libvirt storage pool considerations](docs/libvirt-storage-pool.md)
-  * [kdevops PCIe passthrough support](docs/libvirt-pcie-passthrough.md)
+  * [kdevops libvirt module overview](docs/libvirt.md)
+  * [kdevops libvirt user / group setup](docs/libvirt-user.md)
+  * [kdevops libvirt storage pool considerations](docs/libvirt-storage_pool.md)
+  * [kdevops PCIe passthrough support](docs/libvirt-pcie_passthrough.md)
   * [kdevops running make bringup](docs/running-make-bringup.md)
   * [kdevops running make destroy](docs/kdevops-make-destroy.md)
   * [kdevops make mrproper](docs/kdevops-restarting-from-scratch.md)

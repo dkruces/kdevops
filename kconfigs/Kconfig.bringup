@@ -93,7 +93,7 @@ source "kconfigs/Kconfig.nixos"
 source "terraform/Kconfig"
 source "kconfigs/Kconfig.declared_hosts"
 if LIBVIRT
-source "kconfigs/Kconfig.libvirt"
+source "modules/libvirt/Kconfig"
 endif
 
 source "kconfigs/Kconfig.qemu_build"

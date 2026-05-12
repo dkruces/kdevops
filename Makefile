@@ -185,6 +185,8 @@ include scripts/update_etc_hosts.Makefile
 # Included after the backend Makefiles set KDEVOPS_NODES + KDEVOPS_NODES_TEMPLATE.
 include modules/nodes/Makefile
 
+include modules/libvirt/Makefile
+
 # Node-file selection comes from Make-side workflow/backend state
 # (KDEVOPS_NODES, KDEVOPS_NODES_TEMPLATE) and cannot be derived from
 # Kconfig, so it is injected directly into ANSIBLE_EXTRA_ARGS. Must

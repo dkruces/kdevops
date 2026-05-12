@@ -170,7 +170,7 @@ config QEMU_BIN_PATH
 	output yaml
 	default QEMU_BUILD_BIN_PATH if QEMU_BUILD
 	default QEMU_BIN_PATH_LIBVIRT if LIBVIRT
-	default $(shell,./scripts/get_libvirt_qemu_bin_path.sh) if !QEMU_USE_DEVELOPMENT_VERSION
+	default $(shell,./modules/libvirt/scripts/get_libvirt_qemu_bin_path.sh) if !QEMU_USE_DEVELOPMENT_VERSION
 
 config LIBVIRT_URI
 	string
@@ -231,7 +231,7 @@ config QEMU_INSTALL_DIR_LIBVIRT
 
 config QEMU_VIRSH_CAN_SUDO
 	bool
-	default $(shell, ./scripts/get_libvirsh_can_sudo.sh)
+	default $(shell, ./modules/libvirt/scripts/get_libvirsh_can_sudo.sh)
 
 config LIBVIRT_LARGE_CPU
 	bool "Enable extremely large CPU count"
@@ -1123,7 +1123,7 @@ endchoice
 
 config LIBVIRT_STORAGE_POOL_PATH_AUTO
 	string
-	default $(shell, ./scripts/get_libvirsh_pool_path.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
+	default $(shell, ./modules/libvirt/scripts/get_libvirsh_pool_path.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
 	default "/var/lib/libvirt/images" if LIBVIRT_STORAGE_POOL_PATH_CUSTOM_DEFAULT_DISTRO
 	default $(shell, scripts/cwd-append.sh kdevops) if LIBVIRT_STORAGE_POOL_PATH_CUSTOM_CWD
 	help
@@ -1155,7 +1155,7 @@ config LIBVIRT_STORAGE_POOL_CREATE
 	bool "Should we build a custom storage pool for you?"
 	output yaml
 	default n if !LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
-	default $(shell, ./scripts/get_libvirsh_pool_enabled.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
+	default $(shell, ./modules/libvirt/scripts/get_libvirsh_pool_enabled.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
 	help
 	  By default libvirt assumes your storage pool name is "default" and
 	  it expects libvirt to have created this for you. If you want to
@@ -1168,7 +1168,7 @@ config LIBVIRT_STORAGE_POOL_NAME
 	output yaml
 	depends on LIBVIRT_STORAGE_POOL_CREATE
 	default "default" if !LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
-	default $(shell, ./scripts/get_libvirsh_pool_name.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
+	default $(shell, ./modules/libvirt/scripts/get_libvirsh_pool_name.sh) if LIBVIRT_STORAGE_POOL_PATH_INFER_ADVANCED
 	help
 	  The libvirt storage pool name to use. By default this is "default",
 	  and this is typically defined by libvirt. Even if you create guests

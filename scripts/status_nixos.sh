@@ -4,14 +4,15 @@
 # Show status of NixOS VMs
 
 SCRIPTS_DIR=$(dirname $0)
-source ${SCRIPTS_DIR}/libvirt_pool.sh
+LIBVIRT_SCRIPTS_DIR="${SCRIPTS_DIR}/../modules/libvirt/scripts"
+source ${LIBVIRT_SCRIPTS_DIR}/libvirt_pool.sh
 
 # Get libvirt session settings
 get_pool_vars
 
 # Detect libvirt URI
-if [[ -x "${SCRIPTS_DIR}/detect_libvirt_session.sh" ]]; then
-    LIBVIRT_URI=$("${SCRIPTS_DIR}/detect_libvirt_session.sh")
+if [[ -x "${LIBVIRT_SCRIPTS_DIR}/detect_libvirt_session.sh" ]]; then
+    LIBVIRT_URI=$("${LIBVIRT_SCRIPTS_DIR}/detect_libvirt_session.sh")
 else
     LIBVIRT_URI="qemu:///system"
 fi

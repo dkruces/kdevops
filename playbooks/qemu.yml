@@ -1,5 +1,7 @@
 ---
 - name: Build and install QEMU
   hosts: localhost
+  connection: local
+  gather_facts: true
   roles:
-    - role: build_qemu
+    - role: qemu

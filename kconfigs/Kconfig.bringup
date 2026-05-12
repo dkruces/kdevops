@@ -96,4 +96,4 @@ if LIBVIRT
 source "modules/libvirt/Kconfig"
 endif
 
-source "kconfigs/Kconfig.qemu_build"
+source "modules/qemu/Kconfig"

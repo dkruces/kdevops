@@ -230,7 +230,7 @@ include scripts/install-rcloud-deps.Makefile
 include Makefile.btrfs_progs
 
 ifeq (y,$(CONFIG_QEMU_BUILD))
-include Makefile.build_qemu
+include modules/qemu/Makefile
 endif # CONFIG_QEMU_BUILD
 
 ifeq (y,$(CONFIG_SETUP_POSTFIX_EMAIL_RELAY))

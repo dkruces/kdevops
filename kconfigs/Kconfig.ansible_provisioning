@@ -13,7 +13,7 @@ config KDEVOPS_ANSIBLE_PROVISION_ENABLE
 	help
 	  If enabled we will provision the target hosts with ansible as a last
 	  last step after bringup. This playbook used to provision is
-	  configurable refer to CONFIG_ANSIBLE_CFG_INVENTORY.
+	  configurable refer to CONFIG_ANSIBLE_CONFIG_INVENTORY.
 
 if KDEVOPS_ANSIBLE_PROVISION_ENABLE
 

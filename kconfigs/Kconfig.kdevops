@@ -214,5 +214,5 @@ endmenu
 
 
 menu "Ansible Configuration"
-source "kconfigs/Kconfig.ansible_cfg"
+source "modules/ansible_config/Kconfig"
 endmenu

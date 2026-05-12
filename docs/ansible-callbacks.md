@@ -30,11 +30,11 @@ make menuconfig
 Override the default at build time:
 
 ```bash
-make ANSIBLE_CFG_CALLBACK_PLUGIN=lucid menuconfig
+make ANSIBLE_CONFIG_CALLBACK_PLUGIN=lucid menuconfig
 make
 ```
 
-When `ANSIBLE_CFG_CALLBACK_PLUGIN` is set via environment, the custom plugin
+When `ANSIBLE_CONFIG_CALLBACK_PLUGIN` is set via environment, the custom plugin
 option is automatically selected and populated with the specified value.
 
 ## Plugin Details
@@ -133,7 +133,7 @@ make
 Or via command line:
 
 ```bash
-make ANSIBLE_CFG_CALLBACK_PLUGIN=lucid menuconfig
+make ANSIBLE_CONFIG_CALLBACK_PLUGIN=lucid menuconfig
 make
 ```
 

@@ -67,15 +67,15 @@ Maintainers List
           first. When adding to this list, please keep the entries in
           alphabetical order.
 
-ANSIBLE WRAPPER
+ANSIBLE_CONFIG
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev
 S:	Maintained
 T:	git https://github.com/linux-kdevops/kdevops.git
-F:	docs/kdevops-ansible-configuration.md
-F:	kconfigs/Kconfig.ansible_cfg
-F:	playbooks/ansible_cfg.yml
-F:	playbooks/roles/ansible_cfg
+F:	docs/ansible_config.md
+F:	modules/ansible_config/
+F:	playbooks/ansible_config.yml
+F:	playbooks/roles/ansible_config/
 F:	scripts/ansible_av.py
 F:	scripts/ansible.Makefile
 

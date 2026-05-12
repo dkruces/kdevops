@@ -33,7 +33,7 @@
 
 - name: Check if the inventory file exists already
   ansible.builtin.stat:
-    path: "{{ ansible_cfg_inventory }}"
+    path: "{{ ansible_config_inventory }}"
   register: kdevops_hosts_dest
 
 - name: Ensure proper permission on the inventory file
@@ -41,7 +41,7 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.file:
-    path: "{{ ansible_cfg_inventory }}"
+    path: "{{ ansible_config_inventory }}"
     owner: "{{ my_user.stdout }}"
     group: "{{ my_group.stdout }}"
   when:
@@ -227,7 +227,7 @@
     sections: "{{ sections_replace_underscore | replace(\"'\", '') | split(', ') if is_fstests else [] }}"
   ansible.builtin.template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: true
     trim_blocks: true
     lstrip_blocks: true
@@ -236,7 +236,7 @@
 
 - name: Update Ansible inventory access modification time so make sees it updated
   ansible.builtin.file:
-    path: "{{ ansible_cfg_inventory }}"
+    path: "{{ ansible_config_inventory }}"
     state: touch
     mode: "0755"
 
@@ -273,7 +273,7 @@
     all_generic_nodes: ["{{ kdevops_host_prefix }}-fio-tests"]
   template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: yes
     trim_blocks: True
     lstrip_blocks: True
@@ -289,7 +289,7 @@
     all_generic_nodes: "{{ fio_tests_node_names }}"
   template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: yes
     trim_blocks: True
     lstrip_blocks: True
@@ -304,7 +304,7 @@
   tags: ['hosts']
   ansible.builtin.template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: true
     trim_blocks: True
     lstrip_blocks: True
@@ -319,7 +319,7 @@
   tags: ['hosts']
   ansible.builtin.template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: true
     trim_blocks: True
     lstrip_blocks: True
@@ -334,7 +334,7 @@
   tags: ['hosts']
   ansible.builtin.template:
     src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_cfg_inventory }}"
+    dest: "{{ ansible_config_inventory }}"
     force: true
     trim_blocks: True
     lstrip_blocks: True
@@ -347,7 +347,7 @@
 
 - name: Verify if final host file exists
   ansible.builtin.stat:
-    path: "{{ ansible_cfg_inventory }}"
+    path: "{{ ansible_config_inventory }}"
   register: final_hosts_file
 
 - name: Fail if the dedicated workflow has no rules for node configuration for hosts file configuration

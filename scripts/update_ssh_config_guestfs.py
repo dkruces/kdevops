@@ -103,7 +103,7 @@ def main():
         context = {
             "name": name,
             "addr": addr,
-            "port": extra_vars.get("ansible_cfg_ssh_port", 22),
+            "port": extra_vars.get("ansible_config_ssh_port", 22),
             "sshkey": f"{extra_vars['guestfs_path']}/{name}/ssh/id_ed25519",
         }
         sshconf.write(ssh_template.format(**context))

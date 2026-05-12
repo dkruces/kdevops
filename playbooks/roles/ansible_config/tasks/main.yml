@@ -14,7 +14,7 @@
 - name: Generate kdevops ansible.cfg
   ansible.builtin.template:
     src: "ansible.cfg.j2"
-    dest: "{{ ansible_cfg_file }}"
+    dest: "{{ ansible_config_path }}"
     mode: "0755"
 
 - name: Update ansible.cfg access modification time so make sees it updated

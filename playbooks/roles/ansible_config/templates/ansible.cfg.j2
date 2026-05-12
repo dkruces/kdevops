@@ -1,27 +1,27 @@
 [defaults]
-{% if ansible_cfg_callback_plugin_string == 'lucid' %}
+{% if ansible_config_callback_plugin_string == 'lucid' %}
 callback_plugins = ./callback_plugins
 {% endif %}
-{% if ansible_cfg_callback_plugin_profile_tasks %}
-callbacks_enabled = ansible.posix.profile_tasks{% if ansible_cfg_callback_plugin_string == 'lucid' %}, {{ ansible_cfg_callback_plugin_string }}{% endif %}
+{% if ansible_config_callback_plugin_profile_tasks %}
+callbacks_enabled = ansible.posix.profile_tasks{% if ansible_config_callback_plugin_string == 'lucid' %}, {{ ansible_config_callback_plugin_string }}{% endif %}
 
 {% endif %}
-verbosity = {{ ansible_cfg_verbosity | default(0) }}
-deprecation_warnings = {{ ansible_cfg_deprecation_warnings }}
-stdout_callback = {{ ansible_cfg_callback_plugin_string }}
-check_mode_markers = {{ ansible_cfg_callback_plugin_check_mode_markers }}
-display_failed_stderr = {{ ansible_cfg_callback_plugin_display_failed_stderr }}
-display_ok_hosts = {{ ansible_cfg_callback_plugin_display_ok_hosts }}
-display_skipped_hosts = {{ ansible_cfg_callback_plugin_display_skipped_hosts }}
-show_custom_stats = {{ ansible_cfg_callback_plugin_show_custom_stats }}
-show_per_host_start = {{ ansible_cfg_callback_plugin_show_per_host_start }}
-show_task_path_on_failure = {{ ansible_cfg_callback_plugin_show_task_path_on_failure }}
-interpreter_python = {{ ansible_cfg_interpreter_python_string }}
-forks = {{ ansible_cfg_forks }}
-enable_task_debugger = {{ ansible_cfg_task_debugger }}
-inventory = {{ ansible_cfg_inventory }}
+verbosity = {{ ansible_config_verbosity | default(0) }}
+deprecation_warnings = {{ ansible_config_deprecation_warnings }}
+stdout_callback = {{ ansible_config_callback_plugin_string }}
+check_mode_markers = {{ ansible_config_callback_plugin_check_mode_markers }}
+display_failed_stderr = {{ ansible_config_callback_plugin_display_failed_stderr }}
+display_ok_hosts = {{ ansible_config_callback_plugin_display_ok_hosts }}
+display_skipped_hosts = {{ ansible_config_callback_plugin_display_skipped_hosts }}
+show_custom_stats = {{ ansible_config_callback_plugin_show_custom_stats }}
+show_per_host_start = {{ ansible_config_callback_plugin_show_per_host_start }}
+show_task_path_on_failure = {{ ansible_config_callback_plugin_show_task_path_on_failure }}
+interpreter_python = {{ ansible_config_interpreter_python_string }}
+forks = {{ ansible_config_forks }}
+enable_task_debugger = {{ ansible_config_task_debugger }}
+inventory = {{ ansible_config_inventory }}
 
-{% if ansible_cfg_callback_plugin_string == 'community.general.diy' %}
+{% if ansible_config_callback_plugin_string == 'community.general.diy' %}
 [callback_diy]
 playbook_on_play_start_msg = PLAY: {{ '{{' }} ansible_callback_diy.play.name | default('') | upper {{ '}}' }}
 playbook_on_play_start_msg_color = bright blue
@@ -47,21 +47,21 @@ playbook_on_stats_msg = PLAYBOOK SUMMARY
  {{ '{%' }} endfor {{ '%}' }}
 playbook_on_stats_msg_color = bright green
 {% endif %}
-{% if ansible_cfg_callback_plugin_profile_tasks %}
+{% if ansible_config_callback_plugin_profile_tasks %}
 
 [callback_profile_tasks]
 summary_only = true
 {% endif %}
-{% if ansible_cfg_callback_plugin_string == 'lucid' %}
+{% if ansible_config_callback_plugin_string == 'lucid' %}
 
 [callback_lucid]
-output_mode = {{ ansible_cfg_lucid_output_mode_string | default('auto') }}
+output_mode = {{ ansible_config_lucid_output_mode_string | default('auto') }}
 {% endif %}
 
 [ssh_connection]
-remote_port = {{ ansible_cfg_ssh_port }}
+remote_port = {{ ansible_config_ssh_port }}
 {% if ansible_facts['distribution'] == 'openSUSE' %}
 
 [connection]
-retries = {{ ansible_cfg_reconnection_retries }}
+retries = {{ ansible_config_reconnection_retries }}
 {% endif %}

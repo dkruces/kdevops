@@ -1,24 +1,24 @@
-config ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_SET_BY_CLI
 	bool
-	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CFG_CALLBACK_PLUGIN)
+	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CONFIG_CALLBACK_PLUGIN)
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_SET_BY_CLI
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_SET_BY_CLI
 	bool
-	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CFG_INTERPRETER_PYTHON)
+	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CONFIG_INTERPRETER_PYTHON)
 
-config ANSIBLE_CFG_FORKS_SET_BY_CLI
+config ANSIBLE_CONFIG_FORKS_SET_BY_CLI
 	bool
-	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CFG_FORKS)
+	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CONFIG_FORKS)
 
-config ANSIBLE_CFG_TASK_DEBUGGER_SET_BY_CLI
+config ANSIBLE_CONFIG_TASK_DEBUGGER_SET_BY_CLI
 	bool
-	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CFG_TASK_DEBUGGER)
+	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CONFIG_TASK_DEBUGGER)
 
-config ANSIBLE_CFG_INVENTORY_SET_BY_CLI
+config ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
 	bool
 	default $(shell, scripts/check-cli-set-var.sh KDEVOPS_HOSTS)
 
-config ANSIBLE_CFG_FILE_CUSTOM
+config ANSIBLE_CONFIG_PATH_CUSTOM
 	bool "Set a custom location for the ansible.cfg file"
 	help
 	  When this option is set to N, kdevops creates an ansible.cfg
@@ -26,10 +26,8 @@ config ANSIBLE_CFG_FILE_CUSTOM
 	  in this Kconfig menu. If it is set to Y, you can set the
 	  path and filename of the Ansible configuration file.
 
-if ANSIBLE_CFG_FILE_CUSTOM
-
-config ANSIBLE_CFG_FILE
-	string "Ansible configuration file"
+config ANSIBLE_CONFIG_PATH
+	string "Ansible configuration file" if ANSIBLE_CONFIG_PATH_CUSTOM
 	output yaml
 	default "$(TOPDIR_PATH)/ansible.cfg"
 	help
@@ -51,15 +49,13 @@ config ANSIBLE_CFG_FILE
 	  For more details, refer to the Ansible documentation:
 	  https://docs.ansible.com/ansible/latest/reference_appendices/config.html#the-configuration-file
 
-endif # ANSIBLE_CFG_FILE_CUSTOM
-
 menu "Ansible Callback Plugin Configuration"
 choice
 	prompt "Ansible Callback Plugin"
-	default ANSIBLE_CFG_CALLBACK_PLUGIN_DENSE if !ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
-	default ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM if ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
+	default ANSIBLE_CONFIG_CALLBACK_PLUGIN_DENSE if !ANSIBLE_CONFIG_CALLBACK_PLUGIN_SET_BY_CLI
+	default ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM if ANSIBLE_CONFIG_CALLBACK_PLUGIN_SET_BY_CLI
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_LUCID
 	bool "Ansible Lucid Callback Plugin"
 	help
 	  Lucid: Modern, clean Ansible output with progressive verbosity levels.
@@ -76,47 +72,47 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
 	  Lucid is designed by kernel developers for kernel testing workflows
 	  where human-readable output and silent operation are essential.
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DEBUG
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DEBUG
 	bool "Ansible Debug Callback Plugin"
 	help
 	  Debug: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/debug_module.html
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DENSE
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DENSE
 	bool "Ansible Dense Callback Plugin"
 	help
 	  Dense: https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
 	bool "Ansible DIY Callback Plugin"
 	help
 	  DIY: https://docs.ansible.com/ansible/latest/collections/community/general/diy_callback.html
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM
 	bool "Custom Ansible Callback Plugin"
 	help
 	  This will let you enter in your own Ansible callback plugin
 
 endchoice
 
-if ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM
+if ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM_NAME
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM_NAME
 	string "Custom Ansible Callback Plugin Name"
-	default $(shell, ./scripts/append-makefile-vars.sh $(ANSIBLE_CFG_CALLBACK_PLUGIN)) if ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
-	default "dense" if !ANSIBLE_CFG_CALLBACK_PLUGIN_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(ANSIBLE_CONFIG_CALLBACK_PLUGIN)) if ANSIBLE_CONFIG_CALLBACK_PLUGIN_SET_BY_CLI
+	default "dense" if !ANSIBLE_CONFIG_CALLBACK_PLUGIN_SET_BY_CLI
 
-endif # ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM
+endif # ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_STRING
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_STRING
 	string
 	output yaml
-	default "lucid" if ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
-	default "debug" if ANSIBLE_CFG_CALLBACK_PLUGIN_DEBUG
-	default "dense" if ANSIBLE_CFG_CALLBACK_PLUGIN_DENSE
-	default "community.general.diy" if ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
-	default ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM_NAME if ANSIBLE_CFG_CALLBACK_PLUGIN_CUSTOM
+	default "lucid" if ANSIBLE_CONFIG_CALLBACK_PLUGIN_LUCID
+	default "debug" if ANSIBLE_CONFIG_CALLBACK_PLUGIN_DEBUG
+	default "dense" if ANSIBLE_CONFIG_CALLBACK_PLUGIN_DENSE
+	default "community.general.diy" if ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
+	default ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM_NAME if ANSIBLE_CONFIG_CALLBACK_PLUGIN_CUSTOM
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_CHECK_MODE_MARKERS
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_CHECK_MODE_MARKERS
 	bool "check_mode_markers"
 	output yaml
 	default n
@@ -124,7 +120,7 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_CHECK_MODE_MARKERS
 	  Toggle to control displaying markers when running in check mode.
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-check_mode_markers
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DISPLAY_FAILED_STDERR
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DISPLAY_FAILED_STDERR
 	bool "display_failed_stderr"
 	output yaml
 	default n
@@ -132,16 +128,16 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_DISPLAY_FAILED_STDERR
 	  Toggle to control whether failed and unreachable tasks are displayed to STDERR (vs. STDOUT).
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-display_failed_stderr
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DISPLAY_OK_HOSTS
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DISPLAY_OK_HOSTS
 	bool "display_ok_hosts"
 	output yaml
-	default y if !ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
-	default n if ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
+	default y if !ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
+	default n if ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
 	help
 	  Toggle to control displaying ‘ok’ task/host results in a task.
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-display_ok_hosts
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_DISPLAY_SKIPPED_HOSTS
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_DISPLAY_SKIPPED_HOSTS
 	bool "display_skipped_hosts"
 	output yaml
 	default n
@@ -149,7 +145,7 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_DISPLAY_SKIPPED_HOSTS
 	  Toggle to control displaying skipped task/host results in a task.
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-display_skipped_hosts
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_CUSTOM_STATS
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_SHOW_CUSTOM_STATS
 	bool "show_custom_stats"
 	output yaml
 	default n
@@ -157,7 +153,7 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_CUSTOM_STATS
 	  This adds the custom stats set via the set_stats plugin to the play recap
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-show_custom_stats
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_PER_HOST_START
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_SHOW_PER_HOST_START
 	bool "show_per_host_start"
 	output yaml
 	default y
@@ -165,7 +161,7 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_PER_HOST_START
 	  This adds output that shows when a task is started to execute for each host
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-show_per_host_start
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_TASK_PATH_ON_FAILURE
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_SHOW_TASK_PATH_ON_FAILURE
 	bool "show_task_path_on_failure"
 	output yaml
 	default y
@@ -175,7 +171,7 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_SHOW_TASK_PATH_ON_FAILURE
 	  running with -vv or greater verbosity.
 	  https://docs.ansible.com/ansible/latest/collections/community/general/dense_callback.html#parameter-show_task_path_on_failure
 
-config ANSIBLE_CFG_CALLBACK_PLUGIN_PROFILE_TASKS
+config ANSIBLE_CONFIG_CALLBACK_PLUGIN_PROFILE_TASKS
 	bool "Enable profile_tasks callback for timing analysis"
 	output yaml
 	default n
@@ -189,13 +185,13 @@ config ANSIBLE_CFG_CALLBACK_PLUGIN_PROFILE_TASKS
 
 	  https://docs.ansible.com/ansible/latest/collections/ansible/posix/profile_tasks_callback.html
 
-if ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+if ANSIBLE_CONFIG_CALLBACK_PLUGIN_LUCID
 
 choice
 	prompt "Lucid output display mode"
-	default ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
+	default ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_AUTO
 
-config ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
+config ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_AUTO
 	bool "Auto (dynamic if interactive, static otherwise)"
 	help
 	  Automatically select output mode based on terminal detection.
@@ -209,7 +205,7 @@ config ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
 
 	  This is the recommended default for most use cases.
 
-config ANSIBLE_CFG_LUCID_OUTPUT_MODE_STATIC
+config ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_STATIC
 	bool "Static (always use traditional output)"
 	help
 	  Force static output mode regardless of terminal type.
@@ -220,7 +216,7 @@ config ANSIBLE_CFG_LUCID_OUTPUT_MODE_STATIC
 	  Useful for users who prefer traditional Ansible output or when
 	  dynamic mode causes issues with specific terminal emulators.
 
-config ANSIBLE_CFG_LUCID_OUTPUT_MODE_DYNAMIC
+config ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_DYNAMIC
 	bool "Dynamic (always attempt live display)"
 	help
 	  Force dynamic output mode even in non-interactive contexts.
@@ -235,18 +231,18 @@ config ANSIBLE_CFG_LUCID_OUTPUT_MODE_DYNAMIC
 
 endchoice
 
-config ANSIBLE_CFG_LUCID_OUTPUT_MODE_STRING
+config ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_STRING
 	string
 	output yaml
-	default "auto" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_AUTO
-	default "static" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_STATIC
-	default "dynamic" if ANSIBLE_CFG_LUCID_OUTPUT_MODE_DYNAMIC
+	default "auto" if ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_AUTO
+	default "static" if ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_STATIC
+	default "dynamic" if ANSIBLE_CONFIG_LUCID_OUTPUT_MODE_DYNAMIC
 
-endif # ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID
+endif # ANSIBLE_CONFIG_CALLBACK_PLUGIN_LUCID
 
 endmenu
 
-config ANSIBLE_CFG_VERBOSITY
+config ANSIBLE_CONFIG_VERBOSITY
 	int "Ansible verbosity level"
 	output yaml
 	range 0 6
@@ -266,11 +262,11 @@ config ANSIBLE_CFG_VERBOSITY
 
 	  https://docs.ansible.com/ansible/latest/reference_appendices/config.html#default-verbosity
 
-config ANSIBLE_CFG_DEPRECATION_WARNINGS
+config ANSIBLE_CONFIG_DEPRECATION_WARNINGS
 	bool "deprecation_warnings"
 	output yaml
-	default y if !ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
-	default n if ANSIBLE_CFG_CALLBACK_PLUGIN_DIY
+	default y if !ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
+	default n if ANSIBLE_CONFIG_CALLBACK_PLUGIN_DIY
 	help
 	  Toggle to control the showing of deprecation warnings
 	  https://docs.ansible.com/ansible/latest/reference_appendices/config.html#deprecation-warnings
@@ -278,53 +274,53 @@ config ANSIBLE_CFG_DEPRECATION_WARNINGS
 menu "Ansible Python Interpreter"
 choice
 	prompt "Ansible Python Interpreter"
-	default ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_SILENT if !ANSIBLE_CFG_INTERPRETER_PYTHON_SET_BY_CLI
-	default ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM if ANSIBLE_CFG_INTERPRETER_PYTHON_SET_BY_CLI
+	default ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_SILENT if !ANSIBLE_CONFIG_INTERPRETER_PYTHON_SET_BY_CLI
+	default ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM if ANSIBLE_CONFIG_INTERPRETER_PYTHON_SET_BY_CLI
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO
 	bool "Ansible Python Interpreter: Auto"
 	help
 	  https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html#interpreter-discovery
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_LEGACY
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_LEGACY
 	bool "Ansible Python Interpreter: Auto Legacy"
 	help
 	  https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html#interpreter-discovery
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_LEGACY_CLIENT
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_LEGACY_CLIENT
 	bool "Ansible Python Interpreter: Auto Legacy Client"
 	help
 	  https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html#interpreter-discovery
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_SILENT
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_SILENT
 	bool "Ansible Python Interpreter: Auto Silent"
 	help
 	  https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html#interpreter-discovery
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM
 	bool "Ansible Python Interpreter: Custom"
 	help
 	  https://docs.ansible.com/ansible/latest/reference_appendices/interpreter_discovery.html#interpreter-discovery
 
 endchoice
 
-if ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM
+if ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM_NAME
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM_NAME
 	string "Custom Ansible Python Interpreter Name"
-	default $(shell, ./scripts/append-makefile-vars.sh $(ANSIBLE_CFG_INTERPRETER_PYTHON)) if ANSIBLE_CFG_INTERPRETER_PYTHON_SET_BY_CLI
-	default "/usr/bin/env python3" if !ANSIBLE_CFG_INTERPRETER_PYTHON_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars.sh $(ANSIBLE_CONFIG_INTERPRETER_PYTHON)) if ANSIBLE_CONFIG_INTERPRETER_PYTHON_SET_BY_CLI
+	default "/usr/bin/env python3" if !ANSIBLE_CONFIG_INTERPRETER_PYTHON_SET_BY_CLI
 
-endif # ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM
+endif # ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM
 
-config ANSIBLE_CFG_INTERPRETER_PYTHON_STRING
+config ANSIBLE_CONFIG_INTERPRETER_PYTHON_STRING
 	string
 	output yaml
-	default "auto" if ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO
-	default "auto_legacy" if ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_LEGACY
-	default "auto_legacy_client" if ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_LEGACY_CLIENT
-	default "auto_silent" if ANSIBLE_CFG_INTERPRETER_PYTHON_AUTO_SILENT
-	default ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM_NAME if ANSIBLE_CFG_INTERPRETER_PYTHON_CUSTOM
+	default "auto" if ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO
+	default "auto_legacy" if ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_LEGACY
+	default "auto_legacy_client" if ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_LEGACY_CLIENT
+	default "auto_silent" if ANSIBLE_CONFIG_INTERPRETER_PYTHON_AUTO_SILENT
+	default ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM_NAME if ANSIBLE_CONFIG_INTERPRETER_PYTHON_CUSTOM
 	help
 	  Path to the Python interpreter to be used for module execution on remote targets,
 	  or an automatic discovery mode.
@@ -335,38 +331,38 @@ config ANSIBLE_CFG_INTERPRETER_PYTHON_STRING
 
 endmenu
 
-config ANSIBLE_CFG_FORKS_CUSTOM
+config ANSIBLE_CONFIG_FORKS_CUSTOM
 	bool "Enable a custom Ansible forks setting"
 	default n
 	help
 	  When this setting is enabled, specify the maximum number
 	  of concurrent Ansible tasks (forks) via Kconfig. When this
 	  setting is disabled, kdevops chooses a default value that
-	  can be overridden with "ANSIBLE_CFG_FORKS=NN" on the
+	  can be overridden with "ANSIBLE_CONFIG_FORKS=NN" on the
 	  "make" command line.
 
-if ANSIBLE_CFG_FORKS_CUSTOM
+if ANSIBLE_CONFIG_FORKS_CUSTOM
 
-config ANSIBLE_CFG_FORKS
+config ANSIBLE_CONFIG_FORKS
 	int "forks"
 	output yaml
 	help
 	  Set the maximum number of concurrent Ansible tasks (forks).
 	  https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_strategies.html#setting-the-number-of-forks
 
-endif # ANSIBLE_CFG_FORKS_CUSTOM
+endif # ANSIBLE_CONFIG_FORKS_CUSTOM
 
-if !ANSIBLE_CFG_FORKS_CUSTOM
+if !ANSIBLE_CONFIG_FORKS_CUSTOM
 
-config ANSIBLE_CFG_FORKS
+config ANSIBLE_CONFIG_FORKS
 	int
 	output yaml
-	default 10 if !ANSIBLE_CFG_FORKS_SET_BY_CLI
-	default $(shell, ./scripts/append-makefile-vars-int.sh $(ANSIBLE_CFG_FORKS)) if ANSIBLE_CFG_FORKS_SET_BY_CLI
+	default 10 if !ANSIBLE_CONFIG_FORKS_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars-int.sh $(ANSIBLE_CONFIG_FORKS)) if ANSIBLE_CONFIG_FORKS_SET_BY_CLI
 
-endif # !ANSIBLE_CFG_FORKS_CUSTOM
+endif # !ANSIBLE_CONFIG_FORKS_CUSTOM
 
-config ANSIBLE_CFG_TASK_DEBUGGER
+config ANSIBLE_CONFIG_TASK_DEBUGGER
 	bool "Enable the Ansible task debugger on failed tasks"
 	output yaml
 	default n
@@ -379,7 +375,7 @@ config ANSIBLE_CFG_TASK_DEBUGGER
 
 	  https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_debugger.html#id10
 
-config ANSIBLE_CFG_INVENTORY_CUSTOM
+config ANSIBLE_CONFIG_INVENTORY_CUSTOM
 	bool "Set a custom location for the Ansible inventory"
 	help
 	  When this option is set to N, kdevops creates its
@@ -387,13 +383,11 @@ config ANSIBLE_CFG_INVENTORY_CUSTOM
 	  set to Y, you can set the path and filename of the Ansible
 	  inventory.
 
-if ANSIBLE_CFG_INVENTORY_CUSTOM
-
-config ANSIBLE_CFG_INVENTORY
-	string "Ansible inventory sources"
+config ANSIBLE_CONFIG_INVENTORY
+	string "Ansible inventory sources" if ANSIBLE_CONFIG_INVENTORY_CUSTOM
 	output yaml
-	default "$(TOPDIR_PATH)/hosts" if !ANSIBLE_CFG_INVENTORY_SET_BY_CLI
-	default $(shell, ./scripts/append-makefile-vars-int.sh $(KDEVOPS_HOSTS)) if ANSIBLE_CFG_INVENTORY_SET_BY_CLI
+	default "$(TOPDIR_PATH)/hosts" if !ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars-int.sh $(KDEVOPS_HOSTS)) if ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
 	help
 	  Comma-separated list of Ansible inventory source paths.
 
@@ -408,13 +402,11 @@ config ANSIBLE_CFG_INVENTORY
 	  For more details, refer to the Ansible documentation:
 	  https://docs.ansible.com/ansible/latest/reference_appendices/config.html#default-host-list
 
-endif # ANSIBLE_CFG_INVENTORY_CUSTOM
-
-config ANSIBLE_CFG_SSH_PORT_SET_BY_CLI
+config ANSIBLE_CONFIG_SSH_PORT_SET_BY_CLI
 	bool
-	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CFG_SSH_PORT)
+	default $(shell, scripts/check-cli-set-var.sh ANSIBLE_CONFIG_SSH_PORT)
 
-config ANSIBLE_CFG_SSH_PORT_CUSTOM
+config ANSIBLE_CONFIG_SSH_PORT_CUSTOM
 	bool "Enable a custom Ansible SSH port setting"
 	default n
 	help
@@ -423,14 +415,14 @@ config ANSIBLE_CFG_SSH_PORT_CUSTOM
 
 	  When this setting is disabled, kdevops uses the default
 	  SSH port (22), which can be overridden with
-	  "ANSIBLE_CFG_SSH_PORT=NN" on the "make" command line.
+	  "ANSIBLE_CONFIG_SSH_PORT=NN" on the "make" command line.
 
 	  This is useful when your target hosts use a non-standard
 	  SSH port for security or network configuration reasons.
 
-if ANSIBLE_CFG_SSH_PORT_CUSTOM
+if ANSIBLE_CONFIG_SSH_PORT_CUSTOM
 
-config ANSIBLE_CFG_SSH_PORT
+config ANSIBLE_CONFIG_SSH_PORT
 	int "Ansible SSH port"
 	output yaml
 	help
@@ -439,21 +431,21 @@ config ANSIBLE_CFG_SSH_PORT
 
 	  https://docs.ansible.com/ansible/latest/collections/ansible/builtin/ssh_connection.html#parameter-remote_port
 
-endif # ANSIBLE_CFG_SSH_PORT_CUSTOM
+endif # ANSIBLE_CONFIG_SSH_PORT_CUSTOM
 
-if !ANSIBLE_CFG_SSH_PORT_CUSTOM
+if !ANSIBLE_CONFIG_SSH_PORT_CUSTOM
 
-config ANSIBLE_CFG_SSH_PORT
+config ANSIBLE_CONFIG_SSH_PORT
 	int
 	output yaml
-	default 22 if !ANSIBLE_CFG_SSH_PORT_SET_BY_CLI
-	default $(shell, ./scripts/append-makefile-vars-int.sh $(ANSIBLE_CFG_SSH_PORT)) if ANSIBLE_CFG_SSH_PORT_SET_BY_CLI
+	default 22 if !ANSIBLE_CONFIG_SSH_PORT_SET_BY_CLI
+	default $(shell, ./scripts/append-makefile-vars-int.sh $(ANSIBLE_CONFIG_SSH_PORT)) if ANSIBLE_CONFIG_SSH_PORT_SET_BY_CLI
 
-endif # !ANSIBLE_CFG_SSH_PORT_CUSTOM
+endif # !ANSIBLE_CONFIG_SSH_PORT_CUSTOM
 
 if DISTRO_OPENSUSE
 
-config ANSIBLE_CFG_RECONNECTION_RETRIES
+config ANSIBLE_CONFIG_RECONNECTION_RETRIES
 	string "reconnection_retries"
 	output yaml
 	default 2000

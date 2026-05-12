@@ -48,18 +48,8 @@ KDEVOPS_NODES_ROLE_TEMPLATE_DIR :=		$(KDEVOPS_PLAYBOOKS_DIR)/roles/gen_nodes/tem
 export KDEVOPS_NODES_TEMPLATE :=
 export KDEVOPS_MRPROPER :=
 
-ifeq (y,$(CONFIG_ANSIBLE_CFG_FILE_CUSTOM))
-ifneq ($(strip $(CONFIG_ANSIBLE_CFG_FILE)),)
-ANSIBLE_CFG_FILE := $(shell echo $(CONFIG_ANSIBLE_CFG_FILE) | tr --delete '"')
-export ANSIBLE_CONFIG := $(ANSIBLE_CFG_FILE)
-endif
-else
-ANSIBLE_CFG_FILE := $(TOPDIR_PATH)/ansible.cfg
-export ANSIBLE_CONFIG := $(ANSIBLE_CFG_FILE)
-endif
-
-ifeq (y,$(CONFIG_ANSIBLE_CFG_INVENTORY_CUSTOM))
-ANSIBLE_INVENTORY_FILE := $(shell echo $(CONFIG_ANSIBLE_CFG_INVENTORY) | tr --delete '"')
+ifeq (y,$(CONFIG_ANSIBLE_CONFIG_INVENTORY_CUSTOM))
+ANSIBLE_INVENTORY_FILE := $(shell echo $(CONFIG_ANSIBLE_CONFIG_INVENTORY) | tr --delete '"')
 else
 ANSIBLE_INVENTORY_FILE := $(TOPDIR_PATH)/hosts
 endif
@@ -110,7 +100,7 @@ endif
 KDEVOPS_LOG_DIR := .kdevops/logs
 KDEVOPS_LOGFILE = $(KDEVOPS_LOG_DIR)/$(shell date +%Y%m%d-%H%M%S)-$(notdir $@).log
 
-ifeq (y,$(CONFIG_ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID))
+ifeq (y,$(CONFIG_ANSIBLE_CONFIG_CALLBACK_PLUGIN_LUCID))
 UNAME_S := $(shell uname --kernel-name)
 ifeq ($(UNAME_S),Darwin)
 # BSD script(1) has no long-form flag aliases.
@@ -158,12 +148,8 @@ CFLAGS += $(INCLUDES)
 
 ANSIBLE_EXTRA_ARGS += kdevops_version='$(PROJECTRELEASE)'
 ANSIBLE_EXTRA_ARGS += topdir_path_sha256sum='$(TOPDIR_PATH_SHA256SUM)'
-ifneq (y,$(CONFIG_ANSIBLE_CFG_FILE_CUSTOM))
-ANSIBLE_EXTRA_ARGS += ansible_cfg_file='$(ANSIBLE_CFG_FILE)'
-endif
-ifneq (y,$(CONFIG_ANSIBLE_CFG_INVENTORY_CUSTOM))
-ANSIBLE_EXTRA_ARGS += ansible_cfg_inventory='$(ANSIBLE_INVENTORY_FILE)'
-endif
+
+include modules/ansible_config/Makefile
 
 export KDEVOPS_HOSTS_TEMPLATE := hosts.j2
 
@@ -189,7 +175,7 @@ ifneq (,$(ANSIBLE_EXTRA_ARGS))
 DEFAULT_DEPS += $(KDEVOPS_EXTRA_VARS)
 endif
 
-DEFAULT_DEPS += $(ANSIBLE_CFG_FILE)
+DEFAULT_DEPS += $(ANSIBLE_CONFIG_PATH)
 DEFAULT_DEPS += $(ANSIBLE_INVENTORY_FILE)
 
 include scripts/provision.Makefile
@@ -281,12 +267,6 @@ include scripts/gen-nodes.Makefile
 	make -f scripts/build.Makefile help                             ;\
 	false)
 
-$(ANSIBLE_CFG_FILE): .config
-	$(Q)ansible-playbook --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/ansible_cfg.yml \
-		--extra-vars=@./.extra_vars_auto.yaml
-
 playbooks/secret.yml:
 	@if [[ "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" == "" ]]; then \
 		echo "Registration code is not set, this must be set for this configuration" ;\
@@ -297,7 +277,7 @@ playbooks/secret.yml:
 	@echo "$(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE_VAR): $(CONFIG_KDEVOPS_REG_TWOLINE_REGCODE)" >> $@
 
 ifeq (y,$(CONFIG_KDEVOPS_ENABLE_DISTRO_EXTRA_ADDONS))
-$(KDEVOPS_EXTRA_ADDON_DEST): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_EXTRA_ADDON_SOURCE)
+$(KDEVOPS_EXTRA_ADDON_DEST): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_EXTRA_ADDON_SOURCE)
 	$(Q)cp $(KDEVOPS_EXTRA_ADDON_SOURCE) $(KDEVOPS_EXTRA_ADDON_DEST)
 endif
 
@@ -307,13 +287,13 @@ ifneq (,$(KDEVOPS_BRING_UP_DEPS))
 include scripts/bringup.Makefile
 endif
 
-$(ANSIBLE_INVENTORY_FILE): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_HOSTS_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
+$(ANSIBLE_INVENTORY_FILE): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_HOSTS_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook --connection=local \
 		--inventory localhost, \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
 		--extra-vars=@./extra_vars.yaml
 
-$(KDEVOPS_NODES): .config $(ANSIBLE_CFG_FILE) $(KDEVOPS_NODES_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
+$(KDEVOPS_NODES): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_NODES_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook \
 		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
 		--extra-vars=@./extra_vars.yaml
@@ -350,7 +330,7 @@ mrproper:
 	$(Q)rm -f $(ANSIBLE_INVENTORY_FILE) $(KDEVOPS_MRPROPER)
 	$(Q)rm -f .config .config.old extra_vars.yaml $(KCONFIG_YAMLCFG)
 	$(Q)rm -rf $(EXTRA_VAR_FRAGMENTS_DIR)
-	$(Q)rm -f $(ANSIBLE_CFG_FILE)
+	$(Q)rm -f $(ANSIBLE_CONFIG_PATH)
 	$(Q)rm -f playbooks/secret.yml $(KDEVOPS_EXTRA_ADDON_DEST)
 	$(Q)rm -rf include
 	$(Q)rm -rf guestfs
@@ -361,7 +341,7 @@ kconfig-help-menu:
 	$(Q)$(MAKE) -f scripts/build.Makefile help
 
 PHONY += env
-env: $(KDEVOPS_EXTRA_VARS) $(ANSIBLE_CFG_FILE) $(ANSIBLE_INVENTORY_FILE)
+env: $(KDEVOPS_EXTRA_VARS) $(ANSIBLE_CONFIG_PATH) $(ANSIBLE_INVENTORY_FILE)
 
 PHONY += controller-setup
 controller-setup: env $(KDEVOPS_DEPCHECK) $(LOCALHOST_SETUP_WORK)

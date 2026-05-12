@@ -4,4 +4,4 @@
   vars:
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
   roles:
-    - role: ansible_cfg
+    - role: ansible_config

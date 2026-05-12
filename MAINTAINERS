@@ -117,6 +117,8 @@ M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev
 S:	Maintained
 T:	git https://github.com/linux-kdevops/kdevops.git
+F:	docs/qemu.md
+F:	docs/qemu-build_deps.md
 F:	modules/qemu/
 F:	playbooks/qemu.yml
 F:	playbooks/roles/qemu/

@@ -398,6 +398,8 @@ Below is kdevops' recommended documentation reading.
   * [kdevops libvirt user / group setup](docs/libvirt-user.md)
   * [kdevops libvirt storage pool considerations](docs/libvirt-storage_pool.md)
   * [kdevops PCIe passthrough support](docs/libvirt-pcie_passthrough.md)
+  * [kdevops qemu module overview](docs/qemu.md)
+  * [kdevops qemu build dependencies](docs/qemu-build_deps.md)
   * [kdevops running make bringup](docs/running-make-bringup.md)
   * [kdevops running make destroy](docs/kdevops-make-destroy.md)
   * [kdevops make mrproper](docs/kdevops-restarting-from-scratch.md)

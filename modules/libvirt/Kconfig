@@ -1270,6 +1270,6 @@ config KDEVOPS_STORAGE_POOL_PATH
 	output yaml
 	default "{{ libvirt_storage_pool_path }}/{{ kdevops_storage_pool_user }}"
 
-source "kconfigs/Kconfig.libvirt.zns"
-source "kconfigs/Kconfig.libvirt.largeio"
-source "kconfigs/Kconfig.libvirt.cxl"
+source "modules/libvirt/zns/Kconfig"
+source "modules/libvirt/largeio/Kconfig"
+source "modules/libvirt/cxl/Kconfig"

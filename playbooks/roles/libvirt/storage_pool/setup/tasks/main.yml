@@ -12,6 +12,7 @@
   register: libvirt_storage_pool_check
   failed_when: libvirt_storage_pool_check.rc != 0 and libvirt_storage_pool_check.rc != 1
   changed_when: false
+  tags: do_configure
 
 - name: Define the libvirt storage pool {{ libvirt_storage_pool_name }}
   become: "{{ not (libvirt_session | default(false) | bool) }}"
@@ -20,6 +21,7 @@
     cmd: "virsh pool-define-as {{ libvirt_storage_pool_name }} dir --target {{ libvirt_storage_pool_path }}"
   when: libvirt_storage_pool_check.rc == 1
   changed_when: true
+  tags: do_configure
 
 - name: Start the libvirt storage pool {{ libvirt_storage_pool_name }}
   become: "{{ not (libvirt_session | default(false) | bool) }}"
@@ -28,6 +30,7 @@
     cmd: "virsh pool-start {{ libvirt_storage_pool_name }}"
   when: libvirt_storage_pool_check.rc == 1
   changed_when: true
+  tags: do_deploy
 
 - name: Enable autostart for the libvirt storage pool {{ libvirt_storage_pool_name }}
   become: "{{ not (libvirt_session | default(false) | bool) }}"
@@ -36,3 +39,4 @@
     cmd: "virsh pool-autostart {{ libvirt_storage_pool_name }}"
   when: libvirt_storage_pool_check.rc == 1
   changed_when: true
+  tags: do_configure

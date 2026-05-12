@@ -22,6 +22,7 @@
     label: "{{ item.pcie_human_name }}"
   register: libvirt_pcie_driver_override_stats
   when: pcie_passthrough_enable | bool
+  tags: do_configure
 
 - name: Enable libvirt to use PCI-E sysfs driver_override files
   become: true
@@ -37,6 +38,7 @@
   when:
     - pcie_passthrough_enable | bool
     - item.stat.exists
+  tags: do_configure
 
 - name: Check if PCI-E sysfs unbind files exist
   become: true
@@ -51,6 +53,7 @@
     label: "{{ item.pcie_human_name }}"
   register: libvirt_pcie_driver_unbind_stats
   when: pcie_passthrough_enable | bool
+  tags: do_configure
 
 - name: Enable libvirt to use PCI-E sysfs unbind files
   become: true
@@ -66,6 +69,7 @@
   when:
     - pcie_passthrough_enable | bool
     - item.stat.exists
+  tags: do_configure
 
 - name: Deploy udev 10-qemu-hw-users.rules which enables libvirt to use vfio subsystem
   become: true
@@ -75,3 +79,4 @@
     dest: "/etc/udev/rules.d/10-qemu-hw-users.rules"
     mode: "0644"
   when: pcie_passthrough_enable | bool
+  tags: do_deploy

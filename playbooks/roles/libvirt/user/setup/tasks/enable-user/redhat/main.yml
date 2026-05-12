@@ -10,12 +10,14 @@
       - qemu
     append: true
   when: not (libvirt_session | default(false) | bool)
+  tags: do_configure
 
 - name: Test whether SELinux is enabled
   ansible.builtin.command: /usr/sbin/selinuxenabled
   register: libvirt_user_selinux
   changed_when: false
   failed_when: false
+  tags: do_configure
 
 - name: Read the SELinux context of {{ libvirt_storage_pool_path }}
   ansible.builtin.command: "/usr/bin/stat -c %C {{ libvirt_storage_pool_path }}"
@@ -23,6 +25,7 @@
   changed_when: false
   failed_when: false
   when: libvirt_user_selinux.rc == 0
+  tags: do_configure
 
 - name: Apply the svirt_home_t SELinux context to {{ libvirt_storage_pool_path }}
   become: true
@@ -34,3 +37,4 @@
     - libvirt_user_selinux.rc == 0
     - libvirt_user_storage_pool_ctx.stdout is defined
     - "':svirt_home_t:' not in libvirt_user_storage_pool_ctx.stdout"
+  tags: do_configure

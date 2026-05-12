@@ -10,3 +10,4 @@
       - qemu
     append: true
   when: not (libvirt_session | default(false) | bool)
+  tags: do_configure

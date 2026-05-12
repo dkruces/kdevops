@@ -4,7 +4,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     update_cache: true
-  tags: install
+  tags: do_install
 
 - name: Install libvirt / kvm dependencies
   become: true
@@ -19,7 +19,7 @@
       - qemu-system-x86
       - qemu-utils
     state: present
-  tags: install
+  tags: do_install
 
 - name: Enable libvirtd
   become: true
@@ -28,6 +28,7 @@
     name: libvirtd
     enabled: true
     masked: false
+  tags: do_deploy
 
 - name: Make sure libvirtd is running
   become: true
@@ -35,3 +36,4 @@
   ansible.builtin.systemd:
     state: started
     name: libvirtd
+  tags: do_deploy

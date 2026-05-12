@@ -10,6 +10,7 @@
       - qemu-kvm
       - qemu-x86
     state: present
+  tags: do_install
 
 - name: Enable libvirtd
   become: true
@@ -18,6 +19,7 @@
     name: libvirtd
     enabled: true
     masked: false
+  tags: do_deploy
 
 - name: Make sure libvirtd is running
   become: true
@@ -25,3 +27,4 @@
   ansible.builtin.systemd:
     state: started
     name: libvirtd
+  tags: do_deploy

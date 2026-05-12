@@ -1,31 +1,31 @@
 ---
 - name: Initialize the enabled nodes list for gitr
   ansible.builtin.set_fact:
-    gitr_enabled_nodes: "{{ gitr_enabled_test_groups | ansible.builtin.split }}"
+    nodes_gitr_enabled_nodes: "{{ gitr_enabled_test_groups | ansible.builtin.split }}"
 
 - name: Expand the gitr node list to include -dev nodes
   ansible.builtin.set_fact:
-    gitr_enabled_nodes: "{{ gitr_enabled_nodes + [item + '-dev'] }}"
+    nodes_gitr_enabled_nodes: "{{ nodes_gitr_enabled_nodes + [item + '-dev'] }}"
   with_items: "{{ gitr_enabled_test_groups | ansible.builtin.split }}"
   when:
-    - kdevops_baseline_and_dev|bool
+    - kdevops_baseline_and_dev | default(false) | bool
 
 - name: Add the kdevops NFS server to the enabled nodes list
   ansible.builtin.set_fact:
-    gitr_enabled_nodes: "{{ gitr_enabled_nodes + ['nfsd'] }}"
+    nodes_gitr_enabled_nodes: "{{ nodes_gitr_enabled_nodes + ['nfsd'] }}"
   when:
-    - kdevops_nfsd_enable|bool
+    - kdevops_nfsd_enable | default(false) | bool
 
 - name: Add an iSCSI target to the enabled nodes list
   ansible.builtin.set_fact:
-    gitr_enabled_nodes: "{{ gitr_enabled_nodes + ['iscsi'] }}"
+    nodes_gitr_enabled_nodes: "{{ nodes_gitr_enabled_nodes + ['iscsi'] }}"
   when:
-    - kdevops_enable_iscsi|bool
+    - kdevops_enable_iscsi | default(false) | bool
 
 - name: Generate the kdevops nodes file using {{ kdevops_nodes_template }}
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
-    all_generic_nodes: "{{ [kdevops_host_prefix + '-'] | product(gitr_enabled_nodes) | map('join') | list }}"
+    all_generic_nodes: "{{ [kdevops_host_prefix + '-'] | product(nodes_gitr_enabled_nodes) | map('join') | list }}"
     nodes: "{{ all_generic_nodes }}"
   ansible.builtin.template:
     src: "{{ node_template }}"

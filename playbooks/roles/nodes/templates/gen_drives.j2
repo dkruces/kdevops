@@ -1,5 +1,5 @@
 {% import './templates/drives.j2' as drives %}
-{% if libvirt_extra_storage_drive_ide %}
+{% if libvirt_extra_storage_drive_ide | default(false) %}
 {{ drives.gen_drive_ide(libvirt_extra_storage_drive_count,
 			kdevops_storage_pool_path,
 			hostname,
@@ -7,7 +7,7 @@
 			libvirt_extra_storage_aio_mode,
 			libvirt_extra_storage_aio_cache_mode) }}
 {% elif libvirt_extra_storage_drive_virtio %}
-{% if libvirt_largeio_enable %}
+{% if libvirt_largeio_enable | default(false) %}
 {{ drives.gen_drive_large_io_virtio(libvirt_largeio_logical_compat,
 				    libvirt_largeio_logical_compat_size,
 				    libvirt_largeio_pow_limit,
@@ -35,7 +35,7 @@
                          libvirt_extra_storage_aio_mode,
                          libvirt_extra_storage_aio_cache_mode) }}
 {% elif libvirt_extra_storage_drive_nvme  %}
-{% if libvirt_largeio_enable %}
+{% if libvirt_largeio_enable | default(false) %}
 {{ drives.gen_drive_large_io_nvme(libvirt_largeio_logical_compat,
 				  libvirt_largeio_logical_compat_size,
 				  libvirt_largeio_pow_limit,
@@ -55,7 +55,7 @@
 			 libvirt_extra_storage_nvme_logical_block_size) }}
 {% endif %}
 {% endif %}
-{% if bootlinux_9p %}
+{% if bootlinux_9p | default(false) %}
   {{ drives.gen_9p_mount(bootlinux_9p_driver,
 			 bootlinux_9p_fsdev,
 			 bootlinux_9p_host_path,
@@ -63,7 +63,7 @@
 			 bootlinux_9p_security_model,
 			 10) }}
 {% endif %}
-{% if docker_mirror_9p %}
+{% if docker_mirror_9p | default(false) %}
   {{ drives.gen_9p_mount(docker_mirror_9p_driver,
 			 docker_mirror_9p_fsdev,
 			 docker_mirror_9p_host_path,

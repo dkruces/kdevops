@@ -2,4 +2,4 @@
 - name: Generate target node configuration
   hosts: localhost
   roles:
-    - role: gen_nodes
+    - role: nodes

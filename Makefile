@@ -44,7 +44,6 @@ endif
 
 include scripts/refs.Makefile
 
-KDEVOPS_NODES_ROLE_TEMPLATE_DIR :=		$(KDEVOPS_PLAYBOOKS_DIR)/roles/gen_nodes/templates
 export KDEVOPS_NODES_TEMPLATE :=
 export KDEVOPS_MRPROPER :=
 
@@ -183,6 +182,9 @@ include scripts/systemd-timesync.Makefile
 include scripts/journal-server.Makefile
 include scripts/update_etc_hosts.Makefile
 
+# Included after the backend Makefiles set KDEVOPS_NODES + KDEVOPS_NODES_TEMPLATE.
+include modules/nodes/Makefile
+
 ifneq (,$(KDEVOPS_NODES))
 DEFAULT_DEPS += $(KDEVOPS_NODES)
 endif
@@ -284,12 +286,6 @@ KDEVOPS_BRING_UP_DEPS += $(KDEVOPS_BRING_UP_LATE_DEPS)
 ifneq (,$(KDEVOPS_BRING_UP_DEPS))
 include scripts/bringup.Makefile
 endif
-
-$(KDEVOPS_NODES): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_NODES_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		$(KDEVOPS_PLAYBOOKS_DIR)/gen_nodes.yml \
-		--extra-vars=@./extra_vars.yaml
-
 
 include scripts/tests.Makefile
 include scripts/linux-ab-testing.Makefile

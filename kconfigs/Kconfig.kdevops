@@ -232,4 +232,5 @@ endmenu
 menu "Ansible Configuration"
 source "modules/ansible_config/Kconfig"
 source "modules/ansible_inventory/Kconfig"
+source "modules/nodes/Kconfig"
 endmenu

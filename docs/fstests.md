@@ -532,10 +532,10 @@ your configuration. Because of this kdevops does a bit of sanity checking
 to verify that if you enabled a target section we will first ensure it is
 a valid test section.
 
-The ansible role gen_nodes is used for this, see:
+The ansible role nodes role is used for this, see:
 
 ```
-playbooks/roles/gen_nodes/tasks/main.yml
+playbooks/roles/nodes/tasks/main.yml
 ```
 
 The task to review are:

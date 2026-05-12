@@ -1,0 +1,20 @@
+# SPDX-License-Identifier GPL-2.0+
+---
+# Role-private defaults only. Tree-wide vars (kdevops_*, libvirt_*,
+# qemu_*, nvme_*, bootlinux_*, pcie_passthrough_*, fs_config_*,
+# fstests_fstyp, docker_mirror_*, ...) come from extra_vars.yaml via
+# the Kconfig `output yaml` path. Where that path has gaps (hidden
+# bools, vars inside if/endif), consumers reference the var with
+# `| default(...)` at the use site — not by redeclaring the tree-wide
+# var here.
+# See docs/module-spec.md "When `output yaml` silently does not emit".
+
+# Role-private semantic baseline for the fstests-workflow branch.
+# set_fact in tasks/main.yml flips this when fstests is active.
+nodes_is_fstests: false
+
+# Role-private node-list accumulators. Set via set_fact in tasks/main.yml;
+# the empty-list default keeps gen_nodes_list.j2 happy when the workflow
+# does not populate the list.
+nodes_builder_nodes: []
+nodes_iscsi_nodes: []

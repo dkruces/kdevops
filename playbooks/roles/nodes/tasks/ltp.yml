@@ -1,19 +1,19 @@
 ---
 - name: Initialize the enabled nodes list for ltp
   ansible.builtin.set_fact:
-    ltp_enabled_nodes: "{{ ltp_enabled_test_groups | ansible.builtin.split }}"
+    nodes_ltp_enabled_nodes: "{{ ltp_enabled_test_groups | ansible.builtin.split }}"
 
 - name: Expand the ltp node list to include -dev nodes
   ansible.builtin.set_fact:
-    ltp_enabled_nodes: "{{ ltp_enabled_nodes + [item + '-dev'] }}"
+    nodes_ltp_enabled_nodes: "{{ nodes_ltp_enabled_nodes + [item + '-dev'] }}"
   with_items: "{{ ltp_enabled_test_groups | ansible.builtin.split }}"
   when:
-    - kdevops_baseline_and_dev|bool
+    - kdevops_baseline_and_dev | default(false) | bool
 
 - name: Generate the kdevops nodes file using {{ kdevops_nodes_template }}
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
-    all_generic_nodes: "{{ [kdevops_host_prefix + '-'] | product(ltp_enabled_nodes) | map('join') | list }}"
+    all_generic_nodes: "{{ [kdevops_host_prefix + '-'] | product(nodes_ltp_enabled_nodes) | map('join') | list }}"
     nodes: "{{ all_generic_nodes }}"
   ansible.builtin.template:
     src: "{{ node_template }}"

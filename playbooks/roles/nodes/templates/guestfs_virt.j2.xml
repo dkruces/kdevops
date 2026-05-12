@@ -3,35 +3,24 @@
   <memory unit='MiB'>{{ libvirt_mem_mb }}</memory>
   <currentMemory unit='MiB'>{{ libvirt_mem_mb }}</currentMemory>
   <vcpu placement='static'>{{ libvirt_vcpus_count }}</vcpu>
-{% if guestfs_requires_uefi %}
   <os firmware='efi'>
-     <type arch='x86_64' machine='q35'>hvm</type>
-     <loader readonly='yes' secure='no'/>
-     <boot dev='hd'/>
-  </os>
-{% else %}
-  <os>
-    <type arch='x86_64' machine='q35'>hvm</type>
+    <type arch='aarch64' machine='virt'>hvm</type>
+    <firmware>
+      <feature enabled='no' name='enrolled-keys'/>
+      <feature enabled='no' name='secure-boot'/>
+    </firmware>
+    <loader readonly='yes' type='pflash'>/usr/share/AAVMF/AAVMF_CODE.fd</loader>
     <boot dev='hd'/>
   </os>
-{% endif %}
   <features>
     <acpi/>
-    <apic/>
+    <gic version='3'/>
   </features>
   <cpu mode='{{ 'host-passthrough' if libvirt_host_passthrough else 'host-model' }}' migratable='off'/>
-  <clock offset='localtime'>
-    <timer name='rtc' tickpolicy='catchup'/>
-    <timer name='pit' tickpolicy='delay'/>
-    <timer name='hpet' present='no'/>
-  </clock>
+  <clock offset='localtime'/>
   <on_poweroff>destroy</on_poweroff>
   <on_reboot>restart</on_reboot>
   <on_crash>destroy</on_crash>
-  <pm>
-    <suspend-to-mem enabled='no'/>
-    <suspend-to-disk enabled='no'/>
-  </pm>
   <devices>
     <emulator>{{ qemu_bin_path }}</emulator>
     <disk type='file' device='disk'>
@@ -133,30 +122,26 @@
       <alias name='pci.14'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x5'/>
     </controller>
-    <controller type='sata' index='0'>
-      <alias name='ide'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
-    </controller>
     <controller type='virtio-serial' index='0'>
       <alias name='virtio-serial0'/>
       <address type='pci' domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
     </controller>
     <interface type='bridge'>
-      <source bridge='{{ libvirt_session_public_network_dev }}'/>
+      <source bridge='{{ libvirt_session_public_network_dev | default("virbr0") }}'/>
       <model type='virtio'/>
       <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
     </interface>
     <serial type='pty'>
       <source path='/dev/pts/2'/>
-      <target type='isa-serial' port='0'>
-        <model name='isa-serial'/>
+      <target type='system-serial' port='0'>
+        <model name='pl011'/>
       </target>
       <alias name='serial0'/>
       <log file='{{ guestfs_path }}/{{ hostname }}/console.log' append='on'/>
     </serial>
     <console type='pty' tty='/dev/pts/2'>
-      <source path='/dev/pts/2'/>
+      <source path='/dev/pts/1'/>
       <target type='serial' port='0'/>
       <alias name='serial0'/>
     </console>
@@ -166,6 +151,10 @@
       <alias name='channel0'/>
       <address type='virtio-serial' controller='0' bus='0' port='1'/>
     </channel>
+    <tpm model='tpm-tis'>
+      <backend type='emulator' version='2.0'/>
+      <alias name='tpm0'/>
+    </tpm>
     <audio id='1' type='none'/>
     <memballoon model='virtio'>
       <alias name='balloon0'/>
@@ -183,10 +172,8 @@
     <qemu:arg value='-global'/>
     <qemu:arg value='ICH9-LPC.disable_s4=0'/>
     <qemu:arg value='-device'/>
-    <qemu:arg value='vmcoreinfo'/>
-    <qemu:arg value='-device'/>
     <qemu:arg value='pxb-pcie,id=pcie.1,bus_nr=32,bus=pcie.0,addr=0x8'/>
-    {% if libvirt_enable_gdb %}
+    {% if libvirt_enable_gdb | default(false) %}
       <qemu:arg value='-gdb'/>
       <qemu:arg value='tcp::{{ libvirt_gdb_baseport + idx}}'/>
     {% endif %}

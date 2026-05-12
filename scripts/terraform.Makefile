@@ -28,7 +28,7 @@ ifeq (y,$(CONFIG_TERRAFORM_RCLOUD))
 export KDEVOPS_CLOUD_PROVIDER=rcloud
 endif
 
-KDEVOPS_NODES_TEMPLATE :=	$(KDEVOPS_NODES_ROLE_TEMPLATE_DIR)/terraform_nodes.tf.j2
+KDEVOPS_NODES_TEMPLATE :=	$(KDEVOPS_PLAYBOOKS_DIR)/roles/nodes/templates/terraform_nodes.tf.j2
 KDEVOPS_NODES :=		terraform/$(KDEVOPS_CLOUD_PROVIDER)/nodes.tf
 
 TERRAFORM_EXTRA_VARS += kdevops_enable_terraform='True'

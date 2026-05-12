@@ -89,6 +89,16 @@ F:	modules/ansible_inventory/
 F:	playbooks/ansible_inventory.yml
 F:	playbooks/roles/ansible_inventory/
 
+NODES
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	docs/nodes.md
+F:	modules/nodes/
+F:	playbooks/nodes.yml
+F:	playbooks/roles/nodes/
+
 KDEVOPS CI
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev

@@ -76,7 +76,7 @@ the drives can vary by type, so we have one macro by type of drive.
 {% for x in range(0,libvirt_largeio_drives_per_space) %}
 {% set ns2 = namespace(pbs=libvirt_largeio_logical_compat_size  * (2 ** n)) %}
 {% set ns3 = namespace(pbs_next_two=ns2.pbs * (2*(x-1))) %}
-{% if libvirt_largeio_logical_compat %}
+{% if libvirt_largeio_logical_compat | default(false) %}
 {% set ns4 = namespace(lbs=libvirt_largeio_logical_compat_size) %}
 {% else %}
 {% set ns4 = namespace(lbs=ns2.pbs) %}
@@ -133,7 +133,7 @@ the drives can vary by type, so we have one macro by type of drive.
 {% for x in range(0,libvirt_largeio_drives_per_space) %}
 {% set ns2 = namespace(pbs=libvirt_largeio_logical_compat_size  * (2 ** n)) %}
 {% set ns3 = namespace(pbs_next_two=ns2.pbs * (2*(x-1))) %}
-{% if libvirt_largeio_logical_compat %}
+{% if libvirt_largeio_logical_compat | default(false) %}
 {% set ns4 = namespace(lbs=libvirt_largeio_logical_compat_size) %}
 {% else %}
 {% set ns4 = namespace(lbs=ns2.pbs) %}

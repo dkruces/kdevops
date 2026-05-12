@@ -1,6 +1,6 @@
-# The gen_nodes ansible role
+# nodes for terraform
 
-The `gen_nodes` ansible role is used to let us generate certain target files we
+The `nodes` ansible role is used to let us generate certain target files we
 need upon bringup. The amount of files it generates will depend on the features
 you have enabled. For cloud environments terraform is supported and the
 following files are generated:
@@ -17,4 +17,4 @@ If using a cloud environment terraform will set these to be other files:
 Your workflow can override this to something different if needed. This
 just defines the terraform variable `kdevops_nodes`.
 
-  * [Generating kdevops_nodes terraform variable](playbooks/roles/gen_nodes/templates/terraform_nodes.tf.j2)
+  * [Generating kdevops_nodes terraform variable](playbooks/roles/nodes/templates/terraform_nodes.tf.j2)

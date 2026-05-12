@@ -19,8 +19,8 @@ The `gen_tfvars` ansible has a dependency on the
 [nodes](docs/nodes.md) ansible role as well
 to generate the terraform variable `kdevops_nodes`. See the docs:
 
-  * [What are and how to generate the kdevops nodes files](docs/the-gen-nodes-ansible-role.md)
-    * [nodes for terraform](docs/nodes-terraform.md)
+  * [What are and how to generate the kdevops nodes files](nodes.md)
+    * [nodes for terraform](nodes-terraform.md)
 
 ## TODO
 

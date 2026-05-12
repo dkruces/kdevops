@@ -51,11 +51,14 @@ separately configurable units.
 
 ## Dependencies
 
-`scripts/gen-nodes.Makefile` is a transitional cross-module bridge
-that pushes 40+ Kconfig values (libvirt_*, terraform_*, guestfs_*)
-into ansible via `ANSIBLE_EXTRA_ARGS`. It will retire as those
-modules migrate to canonical layout and emit their own values via
-Kconfig `output yaml`.
+The libvirt and qemu_build modules emit their configuration into
+extra_vars.yaml via Kconfig `output yaml`, so the node templates
+read every libvirt_*, qemu_*, and qemu_build_* key from there with
+no extra Make-side plumbing. Three Make-side scalars
+(`kdevops_nodes`, `kdevops_nodes_template`,
+`kdevops_nodes_template_full_path`) come from the main Makefile's
+`ANSIBLE_EXTRA_ARGS` because they depend on workflow/backend state
+the Kconfig solver cannot see.
 
 ## Variable namespace collisions
 

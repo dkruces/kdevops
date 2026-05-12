@@ -148,14 +148,13 @@ config QEMU_BUILD_BIN_PATH
 	default "{{ qemu_build_destdir }}/bin/qemu-system-ppc64" if TARGET_ARCH_PPC64LE
 	help
 	  Synthetic, derived. Absolute path to the QEMU binary that
-	  the build_qemu role's ninja install step writes. Both the
-	  libvirt path (gen-nodes Makefile, libvirt domain XML
-	  emulator element) and the qsu path
-	  (Kconfig.qemu_system_units QEMU_SYSTEM_UNITS_QEMU_BINARY
-	  default) consume this when QEMU_BUILD=y. The value is a
-	  Jinja2 template that resolves at Ansible-use time against
-	  qemu_build_destdir, which itself resolves against
-	  kdevops_controller_data_path.
+	  the build_qemu role's ninja install step writes. The libvirt
+	  domain XML emulator element (via QEMU_BIN_PATH chaining to
+	  this key) and the qsu path (Kconfig.qemu_system_units
+	  QEMU_SYSTEM_UNITS_QEMU_BINARY default) both consume this when
+	  QEMU_BUILD=y. The value is a Jinja2 template that resolves at
+	  Ansible-use time against qemu_build_destdir, which itself
+	  resolves against kdevops_controller_data_path.
 
 config QEMU_BUILD_GIT_VERSION
 	string "The version of QEMU to build"

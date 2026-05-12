@@ -510,10 +510,9 @@ For detailed documentation, see [docs/contrib/README.md](docs/contrib/README.md)
 Below are sections which get into technical details of how kdevops works.
 
   * [How is extra_vars.yaml generated](docs/how-extra-vars-generated.md)
-  * [How is the ansible hosts file generated](docs/the-gen-hosts-ansible-role.md)
-  * [What are and how to generate the kdevops nodes files](docs/the-gen-nodes-ansible-role.md)
-    * [How is the dynamic Vagrant files generated](docs/the-gen-nodes-ansible-role-vagrant.md)
-    * [How is the terraform kdevops_nodes variable generated](docs/the-gen-nodes-ansible-role-terraform.md)
+  * [How is the ansible hosts file generated](docs/ansible_inventory.md)
+  * [What are and how to generate the kdevops nodes files](docs/nodes.md)
+    * [How is the terraform kdevops_nodes variable generated](docs/nodes-terraform.md)
   * [How are the terraform terraform/terraform.tfvars variables generated](docs/the-terraform-gen-tfvar-ansible-role.md)
   * [Why Vagrant (deprecated) used to be used for virtualization](docs/why-vagrant.md)
   * [A case for supporting truncated files with loopback block devices](docs/testing-with-loopback.md)

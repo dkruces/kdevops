@@ -80,3 +80,5 @@ ANSIBLE_EXTRA_ARGS += $(QEMU_BUILD_SETUP_ARGS)
 # usage of KDEVOPS_BRING_UP_DEPS_EARLY for setup work that must
 # complete before any bringup_* method runs.
 KDEVOPS_BRING_UP_DEPS_EARLY += qemu
+
+include modules/qemu/build_deps/Makefile

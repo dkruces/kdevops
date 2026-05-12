@@ -1,0 +1,32 @@
+---
+# qemu/build_deps/verify — non-sudo precheck that the QEMU build
+# toolchain is present on the controller. Fails with an actionable
+# diagnostic when a required binary is missing.
+
+- name: Check the QEMU build toolchain is on PATH
+  ansible.builtin.shell: |
+    set -o pipefail
+    command -v {{ item }}
+  args:
+    executable: /bin/bash
+  loop:
+    - meson
+    - ninja
+    - pkg-config
+    - cc
+  changed_when: false
+  failed_when: false
+  register: qemu_build_deps_check
+
+- name: Fail with actionable diagnostic when build tools are missing
+  ansible.builtin.fail:
+    msg: |
+      The QEMU build toolchain is incomplete on the controller.
+      Missing: {{ (qemu_build_deps_check.results | rejectattr('rc', 'equalto', 0) | map(attribute='item') | list) | join(', ') }}
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make qemu-build-deps-setup
+        2. Install the toolchain manually following docs/qemu.md,
+           then re-run the original make target.
+  when: qemu_build_deps_check.results | selectattr('rc', 'ne', 0) | list | length > 0

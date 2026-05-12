@@ -7,54 +7,55 @@
 #
 # No playbook-side cache: configure + ninja + ninja install run on
 # every invocation. ninja's source-level dependency tracking is
-# the cache. A no-op rebuild walks the dep graph and exits in
-# seconds; a real source change rebuilds only what actually
-# changed. A config-only cache (sha256 of the installed binary)
-# cannot see source edits and silently skipped the build for the
-# iteration case this path exists to serve.
+# the cache; a no-op rebuild walks the dep graph and exits in
+# seconds, a real source change rebuilds only what actually changed.
+# Install lands under qemu_build_destdir (not /usr/local), so no
+# sudo is required for the install step and the host's system
+# prefixes are never touched.
 #
-# install lands under qemu_build_destdir (not /usr/local), so no sudo
-# is required for the install step and the host's system prefixes
-# are never touched. Build deps still install with the system
-# package manager (sudo) once on first invocation; subsequent
-# invocations see the deps already present and skip that step
-# implicitly.
+# Distro build-dep installation is sudo and lives in the
+# build_deps/ sub-module, opt-in via `make qemu-build-deps-setup`.
+# The verify path below catches a missing toolchain and points the
+# user at that target.
 
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
   with_first_found:
     - files:
         - "../extra_vars.yml"
         - "../extra_vars.yaml"
         - "../extra_vars.json"
       skip: true
-  tags: vars
+  tags: [always]
 
-- name: Install build deps for QEMU as per each Linux distribution
-  ansible.builtin.include_tasks: install-deps/main.yml
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "install-deps"]
+- name: Verify the QEMU build toolchain is present (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: qemu/build_deps/verify
+
+- name: Qemu build_deps sudo opt-in (only with --tags qemu_build_deps_setup)
+  ansible.builtin.include_role:
+    name: qemu/build_deps/setup
+    apply:
+      tags: [qemu_build_deps_setup]
+  tags: [never, qemu_build_deps_setup]
 
 - name: Ensure QEMU tree, build, and install directories exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop:
     - "{{ qemu_build_tree_path }}"
     - "{{ qemu_build_builddir }}"
     - "{{ qemu_build_destdir }}"
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "vars"]
+  when: qemu_build | bool
 
 # Detect a tree the user populated already — manual git clone, a
 # git worktree (.git is a file pointing at the parent's gitdir),
 # a symlink to another checkout, or a previous kdevops bringup.
-# When such a tree exists at qemu_build_tree_path, kdevops uses it in
-# place; the clone step below is skipped. This lets a user point
+# When such a tree exists at qemu_build_tree_path, kdevops uses it
+# in place; the clone step below is skipped. This lets a user point
 # QEMU_BUILD_TREE_PATH at their own QEMU worktree and iterate
 # against working-tree changes without kdevops switching branches
 # or refs under them.
@@ -62,13 +63,11 @@
   ansible.builtin.stat:
     path: "{{ qemu_build_tree_path }}/.git"
   register: qemu_existing_tree
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "vars"]
+  when: qemu_build | bool
 
 - name: Git clone QEMU when no existing tree is present
   environment:
-    GIT_SSL_NO_VERIFY: true
+    GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
     repo: "{{ qemu_git }}"
     dest: "{{ qemu_build_tree_path }}"
@@ -76,41 +75,36 @@
   when:
     - qemu_build | bool
     - not (qemu_existing_tree.stat.exists | default(false))
-  tags: ["qemu", "clone"]
 
 # meson subprojects download is idempotent: it fetches each
 # subprojects/*.wrap target only when missing. Running it
 # unconditionally lets configure --disable-download succeed on
-# both a fresh kdevops clone (where subprojects need fetching)
-# and an existing tree (where they are usually already present).
+# both a fresh kdevops clone (where subprojects need fetching) and
+# an existing tree (where they are usually already present).
 - name: Ensure meson subprojects are present
   ansible.builtin.command:
     cmd: meson subprojects download
     chdir: "{{ qemu_build_tree_path }}"
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "configure"]
+  when: qemu_build | bool
+  changed_when: true
 
 - name: Run configure for QEMU (out-of-tree, prefix=qemu_build_destdir)
   ansible.builtin.command:
     cmd: "{{ qemu_build_tree_path }}/configure --target-list={{ qemu_target }} --prefix={{ qemu_build_destdir }} --disable-download"
     chdir: "{{ qemu_build_builddir }}"
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "configure"]
+  when: qemu_build | bool
+  changed_when: true
 
 - name: Build QEMU with ninja
   ansible.builtin.command:
     cmd: ninja
     chdir: "{{ qemu_build_builddir }}"
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "build"]
+  when: qemu_build | bool
+  changed_when: true
 
 - name: Install QEMU into qemu_build_destdir (no sudo)
   ansible.builtin.command:
     cmd: ninja install
     chdir: "{{ qemu_build_builddir }}"
-  when:
-    - qemu_build | bool
-  tags: ["qemu", "install"]
+  when: qemu_build | bool
+  changed_when: true

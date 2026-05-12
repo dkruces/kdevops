@@ -1,0 +1,9 @@
+---
+# qemu/build_deps/setup — opt-in sudo path that installs the
+# distro-specific packages QEMU's build requires. Invoked via
+# `make qemu-build-deps-setup`, never on bare `make` or
+# `make bringup`. See the spec's controller-side sudo isolation
+# rule.
+
+- name: Distribution-specific QEMU build dependencies
+  ansible.builtin.include_tasks: install-deps/main.yml

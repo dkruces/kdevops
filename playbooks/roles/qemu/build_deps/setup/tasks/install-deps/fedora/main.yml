@@ -8,7 +8,7 @@
 
 - name: Install QEMU build dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     name:
       - ImageMagick

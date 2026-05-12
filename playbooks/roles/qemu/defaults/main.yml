@@ -11,10 +11,8 @@ qemu_build: false
 # role is invoked outside kdevops's Make plumbing.
 qemu_build_tree_path: "{{ kdevops_controller_data_path | default('/data') }}/qemu"
 qemu_build_builddir: "{{ kdevops_controller_data_path | default('/data') }}/qemu-build"
-qemu_build_destdir:  "{{ kdevops_controller_data_path | default('/data') }}/qemu-destdir"
+qemu_build_destdir: "{{ kdevops_controller_data_path | default('/data') }}/qemu-destdir"
 
 qemu_git: "https://github.com/qemu/qemu.git"
 qemu_version: "v7.2.0-rc4"
 qemu_target: "x86_64-softmmu"
-build_linux_shallow_clone: true
-build_linux_clone_depth: 1

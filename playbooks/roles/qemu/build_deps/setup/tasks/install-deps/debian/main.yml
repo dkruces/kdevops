@@ -1,9 +1,17 @@
 ---
+- name: Update apt cache
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.apt:
+    update_cache: true
+  tags: ["qemu", "update-cache"]
+
 - name: Install QEMU build dependencies
   become: true
-  become_method: sudo
-  ansible.builtin.dnf:
+  become_method: ansible.builtin.sudo
+  ansible.builtin.apt:
     name:
+      - debhelper-compat
       - glusterfs-common
       - gnutls-dev
       - libaio-dev
@@ -54,6 +62,7 @@
       - nettle-dev
       - ninja-build
       - python3
+      - python3-distlib
       - python3-sphinx
       - python3-sphinx-rtd-theme
       - texinfo
@@ -63,3 +72,4 @@
       - fcode-utils
       - xsltproc
     state: present
+  tags: ["qemu", "build-deps"]

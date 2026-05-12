@@ -63,3 +63,4 @@
       - fcode-utils
       - xsltproc
     state: present
+  tags: do_install

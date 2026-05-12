@@ -1,11 +1,4 @@
 ---
-- name: Verify local build QEMU installation
-  ansible.builtin.command: "which qemu-system-x86_64"
-  register: qemu_present
-  changed_when: qemu_present.rc == 1
-  failed_when: qemu_present.rc != 0 and qemu_present.rc != 1
-  tags: ["qemu", "verify"]
-
 - name: Install QEMU build dependencies
   become: true
   become_method: ansible.builtin.sudo
@@ -268,3 +261,4 @@
       - zlib-devel
       - zlib-static
     state: present
+  tags: do_install

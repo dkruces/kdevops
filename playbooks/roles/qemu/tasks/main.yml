@@ -50,6 +50,7 @@
     - "{{ qemu_build_builddir }}"
     - "{{ qemu_build_destdir }}"
   when: qemu_build | bool
+  tags: do_fetch
 
 # Detect a tree the user populated already — manual git clone, a
 # git worktree (.git is a file pointing at the parent's gitdir),
@@ -64,6 +65,7 @@
     path: "{{ qemu_build_tree_path }}/.git"
   register: qemu_existing_tree
   when: qemu_build | bool
+  tags: do_fetch
 
 - name: Git clone QEMU when no existing tree is present
   environment:
@@ -75,6 +77,7 @@
   when:
     - qemu_build | bool
     - not (qemu_existing_tree.stat.exists | default(false))
+  tags: do_fetch
 
 # meson subprojects download is idempotent: it fetches each
 # subprojects/*.wrap target only when missing. Running it
@@ -87,6 +90,7 @@
     chdir: "{{ qemu_build_tree_path }}"
   when: qemu_build | bool
   changed_when: true
+  tags: do_fetch
 
 - name: Run configure for QEMU (out-of-tree, prefix=qemu_build_destdir)
   ansible.builtin.command:
@@ -94,6 +98,7 @@
     chdir: "{{ qemu_build_builddir }}"
   when: qemu_build | bool
   changed_when: true
+  tags: do_configure
 
 - name: Build QEMU with ninja
   ansible.builtin.command:
@@ -101,6 +106,7 @@
     chdir: "{{ qemu_build_builddir }}"
   when: qemu_build | bool
   changed_when: true
+  tags: do_build
 
 - name: Install QEMU into qemu_build_destdir (no sudo)
   ansible.builtin.command:
@@ -108,3 +114,4 @@
     chdir: "{{ qemu_build_builddir }}"
   when: qemu_build | bool
   changed_when: true
+  tags: do_install

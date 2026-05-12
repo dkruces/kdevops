@@ -4,6 +4,7 @@
 *.patch
 
 .kdevops\.depcheck
+.kdevops/
 .provisioned_once*
 
 guestfs/

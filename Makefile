@@ -95,6 +95,42 @@ export Q=@
 export NQ=echo
 endif
 
+# Wrap ansible-playbook so the terminal replay is captured to a log
+# file under $(KDEVOPS_LOG_DIR). Lucid's structured logs continue at
+# .ansible/logs/ independently.
+#
+# Lucid's dynamic display (in-place TUI, ANSI cursor control) only
+# engages when sys.stdout.isatty() is True. Make's recipe stdout is
+# not a tty, so when lucid is the active callback we wrap with
+# script(1) to allocate a pty for the child; the user then sees the
+# dynamic display and the raw replay (including ANSI codes) lands in
+# the log. For every other callback (default, dense, debug, diy),
+# clearing the screen is not desired: the macro emits plain
+# scrolling output via tee + pipefail.
+KDEVOPS_LOG_DIR := .kdevops/logs
+KDEVOPS_LOGFILE = $(KDEVOPS_LOG_DIR)/$(shell date +%Y%m%d-%H%M%S)-$(notdir $@).log
+
+ifeq (y,$(CONFIG_ANSIBLE_CFG_CALLBACK_PLUGIN_LUCID))
+UNAME_S := $(shell uname --kernel-name)
+ifeq ($(UNAME_S),Darwin)
+# BSD script(1) has no long-form flag aliases.
+define run-ansible-playbook
+	@mkdir -p $(KDEVOPS_LOG_DIR)
+	script -q $(KDEVOPS_LOGFILE) ansible-playbook $(1)
+endef
+else
+define run-ansible-playbook
+	@mkdir -p $(KDEVOPS_LOG_DIR)
+	script --quiet --return --log-out=$(KDEVOPS_LOGFILE) --command "ansible-playbook $(1)"
+endef
+endif
+else
+define run-ansible-playbook
+	@mkdir -p $(KDEVOPS_LOG_DIR)
+	set -o pipefail; ansible-playbook $(1) 2>&1 | tee $(KDEVOPS_LOGFILE)
+endef
+endif
+
 include Makefile.min_deps
 DEFAULT_DEPS += $(KDEVOPS_DEPCHECK)
 

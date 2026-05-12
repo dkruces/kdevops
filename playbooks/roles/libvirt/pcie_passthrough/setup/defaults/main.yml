@@ -1,6 +1,10 @@
 # SPDX-License-Identifier copyleft-next-0.3.1
 ---
-pcie_passthrough_enable: false
-pcie_passthrough_devices:
-pcie_sysfs_device_path_prefix: "/sys/bus/pci/devices/"
-libvirt_qemu_group: libvirt-qemu
+# Role-private defaults only. Tree-wide pcie_passthrough_* vars come
+# from scripts/gen_pcie_passthrough_vars.sh via the EXTRA_VAR_FRAGMENTS
+# pipeline; libvirt_qemu_group comes from the libvirt module's
+# Kconfig output yaml. Consumers reference both with
+# `| default(...)` where the gap case applies. The previous defaults
+# (pcie_passthrough_enable, pcie_passthrough_devices,
+# pcie_sysfs_device_path_prefix, libvirt_qemu_group) are removed
+# per the module-spec role-defaults rule.

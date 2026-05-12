@@ -1,14 +1,14 @@
 ---
 - name: Update apt cache
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     update_cache: true
   tags: install
 
 - name: Install libvirt / kvm dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - libvirt-daemon
@@ -23,7 +23,7 @@
 
 - name: Enable libvirtd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: libvirtd
     enabled: true
@@ -31,7 +31,7 @@
 
 - name: Make sure libvirtd is running
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     state: started
     name: libvirtd

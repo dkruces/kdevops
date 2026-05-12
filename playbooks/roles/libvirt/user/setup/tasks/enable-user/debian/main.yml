@@ -1,52 +1,7 @@
 ---
-- name: Adds the user to the respective distro libvirt groups
+- name: Ensure the controller user is in the libvirt, kvm, and libvirt-qemu groups
   become: true
-  become_method: sudo
-  ansible.builtin.user:
-    name: "{{ running_user }}"
-    groups: libvirt,kvm,libvirt-qemu
-    append: true
-  when:
-    - not libvirt_session
-    - not only_verify_user|bool
-
-- name: Check if apparmor_status exists
-  ansible.builtin.stat:
-    path: /usr/sbin/apparmor_status
-  register: apparmor_file_stat_result
-  when: "only_verify_user|bool"
-
-- name: Verify if AppArmor is disabled when applicable
-  become: true
-  become_method: sudo
-  ansible.builtin.command:
-    cmd: /usr/sbin/apparmor_status --enabled
-  register: apparmor_check
-  failed_when: apparmor_check.rc == 0
-  when:
-    - "only_verify_user|bool"
-    - "apparmor_file_stat_result.stat.exists"
-
-- name: Verifies user's effective group allows to run libvirt/kvm without being root
-  ansible.builtin.shell: groups | grep {{ item }}
-  with_items:
-    - libvirt
-    - kvm
-    - libvirt-qemu
-  loop_control:
-    label: "Verifying if user's current effective groups includes {{ item }}"
-  register: group_check
-  failed_when: false
-  ignore_errors: true
-  when:
-    - not libvirt_session
-    - not only_verify_user|bool
-
-- name: Ensure our user is part of the libvirt/kvm groups
-  tags: ["journal"]
-  become: true
-  become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     groups:
@@ -54,6 +9,4 @@
       - kvm
       - libvirt-qemu
     append: true
-  when:
-    - not libvirt_session
-    - not only_verify_user|bool
+  when: not (libvirt_session | default(false) | bool)

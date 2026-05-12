@@ -28,7 +28,7 @@
   ansible.builtin.include_role:
     name: libvirt/user/verify
 
-- name: libvirt user/group sudo opt-in (only with --tags libvirt_user_setup)
+- name: Libvirt user/group sudo opt-in (only with --tags libvirt_user_setup)
   ansible.builtin.include_role:
     name: libvirt/user/setup
     apply:
@@ -39,7 +39,7 @@
   ansible.builtin.include_role:
     name: libvirt/storage_pool/verify
 
-- name: libvirt storage_pool sudo opt-in (only with --tags libvirt_storage_pool_setup)
+- name: Libvirt storage_pool sudo opt-in (only with --tags libvirt_storage_pool_setup)
   ansible.builtin.include_role:
     name: libvirt/storage_pool/setup
     apply:
@@ -50,7 +50,7 @@
   ansible.builtin.include_role:
     name: libvirt/pcie_passthrough/verify
 
-- name: libvirt pcie_passthrough sudo opt-in (only with --tags libvirt_pcie_passthrough_setup)
+- name: Libvirt pcie_passthrough sudo opt-in (only with --tags libvirt_pcie_passthrough_setup)
   ansible.builtin.include_role:
     name: libvirt/pcie_passthrough/setup
     apply:

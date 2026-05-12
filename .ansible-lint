@@ -1,0 +1,11 @@
+---
+# kdevops uses slash-separated nested role names (e.g.
+# `include_role: name: libvirt/user/verify`) which resolve to
+# nested sub-role directories under the parent role. This matches
+# ansible-core's path resolution in
+# playbook/role/definition.py:186 (os.path.join(roles_path, role_name))
+# and is the canonical mechanism per docs/module-spec.md
+# "Sub-modules". ansible-lint's role-name[path] rule disallows this
+# form by convention; skip it for the whole project.
+skip_list:
+  - role-name[path]

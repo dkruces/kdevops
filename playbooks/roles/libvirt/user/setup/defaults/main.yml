@@ -1,9 +1,11 @@
 # SPDX-License-Identifier copyleft-next-0.3.1
 ---
-only_install: false
-only_verify_user: false
-
-skip_install: false
-skip_configuration: false
-
-libvirt_session: false
+# Role-private defaults only. The legacy gate vars
+# (only_install, only_verify_user, skip_install, skip_configuration)
+# served the pre-split single-role model. The verify and setup paths
+# are now separate sub-sub-modules (verify/ and setup/) selected via
+# tag, so the gate vars are unused here.
+#
+# The tree-wide libvirt_session var comes from extra_vars.yaml via
+# the libvirt module's Kconfig output yaml. Consumers reference it
+# with `| default(false)` for the gap case.

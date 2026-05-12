@@ -1,7 +1,7 @@
 ---
 - name: Install libvirt / kvm dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     name:
       - libvirt
@@ -13,7 +13,7 @@
 
 - name: Enable libvirtd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: libvirtd
     enabled: true
@@ -21,14 +21,14 @@
 
 - name: Make sure libvirtd is running
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     state: started
     name: libvirtd
 
 - name: Enable virtnetworkd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: virtnetworkd
     enabled: true
@@ -36,7 +36,7 @@
 
 - name: Make sure virtnetworkd is running
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     state: started
     name: virtnetworkd

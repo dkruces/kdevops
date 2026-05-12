@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -9,71 +9,69 @@
         - "../extra_vars.json"
       skip: true
 
-- name: Check if PCI-E sysfs driver_override file exists
+- name: Check if PCI-E sysfs driver_override files exist
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   vars:
     sysfs_override: "{{ pcie_sysfs_device_path_prefix }}/{{ item.pcie_id }}/driver_override"
   ansible.builtin.stat:
     path: "{{ sysfs_override }}"
   with_items: "{{ pcie_passthrough_devices }}"
   loop_control:
-    label: "Checking if {{ sysfs_override }} exists for {{ item.pcie_human_name }} ..."
-  register: sysfs_driver_override_file_stats
-  when:
-    - pcie_passthrough_enable|bool
+    label: "{{ item.pcie_human_name }}"
+  register: libvirt_pcie_driver_override_stats
+  when: pcie_passthrough_enable | bool
 
-- name: Enable libvirt to use PCI-E sysfs driver_override file
+- name: Enable libvirt to use PCI-E sysfs driver_override files
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
     group: "{{ libvirt_qemu_group }}"
     mode: "0664"
-  with_items: "{{ sysfs_driver_override_file_stats.results }}"
+  with_items: "{{ libvirt_pcie_driver_override_stats.results }}"
   loop_control:
-    label: "Setting permissions for {{ item.stat.path }} ..."
+    label: "{{ item.stat.path }}"
   when:
-    - pcie_passthrough_enable|bool
+    - pcie_passthrough_enable | bool
     - item.stat.exists
 
-- name: Check if PCI-E sysfs unbind file exists
+- name: Check if PCI-E sysfs unbind files exist
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   vars:
     sysfs_unbind: "{{ pcie_sysfs_device_path_prefix }}/{{ item.pcie_id }}/unbind"
   ansible.builtin.stat:
     path: "{{ sysfs_unbind }}"
   with_items: "{{ pcie_passthrough_devices }}"
   loop_control:
-    label: "Checking if {{ sysfs_unbind }} exists for {{ item.pcie_human_name }} ..."
-  register: sysfs_driver_unbind_file_stats
-  when:
-    - pcie_passthrough_enable|bool
+    label: "{{ item.pcie_human_name }}"
+  register: libvirt_pcie_driver_unbind_stats
+  when: pcie_passthrough_enable | bool
 
-- name: Enable libvirt to use PCI-E sysfs unbind file
+- name: Enable libvirt to use PCI-E sysfs unbind files
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
     group: "{{ libvirt_qemu_group }}"
     mode: "0220"
-  with_items: "{{ sysfs_driver_unbind_file_stats.results }}"
+  with_items: "{{ libvirt_pcie_driver_unbind_stats.results }}"
   loop_control:
-    label: "Setting permissions for sysfs unbind file"
+    label: "{{ item.stat.path }}"
   when:
-    - pcie_passthrough_enable|bool
+    - pcie_passthrough_enable | bool
     - item.stat.exists
 
 - name: Deploy udev 10-qemu-hw-users.rules which enables libvirt to use vfio subsystem
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.template:
     src: "10-qemu-hw-users.rules"
-    dest: "/etc/udev/rules.d/"
-  when:
-    - pcie_passthrough_enable|bool
+    dest: "/etc/udev/rules.d/10-qemu-hw-users.rules"
+    mode: "0644"
+  when: pcie_passthrough_enable | bool

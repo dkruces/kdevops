@@ -167,6 +167,8 @@ config LIBVIRT_STORAGE_POOL_PATH
 
 config QEMU_BIN_PATH
 	string
+	output yaml
+	default QEMU_BUILD_BIN_PATH if QEMU_BUILD
 	default QEMU_BIN_PATH_LIBVIRT if LIBVIRT
 	default $(shell,./scripts/get_libvirt_qemu_bin_path.sh) if !QEMU_USE_DEVELOPMENT_VERSION
 

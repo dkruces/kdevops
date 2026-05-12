@@ -185,6 +185,15 @@ include scripts/update_etc_hosts.Makefile
 # Included after the backend Makefiles set KDEVOPS_NODES + KDEVOPS_NODES_TEMPLATE.
 include modules/nodes/Makefile
 
+# Node-file selection comes from Make-side workflow/backend state
+# (KDEVOPS_NODES, KDEVOPS_NODES_TEMPLATE) and cannot be derived from
+# Kconfig, so it is injected directly into ANSIBLE_EXTRA_ARGS. Must
+# follow the backend Makefile include above so the values are
+# populated when the immediate-expansion += appends them here.
+ANSIBLE_EXTRA_ARGS += kdevops_nodes='$(KDEVOPS_NODES)'
+ANSIBLE_EXTRA_ARGS += kdevops_nodes_template='$(KDEVOPS_NODES_TEMPLATE)'
+ANSIBLE_EXTRA_ARGS += kdevops_nodes_template_full_path='$(TOPDIR_PATH)/$(KDEVOPS_NODES_TEMPLATE)'
+
 ifneq (,$(KDEVOPS_NODES))
 DEFAULT_DEPS += $(KDEVOPS_NODES)
 endif
@@ -249,8 +258,6 @@ KDEVOPS_ANSIBLE_PROVISION_PLAYBOOK:=$(subst ",,$(CONFIG_KDEVOPS_ANSIBLE_PROVISIO
 ifeq (y,$(CONFIG_KDEVOPS_ANSIBLE_PROVISION_ENABLE))
 ANSIBLE_EXTRA_ARGS += kdevops_ansible_provision_playbook='$(KDEVOPS_ANSIBLE_PROVISION_PLAYBOOK)'
 endif
-
-include scripts/gen-nodes.Makefile
 
 # disable built-in rules for this
 .SUFFIXES:

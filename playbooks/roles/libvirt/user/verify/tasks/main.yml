@@ -1,0 +1,56 @@
+---
+# libvirt/user/verify — non-sudo precheck for libvirt group
+# membership. Fails with an actionable diagnostic when the controller
+# user is missing one of the libvirt groups the setup sub-sub-module
+# adds them to.
+
+- name: Check the controller user's effective groups
+  ansible.builtin.command: id -nG
+  changed_when: false
+  register: libvirt_user_groups
+
+- name: Check libvirt is installed (virsh binary)
+  ansible.builtin.shell: |
+    set -o pipefail
+    command -v virsh
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+  register: libvirt_user_virsh
+
+- name: Fail with actionable diagnostic when libvirt is not installed
+  ansible.builtin.fail:
+    msg: |
+      libvirt is not installed on the controller: the `virsh` binary
+      is not on PATH.
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make libvirt-user-setup
+        2. Install libvirt manually following docs/libvirt-user.md,
+           then re-run the original make target.
+  when: libvirt_user_virsh.rc != 0
+
+- name: Fail with actionable diagnostic when group membership is incomplete
+  ansible.builtin.fail:
+    msg: |
+      The controller user is missing one or more libvirt groups.
+      Current groups: {{ libvirt_user_groups.stdout }}
+      Required groups: {{ libvirt_user_required_groups | join(', ') }}
+
+      Two ways to fix this:
+        1. Run the opt-in sudo target:
+               make libvirt-user-setup
+        2. Add yourself to the missing groups manually following
+           docs/libvirt-user.md, then log out and back in.
+  vars:
+    libvirt_user_required_groups:
+      - libvirt
+      - kvm
+      - "{{ libvirt_qemu_group | default('libvirt-qemu') }}"
+    libvirt_user_have_groups: "{{ libvirt_user_groups.stdout.split() }}"
+    libvirt_user_missing_groups: "{{ libvirt_user_required_groups | difference(libvirt_user_have_groups) }}"
+  when:
+    - not (libvirt_session | default(false) | bool)
+    - libvirt_user_missing_groups | length > 0

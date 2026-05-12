@@ -4,8 +4,12 @@ ifeq (,$(wildcard $(CURDIR)/.config))
 else
 # stage-2-y targets gets called after all local config files have been generated
 stage-2-$(CONFIG_TERRAFORM)			+= kdevops_terraform_deps
-stage-2-$(CONFIG_LIBVIRT_INSTALL)	+= kdevops_install_libvirt
-stage-2-$(CONFIG_LIBVIRT_CONFIGURE)	+= kdevops_configure_libvirt
+
+# Libvirt install + group configuration are controller-side sudo
+# operations and are no longer wired here. They are opt-in via the
+# dedicated Make target `make libvirt-user-setup`; the libvirt
+# orchestrator role's verify path catches the missing setup on bare
+# make and fails with a structured diagnostic naming the target.
 
 kdevops_stage_2: .config
 	$(Q)$(MAKE) -f Makefile.kdevops $(stage-2-y)

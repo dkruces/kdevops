@@ -23,3 +23,14 @@
         - "../extra_vars.json"
       skip: true
   tags: [always]
+
+- name: Verify libvirt user / group membership (non-sudo precheck)
+  ansible.builtin.include_role:
+    name: libvirt/user/verify
+
+- name: libvirt user/group sudo opt-in (only with --tags libvirt_user_setup)
+  ansible.builtin.include_role:
+    name: libvirt/user/setup
+    apply:
+      tags: [libvirt_user_setup]
+  tags: [never, libvirt_user_setup]

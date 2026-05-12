@@ -6,13 +6,13 @@ the drives can vary by type, so we have one macro by type of drive.
 			kdevops_storage_pool_path,
 			hostname,
 			libvirt_extra_drive_format,
-			libvirt_extra_storage_aio_mode,
-			libvirt_extra_storage_aio_cache_mode) -%}
+			libvirt_aio_mode,
+			libvirt_aio_cache_mode) -%}
 <!-- We generated {{ num_drives }} ide drives -->
 {% for n in range(0,num_drives) %}
     <!-- This is IDE drive # {{ n + 1 }} -->
     <qemu:arg value='-drive'/>
-    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},aio={{ libvirt_extra_storage_aio_mode }},cache={{ libvirt_extra_storage_aio_cache_mode }},if=none,id=drv{{ n }}'/>
+    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},aio={{ libvirt_aio_mode }},cache={{ libvirt_aio_cache_mode }},if=none,id=drv{{ n }}'/>
     <qemu:arg value='-device'/>
     <qemu:arg value="ide-hd,drive=drv{{ n }},bus=ide.{{ n }},serial=kdevops{{ n }}"/>
 {% endfor %}
@@ -22,8 +22,8 @@ the drives can vary by type, so we have one macro by type of drive.
 			   kdevops_storage_pool_path,
 			   hostname,
 			   libvirt_extra_drive_format,
-			   libvirt_extra_storage_aio_mode,
-			   libvirt_extra_storage_aio_cache_mode,
+			   libvirt_aio_mode,
+			   libvirt_aio_cache_mode,
 			   libvirt_extra_storage_virtio_logical_block_size,
 			   libvirt_extra_storage_virtio_physical_block_size) -%}
 <!-- We generated {{ num_drives }} virtio drives -->
@@ -34,7 +34,7 @@ the drives can vary by type, so we have one macro by type of drive.
     <qemu:arg value="-object"/>
     <qemu:arg value="iothread,id=kdevops-virtio-iothread-{{ n }}"/>
     <qemu:arg value="-drive"/>
-    <qemu:arg value="file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_extra_storage_aio_mode }},cache={{ libvirt_extra_storage_aio_cache_mode }},id=drv{{ n }}"/>
+    <qemu:arg value="file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_aio_mode }},cache={{ libvirt_aio_cache_mode }},id=drv{{ n }}"/>
     <qemu:arg value="-device"/>
     <qemu:arg value="virtio-blk-pci,drive=drv{{ n }},id=virtio-drv{{ n }},serial=kdevops{{ n }},bus=pcie-port-for-virtio-{{ n }},addr=0x0,iothread=kdevops-virtio-iothread-{{ n }},logical_block_size={{ libvirt_extra_storage_virtio_logical_block_size }},physical_block_size={{ libvirt_extra_storage_virtio_physical_block_size }}"/>
 {% endfor %}
@@ -44,8 +44,8 @@ the drives can vary by type, so we have one macro by type of drive.
                          kdevops_storage_pool_path,
                          hostname,
                          libvirt_extra_drive_format,
-                         libvirt_extra_storage_aio_mode,
-                         libvirt_extra_storage_aio_cache_mode) -%}
+                         libvirt_aio_mode,
+                         libvirt_aio_cache_mode) -%}
 <!-- We generated {{ num_drives }} scsi drives -->
 {% for n in range(0,num_drives) %}
     <!-- This is scsi drive # {{ n + 1 }} -->
@@ -54,7 +54,7 @@ the drives can vary by type, so we have one macro by type of drive.
     <qemu:arg value='-device'/>
     <qemu:arg value='virtio-scsi-pci,id=scsi{{ n }},bus=pcie-port-for-scsi-{{ n }},addr=0x0'/>
     <qemu:arg value='-drive'/>
-    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_extra_storage_aio_mode }},cache={{ libvirt_extra_storage_aio_cache_mode }},id=drv{{ n }}'/>
+    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ n }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_aio_mode }},cache={{ libvirt_aio_cache_mode }},id=drv{{ n }}'/>
     <qemu:arg value='-device'/>
     <qemu:arg value='scsi-hd,drive=drv{{ n }},bus=scsi{{ n }}.0'/>
 {% endfor %}
@@ -66,8 +66,8 @@ the drives can vary by type, so we have one macro by type of drive.
 				    libvirt_largeio_drives_per_space,
 				    hostname,
 				    libvirt_extra_drive_format,
-				    libvirt_extra_storage_aio_mode,
-				    libvirt_extra_storage_aio_cache_mode,
+				    libvirt_aio_mode,
+				    libvirt_aio_cache_mode,
 				    kdevops_storage_pool_path) -%}
 <!-- These are virtio drives used for large IO experimentation, with LBS support -->
 {% set ns = namespace(lbs_idx=0)  %}
@@ -87,7 +87,7 @@ the drives can vary by type, so we have one macro by type of drive.
     <qemu:arg value="-object"/>
     <qemu:arg value="iothread,id=kdevops-virtio-iothread-{{ ns.lbs_idx }}"/>
     <qemu:arg value='-drive'/>
-    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ ns.lbs_idx }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_extra_storage_aio_mode }},cache={{ libvirt_extra_storage_aio_cache_mode }},id=drv{{ ns.lbs_idx }}'/>
+    <qemu:arg value='file={{ kdevops_storage_pool_path }}/guestfs/{{ hostname }}/extra{{ ns.lbs_idx }}.{{ libvirt_extra_drive_format }},format={{ libvirt_extra_drive_format }},if=none,aio={{ libvirt_aio_mode }},cache={{ libvirt_aio_cache_mode }},id=drv{{ ns.lbs_idx }}'/>
     <qemu:arg value='-device'/>
     <qemu:arg value="virtio-blk-pci,drive=drv{{ ns.lbs_idx }},id=virtio-drv{{ ns.lbs_idx }},serial=kdevops{{ ns.lbs_idx }},bus=pcie-port-for-virtio-{{ ns.lbs_idx }},addr=0x0,iothread=kdevops-virtio-iothread-{{ ns.lbs_idx }},logical_block_size={{  ns4.lbs }},physical_block_size={{ ns2.pbs }}"/>
 {% endif %}
@@ -100,8 +100,8 @@ the drives can vary by type, so we have one macro by type of drive.
 			 kdevops_storage_pool_path,
 			 hostname,
 			 libvirt_extra_drive_format,
-			 libvirt_extra_storage_aio_mode,
-			 libvirt_extra_storage_aio_cache_mode,
+			 libvirt_aio_mode,
+			 libvirt_aio_cache_mode,
 			 libvirt_extra_storage_nvme_logical_block_size) -%}
 <!-- We generated {{ num_drives }} NVMe drives -->
 {% for n in range(0,num_drives) %}
@@ -123,8 +123,8 @@ the drives can vary by type, so we have one macro by type of drive.
 				  libvirt_largeio_drives_per_space,
 				  hostname,
 				  libvirt_extra_drive_format,
-				  libvirt_extra_storage_aio_mode,
-				  libvirt_extra_storage_aio_cache_mode,
+				  libvirt_aio_mode,
+				  libvirt_aio_cache_mode,
 				  kdevops_storage_pool_path) -%}
 <!-- These are NVMe drives used for large IO experimentation, with LBS support -->
 {% set ns = namespace(lbs_idx=0)  %}

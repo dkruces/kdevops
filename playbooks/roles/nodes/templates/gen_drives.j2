@@ -4,8 +4,8 @@
 			kdevops_storage_pool_path,
 			hostname,
 			libvirt_extra_drive_format,
-			libvirt_extra_storage_aio_mode,
-			libvirt_extra_storage_aio_cache_mode) }}
+			libvirt_aio_mode,
+			libvirt_aio_cache_mode) }}
 {% elif libvirt_extra_storage_drive_virtio %}
 {% if libvirt_largeio_enable | default(false) %}
 {{ drives.gen_drive_large_io_virtio(libvirt_largeio_logical_compat,
@@ -14,16 +14,16 @@
 				    libvirt_largeio_drives_per_space,
 				    hostname,
 				    libvirt_extra_drive_format,
-				    libvirt_extra_storage_aio_mode,
-				    libvirt_extra_storage_aio_cache_mode,
+				    libvirt_aio_mode,
+				    libvirt_aio_cache_mode,
 				    kdevops_storage_pool_path) }}
 {% else %}
 {{ drives.gen_drive_virtio(libvirt_extra_storage_drive_count,
                            kdevops_storage_pool_path,
                            hostname,
                            libvirt_extra_drive_format,
-                           libvirt_extra_storage_aio_mode,
-                           libvirt_extra_storage_aio_cache_mode,
+                           libvirt_aio_mode,
+                           libvirt_aio_cache_mode,
                            libvirt_extra_storage_virtio_logical_block_size,
                            libvirt_extra_storage_virtio_physical_block_size) }}
 {% endif %}
@@ -32,8 +32,8 @@
                          kdevops_storage_pool_path,
                          hostname,
                          libvirt_extra_drive_format,
-                         libvirt_extra_storage_aio_mode,
-                         libvirt_extra_storage_aio_cache_mode) }}
+                         libvirt_aio_mode,
+                         libvirt_aio_cache_mode) }}
 {% elif libvirt_extra_storage_drive_nvme  %}
 {% if libvirt_largeio_enable | default(false) %}
 {{ drives.gen_drive_large_io_nvme(libvirt_largeio_logical_compat,
@@ -42,16 +42,16 @@
 				  libvirt_largeio_drives_per_space,
 				  hostname,
 				  libvirt_extra_drive_format,
-				  libvirt_extra_storage_aio_mode,
-				  libvirt_extra_storage_aio_cache_mode,
+				  libvirt_aio_mode,
+				  libvirt_aio_cache_mode,
 				  kdevops_storage_pool_path) }}
 {% else %}
 {{ drives.gen_drive_nvme(libvirt_extra_storage_drive_count,
 			 kdevops_storage_pool_path,
 			 hostname,
 			 libvirt_extra_drive_format,
-			 libvirt_extra_storage_aio_mode,
-			 libvirt_extra_storage_aio_cache_mode,
+			 libvirt_aio_mode,
+			 libvirt_aio_cache_mode,
 			 libvirt_extra_storage_nvme_logical_block_size) }}
 {% endif %}
 {% endif %}

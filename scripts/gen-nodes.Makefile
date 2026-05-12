@@ -17,9 +17,6 @@ else
 GEN_NODES_EXTRA_ARGS += qemu_bin_path='$(subst ",,$(CONFIG_QEMU_BIN_PATH))'
 endif
 
-GEN_NODES_EXTRA_ARGS += libvirt_extra_storage_aio_mode='$(subst ",,$(CONFIG_LIBVIRT_AIO_MODE))'
-GEN_NODES_EXTRA_ARGS += libvirt_extra_storage_aio_cache_mode='$(subst ",,$(CONFIG_LIBVIRT_AIO_CACHE_MODE))'
-
 ifeq (y,$(CONFIG_LIBVIRT_EXTRA_STORAGE_DRIVE_NVME))
 ifeq (y,$(CONFIG_LIBVIRT_EXTRA_STORAGE_NVME_LOGICAL_BLOCK_SIZE_512))
 GEN_NODES_EXTRA_ARGS += libvirt_extra_storage_nvme_logical_block_size='512'

@@ -1,6 +1,6 @@
 {# Generic hosts template for when no specific workflow is configured #}
-{% if all_generic_nodes is defined %}
-{% set nodes = all_generic_nodes %}
+{% if ansible_inventory_all_generic_nodes is defined %}
+{% set nodes = ansible_inventory_all_generic_nodes %}
 {% else %}
 {# Default to using the host prefix as the node name #}
 {% set nodes = [kdevops_host_prefix] %}

@@ -17,7 +17,7 @@ log.txt
 logtime.txt
 run.sh
 
-hosts
+inventory
 .extra_vars_auto.yaml
 extra_vars.yaml
 extra_vars.yml

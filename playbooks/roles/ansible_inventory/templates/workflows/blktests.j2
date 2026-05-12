@@ -1,7 +1,7 @@
-{# Workflow template for selftests #}
+{# Workflow template for blktests #}
 [all]
 localhost ansible_connection=local
-{% for test_type in selftests_enabled_test_types %}
+{% for test_type in ansible_inventory_blktests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}
 {% if kdevops_baseline_and_dev %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
@@ -12,7 +12,7 @@ localhost ansible_connection=local
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 [baseline]
-{% for test_type in selftests_enabled_test_types %}
+{% for test_type in ansible_inventory_blktests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}
 {% endfor %}
 
@@ -21,7 +21,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {% if kdevops_baseline_and_dev %}
 [dev]
-{% for test_type in selftests_enabled_test_types %}
+{% for test_type in ansible_inventory_blktests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endfor %}
 
@@ -29,25 +29,30 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {% endif %}
-[selftests]
-{% for test_type in selftests_enabled_test_types %}
+[blktests]
+{% for test_type in ansible_inventory_blktests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}
 {% if kdevops_baseline_and_dev %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endif %}
 {% endfor %}
 
-[selftests:vars]
+[blktests:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% for test_type in selftests_enabled_test_types %}
-[selftests_{{ test_type | replace('-', '_') }}]
+{% for test_type in ansible_inventory_blktests_enabled_test_types %}
+[blktests_{{ test_type | replace('-', '_') }}]
 {{ kdevops_host_prefix }}-{{ test_type }}
 {% if kdevops_baseline_and_dev %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endif %}
 
-[selftests_{{ test_type | replace('-', '_') }}:vars]
+[blktests_{{ test_type | replace('-', '_') }}:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {% endfor %}
+
+[service]
+
+[service:vars]
+ansible_python_interpreter = "{{ kdevops_python_interpreter }}"

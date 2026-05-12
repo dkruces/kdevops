@@ -1,6 +1,6 @@
 [all]
 localhost ansible_connection=local
-{% for s in fstests_enabled_test_types %}
+{% for s in ansible_inventory_fstests_enabled_test_types %}
 {% if kdevops_enable_nixos|default(false) %}
 {{ kdevops_host_prefix }}-{{ s }} ansible_python_interpreter=/run/current-system/sw/bin/python3
 {% else %}
@@ -22,7 +22,7 @@ localhost ansible_connection=local
 [all:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [baseline]
-{% for s in fstests_enabled_test_types %}
+{% for s in ansible_inventory_fstests_enabled_test_types %}
 {% if kdevops_enable_nixos|default(false) %}
 {{ kdevops_host_prefix }}-{{ s }} ansible_python_interpreter=/run/current-system/sw/bin/python3
 {% else %}
@@ -38,7 +38,7 @@ ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [dev]
 {% if kdevops_baseline_and_dev %}
-  {% for s in fstests_enabled_test_types %}
+  {% for s in ansible_inventory_fstests_enabled_test_types %}
 {% if kdevops_enable_nixos|default(false) %}
 {{ kdevops_host_prefix }}-{{ s }}-dev ansible_python_interpreter=/run/current-system/sw/bin/python3
 {% else %}
@@ -77,7 +77,7 @@ ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [kdc:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [krb5]
-{% for s in fstests_enabled_test_types %}
+{% for s in ansible_inventory_fstests_enabled_test_types %}
 {% if kdevops_enable_nixos|default(false) %}
 {{ kdevops_host_prefix }}-{{ s }} ansible_python_interpreter=/run/current-system/sw/bin/python3
 {% else %}

@@ -79,6 +79,16 @@ F:	playbooks/roles/ansible_config/
 F:	scripts/ansible_av.py
 F:	scripts/ansible.Makefile
 
+ANSIBLE_INVENTORY
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	docs/ansible_inventory.md
+F:	modules/ansible_inventory/
+F:	playbooks/ansible_inventory.yml
+F:	playbooks/roles/ansible_inventory/
+
 KDEVOPS CI
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev

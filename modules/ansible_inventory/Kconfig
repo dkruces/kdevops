@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+# ansible_inventory: renders the ansible inventory file. The output
+# path is owned by ansible_config (CONFIG_ANSIBLE_CONFIG_INVENTORY);
+# this module owns the template selection.
+
+config ANSIBLE_INVENTORY_TEMPLATE
+	string
+	output yaml
+	default "inventory.j2"
+	help
+	  Short filename of the inventory template inside the role's
+	  templates/ directory. Workflows override this to render their
+	  own per-workflow inventory layouts.
+
+config ANSIBLE_INVENTORY_TEMPLATE_DIR
+	string
+	output yaml
+	default "$(TOPDIR_PATH)/playbooks/roles/ansible_inventory/templates"
+	help
+	  Absolute path to the directory holding the inventory template.
+	  Used by the role to stat the template before rendering.

@@ -51,7 +51,7 @@ export KDEVOPS_MRPROPER :=
 ifeq (y,$(CONFIG_ANSIBLE_CONFIG_INVENTORY_CUSTOM))
 ANSIBLE_INVENTORY_FILE := $(shell echo $(CONFIG_ANSIBLE_CONFIG_INVENTORY) | tr --delete '"')
 else
-ANSIBLE_INVENTORY_FILE := $(TOPDIR_PATH)/hosts
+ANSIBLE_INVENTORY_FILE := $(TOPDIR_PATH)/inventory
 endif
 
 KDEVOPS_INSTALL_TARGETS :=
@@ -150,8 +150,7 @@ ANSIBLE_EXTRA_ARGS += kdevops_version='$(PROJECTRELEASE)'
 ANSIBLE_EXTRA_ARGS += topdir_path_sha256sum='$(TOPDIR_PATH_SHA256SUM)'
 
 include modules/ansible_config/Makefile
-
-export KDEVOPS_HOSTS_TEMPLATE := hosts.j2
+include modules/ansible_inventory/Makefile
 
 LOCAL_DEVELOPMENT_ARGS	:=
 ifeq (y,$(CONFIG_NEEDS_LOCAL_DEVELOPMENT_PATH))
@@ -249,7 +248,6 @@ ifeq (y,$(CONFIG_KDEVOPS_ANSIBLE_PROVISION_ENABLE))
 ANSIBLE_EXTRA_ARGS += kdevops_ansible_provision_playbook='$(KDEVOPS_ANSIBLE_PROVISION_PLAYBOOK)'
 endif
 
-include scripts/gen-hosts.Makefile
 include scripts/gen-nodes.Makefile
 
 # disable built-in rules for this
@@ -286,12 +284,6 @@ KDEVOPS_BRING_UP_DEPS += $(KDEVOPS_BRING_UP_LATE_DEPS)
 ifneq (,$(KDEVOPS_BRING_UP_DEPS))
 include scripts/bringup.Makefile
 endif
-
-$(ANSIBLE_INVENTORY_FILE): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_HOSTS_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook --connection=local \
-		--inventory localhost, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/gen_hosts.yml \
-		--extra-vars=@./extra_vars.yaml
 
 $(KDEVOPS_NODES): .config $(ANSIBLE_CONFIG_PATH) $(KDEVOPS_NODES_TEMPLATE) $(KDEVOPS_EXTRA_VARS)
 	$(Q)ansible-playbook \
@@ -351,7 +343,7 @@ PHONY += help-targets
 help-targets:
 	@echo "Primary kdevops workflow:"
 	@echo "  make defconfig-<X>      Configure (writes .config)"
-	@echo "  make env                Render ansible.cfg + hosts"
+	@echo "  make env                Render ansible.cfg + inventory"
 	@echo "  make controller-setup   First-run controller deps (sudo)"
 	@echo "  make bringup            Provision guests"
 	@echo "  make <workflow>         Run a workflow (fstests, blktests, ...)"

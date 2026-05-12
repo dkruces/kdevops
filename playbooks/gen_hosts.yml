@@ -1,5 +1,0 @@
----
-- name: Generate Ansible inventory for guests (hosts)
-  hosts: localhost
-  roles:
-    - role: gen_hosts

@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -11,8 +11,8 @@
   tags: vars
 
 - name: Parse declared hosts list when using declared hosts
-  set_fact:
-    kdevops_declared_hosts: >-
+  ansible.builtin.set_fact:
+    ansible_inventory_declared_hosts: >-
       {%- if kdevops_declared_hosts is string -%}
         {{ (kdevops_declared_hosts | default('')) | regex_replace(',', ' ') | split() }}
       {%- else -%}
@@ -25,49 +25,51 @@
 
 - name: Get our user
   ansible.builtin.command: "whoami"
-  register: my_user
+  changed_when: false
+  register: ansible_inventory_my_user
 
 - name: Get our primary group
   ansible.builtin.command: "id -g -n"
-  register: my_group
+  changed_when: false
+  register: ansible_inventory_my_group
 
 - name: Check if the inventory file exists already
   ansible.builtin.stat:
     path: "{{ ansible_config_inventory }}"
-  register: kdevops_hosts_dest
+  register: ansible_inventory_dest_stat
 
 - name: Ensure proper permission on the inventory file
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ ansible_config_inventory }}"
-    owner: "{{ my_user.stdout }}"
-    group: "{{ my_group.stdout }}"
+    owner: "{{ ansible_inventory_my_user.stdout }}"
+    group: "{{ ansible_inventory_my_group.stdout }}"
   when:
-    - kdevops_hosts_dest.stat.exists
+    - ansible_inventory_dest_stat.stat.exists
 
 - name: Verify Ansible inventory template file exists
   ansible.builtin.stat:
-    path: "{{ kdevops_hosts_template_full_path }}"
-  register: ansible_hosts_template
+    path: "{{ ansible_inventory_template_dir }}/{{ ansible_inventory_template }}"
+  register: ansible_inventory_template_stat
 
-- name: Set fstests config file variable for {{ fstests_fstyp }}
+- name: Set fstests config file variable for {{ fstests_fstyp | default('') }}
   ansible.builtin.set_fact:
-    is_fstests: true
-    fs_config_path: "{{ kdevops_playbooks_dir_full_path }}/{{ fs_config_role_path }}"
+    ansible_inventory_is_fstests: true
+    ansible_inventory_fs_config_path: "{{ kdevops_playbooks_dir_full_path }}/{{ fs_config_role_path }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fstests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_fstests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
   tags: vars
 
 - name: Verify fstest config file exists
   ansible.builtin.stat:
-    path: "{{ fs_config_path }}"
-  register: fstests_config_file_reg
+    path: "{{ ansible_inventory_fs_config_path }}"
+  register: ansible_inventory_fstests_config_stat
   when:
-    - is_fstests|bool
+    - ansible_inventory_is_fstests|bool
 
 - name: Infer enabled fstests test section types
   tags: ["hosts"]
@@ -75,7 +77,7 @@
     fs: "{{ fstests_fstyp | upper }}"
     config_prefix: "{{ 'CONFIG_FSTESTS_' + fs + '_SECTION_' }}"
   ansible.builtin.set_fact:
-    fstests_enabled_test_types: >-
+    ansible_inventory_fstests_enabled_test_types: >-
       {{
         lookup('file', topdir_path + '/.config')
         | regex_findall('^' + config_prefix + '(.*)=y$', multiline=True)
@@ -86,13 +88,13 @@
         | list
       }}
   when:
-    - is_fstests
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_is_fstests
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts
 
 - name: Infer enabled blktests test section types
   ansible.builtin.set_fact:
-    blktests_enabled_test_types: >-
+    ansible_inventory_blktests_enabled_test_types: >-
       {{
         lookup('file', topdir_path + '/.config')
         | regex_findall('^CONFIG_BLKTESTS_SECTION_(.*)=y$', multiline=True)
@@ -101,22 +103,22 @@
       }}
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_blktests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_blktests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts
 
 - name: Debug inferring block test types
   ansible.builtin.debug:
-    var: blktests_enabled_test_types
+    var: ansible_inventory_blktests_enabled_test_types
   when:
     - false
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_blktests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_blktests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Infer enabled selftests test section types
   ansible.builtin.set_fact:
-    selftests_enabled_test_types: >-
+    ansible_inventory_selftests_enabled_test_types: >-
       {{
         lookup('file', topdir_path + '/.config')
         | regex_findall('^CONFIG_SELFTESTS_SECTION_(.*)=y$', multiline=True)
@@ -125,24 +127,28 @@
       }}
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_selftests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_selftests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts
 
 - name: Collect dynamically supported filesystems
   vars:
     supported_filesystems_variables: "{{ hostvars[inventory_hostname] | dict2items | selectattr('key', 'search', '^sysbench_supported_filesystem_') }}"
-    local_supported_filesystems: "{{ supported_filesystems_variables | selectattr('value', 'eq', True) | map(attribute='key') | map('regex_replace', '^sysbench_supported_filesystem_',
-      '') | list }}"
+    local_supported_filesystems: >-
+      {{ supported_filesystems_variables
+         | selectattr('value', 'eq', True)
+         | map(attribute='key')
+         | map('regex_replace', '^sysbench_supported_filesystem_', '')
+         | list }}
   ansible.builtin.set_fact:
-    sysbench_enabled_filesystems: "{{ local_supported_filesystems }}"
-    enabled_sysbench_tests: "{{ [] }}"
+    ansible_inventory_sysbench_enabled_filesystems: "{{ local_supported_filesystems }}"
+    ansible_inventory_enabled_sysbench_tests: "{{ [] }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_sysbench
+    - kdevops_workflow_enable_sysbench | default(false) | bool
 
 - name: Collect enabled sysbench target sections for dynamically supported filesystems
-  loop: "{{ sysbench_enabled_filesystems }}"
+  loop: "{{ ansible_inventory_sysbench_enabled_filesystems }}"
   loop_control:
     loop_var: fs
   vars:
@@ -153,14 +159,14 @@
     enabled_fs: "{{ enabled_fs_sections | map('regex_replace', 'section_', '') | list }}"
     enabled_fs_node: "{{ enabled_fs | map('regex_replace', '_', '-') | list }}"
   ansible.builtin.set_fact:
-    enabled_sysbench_tests: "{{ enabled_sysbench_tests + enabled_fs_node }}"
+    ansible_inventory_enabled_sysbench_tests: "{{ ansible_inventory_enabled_sysbench_tests + enabled_fs_node }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_sysbench
+    - kdevops_workflow_enable_sysbench | default(false) | bool
 
 - name: Infer enabled mmtests test types
   ansible.builtin.set_fact:
-    mmtests_enabled_test_types: >-
+    ansible_inventory_mmtests_enabled_test_types: >-
       {{
         lookup('file', topdir_path + '/.config')
         | regex_findall('^CONFIG_MMTESTS_ENABLE_(.*)=y$', multiline=True)
@@ -169,42 +175,42 @@
       }}
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_mmtests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_mmtests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts
 
 - name: Load AI nodes configuration for multi-filesystem setup
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ topdir_path }}/{{ kdevops_nodes }}"
     name: guestfs_nodes
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_ai
+    - kdevops_workflow_enable_ai | default(false) | bool
     - ai_enable_multifs_testing|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Extract AI node names for multi-filesystem setup
-  set_fact:
-    all_generic_nodes: "{{ guestfs_nodes.guestfs_nodes | map(attribute='name') | list }}"
+  ansible.builtin.set_fact:
+    ansible_inventory_all_generic_nodes: "{{ guestfs_nodes.guestfs_nodes | map(attribute='name') | list }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_ai
+    - kdevops_workflow_enable_ai | default(false) | bool
     - ai_enable_multifs_testing|default(false)|bool
     - guestfs_nodes is defined
 
 - name: Load Build-linux nodes configuration for multi-filesystem setup
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ topdir_path }}/{{ kdevops_nodes }}"
     name: build_linux_nodes
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_build_linux|default(false)|bool
     - build_linux_enable_multifs_testing|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Extract Build-linux node names for multi-filesystem setup
-  set_fact:
-    build_linux_enabled_section_types: "{{ build_linux_nodes.guestfs_nodes | map(attribute='name') | list }}"
+  ansible.builtin.set_fact:
+    ansible_inventory_build_linux_enabled_section_types: "{{ build_linux_nodes.guestfs_nodes | map(attribute='name') | list }}"
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_build_linux|default(false)|bool
@@ -215,24 +221,25 @@
   tags: ["hosts"]
   vars:
     # Variables for specific workflows
-    gitr_enabled_hosts: "{{ gitr_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_gitr else [] }}"
-    ltp_enabled_hosts: "{{ ltp_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_ltp else [] }}"
-    nfstest_enabled_hosts: "{{ nfstest_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_nfstest else [] }}"
+    gitr_enabled_hosts: "{{ gitr_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_gitr | default(false) | bool else [] }}"
+    ltp_enabled_hosts: "{{ ltp_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_ltp | default(false) | bool else [] }}"
+    nfstest_enabled_hosts: "{{ nfstest_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_nfstest | default(false) | bool else [] }}"
     # Variables for fstests
-    fs_config_data: "{{ lookup('file', fs_config_path) if is_fstests else '' }}"
-    sections_without_default: "{{ fs_config_data | regex_replace('\\[default\\]', multiline=True) if is_fstests else '' }}"
-    sections_lines: "{{ sections_without_default | regex_findall('^\\[(.*)', multiline=True) if is_fstests else [] }}"
-    clean_section_lines: "{{ sections_lines | regex_replace('\\[') | regex_replace('\\]') if is_fstests else [] }}"
-    sections_replace_underscore: "{{ clean_section_lines | replace('_', '-') if is_fstests else [] }}"
-    sections: "{{ sections_replace_underscore | replace(\"'\", '') | split(', ') if is_fstests else [] }}"
+    ansible_inventory_fs_config_data: "{{ lookup('file', ansible_inventory_fs_config_path) if ansible_inventory_is_fstests else '' }}"
+    sections_without_default: "{{ ansible_inventory_fs_config_data | regex_replace('\\[default\\]', multiline=True) if ansible_inventory_is_fstests else '' }}"
+    sections_lines: "{{ sections_without_default | regex_findall('^\\[(.*)', multiline=True) if ansible_inventory_is_fstests else [] }}"
+    clean_section_lines: "{{ sections_lines | regex_replace('\\[') | regex_replace('\\]') if ansible_inventory_is_fstests else [] }}"
+    sections_replace_underscore: "{{ clean_section_lines | replace('_', '-') if ansible_inventory_is_fstests else [] }}"
+    sections: "{{ sections_replace_underscore | replace(\"'\", '') | split(', ') if ansible_inventory_is_fstests else [] }}"
   ansible.builtin.template:
-    src: "{{ kdevops_hosts_template }}"
+    src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
     force: true
     trim_blocks: true
     lstrip_blocks: true
+    mode: "0755"
   when:
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Update Ansible inventory access modification time so make sees it updated
   ansible.builtin.file:
@@ -241,114 +248,116 @@
     mode: "0755"
 
 - name: Load nodes from nodes file for multi-filesystem setup
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ topdir_path }}/{{ kdevops_nodes }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fio_tests
+    - kdevops_workflow_enable_fio_tests | default(false) | bool
     - fio_tests_multi_filesystem|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Extract node names for multi-filesystem setup
-  set_fact:
-    fio_tests_node_names: "{{ guestfs_nodes | map(attribute='name') | list }}"
+  ansible.builtin.set_fact:
+    ansible_inventory_fio_tests_node_names: "{{ guestfs_nodes | map(attribute='name') | list }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fio_tests
+    - kdevops_workflow_enable_fio_tests | default(false) | bool
     - fio_tests_multi_filesystem|default(false)|bool
     - guestfs_nodes is defined
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
 
-- name: Debug fio_tests_node_names
-  debug:
-    var: fio_tests_node_names
+- name: Debug ansible_inventory_fio_tests_node_names
+  ansible.builtin.debug:
+    var: ansible_inventory_fio_tests_node_names
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fio_tests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_fio_tests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
 
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup (single filesystem)
-  tags: [ 'hosts' ]
+  tags: ["hosts"]
   vars:
-    all_generic_nodes: ["{{ kdevops_host_prefix }}-fio-tests"]
-  template:
-    src: "{{ kdevops_hosts_template }}"
+    ansible_inventory_all_generic_nodes: ["{{ kdevops_host_prefix }}-fio-tests"]
+  ansible.builtin.template:
+    src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
-    force: yes
-    trim_blocks: True
-    lstrip_blocks: True
+    force: true
+    trim_blocks: true
+    lstrip_blocks: true
+    mode: "0755"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fio_tests
-    - ansible_hosts_template.stat.exists
+    - kdevops_workflow_enable_fio_tests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
     - not fio_tests_multi_filesystem|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup (multi-filesystem)
-  tags: [ 'hosts' ]
+  tags: ["hosts"]
   vars:
-    all_generic_nodes: "{{ fio_tests_node_names }}"
-  template:
-    src: "{{ kdevops_hosts_template }}"
-    dest: "{{ ansible_config_inventory }}"
-    force: yes
-    trim_blocks: True
-    lstrip_blocks: True
-  when:
-    - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_fio_tests
-    - ansible_hosts_template.stat.exists
-    - fio_tests_multi_filesystem|default(false)|bool
-    - fio_tests_node_names is defined
-
-- name: Generate the Ansible hosts file for a dedicated MinIO setup
-  tags: ['hosts']
+    ansible_inventory_all_generic_nodes: "{{ ansible_inventory_fio_tests_node_names }}"
   ansible.builtin.template:
-    src: "{{ kdevops_hosts_template }}"
+    src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
     force: true
-    trim_blocks: True
-    lstrip_blocks: True
-    mode: '0644'
+    trim_blocks: true
+    lstrip_blocks: true
+    mode: "0755"
+  when:
+    - kdevops_workflows_dedicated_workflow
+    - kdevops_workflow_enable_fio_tests | default(false) | bool
+    - ansible_inventory_template_stat.stat.exists
+    - fio_tests_multi_filesystem|default(false)|bool
+    - ansible_inventory_fio_tests_node_names is defined
+
+- name: Generate the Ansible hosts file for a dedicated MinIO setup
+  tags: ["hosts"]
+  ansible.builtin.template:
+    src: "{{ ansible_inventory_template }}"
+    dest: "{{ ansible_config_inventory }}"
+    force: true
+    trim_blocks: true
+    lstrip_blocks: true
+    mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_minio|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated Build-linux setup
-  tags: ['hosts']
+  tags: ["hosts"]
   ansible.builtin.template:
-    src: "{{ kdevops_hosts_template }}"
+    src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
     force: true
-    trim_blocks: True
-    lstrip_blocks: True
-    mode: '0644'
+    trim_blocks: true
+    lstrip_blocks: true
+    mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_build_linux|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated vLLM setup
-  tags: ['hosts']
+  tags: ["hosts"]
   ansible.builtin.template:
-    src: "{{ kdevops_hosts_template }}"
+    src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
     force: true
-    trim_blocks: True
-    lstrip_blocks: True
-    mode: '0644'
+    trim_blocks: true
+    lstrip_blocks: true
+    mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_vllm|default(false)|bool
-    - ansible_hosts_template.stat.exists
+    - ansible_inventory_template_stat.stat.exists
     - not kdevops_use_declared_hosts|default(false)|bool
 
 - name: Verify if final host file exists
   ansible.builtin.stat:
     path: "{{ ansible_config_inventory }}"
-  register: final_hosts_file
+  register: ansible_inventory_final_file
 
 - name: Fail if the dedicated workflow has no rules for node configuration for hosts file configuration
   tags: ["hosts"]
@@ -356,5 +365,5 @@
     msg: "Your dedicated workflow lacks rules for what nodes to use, go work on allowed topologies to parallelize testing one per node"
   when:
     - kdevops_workflows_dedicated_workflow
-    - ansible_hosts_template.stat.exists
-    - not final_hosts_file.stat.exists
+    - ansible_inventory_template_stat.stat.exists
+    - not ansible_inventory_final_file.stat.exists

@@ -98,10 +98,10 @@ REBOOT_LIMIT_LOOP      := scripts/workflows/demos/reboot-limit/run_loop.sh
 REBOOT_LIMIT_LOOP_KOTD := scripts/workflows/demos/reboot-limit/run_loop_kotd.sh
 endif # CONFIG_REBOOT_LIMIT_ENABLE_LOOP
 
-# By default KDEVOPS_HOSTS_TEMPLATE is defined to be hosts.in, if you want an
-# alternative you can define one, or even have a dynamic one. For an example
-# of how to make a dynamic KDEVOPS_HOSTS_TEMPLATE refer to the
-# workflows/fstests/Makefile.
+# By default ANSIBLE_INVENTORY_TEMPLATE_NAME is defined to be inventory.j2; if
+# you want an alternative you can define one, or even have a dynamic one. For
+# an example of how to make a dynamic ANSIBLE_INVENTORY_TEMPLATE_NAME refer to
+# the workflows/fstests/Makefile.
 
 # We move on to defining your first targets. These should have the same name
 # of the workflow. That target should just do the installation onto each node
@@ -190,7 +190,7 @@ reboot-limit-tests: reboot-limit-baseline reboot-limit-dev
 # Below are the corresponding dev targets
 # Check if dev group has hosts before running
 reboot-limit-dev: $(KDEVOPS_EXTRA_VARS)
-	$(Q)if grep -A1 '^\[dev\]' hosts | grep -qE '^[a-zA-Z0-9]'; then \
+	$(Q)if grep -A1 '^\[dev\]' inventory | grep -qE '^[a-zA-Z0-9]'; then \
 		ansible-playbook \
 			--limit 'dev' \
 			playbooks/reboot-limit.yml \

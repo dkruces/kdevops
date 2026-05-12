@@ -386,7 +386,7 @@ config ANSIBLE_CONFIG_INVENTORY_CUSTOM
 config ANSIBLE_CONFIG_INVENTORY
 	string "Ansible inventory sources" if ANSIBLE_CONFIG_INVENTORY_CUSTOM
 	output yaml
-	default "$(TOPDIR_PATH)/hosts" if !ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
+	default "$(TOPDIR_PATH)/inventory" if !ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
 	default $(shell, ./scripts/append-makefile-vars-int.sh $(KDEVOPS_HOSTS)) if ANSIBLE_CONFIG_INVENTORY_SET_BY_CLI
 	help
 	  Comma-separated list of Ansible inventory source paths.

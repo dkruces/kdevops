@@ -3,7 +3,7 @@
 {# Multi-filesystem Build-linux configuration #}
 [all]
 localhost ansible_connection=local
-{% for config in build_linux_enabled_section_types|default([]) %}
+{% for config in ansible_inventory_build_linux_enabled_section_types|default([]) %}
 {{ config }}
 {% endfor %}
 
@@ -11,7 +11,7 @@ localhost ansible_connection=local
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 [baseline]
-{% for config in build_linux_enabled_section_types|default([]) %}
+{% for config in ansible_inventory_build_linux_enabled_section_types|default([]) %}
 {% if '-dev' not in config %}
 {{ config }}
 {% endif %}
@@ -22,7 +22,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {% if kdevops_baseline_and_dev %}
 [dev]
-{% for config in build_linux_enabled_section_types|default([]) %}
+{% for config in ansible_inventory_build_linux_enabled_section_types|default([]) %}
 {% if '-dev' in config %}
 {{ config }}
 {% endif %}
@@ -33,7 +33,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 
 [build-linux]
-{% for config in build_linux_enabled_section_types|default([]) %}
+{% for config in ansible_inventory_build_linux_enabled_section_types|default([]) %}
 {{ config }}
 {% endfor %}
 

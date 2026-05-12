@@ -1,0 +1,12 @@
+# SPDX-License-Identifier GPL-2.0+
+---
+# Role-private defaults only. Tree-wide vars (kdevops_*, topdir_path,
+# fs_config_role_path, ...) come from extra_vars.yaml via the Kconfig
+# `output yaml` path. Where that path has gaps (hidden bools, vars
+# inside if/endif), consumers reference the var with `| default(...)`
+# at the use site — not by redeclaring the tree-wide var here.
+# See docs/module-spec.md "When `output yaml` silently does not emit".
+
+# Role-private semantic baseline for the fstests-workflow branch.
+# set_fact in tasks/main.yml flips this when fstests is active.
+ansible_inventory_is_fstests: false

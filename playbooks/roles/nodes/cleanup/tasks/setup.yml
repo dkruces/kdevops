@@ -26,3 +26,4 @@
     owner: "{{ nodes_cleanup_my_user.stdout }}"
     group: "{{ nodes_cleanup_my_group.stdout }}"
   when: nodes_cleanup_dest_stat.stat.exists
+  tags: do_configure

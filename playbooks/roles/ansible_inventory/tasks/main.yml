@@ -69,7 +69,7 @@
     - ansible_inventory_is_fstests|bool
 
 - name: Infer enabled fstests test section types
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     fs: "{{ fstests_fstyp | upper }}"
     config_prefix: "{{ 'CONFIG_FSTESTS_' + fs + '_SECTION_' }}"
@@ -215,7 +215,7 @@
     - build_linux_nodes is defined
 
 - name: Generate the Ansible inventory file
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     # Variables for specific workflows
     gitr_enabled_hosts: "{{ gitr_enabled_test_groups | ansible.builtin.split if kdevops_workflow_enable_gitr | default(false) | bool else [] }}"
@@ -272,7 +272,7 @@
     - ansible_inventory_template_stat.stat.exists
 
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup (single filesystem)
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     ansible_inventory_all_generic_nodes: ["{{ kdevops_host_prefix }}-fio-tests"]
   ansible.builtin.template:
@@ -289,7 +289,7 @@
     - not fio_tests_multi_filesystem|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup (multi-filesystem)
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     ansible_inventory_all_generic_nodes: "{{ ansible_inventory_fio_tests_node_names }}"
   ansible.builtin.template:
@@ -307,7 +307,7 @@
     - ansible_inventory_fio_tests_node_names is defined
 
 - name: Generate the Ansible hosts file for a dedicated MinIO setup
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   ansible.builtin.template:
     src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
@@ -322,7 +322,7 @@
     - not kdevops_use_declared_hosts|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated Build-linux setup
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   ansible.builtin.template:
     src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
@@ -337,7 +337,7 @@
     - not kdevops_use_declared_hosts|default(false)|bool
 
 - name: Generate the Ansible hosts file for a dedicated vLLM setup
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   ansible.builtin.template:
     src: "{{ ansible_inventory_template }}"
     dest: "{{ ansible_config_inventory }}"
@@ -357,7 +357,7 @@
   register: ansible_inventory_final_file
 
 - name: Fail if the dedicated workflow has no rules for node configuration for hosts file configuration
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   ansible.builtin.fail:
     msg: "Your dedicated workflow lacks rules for what nodes to use, go work on allowed topologies to parallelize testing one per node"
   when:

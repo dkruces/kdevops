@@ -140,7 +140,7 @@
   tags: [never, cleanup_setup]
 
 - name: Generate the generic kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     all_generic_nodes: "{{ nodes_generic_nodes }}"
@@ -156,7 +156,7 @@
     - not kdevops_enable_nixos|default(false)|bool
 
 - name: Generate the NixOS kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     all_generic_nodes: "{{ nodes_generic_nodes }}"
@@ -172,7 +172,7 @@
     - kdevops_enable_nixos|default(false)|bool
 
 - name: Generate the builder kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     all_generic_nodes: "{{ nodes_builder_nodes }}"
@@ -187,7 +187,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate the pynfs kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     all_generic_nodes: "{{ nodes_nfsd_nodes + nodes_iscsi_nodes }}"
@@ -202,7 +202,7 @@
     - kdevops_workflow_enable_pynfs | default(false) | bool
 
 - name: Generate the cxl kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     all_generic_nodes: "{{ nodes_generic_nodes }}"
@@ -217,7 +217,7 @@
     - kdevops_workflow_enable_cxl | default(false) | bool
 
 - name: Generate a kdevops nodes file for the gitr workflow
-  tags: hosts
+  tags: ["hosts", "do_configure"]
   ansible.builtin.include_role:
     name: gen_nodes
     tasks_from: gitr
@@ -227,7 +227,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate a kdevops nodes file for the ltp workflow
-  tags: hosts
+  tags: ["hosts", "do_configure"]
   ansible.builtin.include_role:
     name: gen_nodes
     tasks_from: ltp
@@ -237,7 +237,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate a kdevops nodes file for the nfstest workflow
-  tags: hosts
+  tags: ["hosts", "do_configure"]
   ansible.builtin.include_role:
     name: gen_nodes
     tasks_from: nfstest
@@ -247,7 +247,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Set empty enabled test types list for fstests
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   ansible.builtin.set_fact:
     nodes_fstests_enabled_nodes: []
   when:
@@ -279,7 +279,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Now expand the list of enabled fstests for valid configuration sections
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     fs_test_section: "{{ fstests_fstyp + '-' + item.item | regex_replace('_', '-') }}"
     node: "{{ kdevops_host_prefix + '-' + fs_test_section }}"
@@ -295,7 +295,7 @@
     - not kdevops_baseline_and_dev
 
 - name: Now expand the list of enabled fstests for valid configuration sections with dev hosts
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   vars:
     fs_test_section: "{{ fstests_fstyp + '-' + item.item | regex_replace('_', '-') }}"
     node: "{{ kdevops_host_prefix + '-' + fs_test_section }}"
@@ -339,7 +339,7 @@
     - kdevops_krb5_enable | default(false) | bool
 
 - name: Generate the fstests kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_fstests_enabled_nodes | regex_replace('\\[') | regex_replace('\\]') | replace(\"'\", '') | split(', ') }}"
@@ -398,7 +398,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate the blktests kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_blktests_enabled_test_types }}"
@@ -448,7 +448,7 @@
     - kdevops_baseline_and_dev
 
 - name: Generate the selftests kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_selftests_enabled_test_types }}"
@@ -525,7 +525,7 @@
     - nodes_enabled_sysbench_tests | length == 0
 
 - name: Generate the sysbench kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_enabled_sysbench_tests }}"
@@ -540,7 +540,7 @@
     - kdevops_workflow_enable_sysbench | default(false) | bool
 
 - name: Generate the fio-tests kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-fio-tests'] }}"
@@ -558,7 +558,7 @@
     - not fio_tests_multi_filesystem|default(false)|bool
 
 - name: Generate the fio-tests kdevops nodes file with dev hosts from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-fio-tests', kdevops_host_prefix + '-fio-tests-dev'] }}"
@@ -644,7 +644,7 @@
     - nodes_fio_tests_expanded_configs | length > 0
 
 - name: Generate the fio-tests multi-filesystem kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_fio_tests_enabled_section_types | regex_replace('\\[') | regex_replace('\\]') | replace(\"'\", '') | split(', ') }}"
@@ -697,7 +697,7 @@
     - kdevops_baseline_and_dev
 
 - name: Generate the mmtests kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_mmtests_enabled_test_types }}"
@@ -712,7 +712,7 @@
     - kdevops_workflow_enable_mmtests | default(false) | bool
 
 - name: Generate the reboot-limit kdevops nodes file using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-reboot-limit'] }}"
@@ -728,7 +728,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate the reboot-limit kdevops nodes file with dev hosts using nodes file using template as jinja2 source template
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-reboot-limit', kdevops_host_prefix + '-reboot-limit-dev'] }}"
@@ -744,7 +744,7 @@
     - nodes_template_stat.stat.exists
 
 - name: Generate the AI kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-ai'] }}"
@@ -762,7 +762,7 @@
     - not ai_enable_multifs_testing|default(false)|bool
 
 - name: Generate the AI kdevops nodes file with dev hosts from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-ai', kdevops_host_prefix + '-ai-dev'] }}"
@@ -850,7 +850,7 @@
     - nodes_ai_multifs_enabled_configs | length > 0
 
 - name: Generate the AI multi-filesystem kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_ai_enabled_section_types | regex_replace('\\[') | regex_replace('\\]') | replace(\"'\", '') | split(', ') }}"
@@ -871,7 +871,7 @@
 # vLLM Production Stack workflow nodes
 
 - name: Generate the vLLM kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-vllm'] }}"
@@ -888,7 +888,7 @@
     - not kdevops_baseline_and_dev
 
 - name: Generate the vLLM kdevops nodes file with dev hosts from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-vllm', kdevops_host_prefix + '-vllm-dev'] }}"
@@ -965,7 +965,7 @@
     - nodes_minio_multifs_enabled_configs | length > 0
 
 - name: Generate the MinIO multi-filesystem kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_minio_enabled_section_types }}"
@@ -985,7 +985,7 @@
 
 # Standard MinIO single filesystem nodes
 - name: Generate the MinIO kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-minio'] }}"
@@ -1003,7 +1003,7 @@
     - not minio_enable_multifs_testing|default(false)|bool
 
 - name: Generate the MinIO kdevops nodes file with dev hosts from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-minio', kdevops_host_prefix + '-minio-dev'] }}"
@@ -1087,7 +1087,7 @@
     - nodes_build_linux_multifs_enabled_configs | length > 0
 
 - name: Generate the Build-linux multi-filesystem kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ nodes_build_linux_enabled_section_types | regex_replace('\\[') | regex_replace('\\]') | replace(\"'\", '') | split(', ') }}"
@@ -1107,7 +1107,7 @@
 
 # Standard Build-linux single filesystem nodes
 - name: Generate the Build-linux kdevops nodes file from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-build-linux'] }}"
@@ -1125,7 +1125,7 @@
     - not build_linux_enable_multifs_testing|default(false)|bool
 
 - name: Generate the Build-linux kdevops nodes file with dev hosts from template {{ kdevops_nodes_template }}
-  tags: ["hosts"]
+  tags: ["hosts", "do_configure"]
   vars:
     node_template: "{{ kdevops_nodes_template | basename }}"
     nodes: "{{ [kdevops_host_prefix + '-build-linux', kdevops_host_prefix + '-build-linux-dev'] }}"
@@ -1153,7 +1153,7 @@
   register: nodes_dedicated_template_stat
 
 - name: Fail if the dedicated workflow has no rules for node configuration
-  tags: ["nodes"]
+  tags: ["nodes", "do_configure"]
   ansible.builtin.fail:
     msg: "Your dedicated workflow lacks rules for what nodes to use, go work on allowed topologies to parallelize testing one per node"
   when:

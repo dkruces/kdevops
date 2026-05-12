@@ -26,3 +26,4 @@
     owner: "{{ ansible_inventory_cleanup_my_user.stdout }}"
     group: "{{ ansible_inventory_cleanup_my_group.stdout }}"
   when: ansible_inventory_cleanup_dest_stat.stat.exists
+  tags: do_configure

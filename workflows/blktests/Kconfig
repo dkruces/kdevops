@@ -208,6 +208,7 @@ config BLKTESTS_DATA_TARGET
 
 config BLKTESTS_TEST_DEVS
 	string "The devices to use for TEST_DEVS on blktests"
+	output yaml
 	default "/dev/disk/by-id/nvme-QEMU_NVMe_Ctrl_kdevops2" if LIBVIRT && LIBVIRT_EXTRA_STORAGE_DRIVE_NVME
 	default "/dev/disk/by-id/virtio-kdevops2" if LIBVIRT && LIBVIRT_EXTRA_STORAGE_DRIVE_VIRTIO
 	default "/dev/disk/by-id/ata-QEMU_HARDDISK_kdevops2" if LIBVIRT && LIBVIRT_EXTRA_STORAGE_DRIVE_IDE

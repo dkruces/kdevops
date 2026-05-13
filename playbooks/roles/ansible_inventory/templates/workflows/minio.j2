@@ -20,7 +20,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {% for config in minio_enabled_section_types|default([]) %}
 {% if '-dev' in config %}
@@ -44,7 +44,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if minio_multifs_xfs_4k_4ks|default(false)|bool %}
 [minio-xfs-4k]
 {{ kdevops_host_prefix }}-minio-xfs-4k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-xfs-4k-dev
 {% endif %}
 
@@ -58,7 +58,7 @@ minio_xfs_sectorsize = 4096
 {% if minio_multifs_xfs_16k_4ks|default(false)|bool %}
 [minio-xfs-16k]
 {{ kdevops_host_prefix }}-minio-xfs-16k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-xfs-16k-dev
 {% endif %}
 
@@ -72,7 +72,7 @@ minio_xfs_sectorsize = 4096
 {% if minio_multifs_xfs_32k_4ks|default(false)|bool %}
 [minio-xfs-32k]
 {{ kdevops_host_prefix }}-minio-xfs-32k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-xfs-32k-dev
 {% endif %}
 
@@ -86,7 +86,7 @@ minio_xfs_sectorsize = 4096
 {% if minio_multifs_xfs_64k_4ks|default(false)|bool %}
 [minio-xfs-64k]
 {{ kdevops_host_prefix }}-minio-xfs-64k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-xfs-64k-dev
 {% endif %}
 
@@ -100,7 +100,7 @@ minio_xfs_sectorsize = 4096
 {% if minio_multifs_ext4_4k|default(false)|bool %}
 [minio-ext4-4k]
 {{ kdevops_host_prefix }}-minio-ext4-4k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-ext4-4k-dev
 {% endif %}
 
@@ -113,7 +113,7 @@ minio_ext4_mkfs_opts = "-F"
 {% if minio_multifs_ext4_16k_bigalloc|default(false)|bool %}
 [minio-ext4-16k-bigalloc]
 {{ kdevops_host_prefix }}-minio-ext4-16k-bigalloc
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-ext4-16k-bigalloc-dev
 {% endif %}
 
@@ -126,7 +126,7 @@ minio_ext4_mkfs_opts = "-F -O bigalloc -C 16384"
 {% if minio_multifs_btrfs_default|default(false)|bool %}
 [minio-btrfs]
 {{ kdevops_host_prefix }}-minio-btrfs
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-btrfs-dev
 {% endif %}
 
@@ -141,7 +141,7 @@ minio_btrfs_mkfs_opts = "-f"
 [all]
 localhost ansible_connection=local
 {{ kdevops_host_prefix }}-minio
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-dev
 {% endif %}
 
@@ -154,7 +154,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {{ kdevops_host_prefix }}-minio-dev
 
@@ -164,7 +164,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 [minio]
 {{ kdevops_host_prefix }}-minio
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-minio-dev
 {% endif %}
 

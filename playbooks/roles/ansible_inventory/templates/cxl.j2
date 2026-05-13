@@ -1,7 +1,7 @@
 [all]
 localhost ansible_connection=local
 {{ kdevops_hosts_prefix }}
-{% if kdevops_baseline_and_dev == True %}
+{% if kdevops_baseline_and_dev | default(false) | bool == True %}
 {{ kdevops_hosts_prefix }}-dev
 {% endif %}
 [all:vars]
@@ -11,7 +11,7 @@ ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 [dev]
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_hosts_prefix }}-dev
 {% endif %}
 [dev:vars]

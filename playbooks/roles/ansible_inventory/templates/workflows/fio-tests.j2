@@ -20,7 +20,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {% for node in ansible_inventory_all_generic_nodes %}
 {% if node.endswith('-dev') %}
@@ -45,7 +45,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% for node in ansible_inventory_all_generic_nodes %}
 {% if not node.endswith('-dev') %}
 {% set section = node.replace(kdevops_host_prefix + '-fio-tests-', '') %}
-{% if section != kdevops_host_prefix + '-fio-tests' %}
+{% if section != kdevops_host_prefix | default(false) | bool + '-fio-tests' %}
 {% if section_names.append(section) %}{% endif %}
 {% endif %}
 {% endif %}
@@ -54,7 +54,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% for section in section_names %}
 [fio_tests_{{ section | replace('-', '_') }}]
 {{ kdevops_host_prefix }}-fio-tests-{{ section }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-fio-tests-{{ section }}-dev
 {% endif %}
 
@@ -67,7 +67,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [all]
 localhost ansible_connection=local
 {{ kdevops_host_prefix }}-fio-tests
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-fio-tests-dev
 {% endif %}
 
@@ -80,7 +80,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {{ kdevops_host_prefix }}-fio-tests-dev
 
@@ -90,7 +90,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 [fio_tests]
 {{ kdevops_host_prefix }}-fio-tests
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-fio-tests-dev
 {% endif %}
 

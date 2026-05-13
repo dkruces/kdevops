@@ -20,7 +20,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {% for config in ansible_inventory_build_linux_enabled_section_types|default([]) %}
 {% if '-dev' in config %}
@@ -44,7 +44,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_xfs_4k_4ks|default(false)|bool %}
 [build-linux-xfs-4k-4ks]
 {{ kdevops_host_prefix }}-build-linux-xfs-4k-4ks
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-xfs-4k-4ks-dev
 {% endif %}
 
@@ -55,7 +55,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_xfs_8k_4ks|default(false)|bool %}
 [build-linux-xfs-8k-4ks]
 {{ kdevops_host_prefix }}-build-linux-xfs-8k-4ks
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-xfs-8k-4ks-dev
 {% endif %}
 
@@ -66,7 +66,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_xfs_16k_4ks|default(false)|bool %}
 [build-linux-xfs-16k-4ks]
 {{ kdevops_host_prefix }}-build-linux-xfs-16k-4ks
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-xfs-16k-4ks-dev
 {% endif %}
 
@@ -77,7 +77,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_xfs_32k_4ks|default(false)|bool %}
 [build-linux-xfs-32k-4ks]
 {{ kdevops_host_prefix }}-build-linux-xfs-32k-4ks
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-xfs-32k-4ks-dev
 {% endif %}
 
@@ -88,7 +88,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_xfs_64k_4ks|default(false)|bool %}
 [build-linux-xfs-64k-4ks]
 {{ kdevops_host_prefix }}-build-linux-xfs-64k-4ks
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-xfs-64k-4ks-dev
 {% endif %}
 
@@ -99,7 +99,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_ext4_4k|default(false)|bool %}
 [build-linux-ext4-4k]
 {{ kdevops_host_prefix }}-build-linux-ext4-4k
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-ext4-4k-dev
 {% endif %}
 
@@ -110,7 +110,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_ext4_16k_bigalloc|default(false)|bool %}
 [build-linux-ext4-16k-bigalloc]
 {{ kdevops_host_prefix }}-build-linux-ext4-16k-bigalloc
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-ext4-16k-bigalloc-dev
 {% endif %}
 
@@ -122,7 +122,7 @@ build_linux_ext4_mkfs_opts = "-F -O bigalloc -C 16384"
 {% if build_linux_multifs_btrfs_default|default(false)|bool %}
 [build-linux-btrfs]
 {{ kdevops_host_prefix }}-build-linux-btrfs
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-btrfs-dev
 {% endif %}
 
@@ -133,7 +133,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if build_linux_multifs_tmpfs_default|default(false)|bool %}
 [build-linux-tmpfs]
 {{ kdevops_host_prefix }}-build-linux-tmpfs
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-tmpfs-dev
 {% endif %}
 
@@ -146,7 +146,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [all]
 localhost ansible_connection=local
 {{ kdevops_host_prefix }}-build-linux
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-dev
 {% endif %}
 
@@ -159,7 +159,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {{ kdevops_host_prefix }}-build-linux-dev
 
@@ -169,7 +169,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 [build-linux]
 {{ kdevops_host_prefix }}-build-linux
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-build-linux-dev
 {% endif %}
 

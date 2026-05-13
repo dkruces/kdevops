@@ -2,7 +2,7 @@
 [all]
 localhost ansible_connection=local
 {{ kdevops_host_prefix }}-vllm
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-vllm-dev
 {% endif %}
 
@@ -15,7 +15,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {{ kdevops_host_prefix }}-vllm-dev
 
@@ -25,14 +25,14 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 [vllm]
 {{ kdevops_host_prefix }}-vllm
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-vllm-dev
 {% endif %}
 
 [vllm:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_enable_iscsi %}
+{% if kdevops_enable_iscsi | default(false) | bool %}
 [iscsi]
 {{ kdevops_host_prefix }}-iscsi
 
@@ -40,7 +40,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 
-{% if kdevops_nfsd_enable %}
+{% if kdevops_nfsd_enable | default(false) | bool %}
 [nfsd]
 {{ kdevops_host_prefix }}-nfsd
 
@@ -48,7 +48,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 
-{% if kdevops_smbd_enable %}
+{% if kdevops_smbd_enable | default(false) | bool %}
 [smbd]
 {{ kdevops_host_prefix }}-smbd
 
@@ -56,7 +56,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 
-{% if kdevops_krb5_enable %}
+{% if kdevops_krb5_enable | default(false) | bool %}
 [kdc]
 {{ kdevops_host_prefix }}-kdc
 

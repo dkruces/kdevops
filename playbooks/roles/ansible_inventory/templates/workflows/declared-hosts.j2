@@ -23,9 +23,9 @@ localhost ansible_connection=local
 [all:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_workflows_dedicated_workflow %}
+{% if kdevops_workflows_dedicated_workflow | default(false) | bool %}
 {# For workflows, organize hosts into baseline/dev groups for A/B testing #}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [baseline]
 {# Odd-numbered hosts become baseline nodes #}
 {% for host in parsed_hosts %}
@@ -209,7 +209,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {# For non-dedicated workflows (mix mode), add fstests group if enabled #}
-{% if kdevops_workflow_enable_fstests %}
+{% if kdevops_workflow_enable_fstests | default(false) | bool %}
 [fstests]
 {% for host in parsed_hosts %}
 {{ host }}

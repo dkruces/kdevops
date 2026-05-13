@@ -3,7 +3,7 @@
 localhost ansible_connection=local
 {% for test in ansible_inventory_enabled_sysbench_tests %}
 {{ kdevops_host_prefix }}-{{ test }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test }}-dev
 {% endif %}
 {% endfor %}
@@ -19,7 +19,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {% for test in ansible_inventory_enabled_sysbench_tests %}
 {{ kdevops_host_prefix }}-{{ test }}-dev
@@ -32,7 +32,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [sysbench]
 {% for test in ansible_inventory_enabled_sysbench_tests %}
 {{ kdevops_host_prefix }}-{{ test }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test }}-dev
 {% endif %}
 {% endfor %}
@@ -43,7 +43,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% for test in ansible_inventory_enabled_sysbench_tests %}
 [sysbench_{{ test | replace('-', '_') }}]
 {{ kdevops_host_prefix }}-{{ test }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test }}-dev
 {% endif %}
 

@@ -4,13 +4,13 @@ localhost ansible_connection=local
 {% if ansible_inventory_mmtests_enabled_test_types %}
 {% for test_type in ansible_inventory_mmtests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endif %}
 {% endfor %}
 {% else %}
 {{ kdevops_host_prefix }}-mmtests
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-mmtests-dev
 {% endif %}
 {% endif %}
@@ -30,7 +30,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {% if ansible_inventory_mmtests_enabled_test_types %}
 {% for test_type in ansible_inventory_mmtests_enabled_test_types %}
@@ -48,13 +48,13 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% if ansible_inventory_mmtests_enabled_test_types %}
 {% for test_type in ansible_inventory_mmtests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ test_type }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endif %}
 {% endfor %}
 {% else %}
 {{ kdevops_host_prefix }}-mmtests
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-mmtests-dev
 {% endif %}
 {% endif %}
@@ -66,7 +66,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% for test_type in ansible_inventory_mmtests_enabled_test_types %}
 [mmtests_{{ test_type | replace('-', '_') }}]
 {{ kdevops_host_prefix }}-{{ test_type }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ test_type }}-dev
 {% endif %}
 

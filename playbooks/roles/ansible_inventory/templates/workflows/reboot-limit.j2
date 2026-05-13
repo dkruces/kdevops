@@ -2,7 +2,7 @@
 [all]
 localhost ansible_connection=local
 {{ kdevops_host_prefix }}-reboot-limit
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-reboot-limit-dev
 {% endif %}
 
@@ -15,7 +15,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [baseline:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 [dev]
 {{ kdevops_host_prefix }}-reboot-limit-dev
 
@@ -25,7 +25,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endif %}
 [reboot-limit]
 {{ kdevops_host_prefix }}-reboot-limit
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-reboot-limit-dev
 {% endif %}
 

@@ -2,7 +2,7 @@
 localhost ansible_connection=local
 {% for s in ltp_enabled_hosts %}
 {{ kdevops_host_prefix }}-{{ s }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ s }}-dev
 {% endif %}
 {% endfor %}
@@ -17,7 +17,7 @@ ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter =  "{{ kdevops_python_interpreter }}"
 
 [dev]
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
   {% for s in ltp_enabled_hosts %}
 {{ kdevops_host_prefix }}-{{ s }}-dev
   {% endfor %}

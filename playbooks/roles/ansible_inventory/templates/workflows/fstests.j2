@@ -3,7 +3,7 @@
 localhost ansible_connection=local
 {% for node_section in ansible_inventory_fstests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ node_section }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ node_section }}-dev
 {% endif %}
 {% endfor %}
@@ -20,7 +20,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 [dev]
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {% for node_section in ansible_inventory_fstests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ node_section }}-dev
 {% endfor %}
@@ -32,7 +32,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [fstests]
 {% for node_section in ansible_inventory_fstests_enabled_test_types %}
 {{ kdevops_host_prefix }}-{{ node_section }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ node_section }}-dev
 {% endif %}
 {% endfor %}
@@ -43,7 +43,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% for section in ansible_inventory_fstests_enabled_test_types %}
 [fstests_{{ section | replace('-', '_') }}]
 {{ kdevops_host_prefix }}-{{ section }}
-{% if kdevops_baseline_and_dev %}
+{% if kdevops_baseline_and_dev | default(false) | bool %}
 {{ kdevops_host_prefix }}-{{ section }}-dev
 {% endif %}
 
@@ -53,7 +53,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 {% endfor %}
 
 [nfsd]
-{% if kdevops_nfsd_enable %}
+{% if kdevops_nfsd_enable | default(false) | bool %}
 {{ kdevops_host_prefix }}-nfsd
 {% endif %}
 
@@ -61,10 +61,10 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 [service]
-{% if kdevops_enable_iscsi %}
+{% if kdevops_enable_iscsi | default(false) | bool %}
 {{ kdevops_host_prefix }}-iscsi
 {% endif %}
-{% if kdevops_nfsd_enable %}
+{% if kdevops_nfsd_enable | default(false) | bool %}
 {{ kdevops_host_prefix }}-nfsd
 {% endif %}
 

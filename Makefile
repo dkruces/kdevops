@@ -233,6 +233,10 @@ ifeq (y,$(CONFIG_QEMU_BUILD))
 include modules/qemu/Makefile
 endif # CONFIG_QEMU_BUILD
 
+ifeq (y,$(CONFIG_ENABLE_MONITORING))
+include modules/monitoring/Makefile
+endif # CONFIG_ENABLE_MONITORING
+
 ifeq (y,$(CONFIG_SETUP_POSTFIX_EMAIL_RELAY))
 include Makefile.postfix
 endif # CONFIG_SETUP_POSTFIX_EMAIL_RELAY

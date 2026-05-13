@@ -65,7 +65,7 @@ source "kconfigs/workflows/Kconfig"
 endmenu
 
 menu "Monitors"
-source "kconfigs/monitors/Kconfig"
+source "modules/monitoring/Kconfig"
 endmenu
 
 menu "Kdevops configuration"

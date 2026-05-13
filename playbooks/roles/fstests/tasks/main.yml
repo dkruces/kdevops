@@ -234,8 +234,8 @@
   ansible.builtin.include_role:
     name: compile_dbench
   vars:
-    dbench_data: "{{ data_path }}/dbench"
-    dbench_git: "https://github.com/linux-kdevops/dbench.git"
+    compile_dbench_dbench_data: "{{ data_path }}/dbench"
+    compile_dbench_dbench_git: "https://github.com/linux-kdevops/dbench.git"
   tags: ["oscheck", "git", "dbench"]
 
 - name: Remove any old fstests and install directories

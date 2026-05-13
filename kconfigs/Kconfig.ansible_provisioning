@@ -41,8 +41,9 @@ config KDEVOPS_DEVCONFIG_ENABLE_CONSOLE
 
 if KDEVOPS_DEVCONFIG_ENABLE_CONSOLE
 
-config KDEVOPS_DEVCONFIG_KERNEL_CONSOLE_SETTINGS
+config DEVCONFIG_KERNEL_CONSOLE
 	string "Kernel command line console kernel parameters to use"
+	output yaml
 	default "console=tty0 console=tty1 console=ttyS0,115200n8"
 	help
 	  Linux kernel console kernel parameters to use. This will be appended
@@ -50,8 +51,9 @@ config KDEVOPS_DEVCONFIG_KERNEL_CONSOLE_SETTINGS
 	  GRUB_CMDLINE_LINUX_DEFAULT, if and only if you did not have any
 	  console settings already set.
 
-config KDEVOPS_DEVCONFIG_GRUB_SERIAL_COMMAND
+config DEVCONFIG_GRUB_CONSOLE
 	string "GRUB specific serial settings"
+	output yaml
 	default "serial --speed=115200 --unit=0 --parity=no --stop=1"
 	help
 	  GRUB console settings to use. This will be appended to the GRUB
@@ -78,20 +80,23 @@ config KDEVOPS_DEVCONFIG_ENABLE_SYSTEMD_WATCHDOG
 
 if KDEVOPS_DEVCONFIG_ENABLE_SYSTEMD_WATCHDOG
 
-config KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_RUNTIME
+config DEVCONFIG_SYSTEMD_WATCHDOG_RUNTIME_TIMEOUT
 	string "Configures the RuntimeWatchdogSec settting"
+	output yaml
 	default "5min"
 	help
 	  Configures the systemd watchdog RuntimeWatchdogSec setting.
 
-config KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_REBOOT
+config DEVCONFIG_SYSTEMD_WATCHDOG_REBOOT_TIMEOUT
 	string "Configures the RebootWatchdogSec settting"
+	output yaml
 	default "10min"
 	help
 	  Configures the systemd watchdog RebootWatchdogSec setting.
 
-config KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_KEXEC
+config DEVCONFIG_SYSTEMD_WATCHDOG_KEXEC_TIMEOUT
 	string "Configures the KexecWatchdogSec settting"
+	output yaml
 	default "5min"
 	help
 	  Configures the systemd watchdog KexecWatchdogSec setting.

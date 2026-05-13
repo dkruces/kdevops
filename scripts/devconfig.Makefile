@@ -37,22 +37,19 @@ GRUB_TIMEOUT:=$(subst ",,$(CONFIG_KDEVOPS_GRUB_TIMEOUT))
 ANSIBLE_EXTRA_ARGS += devconfig_grub_timeout=$(GRUB_TIMEOUT)
 endif
 
+# The static console / watchdog knobs land in extra_vars.yaml via
+# Kconfig "output yaml" (DEVCONFIG_KERNEL_CONSOLE, DEVCONFIG_GRUB_CONSOLE,
+# DEVCONFIG_SYSTEMD_WATCHDOG_*_TIMEOUT). The distro-extra-addons path
+# is genuinely dynamic -- it inlines the contents of a user-supplied
+# yaml file -- so it stays on the fragment mechanism until the
+# addon-source file is consumed directly via --extra-vars=@<path>.
+ifeq (y,$(CONFIG_KDEVOPS_ENABLE_DISTRO_EXTRA_ADDONS))
 EXTRA_VAR_FRAGMENTS += $(EXTRA_VAR_FRAGMENTS_DIR)/devconfig.yml
 
 $(EXTRA_VAR_FRAGMENTS_DIR)/devconfig.yml: .config | $(EXTRA_VAR_FRAGMENTS_DIR)
-	@{ if [[ "$(CONFIG_KDEVOPS_ENABLE_DISTRO_EXTRA_ADDONS)" == "y" ]]; then \
-		echo "devconfig_repos_addon: True" ;\
-		cat $(KDEVOPS_EXTRA_ADDON_SOURCE) ;\
-	fi ; \
-	if [[ "$(CONFIG_KDEVOPS_DEVCONFIG_ENABLE_CONSOLE)" == "y" ]]; then \
-		echo "devconfig_kernel_console: '$(CONFIG_KDEVOPS_DEVCONFIG_KERNEL_CONSOLE_SETTINGS)'" ;\
-		echo "devconfig_grub_console: '$(CONFIG_KDEVOPS_DEVCONFIG_GRUB_SERIAL_COMMAND)'" ;\
-	fi ; \
-	if [[ "$(CONFIG_KDEVOPS_DEVCONFIG_ENABLE_SYSTEMD_WATCHDOG)" == "y" ]]; then \
-		echo "devconfig_systemd_watchdog_runtime_timeout: '$(CONFIG_KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_RUNTIME)'" ;\
-		echo "devconfig_systemd_watchdog_reboot_timeout: '$(CONFIG_KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_REBOOT)'" ;\
-		echo "devconfig_systemd_watchdog_kexec_timeout: '$(CONFIG_KDEVOPS_DEVCONFIG_SYSTEMD_WATCHDOG_TIMEOUT_KEXEC)'" ;\
-	fi ; } > $@
+	@{ echo "devconfig_repos_addon: True" ;\
+		cat $(KDEVOPS_EXTRA_ADDON_SOURCE) ; } > $@
+endif
 
 PHONY += devconfig
 devconfig: $(KDEVOPS_NODES)

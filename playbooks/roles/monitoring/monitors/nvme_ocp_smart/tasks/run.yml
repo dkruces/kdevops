@@ -1,0 +1,70 @@
+---
+- name: Create the monitoring directory on the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: /root/monitoring
+    state: directory
+    mode: "0755"
+
+- name: Discover OCP-compatible NVMe devices
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    set -o pipefail
+    devices=()
+    for dev in /dev/nvme*n1; do
+      if [ -e "$dev" ]; then
+        # Test if nvme ocp command produces any output (even with errors).
+        # QEMU NVMe devices may fail GUID checks but still produce useful data.
+        if output=$(nvme ocp smart-add-log "$dev" --output-format=json 2>&1); then
+          devices+=("$dev")
+        elif echo "$output" | grep -q "NVMe Status:Successful Completion"; then
+          devices+=("$dev")
+        fi
+      fi
+    done
+    echo "${devices[@]}"
+  args:
+    executable: /bin/bash
+  register: monitoring_nvme_ocp_discovered
+  changed_when: false
+  when: monitor_nvme_ocp_smart_devices | default('auto') == 'auto'
+
+- name: Resolve the OCP device list
+  ansible.builtin.set_fact:
+    monitoring_nvme_ocp_devices: >-
+      {{
+        monitoring_nvme_ocp_discovered.stdout.split()
+        if monitor_nvme_ocp_smart_devices | default('auto') == 'auto'
+        else monitor_nvme_ocp_smart_devices.split()
+      }}
+
+- name: Start the nvme_ocp_smart sampler per device
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    set -o pipefail
+    device_name=$(echo "{{ item }}" | sed 's|/dev/||g')
+    nohup bash -c "while true; do
+      echo \"\$(date +'%Y-%m-%d %H:%M:%S')\" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
+      nvme ocp smart-add-log {{ item }} --output-format=json 2>&1 >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt || true
+      echo \"\" >> /root/monitoring/nvme_ocp_smart_${device_name}_stats.txt
+      sleep {{ monitor_nvme_ocp_smart_interval | default(120) }}
+    done" > /root/monitoring/nvme_ocp_smart_${device_name}.log 2>&1 &
+    echo $! > /root/monitoring/nvme_ocp_smart_${device_name}.pid
+  args:
+    executable: /bin/bash
+  loop: "{{ monitoring_nvme_ocp_devices }}"
+  changed_when: true
+  when: monitoring_nvme_ocp_devices | length > 0
+
+- name: Show the nvme_ocp_smart startup status
+  ansible.builtin.debug:
+    msg: |
+      Started NVMe OCP SMART sampler for {{ monitoring_nvme_ocp_devices | length }} devices:
+      {% for device in monitoring_nvme_ocp_devices %}
+      - {{ device }}
+      {% endfor %}
+      Sampling interval: {{ monitor_nvme_ocp_smart_interval | default(120) }} seconds
+  when: monitoring_nvme_ocp_devices | length > 0

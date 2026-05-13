@@ -1,0 +1,96 @@
+---
+- name: Locate nvme_ocp_smart PID files
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.find:
+    paths: /root/monitoring
+    patterns: "nvme_ocp_smart_*.pid"
+    file_type: file
+  register: monitoring_nvme_ocp_pid_files
+
+- name: Stop the nvme_ocp_smart samplers
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    set -o pipefail
+    for pidfile in /root/monitoring/nvme_ocp_smart_*.pid; do
+      if [ -f "$pidfile" ]; then
+        device_name=$(basename "$pidfile" .pid | sed 's/nvme_ocp_smart_//')
+        pid=$(cat "$pidfile")
+        if ps -p $pid > /dev/null 2>&1; then
+          kill $pid
+          echo "Stopped NVMe OCP SMART sampler for $device_name (PID $pid)"
+        else
+          echo "NVMe OCP SMART sampler for $device_name (PID $pid) was not running"
+        fi
+        rm -f "$pidfile"
+      fi
+    done
+  args:
+    executable: /bin/bash
+  changed_when: true
+  when: monitoring_nvme_ocp_pid_files.matched | default(0) > 0
+
+- name: List the nvme_ocp_smart stats files
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.find:
+    paths: /root/monitoring
+    patterns: "nvme_ocp_smart_*_stats.txt"
+    file_type: file
+  register: monitoring_nvme_ocp_stats_files
+
+- name: Fetch the nvme_ocp_smart stats to localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.fetch:
+    src: "{{ item.path }}"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_{{ item.path | basename }}"
+    flat: true
+    validate_checksum: false
+  loop: "{{ monitoring_nvme_ocp_stats_files.files | default([]) }}"
+  when: monitoring_nvme_ocp_stats_files.matched | default(0) > 0
+
+- name: Show the nvme_ocp_smart collection summary
+  ansible.builtin.debug:
+    msg: |
+      NVMe OCP SMART collection complete.
+      Data files copied: {{ monitoring_nvme_ocp_stats_files.matched | default(0) }}
+      Results directory: {{ monitoring_results_path }}
+
+- name: Find collected nvme_ocp_smart stats files on localhost for plotting
+  ansible.builtin.find:
+    paths: "{{ monitoring_results_path }}"
+    patterns: "*nvme_ocp_smart*_stats.txt"
+    file_type: file
+  delegate_to: localhost
+  run_once: true
+  register: monitoring_nvme_ocp_localhost_files
+
+- name: Render the nvme_ocp_smart plot on localhost
+  ansible.builtin.command:
+    cmd: >
+      python3 {{ role_path }}/files/plot_nvme_ocp_stats.py
+      -o {{ monitoring_results_path }}/nvme_ocp_smart_plot.png
+      {{ monitoring_nvme_ocp_localhost_files.files | map(attribute='path') | join(' ') }}
+  delegate_to: localhost
+  run_once: true
+  register: monitoring_nvme_ocp_plot
+  failed_when: false
+  changed_when: true
+  when:
+    - monitoring_nvme_ocp_localhost_files.files is defined
+    - monitoring_nvme_ocp_localhost_files.files | length > 0
+
+- name: Show the nvme_ocp_smart plot status
+  ansible.builtin.debug:
+    msg: |
+      NVMe OCP SMART plot {% if monitoring_nvme_ocp_plot.rc | default(-1) == 0 %}rendered{% else %}failed{% endif %}.
+      {% if monitoring_nvme_ocp_plot.rc | default(-1) == 0 %}
+      Plot saved to: {{ monitoring_results_path }}/nvme_ocp_smart_plot.png
+      {% else %}
+      Error: {{ monitoring_nvme_ocp_plot.stderr | default('plot script not invoked') }}
+      {% endif %}
+  delegate_to: localhost
+  run_once: true
+  when: monitoring_nvme_ocp_plot is defined

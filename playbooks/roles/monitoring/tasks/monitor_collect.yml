@@ -43,6 +43,13 @@
     - monitor_memory_fragmentation | default(false) | bool
   tags: [monitor_memory_fragmentation]
 
+- name: Run the nvme_ocp_smart sub-role (collect phase)
+  ansible.builtin.include_role:
+    name: monitoring/monitors/nvme_ocp_smart
+    tasks_from: collect
+  when: monitor_nvme_ocp_smart | default(false) | bool
+  tags: [monitor_nvme_ocp_smart]
+
 - name: Generate monitoring visualizations
   ansible.builtin.include_tasks: visualize.yml
   vars:

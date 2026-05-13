@@ -38,4 +38,6 @@ source "modules/monitoring/monitors/memory_fragmentation/Kconfig"
 
 endif # MONITOR_DEVELOPMENTAL_STATS
 
+source "modules/monitoring/monitors/nvme_ocp_smart/Kconfig"
+
 endif # ENABLE_MONITORING

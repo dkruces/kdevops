@@ -46,6 +46,13 @@
     - monitor_memory_fragmentation | default(false) | bool
   tags: [monitor_memory_fragmentation]
 
+- name: Run the nvme_ocp_smart sub-role (interim collect)
+  ansible.builtin.include_role:
+    name: monitoring/monitors/nvme_ocp_smart
+    tasks_from: collect_only
+  when: monitor_nvme_ocp_smart | default(false) | bool
+  tags: [monitor_nvme_ocp_smart]
+
 - name: Show the interim monitoring collection summary
   ansible.builtin.debug:
     msg: |
@@ -56,6 +63,9 @@
       {% endif %}
       {% if monitor_developmental_stats | default(false) | bool and monitor_memory_fragmentation | default(false) | bool %}
       - Fragmentation interim data collected
+      {% endif %}
+      {% if monitor_nvme_ocp_smart | default(false) | bool %}
+      - NVMe OCP SMART interim snapshots collected
       {% endif %}
   run_once: true
   when: enable_monitoring | default(false) | bool

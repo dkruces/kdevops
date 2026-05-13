@@ -1,0 +1,53 @@
+---
+- name: Take a snapshot copy of each nvme_ocp_smart stats file
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    for file in /root/monitoring/nvme_ocp_smart_*_stats.txt; do
+      if [ -f "$file" ]; then
+        base_name=$(basename "$file" .txt)
+        cp "$file" "/root/monitoring/${base_name}_snapshot.txt"
+      fi
+    done
+  args:
+    executable: /bin/bash
+  changed_when: true
+
+- name: Locate nvme_ocp_smart snapshot files
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.find:
+    paths: /root/monitoring
+    patterns: "nvme_ocp_smart_*_snapshot.txt"
+    file_type: file
+  register: monitoring_nvme_ocp_snapshots
+
+- name: Fetch the nvme_ocp_smart snapshots to localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.fetch:
+    src: "{{ item.path }}"
+    dest: >-
+      {{ monitoring_results_path }}/{{ ansible_hostname }}_{{
+         item.path | basename | replace('_snapshot', '_interim') }}
+    flat: true
+    validate_checksum: false
+  loop: "{{ monitoring_nvme_ocp_snapshots.files | default([]) }}"
+  when: monitoring_nvme_ocp_snapshots.matched | default(0) > 0
+
+- name: Remove the nvme_ocp_smart snapshot files
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ monitoring_nvme_ocp_snapshots.files | default([]) }}"
+  when: monitoring_nvme_ocp_snapshots.matched | default(0) > 0
+
+- name: Show the nvme_ocp_smart interim collection summary
+  ansible.builtin.debug:
+    msg: |
+      NVMe OCP SMART interim collection complete.
+      Snapshot files copied: {{ monitoring_nvme_ocp_snapshots.matched | default(0) }}
+      Results directory: {{ monitoring_results_path }}
+      Samplers continue running.

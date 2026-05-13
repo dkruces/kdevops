@@ -38,8 +38,11 @@ boundaries.
 | `CONFIG_MONITOR_FOLIO_MIGRATION` | Periodic snapshots of `/sys/kernel/debug/mm/migrate/stats`. |
 | `CONFIG_MONITOR_FOLIO_MIGRATION_INTERVAL` | Sampling interval (seconds). |
 | `CONFIG_MONITOR_MEMORY_FRAGMENTATION` | eBPF tracepoint-based fragmentation tracker. |
-| `CONFIG_MONITOR_FRAGMENTATION_DURATION` | Tracker runtime (seconds, 0 = until workflow ends). |
-| `CONFIG_MONITOR_FRAGMENTATION_OUTPUT_DIR` | Guest-side output directory. |
+| `CONFIG_MONITOR_MEMORY_FRAGMENTATION_DURATION` | Tracker runtime (seconds, 0 = until workflow ends). |
+| `CONFIG_MONITOR_MEMORY_FRAGMENTATION_OUTPUT_DIR` | Guest-side output directory. |
+| `CONFIG_MONITOR_NVME_OCP_SMART` | Sample NVMe OCP extended SMART log per device. |
+| `CONFIG_MONITOR_NVME_OCP_SMART_INTERVAL` | Sampling interval in seconds (default 120). |
+| `CONFIG_MONITOR_NVME_OCP_SMART_DEVICES` | Space-separated device list or `auto` for discovery. |
 
 Per-monitor knobs live in their own sub-module Kconfig once the
 sub-modules are split out.

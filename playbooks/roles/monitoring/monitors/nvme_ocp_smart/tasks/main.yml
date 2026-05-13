@@ -1,0 +1,8 @@
+---
+- name: Start the nvme_ocp_smart samplers
+  ansible.builtin.include_tasks: run.yml
+  tags: [do_run]
+
+- name: Collect the nvme_ocp_smart data and render plot
+  ansible.builtin.include_tasks: collect.yml
+  tags: [do_collect]

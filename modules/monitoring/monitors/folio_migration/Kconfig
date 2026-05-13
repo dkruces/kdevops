@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: copyleft-next-0.3.1
+
+config MONITOR_FOLIO_MIGRATION
+	bool "Monitor folio migration statistics"
+	output yaml
+	default n
+	help
+	  Enable monitoring of folio migration statistics if available.
+	  This requires the kernel to have the folio migration debugfs
+	  stats patch applied.
+
+	  The statistics are collected from:
+	  /sys/kernel/debug/mm/migrate/stats
+
+	  This feature collects migration statistics periodically during
+	  workflow execution and can generate plots for visualization.
+
+config MONITOR_FOLIO_MIGRATION_INTERVAL
+	int "Folio migration monitoring interval (seconds)"
+	output yaml
+	default 60
+	depends on MONITOR_FOLIO_MIGRATION
+	help
+	  How often to collect folio migration statistics in seconds.
+	  Default is 60 seconds.
+
+	  Lower values provide more granular data but may impact system
+	  performance. Higher values reduce overhead but may miss
+	  short-lived migration events.

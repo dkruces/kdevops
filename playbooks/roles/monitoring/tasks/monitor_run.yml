@@ -37,7 +37,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.file:
-    path: "{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    path: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     state: directory
     mode: "0755"
   when:
@@ -49,8 +49,8 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.shell: |
     cd /opt/fragmentation
-    duration="{{ monitor_fragmentation_duration | default(0) }}"
-    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    duration="{{ monitor_memory_fragmentation_duration | default(0) }}"
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
 
     # Start the fragmentation tracker with output file specified
     if [ "$duration" -eq "0" ]; then
@@ -84,7 +84,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.shell: |
-    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     if [ -f "${output_dir}/fragmentation_tracker.pid" ]; then
       pid=$(cat "${output_dir}/fragmentation_tracker.pid")
       if ps -p $pid > /dev/null 2>&1; then

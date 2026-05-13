@@ -36,7 +36,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.stat:
-    path: "{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_tracker.pid"
+    path: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_tracker.pid"
   register: monitoring_fragmentation_pid_file
   when:
     - monitor_developmental_stats | default(false) | bool
@@ -46,7 +46,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.shell: |
-    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     if [ -f "${output_dir}/fragmentation_tracker.pid" ]; then
       pid=$(cat "${output_dir}/fragmentation_tracker.pid")
       if ps -p $pid > /dev/null 2>&1; then
@@ -88,7 +88,7 @@
   ansible.builtin.shell: |
     set -o pipefail
     cd /opt/fragmentation
-    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
 
     # Run the visualizer if data exists - it can handle corrupted JSON
     if [ -f "${output_dir}/fragmentation_data.json" ]; then
@@ -120,7 +120,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.find:
-    paths: "{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    paths: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     patterns: "*"
     file_type: file
   register: monitoring_fragmentation_output_files

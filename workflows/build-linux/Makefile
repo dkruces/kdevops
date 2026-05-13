@@ -1,6 +1,5 @@
 PHONY += build-linux build-linux-baseline build-linux-dev
 PHONY += build-linux-results build-linux-visualize build-linux-help-menu
-PHONY += monitor-results monitor-kill
 
 # Main build-linux workflow targets
 build-linux: $(KDEVOPS_NODES) $(ANSIBLE_INVENTORY_FILE)
@@ -64,18 +63,6 @@ build-linux-visualize:
 		echo "  SUSE: sudo zypper install python3-matplotlib python3-numpy"; \
 		exit 1)
 
-monitor-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		playbooks/monitor-results.yml \
-		--extra-vars=@$(KDEVOPS_EXTRA_VARS)
-
-monitor-kill: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		-i hosts \
-		playbooks/monitor-kill.yml \
-		--extra-vars=@$(KDEVOPS_EXTRA_VARS) \
-		$(LIMIT_HOSTS)
-
 build-linux-help-menu:
 	@echo "Build Linux workflow targets:"
 	@echo ""
@@ -87,8 +74,6 @@ build-linux-help-menu:
 	@echo "Results collection (also run automatically by build-linux):"
 	@echo "  build-linux-results     - Collect and analyze build statistics (standalone)"
 	@echo "  build-linux-visualize   - Generate HTML report with performance graphs (standalone)"
-	@echo "  monitor-results         - Collect monitoring data (requires CONFIG_ENABLE_MONITORING)"
-	@echo "  monitor-kill            - Kill all monitoring processes and clean up data"
 	@echo ""
 	@echo "Configuration:"
 	@echo "  Repeat count: $(CONFIG_BUILD_LINUX_REPEAT_COUNT) builds"

@@ -90,11 +90,6 @@ ai-results-baseline:
 ai-results-dev:
 	$(Q)$(MAKE) ai-results HOSTS="dev"
 
-monitor-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		playbooks/monitor-results.yml \
-		--extra-vars=@./extra_vars.yaml
-
 ai-setup:
 	$(Q)ansible-playbook \
 		playbooks/ai_setup.yml \

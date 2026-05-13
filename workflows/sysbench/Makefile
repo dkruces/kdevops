@@ -1,4 +1,4 @@
-PHONY += sysbench sysbench-test sysbench-telemetry sysbench-help-menu monitor-results
+PHONY += sysbench sysbench-test sysbench-telemetry sysbench-help-menu
 
 
 TAGS_SYSBENCH_RUN := db_start
@@ -47,11 +47,6 @@ sysbench-results:
 		playbooks/sysbench.yml \
 		--tags $(subst $(space),$(comma),$(TAGS_SYSBENCH_RESULTS))
 
-monitor-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		playbooks/monitor-results.yml \
-		--extra-vars=@./extra_vars.yaml
-
 sysbench-clean:
 	$(Q)ansible-playbook \
 		playbooks/sysbench.yml \
@@ -63,12 +58,6 @@ sysbench-plot:
 		playbooks/sysbench.yml \
 		--tags vars,plot
 
-monitor-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		playbooks/monitor-results.yml \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
-
 # Help target to show available options
 sysbench-help-menu:
 	@echo "Sysbench options:"
@@ -76,9 +65,7 @@ sysbench-help-menu:
 	@echo "sysbench-test                     - Run sysbench tests and collect results (with telemetry)"
 	@echo "sysbench-telemetry                - Gather sysbench telemetry data on each node"
 	@echo "sysbench-results                  - Collect all sysbench results onto local host"
-	@echo "monitor-results                   - Collect interim monitoring data without stopping monitoring"
 	@echo "sysbench-clean                    - Remove any previous results on node and host"
-	@echo "monitor-results                   - Collect interim monitoring data without stopping monitoring"
 	@echo ""
 
 HELP_TARGETS += sysbench-help-menu

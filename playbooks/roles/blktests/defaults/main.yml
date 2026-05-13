@@ -1,25 +1,10 @@
-# SPDX-License-Identifier copyleft-next-0.3.1
+# SPDX-License-Identifier: copyleft-next-0.3.1
 ---
-# Our sensible defaults for the blktests role.
-#
-# We default to not run tests.
-kdevops_run_blktests: false
-run_tests_on_failures: false
-blktests_skip_run: false
-
-# Ror instance you can use "-g quick" but note that this may produce
-# not results as all quick tests may be expunded.
-oscheck_extra_args: ""
-limit_tests: ""
-
-blktests_git: "https://github.com/osandov/blktests.git"
-blktets_data: "{{ data_path }}/blktests"
-blktests_data_target: "/usr/local/blktests/"
-blktests_test_devs: "/dev/null"
-
-nbd_git: "https://github.com/NetworkBlockDevice/nbd.git"
-nbd_version: "nbd-3.21"
-nbd_data: "{{ data_path }}/nbd"
-
-compile_dbench: false
-blktests_dbench_git: "https://github.com/linux-kdevops/dbench.git"
+# Role-private defaults only. Tree-wide vars (blktests_git,
+# blktests_data, blktests_data_target, blktests_test_devs,
+# blktests_dbench_git, nbd_git, nbd_version, nbd_data) come from
+# extra_vars.yaml via the Kconfig output yaml path. Runtime
+# overrides (kdevops_run_blktests, oscheck_extra_args,
+# limit_tests, run_tests_on_failures, blktests_skip_run) come from
+# Make's --extra-vars at runtime; consumers reference them with
+# `| default(false)` where the gap case applies.

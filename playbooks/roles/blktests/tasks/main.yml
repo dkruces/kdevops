@@ -64,16 +64,16 @@
     version: master
   tags: ["git", "blktests", "blktrace", "do_fetch"]
 
-- name: Get nproc
+- name: Get blktests_nproc
   ansible.builtin.command: "{{ num_jobs }}"
   tags: ["blktests", "build", "bltkrace"]
-  register: nproc
+  register: blktests_nproc
 
 - name: Build blktrace
   tags: ["blktests", "build", "bltkrace", "do_compile"]
   community.general.make:
     chdir: "{{ blktrace_data }}"
-    jobs: "{{ nproc.stdout }}"
+    jobs: "{{ blktests_nproc.stdout }}"
 
 - name: Install blktrace
   become: true
@@ -105,7 +105,7 @@
   tags: ["blktests", "build", "do_compile"]
   community.general.make:
     chdir: "{{ blktests_data }}"
-    jobs: "{{ nproc.stdout }}"
+    jobs: "{{ blktests_nproc.stdout }}"
 
 - name: Install blktests
   become: true
@@ -178,11 +178,11 @@
 - name: Get used target kernel version
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   ansible.builtin.command: "uname -r"
-  register: uname_cmd
+  register: blktests_uname_cmd
 
 - name: Store last kernel variable
   ansible.builtin.set_fact:
-    last_kernel: "{{ uname_cmd.stdout_lines | regex_replace('\\]') | regex_replace('\\[') | replace(\"'\", '') }}"
+    blktests_last_kernel: "{{ blktests_uname_cmd.stdout_lines | regex_replace('\\]') | regex_replace('\\[') | replace(\"'\", '') }}"
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   run_once: true
 
@@ -196,7 +196,7 @@
   run_once: true
 
 - name: Document used target kernel version
-  ansible.builtin.shell: echo {{ last_kernel }} > {{ blktests_results_target }}/last-kernel.txt
+  ansible.builtin.shell: echo {{ blktests_last_kernel }} > {{ blktests_results_target }}/last-kernel.txt
   delegate_to: localhost
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   run_once: true
@@ -208,7 +208,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command: "modprobe configfs"
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
 
 - name: Clear out old results directory on target hosts
   become: true
@@ -223,7 +223,7 @@
   ansible.builtin.fail:
     msg: "The variable blktests_test_devs must be defined to run"
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs is not defined
   tags: ["blktests", "run_tests"]
 
@@ -243,7 +243,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command: "test -e {{ verify_dev_list }}"
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs|length != 0
 
 - name: Verify target test devices are block devices {{ blktests_test_devs }}
@@ -255,7 +255,7 @@
   become_method: ansible.builtin.sudo
   ansible.builtin.command: "test -b {{ verify_dev_list }}"
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs is defined
     - blktests_test_devs|length != 0
 
@@ -267,13 +267,13 @@
   delegate_to: localhost
   tags: ["blktests", "run_tests"]
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
   run_once: true
 
 - name: Start the monitoring services on the test hosts
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
     - enable_monitoring|default(false)|bool
   tags: ["blktests", "run_tests", "monitoring", "monitor_run"]
 
@@ -284,41 +284,41 @@
   ansible.builtin.command: sysctl kernel.printk="8 8 1 7"
 - name: Check to see if dynamic test limit scope was set
   ansible.builtin.set_fact:
-    dynamic_limit_tests: "{{ lookup('ansible.builtin.env', 'LIMIT_TESTS') }}"
+    blktests_dynamic_limit_tests: "{{ lookup('ansible.builtin.env', 'LIMIT_TESTS') }}"
   tags: ["blktests", "run_tests", "limit-tests"]
   when:
-    - not run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
+    - not run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
 
 - name: Allow dynamic test override
   ansible.builtin.set_fact:
-    all_limit_tests: "{{ dynamic_limit_tests }}"
+    blktests_all_limit_tests: "{{ blktests_dynamic_limit_tests }}"
   tags: ["blktests", "run_tests", "limit-tests"]
   when:
-    - not run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
-    - dynamic_limit_tests is defined
-    - dynamic_limit_tests != None
-    - dynamic_limit_tests | length > 0
+    - not run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
+    - blktests_dynamic_limit_tests is defined
+    - blktests_dynamic_limit_tests != None
+    - blktests_dynamic_limit_tests | length > 0
 
 - name: Empty out test limit if None is set
   ansible.builtin.set_fact:
-    all_limit_tests: ""
+    blktests_all_limit_tests: ""
   tags: ["blktests", "run_tests", "limit-tests"]
   when:
-    - not run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
-    - all_limit_tests is defined
-    - all_limit_tests == None
+    - not run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
+    - blktests_all_limit_tests is defined
+    - blktests_all_limit_tests == None
 
 - name: Empty out test no limits have been set
   ansible.builtin.set_fact:
-    all_limit_tests: ""
+    blktests_all_limit_tests: ""
   tags: ["blktests", "run_tests", "limit-tests"]
   when:
-    - not run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
-    - all_limit_tests is undefined
+    - not run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
+    - blktests_all_limit_tests is undefined
 
 - name: Run oscheck-get-failures.sh to get list of known failed tests
   vars:
@@ -327,37 +327,37 @@
   ansible.builtin.command: "{{ kdevops_data }}/workflows/blktests/scripts/oscheck-get-failures.sh --test-group {{ group }}"
   args:
     chdir: "{{ blktests_data_target }}"
-  register: failed_tests_limit
+  register: blktests_failed_tests_limit
   when:
-    - run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
+    - run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
 
 - name: Inform user no failures are known
   ansible.builtin.fail:
     msg: "No known failures for this run! Go find bugs!"
   tags: ["blktests", "run_tests"]
   when:
-    - run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
-    - failed_tests_limit.stdout | replace('\n', ' ') | length == 0
+    - run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
+    - blktests_failed_tests_limit.stdout | replace('\n', ' ') | length == 0
 
 - name: Set test limit to known failed tests
   ansible.builtin.set_fact:
-    all_limit_tests: "{{ failed_tests_limit.stdout | replace('\n', ' ') }}"
+    blktests_all_limit_tests: "{{ blktests_failed_tests_limit.stdout | replace('\n', ' ') }}"
   tags: ["blktests", "run_tests"]
   when:
-    - run_tests_on_failures|bool
-    - kdevops_run_blktests|bool
+    - run_tests_on_failures | default(false) | bool
+    - kdevops_run_blktests | default(false) | bool
 
 - name: Print list of test limits for this run
   ansible.builtin.debug:
-    msg: "all_limit_tests: {{ all_limit_tests }}"
+    msg: "blktests_all_limit_tests: {{ blktests_all_limit_tests }}"
   tags: ["blktests", "run_tests", "limit-tests"]
   when:
-    - kdevops_run_blktests|bool
-    - all_limit_tests is defined
-    - all_limit_tests != None
-    - all_limit_tests | length > 0
+    - kdevops_run_blktests | default(false) | bool
+    - blktests_all_limit_tests is defined
+    - blktests_all_limit_tests != None
+    - blktests_all_limit_tests | length > 0
   vars:
     ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
 
@@ -365,7 +365,7 @@
   ansible.builtin.meta: end_play
   tags: ["blktests", "run_tests"]
   when:
-    - blktests_skip_run|bool
+    - blktests_skip_run | default(false) | bool
 
 - name: Run blktests using oscheck.sh
   vars:
@@ -377,7 +377,7 @@
   become: true
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
-  ansible.builtin.command: "./oscheck.sh --print-start --print-done --test-group {{ group }} {{ oscheck_extra_args }} {{ all_limit_tests }}"
+  ansible.builtin.command: "./oscheck.sh --print-start --print-done --test-group {{ group }} {{ oscheck_extra_args }} {{ blktests_all_limit_tests }}"
   failed_when: false
   no_log: true
   changed_when: true
@@ -385,9 +385,9 @@
     chdir: "{{ blktests_data_target }}"
   environment:
     TEST_DEVS: "{{ blktests_test_devs }}"
-    LIMIT_TESTS: "{{ all_limit_tests }}"
+    LIMIT_TESTS: "{{ blktests_all_limit_tests }}"
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
 
 - name: Remove watchdog hint that tests have started
   ansible.builtin.file:
@@ -396,13 +396,13 @@
   delegate_to: localhost
   tags: ["blktests", "run_tests"]
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
   run_once: true
 
 - name: Stop monitoring services and collect data
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
-    - kdevops_run_blktests|bool
+    - kdevops_run_blktests | default(false) | bool
     - enable_monitoring|default(false)|bool
   tags: ["blktests", "run_tests", "monitoring", "monitor_collect"]
 
@@ -427,7 +427,7 @@
     paths: "{{ blktests_data_target }}/results/"
     recurse: true
     patterns: "*"
-  register: last_run_results
+  register: blktests_last_run_results
 
 - name: Copy all test results
   tags: ["blktests", "copy_results"]
@@ -438,11 +438,11 @@
     src: "{{ item.path }}"
     dest: "{{ blktests_results_target }}/last-run/{{ item.path | regex_replace(blktests_data_target + 'results/' | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
-  with_items: "{{ last_run_results.files }}"
+  with_items: "{{ blktests_last_run_results.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(blktests_data_target + 'results/' | regex_escape()) | regex_replace('^/', '') }}"
   when:
-    - last_run_results.matched > 0
+    - blktests_last_run_results.matched > 0
 
 - name: Augment expunge list just run git diff after this to see new failures found
   ansible.builtin.command: ./python/workflows/blktests/augment_expunge_list.py {{ blktests_results_target }}/last-run/ {{ blktests_expunges_target }}
@@ -469,7 +469,7 @@
 - name: Print blktests new expunge files for which are not yet committed
   ansible.builtin.command: ./python/workflows/blktests/get_new_expunge_files.py {{ blktests_expunges_target }}
   delegate_to: localhost
-  register: new_expunges
+  register: blktests_new_expunges
   tags: ["blktests", "copy_results", "print_results", "augment_expunge_list"]
   run_once: true
 
@@ -477,25 +477,25 @@
   run_once: true
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   ansible.builtin.debug:
-    msg: "New expunge files found: {{ new_expunges.stdout_lines }}"
+    msg: "New expunge files found: {{ blktests_new_expunges.stdout_lines }}"
   when:
-    - new_expunges.stdout != 0
+    - blktests_new_expunges.stdout != 0
   vars:
     ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
 
 - name: Check if results directory is empty
   ansible.builtin.find:
-    paths: "{{ blktests_results_full_path }}/{{ last_kernel }}"
+    paths: "{{ blktests_results_full_path }}/{{ blktests_last_kernel }}"
     file_type: any
-  register: result_dir_check
+  register: blktests_result_dir_check
   delegate_to: localhost
   run_once: true
   tags: ["blktests", "copy_results", "augment_expunge_list"]
 
 - name: Inform user if results directory is empty
   ansible.builtin.debug:
-    msg: "Skipping compression: {{ blktests_results_full_path }}/{{ last_kernel }} is empty."
-  when: result_dir_check.matched == 0
+    msg: "Skipping compression: {{ blktests_results_full_path }}/{{ blktests_last_kernel }} is empty."
+  when: blktests_result_dir_check.matched == 0
   run_once: true
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   delegate_to: localhost
@@ -506,11 +506,11 @@
 # so we keep an archive
 - name: Compress the per-kernel results archive
   community.general.archive:
-    path: "{{ blktests_results_full_path }}/{{ last_kernel }}"
-    dest: "{{ blktests_results_full_path }}/{{ last_kernel }}.xz"
+    path: "{{ blktests_results_full_path }}/{{ blktests_last_kernel }}"
+    dest: "{{ blktests_results_full_path }}/{{ blktests_last_kernel }}.xz"
     format: xz
     mode: "0644"
-  when: result_dir_check.matched != 0
+  when: blktests_result_dir_check.matched != 0
   run_once: true
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   delegate_to: localhost

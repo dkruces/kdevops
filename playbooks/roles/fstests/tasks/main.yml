@@ -55,7 +55,7 @@
     follow: false
     owner: "{{ data_user }}"
     group: "{{ data_group }}"
-  tags: ["oscheck", "git", "fstests"]
+  tags: ["oscheck", "git", "fstests", "do_deploy"]
   when:
     - fstests_xfs_build_custom_xfsprogs|bool
     - xfsprogs_dir.stat.exists
@@ -79,21 +79,21 @@
   delay: 5
   register: result
   until: not result.failed
-  tags: ["oscheck", "git", "fstests"]
+  tags: ["oscheck", "git", "fstests", "do_fetch"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
 - name: Configure xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     target: configure
-  tags: ["oscheck", "fstests", "build"]
+  tags: ["oscheck", "fstests", "build", "do_configure"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
 - name: Build xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     jobs: "{{ nproc.stdout }}"
-  tags: ["oscheck", "fstests", "build"]
+  tags: ["oscheck", "fstests", "build", "do_compile"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
 - name: Install xfsprogs
@@ -105,7 +105,7 @@
     params:
       DIST_ROOT: "{{ fstests_xfs_xfsprogs_install_path }}"
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
-  tags: ["oscheck", "fstests", "build"]
+  tags: ["oscheck", "fstests", "build", "do_compile"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
 - name: Check if there's an existing xfsdump directory
@@ -148,12 +148,12 @@
     dest: "{{ fstests_xfsdump_data }}"
     update: true
     version: "{{ fstests_xfsdump_commit }}"
-  tags: ["fstests", "deps"]
+  tags: ["fstests", "deps", "do_fetch"]
   when:
     - fstests_xfsdump_build|bool
 
 - name: Build xfsdump
-  tags: ["fstests", "deps"]
+  tags: ["fstests", "deps", "do_compile"]
   community.general.make:
     chdir: "{{ fstests_xfsdump_data }}"
     jobs: "{{ nproc.stdout }}"
@@ -163,7 +163,7 @@
 - name: Install xfsdump
   become: true
   become_method: sudo
-  tags: ["fstests", "deps"]
+  tags: ["fstests", "deps", "do_compile"]
   community.general.make:
     chdir: "{{ fstests_xfsdump_data }}"
     target: install
@@ -178,7 +178,7 @@
     path: "/root/.bashrc"
     line: "export PATH={{ fstests_xfs_xfsprogs_install_path }}/usr/sbin/:$PATH"
     state: present
-  tags: ["oscheck", "fstests", "build"]
+  tags: ["oscheck", "fstests", "build", "do_configure"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
 - name: Create {{ truncated_path }} if needed
@@ -207,13 +207,13 @@
   delay: 5
   register: result
   until: not result.failed
-  tags: ["oscheck", "install", "git"]
+  tags: ["oscheck", "install", "git", "do_fetch"]
 
 - name: Copy over our .config
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/../.config"
     dest: "{{ kdevops_dir }}"
-  tags: ["oscheck", "install", "root", "config"]
+  tags: ["oscheck", "install", "root", "config", "do_deploy"]
 
 - name: Install kdevops as root
   become: true
@@ -249,7 +249,7 @@
     - "{{ fstests_data }}"
     - "{{ fstests_data_prefix }}"
     - "{{ fstests_data_target }}"
-  tags: ["oscheck", "git", "fstests", "build"]
+  tags: ["oscheck", "git", "fstests", "build", "do_clean"]
 
 - name: Git clone fstests
   ansible.builtin.git:
@@ -261,10 +261,10 @@
   delay: 5
   register: result
   until: not result.failed
-  tags: ["oscheck", "git", "fstests"]
+  tags: ["oscheck", "git", "fstests", "do_fetch"]
 
 - name: Create {{ fstests_data_prefix }} if it does not exist
-  tags: ["oscheck", "fstests", "install", "root"]
+  tags: ["oscheck", "fstests", "install", "root", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -290,7 +290,7 @@
   register: nproc
 
 - name: Build fstests
-  tags: ["oscheck", "fstests", "build"]
+  tags: ["oscheck", "fstests", "build", "do_compile"]
   community.general.make:
     chdir: "{{ fstests_data }}"
     jobs: "{{ nproc.stdout }}"
@@ -303,7 +303,7 @@
     dest: "/usr/lib/udev/rules.d/"
     owner: "{{ data_user }}"
     group: "{{ data_group }}"
-  tags: ["oscheck", "fstests"]
+  tags: ["oscheck", "fstests", "do_deploy"]
   when:
     - fstests_zns_enabled == "y"
     - fstests_fstyp == "btrfs"
@@ -320,7 +320,7 @@
   delay: 5
   register: result
   until: not result.failed
-  tags: ["oscheck", "install", "git", "git_update", "fstests", "run_tests"]
+  tags: ["oscheck", "install", "git", "git_update", "fstests", "run_tests", "do_fetch"]
 
 - name: Install fstests
   become: true
@@ -332,7 +332,7 @@
     chdir: "{{ fstests_data }}"
 
 - name: Add symlink for old fstests directory
-  tags: ["oscheck", "fstests", "install", "root"]
+  tags: ["oscheck", "fstests", "install", "root", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -342,7 +342,7 @@
     state: link
 
 - name: Install root generated .kdevops_fstests_setup
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -375,7 +375,7 @@
     executable: /bin/bash
 
 - name: Add symlinks for kdevops scripts for fstests
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -389,7 +389,7 @@
     - naggy-check.sh
 
 - name: Create a few directories which kdevops uses for fstests if they do not exist
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -402,7 +402,7 @@
     - fstests_testdev_sparsefile_generation|bool
 
 - name: Create a few directories which kdevops uses for fstests if they do not exist
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -420,7 +420,7 @@
   register: host_specific_fstests_config
 
 - name: Generate filesystem configuration file for debugging purposes using host specific config {{ target_config }}
-  tags: ["generate-fstests-config"]
+  tags: ["generate-fstests-config", "do_deploy"]
   vars:
     target_config: "{{ topdir_path }}/workflows/fstests/{{ fstests_fstyp }}/{{ fstests_fstyp }}.config.generated"
   ansible.builtin.template:
@@ -433,7 +433,7 @@
     - host_specific_fstests_config.stat.exists
 
 - name: Generate filesystem configuration file for debugging purposes using generic config {{ target_config }}
-  tags: ["generate-fstests-config"]
+  tags: ["generate-fstests-config", "do_deploy"]
   vars:
     target_config: "{{ topdir_path }}/workflows/fstests/{{ fstests_fstyp }}/{{ fstests_fstyp }}.config.generated"
   ansible.builtin.template:
@@ -446,7 +446,7 @@
     - not host_specific_fstests_config.stat.exists
 
 - name: Copy and force overwrite of the host specific fstests configuration
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -460,7 +460,7 @@
     - host_specific_fstests_config.stat.exists
 
 - name: Copy and force overwrite of the target filesystem fstests configuration
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -664,7 +664,7 @@
     - nvme_parts | length < 13
 
 - name: Copy and force overwrite of the target filesystem fstests configuration using NVMe partition euis
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -706,7 +706,7 @@
     - nvme_symlinks | length < 7
 
 - name: Copy and force overwrite of the target filesystem fstests configuration using NVMe euis
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -778,7 +778,7 @@
     - fstests_nfs_use_kdevops_nfsd|bool
 
 - name: Copy and force overwrite of the target filesystem fstests configuration for NFS
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -858,7 +858,7 @@
     - fstests_cifs_use_kdevops_smbd|bool
 
 - name: Copy and force overwrite of the target filesystem fstests configuration for CIFS
-  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config"]
+  tags: ["oscheck", "fstests", "run_tests", "kdevops_fstests_setup", "install", "generate-fstests-config", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -920,7 +920,7 @@
 - name: Verify section name {{ fstests_section }} exists on fstests config file
   vars:
     fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
-  tags: ["oscheck", "fstests", "run_tests", "section"]
+  tags: ["oscheck", "fstests", "run_tests", "section", "do_configure"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -1074,7 +1074,7 @@
   ansible.builtin.file:
     state: absent
     path: "{{ fstests_data_target }}/results/"
-  tags: ["oscheck", "fstests", "run_tests", "clean_results"]
+  tags: ["oscheck", "fstests", "run_tests", "clean_results", "do_clean"]
   when:
     - not fstests_initial_baseline|bool
 
@@ -1088,7 +1088,7 @@
     state: absent
   delegate_to: localhost
   run_once: true
-  tags: ["oscheck", "fstests", "copy_results", "clean_local_results"]
+  tags: ["oscheck", "fstests", "copy_results", "clean_local_results", "do_clean"]
 
 - name: Create empty last-run directory
   ansible.builtin.file:
@@ -1096,7 +1096,7 @@
     state: directory
   delegate_to: localhost
   run_once: true
-  tags: ["oscheck", "fstests", "copy_results", "clean_local_results"]
+  tags: ["oscheck", "fstests", "copy_results", "clean_local_results", "do_deploy"]
 
 - name: Get used target kernel version
   tags: ["oscheck", "fstests", "copy_results", "print_results", "augment_expunge_list"]
@@ -1308,7 +1308,7 @@
     path: "{{ fstests_workflow_dir }}/.begin"
     state: absent
   delegate_to: localhost
-  tags: ["oscheck", "fstests", "run_tests"]
+  tags: ["oscheck", "fstests", "run_tests", "do_clean"]
   when:
     - kdevops_run_fstests|bool
   run_once: true
@@ -1435,7 +1435,7 @@
     - fstests_tfp_copy_enable_list|bool
 
 - name: Truncate TFB files
-  tags: ["copy_results", "failed_tests", "tfb"]
+  tags: ["copy_results", "failed_tests", "tfb", "do_deploy"]
   become: true
   become_flags: "su - -c"
   become_method: sudo
@@ -1650,7 +1650,7 @@
     src: "{{ fstests_results_full_path }}/last-run/{{ last_kernel }}"
     dest: "{{ fstests_results_full_path }}/"
   run_once: true
-  tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list"]
+  tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list", "do_deploy"]
   delegate_to: localhost
   when:
     - last_run_kernel_dir.stat.exists

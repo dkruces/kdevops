@@ -1,7 +1,7 @@
 ---
-# fstests/localhost_prep/verify -- non-sudo precheck that the
+# fstests/runtime_deps/verify -- non-sudo precheck that the
 # python3 junitparser module is importable on the controller. When
-# missing the user runs `make fstests-localhost-prep-setup` (which
+# missing the user runs `make fstests-runtime-deps-setup` (which
 # is the sudo opt-in path) before invoking the fstests workflow.
 
 - name: Check that python3 junitparser is importable on the controller
@@ -19,7 +19,7 @@
 
       Install it with the controller-side sudo opt-in target:
 
-          make fstests-localhost-prep-setup
+          make fstests-runtime-deps-setup
 
-      See docs/fstests-localhost_prep.md.
+      See docs/fstests-runtime_deps.md.
   when: fstests_junitparser_check.rc != 0

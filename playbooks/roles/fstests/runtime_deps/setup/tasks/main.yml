@@ -1,5 +1,5 @@
 ---
-# fstests/localhost_prep/setup -- controller-side sudo opt-in.
+# fstests/runtime_deps/setup -- controller-side sudo opt-in.
 # Dispatches the distro-specific install-deps for the python3
 # junitparser module fstests uses to post-process JUnit XML
 # results.

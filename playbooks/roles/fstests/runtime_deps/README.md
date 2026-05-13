@@ -1,4 +1,4 @@
-# fstests/localhost_prep -- controller-side prep (sudo opt-in)
+# fstests/runtime_deps -- controller-side prep (sudo opt-in)
 
 ## When this matters
 
@@ -18,12 +18,12 @@ the opt-in target.
 ## The opt-in path
 
 ```
-make fstests-localhost-prep-setup
+make fstests-runtime-deps-setup
 ```
 
 Drives `playbooks/fstests.yml` with
-`--tags fstests_localhost_prep_setup` and runs the
-`playbooks/roles/fstests/localhost_prep/setup/` sub-role under
+`--tags fstests_runtime_deps_setup` and runs the
+`playbooks/roles/fstests/runtime_deps/setup/` sub-role under
 sudo on the controller. The sub-role dispatches on
 `ansible_os_family`:
 
@@ -48,7 +48,7 @@ sudo zypper install python3-junit-xml python3-pip \
 
 ## What the verify path checks
 
-`playbooks/roles/fstests/localhost_prep/verify/tasks/main.yml`
+`playbooks/roles/fstests/runtime_deps/verify/tasks/main.yml`
 runs without sudo on every `make fstests*` invocation and tries
 `python3 -c "import junitparser"`. On failure it emits the
 structured diagnostic naming the opt-in target and this document.

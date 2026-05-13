@@ -18,11 +18,6 @@ NFSD_EXTRA_ARGS += nfsd_threads=$(CONFIG_NFSD_THREADS)
 NFSD_EXTRA_ARGS += nfsd_lease_time=$(CONFIG_NFSD_LEASE_TIME)
 NFSD_EXTRA_ARGS += kdevops_nfsd_enable=True
 
-EXTRA_VAR_FRAGMENTS += $(EXTRA_VAR_FRAGMENTS_DIR)/nfsd.yml
-
-$(EXTRA_VAR_FRAGMENTS_DIR)/nfsd.yml: .config | $(EXTRA_VAR_FRAGMENTS_DIR)
-	@echo "nfsd_export_options: '$(CONFIG_NFSD_EXPORT_OPTIONS)'" > $@
-
 ANSIBLE_EXTRA_ARGS += $(NFSD_EXTRA_ARGS)
 
 nfsd:

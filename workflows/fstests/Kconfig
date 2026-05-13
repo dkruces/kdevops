@@ -98,6 +98,7 @@ endchoice
 
 config FSTESTS_FSTYP
 	string
+	output yaml
 	default "xfs" if FSTESTS_XFS
 	default "btrfs" if FSTESTS_BTRFS
 	default "ext4" if FSTESTS_EXT4
@@ -108,8 +109,25 @@ config FSTESTS_FSTYP
 	  The filesystem to test. This will be automatically set depending on
 	  the above choice, you however can override this manually.
 
-config FSTESTS_TFB_COPY_ENABLE
+config FS_CONFIG_ROLE_PATH
+	string
+	output yaml
+	default "roles/fstests/templates/xfs/xfs.config" if FSTESTS_XFS
+	default "roles/fstests/templates/btrfs/btrfs.config" if FSTESTS_BTRFS
+	default "roles/fstests/templates/ext4/ext4.config" if FSTESTS_EXT4
+	default "roles/fstests/templates/nfs/nfs.config" if FSTESTS_NFS
+	default "roles/fstests/templates/cifs/cifs.config" if FSTESTS_CIFS
+	default "roles/fstests/templates/tmpfs/tmpfs.config" if FSTESTS_TMPFS
+	help
+	  Synthetic, derived. Path to the fstests config template the role
+	  copies into the guest as <fstyp>.config. Cascades on the same
+	  filesystem choice as FSTESTS_FSTYP. Lands as fs_config_role_path
+	  in extra_vars, matching the historical consumer key in the
+	  ansible_inventory and nodes roles.
+
+config FSTESTS_TFP_COPY_ENABLE
 	bool "Enable trimming extremely large output files at copy time"
+	output yaml
 	default y
 	help
 	  Some tests may have test bugs leading to insane test *.out.bad file
@@ -639,8 +657,18 @@ config FSTESTS_TEST_LOGDEV_MKFS_OPTS
 
 endif
 
+config FSTESTS_ZNS_ENABLED
+	bool
+	output yaml
+	default y if QEMU_ENABLE_NVME_ZNS
+	help
+	  Synthetic, derived. Marks ZNS testing as active so the role
+	  can branch on it without inspecting QEMU_ENABLE_NVME_ZNS
+	  directly. Lands as fstests_zns_enabled in extra_vars.
+
 config FSTESTS_TEST_DEV_ZNS
 	string "The device to use TEST_DEV on fstests for ZNS testing"
+	output yaml
 	depends on LIBVIRT_ENABLE_ZNS
 	default "/dev/nvme4n1" if QEMU_ENABLE_NVME_ZNS
 	help

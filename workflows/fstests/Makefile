@@ -8,15 +8,6 @@ FSTESTS_BASELINE_EXTRA :=
 
 export FSTYP:=$(subst ",,$(CONFIG_FSTESTS_FSTYP))
 
-
-FSTESTS_ARGS += fstests_fstyp='$(FSTYP)'
-FS_CONFIG='$(FSTYP)/$(FSTYP).config'
-FSTESTS_ARGS += fs_config_role_path='roles/fstests/templates/$(FS_CONFIG)'
-
-ifeq (y,$(CONFIG_FSTESTS_TFB_COPY_ENABLE))
-FSTESTS_ARGS += fstests_tfp_copy_enable='True'
-endif
-
 ifeq (y,$(CONFIG_FSTESTS_XFS))
 include $(TOPDIR)/workflows/fstests/Makefile.xfs
 endif
@@ -37,10 +28,6 @@ ifeq (y,$(CONFIG_FSTESTS_TMPFS))
 include $(TOPDIR)/workflows/fstests/tmpfs/Makefile
 endif
 
-ifeq (y,$(CONFIG_QEMU_ENABLE_NVME_ZNS))
-FSTESTS_ARGS += fstests_test_dev_zns='$(subst ",,$(CONFIG_FSTESTS_TEST_DEV_ZNS))'
-FSTESTS_ARGS += fstests_zns_enabled='$(subst ",,$(CONFIG_QEMU_ENABLE_NVME_ZNS))'
-endif
 
 export FSTESTS_SPARSE_FILE_SIZE:=
 export FSTESTS_TESTDEV_SPARSEFILE_GENERATION:=
@@ -128,127 +115,116 @@ XARGS_ARGS := -I {} bash -c 'echo "{}:"; cat {}; echo;'
 endif
 endif
 
-fstests: $(FSTESTS_BASELINE_EXTRA)
-	$(Q)ansible-playbook \
-		--limit 'localhost:baseline:dev' \
+fstests: $(KDEVOPS_EXTRA_VARS) $(FSTESTS_BASELINE_EXTRA)
+	$(call run-ansible-playbook, \
+		--limit localhost:baseline:dev \
 		playbooks/fstests.yml \
-		--skip-tags run_tests,copy_results $(LIMIT_HOSTS)
+		--skip-tags run_tests$(comma)copy_results $(LIMIT_HOSTS))
 
 fstests-kdevops-setup: $(KDEVOPS_EXTRA_VARS) $(FSTESTS_BASELINE_EXTRA)
-	$(Q)ansible-playbook \
-		--limit 'baseline:dev' \
+	$(call run-ansible-playbook, \
+		--limit baseline:dev \
 		playbooks/fstests.yml \
-		--tags vars,kdevops_fstests_setup,gendisks \
-		$(LIMIT_HOSTS)
+		--tags vars$(comma)kdevops_fstests_setup$(comma)gendisks \
+		$(LIMIT_HOSTS))
 
-fstests-baseline: $(FSTESTS_BASELINE_EXTRA)
-	$(Q)PYTHONUNBUFFERED=1 ansible-playbook \
-		--limit 'baseline' \
+fstests-baseline: $(KDEVOPS_EXTRA_VARS) $(FSTESTS_BASELINE_EXTRA)
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags vars,run_tests,copy_results \
+		--tags vars$(comma)run_tests$(comma)copy_results \
 		--extra-vars '{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
-		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-baseline-skip-kdevops-update: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags run_tests,copy_results \
+		--tags run_tests$(comma)copy_results \
 		--skip-tags git_update \
-		--extra-vars \
-		'{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		--extra-vars '{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-baseline-run-oscheck-only: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags run_tests,copy_results \
-		--skip-tags git_update,reboot,clean_results \
-		--extra-vars \
-		'{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		--tags run_tests$(comma)copy_results \
+		--skip-tags git_update$(comma)reboot$(comma)clean_results \
+		--extra-vars '{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-config: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags vars,generate-fstests-config \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		--tags vars$(comma)generate-fstests-config \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-config-debug: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
+	$(call run-ansible-playbook, \
 		playbooks/fstests.yml \
 		-e 'fstests_debug_localhost=True' \
-		--tags vars,generate-fstests-config \
-		--extra-vars=@./extra_vars.yaml
+		--tags vars$(comma)generate-fstests-config \
+		--extra-vars=@./extra_vars.yaml)
 
 fstests-dev: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'dev' \
+	$(call run-ansible-playbook, \
+		--limit dev \
 		playbooks/fstests.yml \
-		--tags vars,run_tests,copy_results \
-		--extra-vars \
-		'{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
-		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+		--tags vars$(comma)run_tests$(comma)copy_results \
+		--extra-vars '{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-tests: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline:dev' \
+	$(call run-ansible-playbook, \
+		--limit baseline:dev \
 		playbooks/fstests.yml \
-		--tags vars,run_tests,copy_results \
-		--extra-vars \
-		'{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
-		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+		--tags vars$(comma)run_tests$(comma)copy_results \
+		--extra-vars '{ $(FSTESTS_DYNAMIC_RUNTIME_VARS) }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-baseline-results-tfb-ls: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags vars,tfb \
+		--tags vars$(comma)tfb \
 		--skip-tags copy_final \
-		--extra-vars \
-		'{ fstests_tfp_copy_enable_list: True }' \
-		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+		--extra-vars '{ fstests_tfp_copy_enable_list: True }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-baseline-results-tfb-trim: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags vars,tfb \
+		--tags vars$(comma)tfb \
 		--skip-tags copy_final \
-		--extra-vars \
-		'{ fstests_tfp_copy_enable: True }' \
-		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS)
+		--extra-vars '{ fstests_tfp_copy_enable: True }' \
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-baseline-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'baseline' \
+	$(call run-ansible-playbook, \
+		--limit baseline \
 		playbooks/fstests.yml \
-		--tags copy_results,print_results,tfb \
+		--tags copy_results$(comma)print_results$(comma)tfb \
 		--extra-vars '{ kdevops_run_fstests: True }' \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 fstests-results: fstests-baseline-results
 
 fstests-dev-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
-		--limit 'dev' \
+	$(call run-ansible-playbook, \
+		--limit dev \
 		playbooks/fstests.yml \
-		--tags copy_results,print_results \
+		--tags copy_results$(comma)print_results \
 		--extra-vars '{ kdevops_run_fstests: True }' \
-		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		--extra-vars=@./extra_vars.yaml $(LIMIT_HOSTS))
 
 monitor-results: $(KDEVOPS_EXTRA_VARS)
-	$(Q)ansible-playbook \
+	$(call run-ansible-playbook, \
 		playbooks/monitor-results.yml \
 		--extra-vars=@./extra_vars.yaml \
-		$(LIMIT_HOSTS)
+		$(LIMIT_HOSTS))
 
 fstests-show-results:
 	@find $(FIND_PATH) -type f $(PATTERN) \

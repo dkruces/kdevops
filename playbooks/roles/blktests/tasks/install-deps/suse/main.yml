@@ -65,7 +65,7 @@
 
 - name: Install NVMe tools
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - nvme-cli
@@ -76,7 +76,7 @@
 
 - name: Install build dependencies for blktests
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - bison
@@ -121,7 +121,7 @@
 
 - name: Install tumblweed packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm6
@@ -132,7 +132,7 @@
 
 - name: Install leap packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm4
@@ -144,7 +144,7 @@
 
 - name: Install libgdbm4
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm4
@@ -157,7 +157,7 @@
 # as it is required...
 - name: Install autoconf-archive for building nbd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - autoconf-archive
@@ -178,7 +178,7 @@
 
 - name: Add benchmark sles12sp5 opensuse repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_12_SP5/ benchmark benchmark"
   when:
@@ -186,7 +186,7 @@
 
 - name: Add benchmark sles15sp2 opensuse repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP2/ benchmark benchmark"
   when:
@@ -194,7 +194,7 @@
 
 - name: Add benchmark sles15sp3 opensuse repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP3/ benchmark benchmark"
   when:
@@ -202,7 +202,7 @@
 
 - name: Install dbench when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - dbench
@@ -222,7 +222,7 @@
 
 - name: Install build dependencies for nbd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - glib2-devel
@@ -285,7 +285,7 @@
 - name: Install nbd
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "{{  make }} install"
   tags: ["git", "blktests", "nbd"]
   args:

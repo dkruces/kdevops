@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -18,7 +18,7 @@
 - ansible.builtin.include_tasks: install-deps/main.yml
 - name: Git clone kdevops
   environment:
-    GIT_SSL_NO_VERIFY: true
+    GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
     repo: "{{ kdevops_git }}"
     dest: "{{ kdevops_data }}"
@@ -47,7 +47,7 @@
 - name: Remove any old blktrace as we always clone a fresh tree
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ blktrace_data }}"
     state: absent
@@ -75,7 +75,7 @@
 - name: Install blktrace
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "{{  make }} install"
   tags: ["blktests", "install", "root", "blktrace", "do_install"]
   args:
@@ -84,7 +84,7 @@
 - name: Remove any old blktets as we always clone a fresh tree
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: "{{ blktests_data }}"
     state: absent
@@ -107,7 +107,7 @@
 - name: Install blktests
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "{{  make }} install"
   tags: ["blktests", "install", "root", "do_install"]
   args:
@@ -115,7 +115,7 @@
 
 - name: Git pull latest kdevops to ensure expunge list is up to date
   environment:
-    GIT_SSL_NO_VERIFY: true
+    GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
     repo: "{{ kdevops_git }}"
     dest: "{{ kdevops_data }}"
@@ -125,7 +125,7 @@
 
 - name: Create a symbolic links needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     src: "{{ kdevops_dir }}/workflows/blktests/scripts/{{ item }}"
     dest: "{{ blktests_data_target }}/{{ item }}"
@@ -138,7 +138,7 @@
 
 - name: Disable multipathd service for srp blktests tests
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: multipathd
     enabled: false
@@ -148,7 +148,7 @@
 - name: Reboot system before our test so we know everything is sane
   tags: ["blktests", "run_tests", "reboot"]
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.reboot:
     post_reboot_delay: 10
 
@@ -201,7 +201,7 @@
   tags: ["blktests", "run_tests", "configfs"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "modprobe configfs"
   when:
     - kdevops_run_blktests|bool
@@ -209,7 +209,7 @@
 - name: Clear out old results directory on target hosts
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     state: absent
     path: "{{ blktests_data_target }}/results/"
@@ -236,7 +236,7 @@
   tags: ["blktests", "run_tests"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "test -e {{ verify_dev_list }}"
   when:
     - kdevops_run_blktests|bool
@@ -248,7 +248,7 @@
   tags: ["blktests", "run_tests"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "test -b {{ verify_dev_list }}"
   when:
     - kdevops_run_blktests|bool
@@ -275,7 +275,7 @@
 - name: Enable low-level messages on console
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: sysctl kernel.printk="8 8 1 7"
 - name: Check to see if dynamic test limit scope was set
   ansible.builtin.set_fact:
@@ -371,10 +371,11 @@
   tags: ["blktests", "run_tests"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.command: "./oscheck.sh --print-start --print-done --test-group {{ group }} {{ oscheck_extra_args }} {{ all_limit_tests }}"
-  ignore_errors: true
+  failed_when: false
   no_log: true
+  changed_when: true
   args:
     chdir: "{{ blktests_data_target }}"
   environment:
@@ -416,7 +417,7 @@
   tags: ["blktests", "copy_results"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.find:
     paths: "{{ blktests_data_target }}/results/"
     recurse: true
@@ -427,7 +428,7 @@
   tags: ["blktests", "copy_results"]
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.fetch:
     src: "{{ item.path }}"
     dest: "{{ blktests_results_target }}/last-run/{{ item.path | regex_replace(blktests_data_target + 'results/' | regex_escape()) | regex_replace('^/', '') }}"

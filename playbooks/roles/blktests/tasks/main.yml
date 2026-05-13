@@ -68,6 +68,7 @@
   ansible.builtin.command: "{{ num_jobs }}"
   tags: ["blktests", "build", "bltkrace"]
   register: blktests_nproc
+  changed_when: false
 
 - name: Build blktrace
   tags: ["blktests", "build", "bltkrace", "do_compile"]
@@ -83,6 +84,7 @@
   tags: ["blktests", "install", "root", "blktrace", "do_install"]
   args:
     chdir: "{{ blktrace_data }}"
+  changed_when: true
 
 - name: Remove any old blktets as we always clone a fresh tree
   become: true
@@ -115,6 +117,7 @@
   tags: ["blktests", "install", "root", "do_install"]
   args:
     chdir: "{{ blktests_data }}"
+  changed_when: true
 
 - name: Git pull latest kdevops to ensure expunge list is up to date
   environment:
@@ -179,6 +182,7 @@
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   ansible.builtin.command: "uname -r"
   register: blktests_uname_cmd
+  changed_when: false
 
 - name: Store last kernel variable
   ansible.builtin.set_fact:
@@ -200,6 +204,7 @@
   delegate_to: localhost
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   run_once: true
+  changed_when: false
 
 - name: Load configfs module
   tags: ["blktests", "run_tests", "configfs"]
@@ -209,6 +214,7 @@
   ansible.builtin.command: "modprobe configfs"
   when:
     - kdevops_run_blktests | default(false) | bool
+  changed_when: true
 
 - name: Clear out old results directory on target hosts
   become: true
@@ -245,6 +251,7 @@
   when:
     - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs|length != 0
+  changed_when: false
 
 - name: Verify target test devices are block devices {{ blktests_test_devs }}
   vars:
@@ -258,6 +265,7 @@
     - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs is defined
     - blktests_test_devs|length != 0
+  changed_when: false
 
 - name: Hint to watchdog tests are about to kick off
   ansible.builtin.file:
@@ -282,6 +290,7 @@
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
   ansible.builtin.command: sysctl kernel.printk="8 8 1 7"
+  changed_when: true
 - name: Check to see if dynamic test limit scope was set
   ansible.builtin.set_fact:
     blktests_dynamic_limit_tests: "{{ lookup('ansible.builtin.env', 'LIMIT_TESTS') }}"
@@ -331,6 +340,7 @@
   when:
     - run_tests_on_failures | default(false) | bool
     - kdevops_run_blktests | default(false) | bool
+  changed_when: true
 
 - name: Inform user no failures are known
   ansible.builtin.fail:
@@ -449,6 +459,7 @@
   delegate_to: localhost
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   run_once: true
+  changed_when: true
 
 - name: Copy last-run files to results directory for target kernel and in place only bad and dmesg files
   ansible.builtin.command: ./python/workflows/blktests/gen-results-dir.py
@@ -457,6 +468,7 @@
   run_once: true
   when:
     - not blktests_results_all
+  changed_when: true
 
 - name: Copy all last-run files to results directory for full results
   ansible.builtin.command: ./python/workflows/blktests/gen-results-dir.py --copy-all
@@ -465,6 +477,7 @@
   run_once: true
   when:
     - blktests_results_all | bool
+  changed_when: true
 
 - name: Print blktests new expunge files for which are not yet committed
   ansible.builtin.command: ./python/workflows/blktests/get_new_expunge_files.py {{ blktests_expunges_target }}
@@ -472,6 +485,7 @@
   register: blktests_new_expunges
   tags: ["blktests", "copy_results", "print_results", "augment_expunge_list"]
   run_once: true
+  changed_when: false
 
 - name: Inform user if new expunge files have been found
   run_once: true

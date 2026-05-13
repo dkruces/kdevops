@@ -265,17 +265,20 @@
   tags: ["blktests", "nbd"]
   args:
     chdir: "{{ nbd_data }}"
+  changed_when: true
 
 - name: Run configure for nbd
   ansible.builtin.command: "./configure"
   tags: ["blktests", "nbd"]
   args:
     chdir: "{{ nbd_data }}"
+  changed_when: true
 
 - name: Get blktests_nproc
   ansible.builtin.command: "{{ num_jobs }}"
   tags: ["git", "blktests", "nbd"]
   register: blktests_nproc
+  changed_when: false
 
 - name: Build nbd
   tags: ["git", "blktests", "nbd"]
@@ -291,3 +294,4 @@
   tags: ["git", "blktests", "nbd"]
   args:
     chdir: "{{ nbd_data }}"
+  changed_when: true

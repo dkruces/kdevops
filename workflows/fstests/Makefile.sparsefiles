@@ -19,7 +19,7 @@ FSTESTS_SCRATCH_DEVPOOL_RTLOGDEV=$(subst ",,$(CONFIG_FSTESTS_SCRATCH_DEV_POOL_RT
 FSTESTS_ARGS_SEPARATED += fstests_scratch_devpool_rtlogdev='$(subst $(space),+,$(FSTESTS_SCRATCH_DEVPOOL_RTLOGDEV))'
 
 SPARSE_GEN:=$(subst ",,$(CONFIG_FSTESTS_TESTDEV_SPARSEFILE_GENERATION))
-FSTESTS_ARGS += sparsefiles_generation='$(SPARSE_GEN)'
+FSTESTS_ARGS += fstests_sparsefiles_generation='$(SPARSE_GEN)'
 
 export FSTESTS_TESTDEV_SPARSEFILE_GENERATION:=y
 SPARSE_DEV:=$(subst ",,$(CONFIG_FSTESTS_SPARSE_DEV))
@@ -32,17 +32,17 @@ export FSTESTS_RUN_LARGE_DISK_TESTS:=$(subst ",,$(CONFIG_FSTESTS_RUN_LARGE_DISK_
 export FSTESTS_RUN_AUTO_GROUP_TESTS:=$(subst ",,$(CONFIG_FSTESTS_RUN_AUTO_GROUP_TESTS))
 export FSTESTS_RUN_CUSTOM_GROUP_TESTS:=$(subst ",,$(CONFIG_FSTESTS_RUN_CUSTOM_GROUP_TESTS))
 
-FSTESTS_ARGS += sparsefiles_device='$(SPARSE_DEV)'
-FSTESTS_ARGS += sparsefiles_path='$(FSTESTS_SPARSE_FILE_PATH)'
-FSTESTS_ARGS += sparsefiles_fstype='$(SPARSE_FSTYPE)'
-FSTESTS_ARGS += sparsefiles_label='$(SPARSE_LABEL)'
-FSTESTS_ARGS += sparsefiles_fs_opts='-L$(SPARSE_LABEL)'
-FSTESTS_ARGS += sparsefiles_size='$(FSTESTS_SPARSE_FILE_SIZE)'
-FSTESTS_ARGS += sparsefiles_filename_prefix='$(FSTESTS_SPARSE_FILENAME_PREFIX)'
-FSTESTS_ARGS += run_large_disk_tests='$(FSTESTS_RUN_LARGE_DISK_TESTS)'
-FSTESTS_ARGS += run_auto_group_tests='$(FSTESTS_RUN_AUTO_GROUP_TESTS)'
-FSTESTS_ARGS += run_custom_group_tests='$(FSTESTS_RUN_CUSTOM_GROUP_TESTS)'
-FSTESTS_ARGS += exclude_test_groups='$(CONFIG_FSTESTS_EXCLUDE_TEST_GROUPS)'
+FSTESTS_ARGS += fstests_sparsefiles_device='$(SPARSE_DEV)'
+FSTESTS_ARGS += fstests_sparsefiles_path='$(FSTESTS_SPARSE_FILE_PATH)'
+FSTESTS_ARGS += fstests_sparsefiles_fstype='$(SPARSE_FSTYPE)'
+FSTESTS_ARGS += fstests_sparsefiles_label='$(SPARSE_LABEL)'
+FSTESTS_ARGS += fstests_sparsefiles_fs_opts='-L$(SPARSE_LABEL)'
+FSTESTS_ARGS += fstests_sparsefiles_size='$(FSTESTS_SPARSE_FILE_SIZE)'
+FSTESTS_ARGS += fstests_sparsefiles_filename_prefix='$(FSTESTS_SPARSE_FILENAME_PREFIX)'
+FSTESTS_ARGS += fstests_run_large_disk_tests='$(FSTESTS_RUN_LARGE_DISK_TESTS)'
+FSTESTS_ARGS += fstests_run_auto_group_tests='$(FSTESTS_RUN_AUTO_GROUP_TESTS)'
+FSTESTS_ARGS += fstests_run_custom_group_tests='$(FSTESTS_RUN_CUSTOM_GROUP_TESTS)'
+FSTESTS_ARGS += fstests_exclude_test_groups='$(CONFIG_FSTESTS_EXCLUDE_TEST_GROUPS)'
 
 ifeq (y,$(CONFIG_FSTESTS_ENABLE_SOAK_DURATION))
 FSTESTS_ARGS += fstests_soak_duration_enable='True'
@@ -51,7 +51,7 @@ FSTESTS_ARGS += fstests_soak_duration='$(CONFIG_FSTESTS_SOAK_DURATION)'
 
 ifeq (y,$(CONFIG_FSTESTS_ENABLE_RUN_CUSTOM_TESTS))
 export FSTESTS_CUSTOM_TESTS:=$(subst ",,$(CONFIG_FSTESTS_RUN_CUSTOM_TESTS))
-FSTESTS_ARGS_SEPARATED += limit_tests='$(subst $(space),+,$(FSTESTS_CUSTOM_TESTS))'
+FSTESTS_ARGS_SEPARATED += fstests_limit_tests='$(subst $(space),+,$(FSTESTS_CUSTOM_TESTS))'
 endif
 
 FSTESTS_SCRATCH_DEVPOOL=$(subst ",,$(CONFIG_FSTESTS_SCRATCH_DEV_POOL))

@@ -41,7 +41,7 @@
 
 - name: Get fstests_nproc
   tags: ["oscheck", "fstests", "build"]
-  ansible.builtin.command: "fstests_nproc"
+  ansible.builtin.command: "nproc"
   register: fstests_nproc
   changed_when: false
 
@@ -190,13 +190,13 @@
   ansible.builtin.include_role:
     name: create_partition
   vars:
-    fstests_disk_setup_device: "{{ sparsefiles_device }}"
-    fstests_disk_setup_fstype: "{{ sparsefiles_fstype }}"
-    fstests_disk_setup_label: "{{ sparsefiles_label }}"
-    fstests_disk_setup_fs_opts: "{{ sparsefiles_fs_opts }}"
-    fstests_disk_setup_path: "{{ sparsefiles_path }}"
-    fstests_disk_setup_user: "{{ data_user }}"
-    fstests_disk_setup_group: "{{ data_group }}"
+    disk_setup_device: "{{ fstests_sparsefiles_device }}"
+    disk_setup_fstype: "{{ fstests_sparsefiles_fstype }}"
+    disk_setup_label: "{{ fstests_sparsefiles_label }}"
+    disk_setup_fs_opts: "{{ fstests_sparsefiles_fs_opts }}"
+    disk_setup_path: "{{ fstests_sparsefiles_path }}"
+    disk_setup_user: "{{ data_user }}"
+    disk_setup_group: "{{ data_group }}"
   tags: ["oscheck", "sparse_partition"]
   when:
     - fstests_testdev_sparsefile_generation|bool
@@ -297,7 +297,7 @@
 
 - name: Get fstests_nproc
   tags: ["oscheck", "fstests", "build"]
-  ansible.builtin.command: "fstests_nproc"
+  ansible.builtin.command: "nproc"
   register: fstests_nproc
   changed_when: false
 
@@ -354,7 +354,6 @@
     src: "{{ fstests_data_prefix }}/xfstests"
     dest: "{{ fstests_data_target }}"
     state: link
-    mode: "0644"
 
 - name: Install root generated .fstests_setup
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "do_deploy"]
@@ -399,7 +398,6 @@
     src: "{{ kdevops_data }}/workflows/fstests/scripts/{{ item }}"
     dest: "{{ fstests_data_target }}/{{ item }}"
     state: link
-    mode: "0644"
   with_items:
     - gendisks.sh
     - oscheck.sh
@@ -415,7 +413,7 @@
     state: directory
     mode: "0755"
   with_items:
-    - "{{ sparsefiles_path }}"
+    - "{{ fstests_sparsefiles_path }}"
   when:
     - fstests_testdev_sparsefile_generation|bool
 
@@ -978,9 +976,9 @@
     chdir: "{{ fstests_data_target }}"
   environment:
     FSTYP: "{{ fstests_fstyp }}"
-    FSTESTS_SPARSE_FILE_PATH: "{{ sparsefiles_path }}"
+    FSTESTS_SPARSE_FILE_PATH: "{{ fstests_sparsefiles_path }}"
     FSTESTS_SETUP_SYSTEM: "{{ fstests_setup_system }}"
-    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ fstests_sparsefiles_generation }}"
+    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ 'y' if fstests_testdev_sparsefile_generation | default(false) | bool else 'n' }}"
     FSTESTS_SPARSE_FILE_SIZE: "{{ fstests_sparsefiles_size }}"
     FSTESTS_SPARSE_FILENAME_PREFIX: "{{ fstests_sparsefiles_filename_prefix }}"
     TEST_DEV: "{{ fstests_test_dev }}"
@@ -1014,9 +1012,9 @@
     chdir: "{{ fstests_data_target }}"
   environment:
     FSTYP: "{{ fstests_fstyp }}"
-    FSTESTS_SPARSE_FILE_PATH: "{{ sparsefiles_path }}"
+    FSTESTS_SPARSE_FILE_PATH: "{{ fstests_sparsefiles_path }}"
     FSTESTS_SETUP_SYSTEM: "{{ fstests_setup_system }}"
-    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ fstests_sparsefiles_generation }}"
+    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ 'y' if fstests_testdev_sparsefile_generation | default(false) | bool else 'n' }}"
     FSTESTS_SPARSE_FILE_SIZE: "{{ fstests_sparsefiles_size }}"
     FSTESTS_SPARSE_FILENAME_PREFIX: "{{ fstests_sparsefiles_filename_prefix }}"
     TEST_DEV: "{{ fstests_test_dev }}"
@@ -1292,7 +1290,7 @@
 # Recent environments runs are showing that environment variables
 # set below are not propagated. So best to stuff what you need
 # into the .fstests_setup file which is sourced by root.
-- name: Run fstests using ./oscheck.sh --print-start --journal {{ fstests_journal }} --print-done --test-section {{ fstests_section }} {{ oscheck_extra_args }} {{
+- name: Run fstests using ./oscheck.sh --print-start --journal {{ fstests_journal }} --print-done --test-section {{ fstests_section }} {{ oscheck_extra_args | default('') }} {{
     fstests_all_limit_tests }}
   vars:
     fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
@@ -1309,7 +1307,7 @@
       --journal {{ fstests_journal }}
       --test-section
       {{ fstests_section }}
-      {{ oscheck_extra_args }}
+      {{ oscheck_extra_args | default('') }}
       {{ fstests_all_limit_tests }}
       {{ initial_baseline_expunges }}
       {{ skip_tests_args }}
@@ -1320,10 +1318,10 @@
     chdir: "{{ fstests_data_target }}"
   environment:
     FSTYP: "{{ fstests_fstyp }}"
-    FSTESTS_SPARSE_FILE_PATH: "{{ sparsefiles_path }}"
+    FSTESTS_SPARSE_FILE_PATH: "{{ fstests_sparsefiles_path }}"
     FSTESTS_SETUP_SYSTEM: "{{ fstests_setup_system }}"
     FSTESTS_LINUX_LOCALVERSION: "{{ target_linux_localversion | default('') }}"
-    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ fstests_sparsefiles_generation }}"
+    FSTESTS_TESTDEV_SPARSEFILE_GENERATION: "{{ 'y' if fstests_testdev_sparsefile_generation | default(false) | bool else 'n' }}"
     FSTESTS_SPARSE_FILE_SIZE: "{{ fstests_sparsefiles_size }}"
     FSTESTS_SPARSE_FILENAME_PREFIX: "{{ fstests_sparsefiles_filename_prefix }}"
     FSTESTS_RUN_LARGE_DISK_TESTS: "{{ fstests_run_large_disk_tests | default('') }}"

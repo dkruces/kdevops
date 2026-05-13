@@ -389,6 +389,7 @@ choice
 
 config FSTESTS_TESTDEV_SPARSEFILE_GENERATION
 	bool "Create sparse files for test devices"
+	output yaml
 	select FSTESTS_GENERATE_SIMPLE_CONFIG_ENABLE
 	help
 	  When testing a filesystem with fstests you must provide the

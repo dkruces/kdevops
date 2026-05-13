@@ -8,16 +8,29 @@
         - "../extra_vars.yaml"
         - "../extra_vars.json"
       skip: true
-  tags: vars
+  tags: [always]
 
-- name: Include monitor_run tasks
+- name: Start monitors at the workload boundary
   ansible.builtin.include_tasks: monitor_run.yml
-  when:
-    - enable_monitoring | default(false) | bool
-  tags: ["monitoring", "monitor_run"]
+  when: enable_monitoring | default(false) | bool
+  tags: [do_run]
 
-- name: Include monitor_collect tasks
+- name: Collect monitor data at the workload boundary
   ansible.builtin.include_tasks: monitor_collect.yml
-  when:
-    - enable_monitoring | default(false) | bool
-  tags: ["monitoring", "monitor_collect"]
+  when: enable_monitoring | default(false) | bool
+  tags: [do_collect]
+
+- name: Collect interim monitor data without stopping (monitoring-results)
+  ansible.builtin.include_tasks:
+    file: monitor_collect_only.yml
+    apply:
+      tags: [do_collect, monitoring_results]
+  when: enable_monitoring | default(false) | bool
+  tags: [never, monitoring_results]
+
+- name: Stop monitors and remove collected data (monitoring-cleanup)
+  ansible.builtin.include_tasks:
+    file: monitor_cleanup.yml
+    apply:
+      tags: [do_clean, monitoring_cleanup]
+  tags: [never, monitoring_cleanup]

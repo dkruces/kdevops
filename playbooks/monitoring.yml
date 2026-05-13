@@ -1,0 +1,22 @@
+---
+# SPDX-License-Identifier: copyleft-next-0.3.1
+- name: Run the kdevops monitoring module
+  hosts: baseline:dev
+  become: true
+  become_flags: "su - -c"
+  become_method: ansible.builtin.sudo
+  tasks:
+    - name: Import optional extra_args file
+      ansible.builtin.include_vars: "{{ item }}"
+      failed_when: false
+      with_first_found:
+        - files:
+            - "../extra_vars.yml"
+            - "../extra_vars.yaml"
+            - "../extra_vars.json"
+          skip: true
+      tags: [always]
+
+    - name: Run the monitoring role
+      ansible.builtin.include_role:
+        name: monitoring

@@ -1,0 +1,55 @@
+---
+- name: Find all fragmentation monitoring processes
+  ansible.builtin.command: pgrep --full fragmentation_tracker.py
+  register: monitoring_fragmentation_pids
+  changed_when: false
+  failed_when: false
+
+- name: Kill fragmentation monitoring processes
+  ansible.builtin.command: pkill --full fragmentation_tracker.py
+  register: monitoring_kill_fragmentation
+  failed_when: false
+  changed_when: monitoring_kill_fragmentation.rc == 0
+  when: monitoring_fragmentation_pids.rc == 0
+
+- name: Find all folio migration monitoring processes
+  ansible.builtin.command: pgrep --full "while.*folio_migration"
+  register: monitoring_folio_pids
+  changed_when: false
+  failed_when: false
+
+- name: Kill folio migration monitoring processes
+  ansible.builtin.command: pkill --full "while.*folio_migration"
+  register: monitoring_kill_folio
+  failed_when: false
+  changed_when: monitoring_kill_folio.rc == 0
+  when: monitoring_folio_pids.rc == 0
+
+- name: Remove monitoring PID files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /root/monitoring/fragmentation.pid
+    - /root/monitoring/folio_migration.pid
+
+- name: Check if monitoring directory exists
+  ansible.builtin.stat:
+    path: /root/monitoring
+  register: monitoring_dir
+
+- name: Remove monitoring data directory
+  ansible.builtin.file:
+    path: /root/monitoring
+    state: absent
+  when:
+    - monitoring_dir.stat.exists | default(false)
+    - enable_monitoring_cleanup | default(true) | bool
+
+- name: Remove local monitoring results directory
+  ansible.builtin.file:
+    path: "{{ topdir_path }}/workflows/build-linux/results/monitoring"
+    state: absent
+  delegate_to: localhost
+  become: false
+  when: enable_monitoring_cleanup | default(true) | bool

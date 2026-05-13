@@ -40,7 +40,7 @@
   ansible.builtin.copy:
     src: fragmentation_snapshot.py
     dest: /opt/fragmentation/fragmentation_snapshot.py
-    mode: '0755'
+    mode: "0755"
   when:
     - monitor_developmental_stats | default(false) | bool
     - monitor_memory_fragmentation | default(false) | bool
@@ -83,7 +83,7 @@
     - monitor_folio_migration | default(false) | bool
     - monitoring_folio_migration_data_file.stat.exists | default(false)
 
-# Plot generation happens on localhost, not on target hosts
+  # Plot generation happens on localhost, not on target hosts
   changed_when: true
 
 - name: Debug monitoring collection status
@@ -198,7 +198,7 @@
   ansible.builtin.copy:
     src: plot_migration_stats.py
     dest: "{{ monitoring_results_path }}/plot_migration_stats.py"
-    mode: '0755'
+    mode: "0755"
   delegate_to: localhost
   run_once: true
   when:

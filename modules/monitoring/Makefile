@@ -2,14 +2,14 @@
 
 monitoring-results: $(KDEVOPS_EXTRA_VARS)
 	$(call run-ansible-playbook, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/monitor-results.yml \
-		--extra-vars=@./extra_vars.yaml)
+		$(KDEVOPS_PLAYBOOKS_DIR)/monitoring.yml \
+		--extra-vars=@./extra_vars.yaml --tags monitoring_results)
 PHONY += monitoring-results
 
 monitoring-cleanup: $(KDEVOPS_EXTRA_VARS)
 	$(call run-ansible-playbook, \
-		$(KDEVOPS_PLAYBOOKS_DIR)/monitor-kill.yml \
-		--extra-vars=@./extra_vars.yaml)
+		$(KDEVOPS_PLAYBOOKS_DIR)/monitoring.yml \
+		--extra-vars=@./extra_vars.yaml --tags monitoring_cleanup)
 PHONY += monitoring-cleanup
 
 monitoring-help-menu:

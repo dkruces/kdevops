@@ -23,7 +23,7 @@
   ansible.builtin.file:
     path: "{{ monitoring_results_path }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   delegate_to: localhost
   run_once: true
   become: false

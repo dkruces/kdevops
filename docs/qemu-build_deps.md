@@ -33,8 +33,8 @@ The role dispatches on `ansible_facts['os_family']`:
 - `Suse` → zypper install, with SLE/Leap/Tumbleweed-specific tweaks
   to handle `acpica` packaging differences.
 
-After the install you can run `make qemu` (or `make bringup` with
-`CONFIG_QEMU_BUILD=y`) and the build runs cleanly without sudo.
+After the install you can run `make qemu` and the build runs
+cleanly without sudo.
 
 ## The manual path
 
@@ -77,8 +77,8 @@ the system toolchain.
 ## What the verify path checks
 
 `playbooks/roles/qemu/build_deps/verify/tasks/main.yml` runs
-without sudo on every `make qemu` (or `make bringup` with
-`CONFIG_QEMU_BUILD=y`) and stats the controller's `PATH` for
+without sudo on every `make qemu` and stats the controller's
+`PATH` for
 `meson`, `ninja`, `pkg-config`, and `cc`. When any of those four
 is missing the role fails with:
 

@@ -34,8 +34,4 @@ qemu-help-menu:
 
 HELP_TARGETS += qemu-help-menu
 
-# Hooked into bringup-early so bare `make` does not trigger a
-# heavy controller-side build; explicit `make qemu` still works.
-KDEVOPS_BRING_UP_DEPS_EARLY += qemu
-
 include modules/qemu/build_deps/Makefile

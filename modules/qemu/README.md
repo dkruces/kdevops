@@ -23,10 +23,11 @@ locally-built binary.
 | Re-run only the configure step | `make qemu-configure` | no sudo |
 | Re-run only the build step | `make qemu-build` | no sudo |
 
-`make qemu` is invoked automatically from `make bringup` via
-`KDEVOPS_BRING_UP_DEPS_EARLY` when `CONFIG_QEMU_BUILD=y`. ninja's
-own dependency graph handles incremental rebuilds; a no-op walks
-the graph and exits in seconds.
+`make qemu` is explicit: `make bringup` does not invoke it. Users
+who flip `CONFIG_QEMU_BUILD=y` run `make qemu` before `make
+bringup` so the libvirt domain XML can point at the controller-
+built binary. ninja's own dependency graph handles incremental
+rebuilds; a no-op walks the graph and exits in seconds.
 
 ## Configuration
 

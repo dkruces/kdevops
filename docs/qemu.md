@@ -35,11 +35,11 @@ make defconfig-<workflow>
 make
 make qemu-build-deps-setup     # one-time, sudo on the controller
 make qemu                      # explicit no-sudo build
-make bringup                   # pulls in `make qemu` via
-                               # KDEVOPS_BRING_UP_DEPS_EARLY
+make bringup                   # spawns VMs against the qemu-destdir binary
 ```
 
-`make qemu` is idempotent: ninja's source-level dependency tracking
+`make qemu` is explicit: `make bringup` does not auto-invoke it.
+ninja's source-level dependency tracking
 catches "nothing to do" and exits in seconds. After the first
 build, subsequent invocations rebuild only what actually changed.
 

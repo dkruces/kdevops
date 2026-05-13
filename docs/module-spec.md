@@ -452,8 +452,13 @@ A module's variables that flow to ansible MUST be declared with
 `output yaml` in the module's Kconfig and reach `extra_vars.yaml`
 through the kconfig solver. The Makefile MUST NOT push those values
 into ansible by any other path: no `ANSIBLE_EXTRA_ARGS += foo=$(CONFIG_X)`
-appends, no `EXTRA_VAR_FRAGMENTS` writes under `.extra_vars.d/`, no
-inline `--extra-vars foo=...` on the `ansible-playbook` command line.
+appends, no `EXTRA_VAR_FRAGMENTS` writes under `.extra_vars.d/` for
+static, Kconfig-derived values, no inline `--extra-vars foo=...` on
+the `ansible-playbook` command line. The fragment mechanism survives
+only for genuinely dynamic content (a user-supplied yaml file
+inlined verbatim, runtime-detected PCIe device topology) — once
+those producers also flow through Kconfig (or `--extra-vars=@<file>`
+loading), the infrastructure disappears.
 Make-side variables are still fine for Make-time use (prerequisite
 target names, recipe wiring) — they just don't get a second life as
 ansible vars. Commit `373df3ee` ("linux-mirror: migrate all mirror

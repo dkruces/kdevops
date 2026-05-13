@@ -246,6 +246,7 @@
   ansible.builtin.file:
     path: "{{ nbd_data }}/man/{{ item }}"
     state: touch
+    mode: "0644"
   with_items:
     - "nbd-client.8.sh.in"
     - "nbd-server.5.sh.in"

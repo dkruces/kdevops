@@ -10,12 +10,14 @@
       skip: true
   tags: vars
 
-- ansible.builtin.include_role:
+- name: Set up the /data partition the blktests workflow stores trees in
+  ansible.builtin.include_role:
     name: create_data_partition
   tags: ["data_partition"]
 
-# Distro specific
-- ansible.builtin.include_tasks: install-deps/main.yml
+- name: Install blktests build and runtime dependencies
+  ansible.builtin.include_tasks: install-deps/main.yml
+
 - name: Git clone kdevops
   environment:
     GIT_SSL_NO_VERIFY: "true"
@@ -30,6 +32,7 @@
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/../.config"
     dest: "{{ kdevops_dir }}"
+    mode: "0644"
   tags: ["install", "root", "config", "do_deploy"]
 
 # We do this *after* the /data/ partition is set up so
@@ -183,12 +186,13 @@
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   run_once: true
 
-- name: Create {{ blktests_results_target }} if it does not exist
+- name: Create the local results directory if it does not exist
   tags: ["blktests", "copy_results", "augment_expunge_list"]
   delegate_to: localhost
   ansible.builtin.file:
     path: "{{ blktests_results_target }}"
     state: directory
+    mode: "0755"
   run_once: true
 
 - name: Document used target kernel version
@@ -259,14 +263,15 @@
   ansible.builtin.file:
     path: "{{ blktests_workflow_target }}/.begin"
     state: touch
+    mode: "0644"
   delegate_to: localhost
   tags: ["blktests", "run_tests"]
   when:
     - kdevops_run_blktests|bool
   run_once: true
 
-# Start monitoring services before running tests
-- ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
+- name: Start the monitoring services on the test hosts
+  ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
     - kdevops_run_blktests|bool
     - enable_monitoring|default(false)|bool
@@ -394,8 +399,8 @@
     - kdevops_run_blktests|bool
   run_once: true
 
-# Stop monitoring services and collect data after running tests
-- ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
+- name: Stop monitoring services and collect data
+  ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
     - kdevops_run_blktests|bool
     - enable_monitoring|default(false)|bool
@@ -499,11 +504,12 @@
 
 # You are encouraged to commit the compressed results of failed tests
 # so we keep an archive
-- name: Compress results {{ blktests_results_full_path }}{{ last_kernel }}.xz
+- name: Compress the per-kernel results archive
   community.general.archive:
     path: "{{ blktests_results_full_path }}/{{ last_kernel }}"
     dest: "{{ blktests_results_full_path }}/{{ last_kernel }}.xz"
     format: xz
+    mode: "0644"
   when: result_dir_check.matched != 0
   run_once: true
   tags: ["blktests", "copy_results", "augment_expunge_list"]

@@ -18,7 +18,7 @@ import os
 import sys
 import time
 from datetime import datetime
-from junitparser import JUnitXml, Property, Properties, Failure, Error, Skipped
+from junitparser import JUnitXml, Property, Properties, Failure, Error, Skipped, TestSuite
 
 
 def get_results(dirroot, results_file):
@@ -256,8 +256,16 @@ def gen_results_summary(
     nr_files = 0
     out_f = sys.stdout
 
+    # junitparser >= 3 returns a JUnitXml containing testsuites; older
+    # versions auto-unwrapped a single <testsuite> root into a TestSuite
+    # the script could read .timestamp / .hostname on directly. Flatten
+    # to a list of TestSuite so the rest of the function keeps working.
     for filename in get_results(results_dir, results_file):
-        reports.append(JUnitXml.fromfile(filename))
+        x = JUnitXml.fromfile(filename)
+        if isinstance(x, TestSuite):
+            reports.append(x)
+        else:
+            reports.extend(list(x))
 
     if len(reports) == 0:
         return 0

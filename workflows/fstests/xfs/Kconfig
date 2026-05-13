@@ -101,6 +101,7 @@ config FSTESTS_XFS_QUOTA_ENABLED
 
 config FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 	bool "Enable testing sections which use an external log device"
+	output yaml
 	default y if HAVE_DISTRO_XFS_SUPPORTS_EXTERNAL_LOG
 	default n if !HAVE_DISTRO_XFS_SUPPORTS_EXTERNAL_LOG
 	help
@@ -109,6 +110,7 @@ config FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 
 config FSTESTS_XFS_SECTION_RTDEV_ENABLED
 	bool "Enable testing sections which use a realtime device"
+	output yaml
 	default y if HAVE_DISTRO_XFS_SUPPORTS_RT
 	default n if !HAVE_DISTRO_XFS_SUPPORTS_RT
 	help
@@ -168,6 +170,7 @@ if FSTESTS_XFS_MANUAL_COVERAGE
 
 config FSTESTS_XFS_SECTION_CRC
 	bool "Enable testing section: xfs_crc"
+	output yaml
 	default y if HAVE_DISTRO_XFS_SUPPORTS_CRC
 	default n if !HAVE_DISTRO_XFS_SUPPORTS_CRC
 	help
@@ -182,6 +185,7 @@ config FSTESTS_XFS_SECTION_CRC
 if FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 config FSTESTS_XFS_SECTION_CRC_LOGDEV
 	bool "Enable testing section: xfs_crc_logdev"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables the usage of writing metadata
@@ -197,6 +201,7 @@ endif # FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 if FSTESTS_XFS_SECTION_RTDEV_ENABLED
 config FSTESTS_XFS_SECTION_CRC_RTDEV
 	bool "Enable testing section: xfs_crc_rtdev"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using the realtime device. This is only useful if your
@@ -214,6 +219,7 @@ config FSTESTS_XFS_SECTION_CRC_RTDEV
 
 config FSTESTS_XFS_SECTION_CRC_RTDEV_EXTSIZE_28K
 	bool "Enable testing section: xfs_crc_rtdev_extsize_28k"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using the realtime device with real time extent size of
@@ -232,6 +238,7 @@ config FSTESTS_XFS_SECTION_CRC_RTDEV_EXTSIZE_28K
 
 config FSTESTS_XFS_SECTION_CRC_RTDEV_EXTSIZE_64K
 	bool "Enable testing section: xfs_crc_rtdev_extsize_64k"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using the realtime device with real time extent size of
@@ -251,6 +258,7 @@ config FSTESTS_XFS_SECTION_CRC_RTDEV_EXTSIZE_64K
 if FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 config FSTESTS_XFS_SECTION_CRC_LOGDEV_RTDEV
 	bool "Enable testing section: xfs_crc_logdev_rtdev"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using both an external journal and a realtime device as
@@ -271,6 +279,7 @@ endif # FSTESTS_XFS_SECTION_RTDEV_ENABLED
 
 config FSTESTS_XFS_SECTION_NOCRC_ENABLED
 	bool "Enable testing sections which don't have CRC enabled"
+	output yaml
 	default n if HAVE_DISTRO_XFS_IGNORES_NOCRC
 	default y if !HAVE_DISTRO_XFS_IGNORES_NOCRC
 	help
@@ -312,6 +321,7 @@ if FSTESTS_XFS_SECTION_NOCRC_ENABLED
 
 config FSTESTS_XFS_SECTION_NOCRC
 	bool "Enable testing section: xfs_nocrc"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration without CRC enabled. This is useful to test
@@ -324,6 +334,7 @@ config FSTESTS_XFS_SECTION_NOCRC
 
 config FSTESTS_XFS_SECTION_NOCRC_512
 	bool "Enable testing section: xfs_nocrc_512"
+	output yaml
 	depends on EXTRA_STORAGE_SUPPORTS_512
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -336,6 +347,7 @@ config FSTESTS_XFS_SECTION_NOCRC_512
 
 config FSTESTS_XFS_SECTION_NOCRC_1K
 	bool "Enable testing section: xfs_nocrc_1k"
+	output yaml
 	depends on EXTRA_STORAGE_SUPPORTS_1K
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -349,6 +361,7 @@ config FSTESTS_XFS_SECTION_NOCRC_1K
 
 config FSTESTS_XFS_SECTION_NOCRC_2K
 	bool "Enable testing section: xfs_nocrc_2k"
+	output yaml
 	depends on EXTRA_STORAGE_SUPPORTS_2K
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -362,6 +375,7 @@ config FSTESTS_XFS_SECTION_NOCRC_2K
 
 config FSTESTS_XFS_SECTION_NOCRC_4K
 	bool "Enable testing section: xfs_nocrc_4k"
+	output yaml
 	depends on EXTRA_STORAGE_SUPPORTS_4K
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -375,6 +389,7 @@ config FSTESTS_XFS_SECTION_NOCRC_4K
 
 config FSTESTS_XFS_SECTION_NOCRC_8K
 	bool "Enable testing section: xfs_nocrc_8k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -388,6 +403,7 @@ config FSTESTS_XFS_SECTION_NOCRC_8K
 
 config FSTESTS_XFS_SECTION_NOCRC_8K_4KS
 	bool "Enable testing section: xfs_nocrc_8k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -401,6 +417,7 @@ config FSTESTS_XFS_SECTION_NOCRC_8K_4KS
 
 config FSTESTS_XFS_SECTION_NOCRC_16K
 	bool "Enable testing section: xfs_nocrc_16k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -414,6 +431,7 @@ config FSTESTS_XFS_SECTION_NOCRC_16K
 
 config FSTESTS_XFS_SECTION_NOCRC_16K_4KS
 	bool "Enable testing section: xfs_nocrc_16k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -427,6 +445,7 @@ config FSTESTS_XFS_SECTION_NOCRC_16K_4KS
 
 config FSTESTS_XFS_SECTION_NOCRC_32K
 	bool "Enable testing section: xfs_nocrc_32k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -440,6 +459,7 @@ config FSTESTS_XFS_SECTION_NOCRC_32K
 
 config FSTESTS_XFS_SECTION_NOCRC_32K_4KS
 	bool "Enable testing section: xfs_nocrc_32k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -453,6 +473,7 @@ config FSTESTS_XFS_SECTION_NOCRC_32K_4KS
 
 config FSTESTS_XFS_SECTION_NOCRC_64K
 	bool "Enable testing section: xfs_nocrc_64k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -466,6 +487,7 @@ config FSTESTS_XFS_SECTION_NOCRC_64K
 
 config FSTESTS_XFS_SECTION_NOCRC_64K_4KS
 	bool "Enable testing section: xfs_nocrc_64k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -481,6 +503,7 @@ endif # FSTESTS_XFS_SECTION_NOCRC_ENABLED
 
 config FSTESTS_XFS_SECTION_REFLINK_ENABLED
 	bool "Enable testing sections which have reflink enabled"
+	output yaml
 	default y if HAVE_DISTRO_XFS_SUPPORTS_REFLINKS
 	default n if !HAVE_DISTRO_XFS_SUPPORTS_REFLINKS
 	help
@@ -503,6 +526,7 @@ if FSTESTS_XFS_SECTION_REFLINK_ENABLED
 
 config FSTESTS_XFS_SECTION_REFLINK
 	bool "Enable testing section: xfs_reflink"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables reflinks.
@@ -514,6 +538,7 @@ config FSTESTS_XFS_SECTION_REFLINK
 if FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 config FSTESTS_XFS_SECTION_REFLINK_LOGDEV
 	bool "Enable testing section: xfs_reflink_logdev"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables the usage of writing metadata
@@ -530,6 +555,7 @@ endif # FSTESTS_XFS_SECTION_LOGDEV_ENABLED
 config FSTESTS_XFS_SECTION_REFLINK_1024
 	depends on EXTRA_STORAGE_SUPPORTS_1K
 	bool "Enable testing section: xfs_reflink_1024"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables reflink using 1024 byte
@@ -542,6 +568,7 @@ config FSTESTS_XFS_SECTION_REFLINK_1024
 config FSTESTS_XFS_SECTION_REFLINK_2K
 	depends on EXTRA_STORAGE_SUPPORTS_2K
 	bool "Enable testing section: xfs_reflink_2k"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables reflink using 2048 bytes
@@ -553,6 +580,7 @@ config FSTESTS_XFS_SECTION_REFLINK_2K
 
 config FSTESTS_XFS_SECTION_REFLINK_4K
 	bool "Enable testing section: xfs_reflink_4k"
+	output yaml
 	depends on EXTRA_STORAGE_SUPPORTS_4K
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -565,6 +593,7 @@ config FSTESTS_XFS_SECTION_REFLINK_4K
 
 config FSTESTS_XFS_SECTION_REFLINK_8K
 	bool "Enable testing section: xfs_reflink_8k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -577,6 +606,7 @@ config FSTESTS_XFS_SECTION_REFLINK_8K
 
 config FSTESTS_XFS_SECTION_REFLINK_8K_4KS
 	bool "Enable testing section: xfs_reflink_8k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -589,6 +619,7 @@ config FSTESTS_XFS_SECTION_REFLINK_8K_4KS
 
 config FSTESTS_XFS_SECTION_REFLINK_16K
 	bool "Enable testing section: xfs_reflink_16k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -601,6 +632,7 @@ config FSTESTS_XFS_SECTION_REFLINK_16K
 
 config FSTESTS_XFS_SECTION_REFLINK_16K_4KS
 	bool "Enable testing section: xfs_reflink_16k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -613,6 +645,7 @@ config FSTESTS_XFS_SECTION_REFLINK_16K_4KS
 
 config FSTESTS_XFS_SECTION_REFLINK_32K
 	bool "Enable testing section: xfs_reflink_32k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -625,6 +658,7 @@ config FSTESTS_XFS_SECTION_REFLINK_32K
 
 config FSTESTS_XFS_SECTION_REFLINK_32K_4KS
 	bool "Enable testing section: xfs_reflink_32k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -637,6 +671,7 @@ config FSTESTS_XFS_SECTION_REFLINK_32K_4KS
 
 config FSTESTS_XFS_SECTION_REFLINK_64K
 	bool "Enable testing section: xfs_reflink_64k"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_REAL
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -649,6 +684,7 @@ config FSTESTS_XFS_SECTION_REFLINK_64K
 
 config FSTESTS_XFS_SECTION_REFLINK_64K_4KS
 	bool "Enable testing section: xfs_reflink_64k_4ks"
+	output yaml
 	depends on FSTESTS_XFS_ENABLE_LBS_4KS
 	help
 	  This will create a host to test the baseline of fstests using the
@@ -661,6 +697,7 @@ config FSTESTS_XFS_SECTION_REFLINK_64K_4KS
 
 config FSTESTS_XFS_SECTION_REFLINK_DIR_BSIZE_8K
 	bool "Enable testing section: xfs_reflink_dir_bsize_8k"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables reflink using 8k bytes
@@ -672,6 +709,7 @@ config FSTESTS_XFS_SECTION_REFLINK_DIR_BSIZE_8K
 
 config FSTESTS_XFS_SECTION_REFLINK_NORMAPBT
 	bool "Enable testing section: xfs_reflink_normapbt"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests using the
 	  following configuration which enables reflink but disables the
@@ -697,6 +735,7 @@ config FSTESTS_XFS_SECTION_REFLINK_NORMAPBT
 
 config FSTESTS_XFS_SECTION_REFLINK_STRIPE_LEN
 	bool "Enable testing section: xfs_reflink_stripe_len"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using the following configuration which enables reflink
@@ -708,6 +747,7 @@ config FSTESTS_XFS_SECTION_REFLINK_STRIPE_LEN
 
 config FSTESTS_XFS_SECTION_REFLINK_NREXT64
 	bool "Enable testing section: xfs_reflink_nrext64"
+	output yaml
 	help
 	  This will create a host to test the baseline of fstests
 	  using the following configuration which enables reflink
@@ -721,6 +761,7 @@ endif # FSTESTS_XFS_SECTION_REFLINK_ENABLED
 
 config FSTESTS_XFS_SECTION_BIGBLOCK
 	bool "Enable testing section: xfs_bigblock"
+	output yaml
 	default y if HAVE_DISTRO_XFS_SUPPORTS_BIGBLOCKS
 	default n if !HAVE_DISTRO_XFS_SUPPORTS_BIGBLOCKS
 	depends on HAVE_ARCH_64K_PAGES

@@ -17,8 +17,9 @@ config HAVE_MIRROR_DBENCH
 	depends on USE_LIBVIRT_MIRROR
 	default $(shell, scripts/check_mirror_present.sh /mirror/dbench.git)
 
-config BLKTESTS_DBENCH_GIT_URL
+config BLKTESTS_DBENCH_GIT
 	string
+	output yaml
 	default DEFAULT_DBENCH_URL if !HAVE_MIRROR_DBENCH
 	default $(shell, scripts/append-makefile-vars.sh git:// $(KDEVOPS_DEFAULT_BRIDGE_IP_GUESTFS) /mirror/dbench.git) if HAVE_MIRROR_XFSDUMP && GUESTFS
 
@@ -144,6 +145,7 @@ config HAVE_MIRROR_BLKTESTS
 
 config BLKTESTS_GIT
 	string "The blktests git tree to clone"
+	output yaml
 	default DEFAULT_BLKTESTS_URL if !HAVE_MIRROR_BLKTESTS
 	default $(shell, scripts/append-makefile-vars.sh git:// $(KDEVOPS_DEFAULT_BRIDGE_IP_GUESTFS) /mirror/blktests.git) if HAVE_MIRROR_BLKTESTS && GUESTFS
 	help
@@ -151,6 +153,7 @@ config BLKTESTS_GIT
 
 config BLKTESTS_DATA
 	string "Where to clone the blktests git tree to"
+	output yaml
 	default "{{data_path}}/blktests"
 	help
 	  This is the target location of where to clone the blktests git tree.
@@ -164,6 +167,7 @@ config HAVE_MIRROR_BLKTRACE
 
 config BLKTRACE_GIT
 	string "The blktrace git tree to clone"
+	output yaml
 	default DEFAULT_BLKTRACE_URL if !HAVE_MIRROR_BLKTRACE
 	default $(shell, scripts/append-makefile-vars.sh git:// $(KDEVOPS_DEFAULT_BRIDGE_IP_GUESTFS) /mirror/blktrace.git) if HAVE_MIRROR_BLKTRACE && GUESTFS
 	help
@@ -171,6 +175,7 @@ config BLKTRACE_GIT
 
 config BLKTRACE_DATA
 	string "Where to clone the blktrace git tree to"
+	output yaml
 	default "{{data_path}}/blktrace"
 	help
 	  This is the target location of where to clone the blktrace git tree.
@@ -179,6 +184,7 @@ config BLKTRACE_DATA
 
 config NBD_GIT
 	string "The nbd git tree to clone when needed"
+	output yaml
 	default "https://github.com/NetworkBlockDevice/nbd.git"
 	help
 	  Some distributions do not carry the nbd server or client packages.
@@ -188,12 +194,14 @@ config NBD_GIT
 
 config NBD_VERSION
 	string "nbd tag to use to compile"
+	output yaml
 	default "nbd-3.21"
 	help
 	  This specifies the git version to use"
 
 config NBD_DATA
 	string "Where to clone the nbd git tree to"
+	output yaml
 	default "{{data_path}}/nbd"
 	help
 	  This is the target location of where we'll cone the nbd git tree to.
@@ -202,6 +210,7 @@ config NBD_DATA
 
 config BLKTESTS_DATA_TARGET
 	string "The target blktests install directory"
+	output yaml
 	default "/usr/local/blktests/"
 	help
 	  The directory where blktests will be installed.

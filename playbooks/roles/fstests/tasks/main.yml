@@ -56,6 +56,7 @@
     follow: false
     owner: "{{ data_user }}"
     group: "{{ data_group }}"
+    mode: "0755"
   tags: ["oscheck", "git", "fstests", "do_deploy"]
   when:
     - fstests_xfs_build_custom_xfsprogs|bool
@@ -130,6 +131,7 @@
     recurse: true
     owner: "{{ data_user }}"
     group: "{{ data_group }}"
+    mode: "0644"
   tags: ["fstests", "deps"]
   when:
     - fstests_xfsdump_build|bool
@@ -216,6 +218,7 @@
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/../.config"
     dest: "{{ kdevops_dir }}"
+    mode: "0644"
   tags: ["oscheck", "install", "root", "config", "do_deploy"]
 
 - name: Install kdevops as root
@@ -249,6 +252,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
+    mode: "0644"
   with_items:
     - "{{ fstests_data }}"
     - "{{ fstests_data_prefix }}"
@@ -275,6 +279,7 @@
   ansible.builtin.file:
     path: "{{ fstests_data_prefix }}"
     state: directory
+    mode: "0755"
 
 - name: Build the configure file for fstests
   tags: ["oscheck", "fstests", "build"]
@@ -310,6 +315,7 @@
     dest: "/usr/lib/udev/rules.d/"
     owner: "{{ data_user }}"
     group: "{{ data_group }}"
+    mode: "0644"
   tags: ["oscheck", "fstests", "do_deploy"]
   when:
     - fstests_zns_enabled == "y"
@@ -348,6 +354,7 @@
     src: "{{ fstests_data_prefix }}/xfstests"
     dest: "{{ fstests_data_target }}"
     state: link
+    mode: "0644"
 
 - name: Install root generated .fstests_setup
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "do_deploy"]
@@ -392,6 +399,7 @@
     src: "{{ kdevops_data }}/workflows/fstests/scripts/{{ item }}"
     dest: "{{ fstests_data_target }}/{{ item }}"
     state: link
+    mode: "0644"
   with_items:
     - gendisks.sh
     - oscheck.sh
@@ -405,6 +413,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ sparsefiles_path }}"
   when:
@@ -418,6 +427,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ fstests_data_target }}/configs"
 
@@ -436,6 +446,7 @@
     src: "{{ topdir_path }}/workflows/fstests/{{ fstests_fstyp }}/{{ ansible_host }}.config"
     dest: "{{ target_config }}"
     force: true
+    mode: "0644"
   when:
     - fstests_generate_simple_config_enable|bool
     - fstests_debug_localhost|bool
@@ -449,6 +460,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ topdir_path }}/workflows/fstests/{{ fstests_fstyp }}/{{ fstests_fstyp }}.config.generated"
     force: true
+    mode: "0644"
   when:
     - fstests_generate_simple_config_enable|bool
     - fstests_debug_localhost|bool
@@ -463,6 +475,7 @@
     src: "{{ topdir_path }}/workflows/fstests/{{ fstests_fstyp }}//{{ ansible_host }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_generate_simple_config_enable|bool
     - not fstests_debug_localhost|bool
@@ -477,6 +490,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_generate_simple_config_enable|bool
     - not fstests_debug_localhost|bool
@@ -695,6 +709,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_testdev_nvme_partition_euis|bool
     - fstests_nvme_symlinks | length >= 1
@@ -732,6 +747,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_testdev_nvme_euis|bool
     - fstests_nvme_symlinks | length >= 7
@@ -798,6 +814,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_fstyp == "nfs"
 
@@ -878,6 +895,7 @@
     src: "{{ fstests_fstyp }}/{{ fstests_fstyp }}.config"
     dest: "{{ fstests_data_target }}/configs/{{ ansible_host }}.config"
     force: true
+    mode: "0644"
   when:
     - fstests_fstyp == "cifs"
 
@@ -1033,6 +1051,7 @@
     dest: "{{ fstests_workflow_dir }}/{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_checktime_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
@@ -1087,6 +1106,7 @@
   ansible.builtin.file:
     state: absent
     path: "{{ fstests_data_target }}/results/"
+    mode: "0644"
   tags: ["oscheck", "fstests", "run_tests", "clean_results", "do_clean"]
   when:
     - not fstests_initial_baseline|bool
@@ -1099,6 +1119,7 @@
   ansible.builtin.file:
     path: "{{ fstests_results_target }}/"
     state: absent
+    mode: "0644"
   delegate_to: localhost
   run_once: true
   tags: ["oscheck", "fstests", "copy_results", "clean_local_results", "do_clean"]
@@ -1107,6 +1128,7 @@
   ansible.builtin.file:
     path: "{{ fstests_results_target }}/"
     state: directory
+    mode: "0755"
   delegate_to: localhost
   run_once: true
   tags: ["oscheck", "fstests", "copy_results", "clean_local_results", "do_deploy"]
@@ -1158,6 +1180,7 @@
   ansible.builtin.file:
     path: "{{ fstests_workflow_dir }}/.begin"
     state: touch
+    mode: "0644"
   delegate_to: localhost
   tags: ["oscheck", "fstests", "run_tests"]
   when:
@@ -1325,6 +1348,7 @@
   ansible.builtin.file:
     path: "{{ fstests_workflow_dir }}/.begin"
     state: absent
+    mode: "0644"
   delegate_to: localhost
   tags: ["oscheck", "fstests", "run_tests", "do_clean"]
   when:
@@ -1351,6 +1375,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_checktime_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
@@ -1377,6 +1402,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_checklog_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
@@ -1403,6 +1429,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_xunit_files.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
@@ -1460,6 +1487,7 @@
   ansible.builtin.copy:
     content: "kdevops TFB trimming enabled, original file size: {{ item.size | human_readable(true) }}"
     dest: "{{ item.path }}"
+    mode: "0644"
   with_items: "{{ fstests_tfb_reg.files }}"
   loop_control:
     label: "{{ item.path }} {{ item.size | human_readable(true) }}"
@@ -1492,6 +1520,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: "absent"
+    mode: "0644"
   with_items: "{{ fstests_tfb_reg.files }}"
   loop_control:
     label: "{{ item.path }} {{ item.size | human_readable(true) }}"
@@ -1508,6 +1537,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_failed_tests.files }}"
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
@@ -1547,6 +1577,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_bad_full_file_stats.results }}"
   loop_control:
     label: "Copying over {{ tests_name }}"
@@ -1586,6 +1617,7 @@
     dest: "{{ fstests_results_target }}/{{ item_path_without_host | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
     flat: true
     validate_checksum: false
+    mode: "0644"
   with_items: "{{ fstests_bad_dmesg_file_stats.results }}"
   loop_control:
     label: "Copying over dmesg {{ tests_name }}"
@@ -1672,6 +1704,7 @@
   ansible.builtin.copy:
     src: "{{ fstests_results_full_path }}/last-run/{{ fstests_last_kernel }}"
     dest: "{{ fstests_results_full_path }}/"
+    mode: "0644"
   run_once: true
   tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list", "do_deploy"]
   delegate_to: localhost

@@ -5,6 +5,7 @@
   ansible.builtin.file:
     state: directory
     path: "/media/{{ item }}"
+    mode: "0755"
   with_items:
     - scratch
     - "{{ sparsefiles_path }}"

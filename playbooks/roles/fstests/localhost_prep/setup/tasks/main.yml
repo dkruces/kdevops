@@ -1,0 +1,17 @@
+---
+# fstests/localhost_prep/setup -- controller-side sudo opt-in.
+# Dispatches the distro-specific install-deps for the python3
+# junitparser module fstests uses to post-process JUnit XML
+# results.
+
+- name: Install junitparser on Debian-family controllers
+  ansible.builtin.import_tasks: install-deps/debian/main.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: Install junitparser on Suse-family controllers
+  ansible.builtin.import_tasks: install-deps/suse/main.yml
+  when: ansible_facts['os_family']|lower == 'suse'
+
+- name: Install junitparser on RedHat-family controllers
+  ansible.builtin.import_tasks: install-deps/redhat/main.yml
+  when: ansible_facts['os_family']|lower == 'redhat'

@@ -1,0 +1,25 @@
+---
+# fstests/localhost_prep/verify -- non-sudo precheck that the
+# python3 junitparser module is importable on the controller. When
+# missing the user runs `make fstests-localhost-prep-setup` (which
+# is the sudo opt-in path) before invoking the fstests workflow.
+
+- name: Check that python3 junitparser is importable on the controller
+  ansible.builtin.command:
+    cmd: python3 -c "import junitparser"
+  changed_when: false
+  failed_when: false
+  register: junitparser_check
+
+- name: Fail with a structured diagnostic when junitparser is missing
+  ansible.builtin.fail:
+    msg: |
+      The python3 junitparser module is not importable on the controller.
+      kdevops needs it for fstests JUnit XML result post-processing.
+
+      Install it with the controller-side sudo opt-in target:
+
+          make fstests-localhost-prep-setup
+
+      See docs/fstests-localhost_prep.md.
+  when: junitparser_check.rc != 0

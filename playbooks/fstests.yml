@@ -1,8 +1,17 @@
 ---
-- name: Enable fstests JUnit XML result processing
+- name: Verify the fstests localhost prep deps and isolate the sudo opt-in
   hosts: localhost
-  roles:
-    - role: fstests_prep_localhost
+  tasks:
+    - name: Run the non-sudo verify
+      ansible.builtin.include_role:
+        name: fstests/localhost_prep/verify
+
+    - name: Run the sudo opt-in setup (only with --tags fstests_localhost_prep_setup)
+      ansible.builtin.include_role:
+        name: fstests/localhost_prep/setup
+        apply:
+          tags: [fstests_localhost_prep_setup]
+      tags: [never, fstests_localhost_prep_setup]
 
 - name: Configure and run the filesystem testing suite workflow
   hosts: baseline:dev

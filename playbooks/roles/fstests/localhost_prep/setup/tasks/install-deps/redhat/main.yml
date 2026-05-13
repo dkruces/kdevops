@@ -1,0 +1,22 @@
+---
+- name: Install python3 junitparser on the controller (RedHat)
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.dnf:
+    update_cache: true
+    name:
+      - python3-junitxml
+      - python-pip
+  retries: 3
+  delay: 5
+  register: result
+  until: result is succeeded
+  tags: do_install
+
+- name: Install junitparser via pip on the controller (RedHat)
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.pip:
+    name:
+      - junitparser
+  tags: do_install

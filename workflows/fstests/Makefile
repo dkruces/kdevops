@@ -115,6 +115,14 @@ XARGS_ARGS := -I {} bash -c 'echo "{}:"; cat {}; echo;'
 endif
 endif
 
+PHONY += fstests-localhost-prep-setup
+fstests-localhost-prep-setup: $(KDEVOPS_EXTRA_VARS)
+	$(call run-ansible-playbook, \
+		--limit localhost \
+		playbooks/fstests.yml \
+		--tags fstests_localhost_prep_setup \
+		--extra-vars=@./extra_vars.yaml)
+
 fstests: $(KDEVOPS_EXTRA_VARS) $(FSTESTS_BASELINE_EXTRA)
 	$(call run-ansible-playbook, \
 		--limit localhost:baseline:dev \

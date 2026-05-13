@@ -15,8 +15,10 @@ The following are ansible roles dedicated towards supported workflows:
 
   * [bootlinux](./playbooks/roles/bootlinux/README.md): used to support hacking
     on Linux. Kernel configuration files are also tracked in the bootlinux role.
-  * fstests_prep_localhost: used to install command and control dependencies
-  * fstests: used to run the fstests workflow
+  * fstests: used to run the fstests workflow. The
+    fstests/localhost_prep/{verify,setup} sub-roles isolate the
+    controller-side junitparser install behind
+    `make fstests-localhost-prep-setup`
   * blktests: used to run the blktests workflow
   * reboot-limit: used to run the reboot-limit test workflow
 

@@ -1,0 +1,8 @@
+---
+- name: Install python3 junitparser on the controller (Debian)
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.apt:
+    name:
+      - python3-junitparser
+  tags: do_install

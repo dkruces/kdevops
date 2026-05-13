@@ -762,7 +762,7 @@
 - name: Set the NFS export's fstype
   tags: vars
   ansible.builtin.set_fact:
-    fstests_nfs_export_fstype: "{{ nfsd_export_fstype }}"
+    fstests_nfs_export_fstype: "{{ nfsd_export_fstype | default('xfs') }}"
   when:
     - not fstests_nfs_section_pnfs|bool
 

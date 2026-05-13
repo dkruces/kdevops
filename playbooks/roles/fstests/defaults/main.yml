@@ -59,7 +59,7 @@ fstests_test_dir: "/media/test"
 fstests_debug: false
 
 fstests_run_large_disk_tests:
-fstests_setup_name: "fstests_setup"
+fstests_setup_name: "kdevops_fstests_setup"
 fstests_setup: ".{{ fstests_setup_name }}"
 
 fstests_perf_config: "kdevops"

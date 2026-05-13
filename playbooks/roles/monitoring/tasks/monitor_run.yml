@@ -6,6 +6,7 @@
   when:
     - monitor_developmental_stats | default(false) | bool
     - monitor_folio_migration | default(false) | bool
+  tags: [monitor_folio_migration]
 
 - name: Run the memory_fragmentation sub-role (start phase)
   ansible.builtin.include_role:
@@ -14,3 +15,4 @@
   when:
     - monitor_developmental_stats | default(false) | bool
     - monitor_memory_fragmentation | default(false) | bool
+  tags: [monitor_memory_fragmentation]

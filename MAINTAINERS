@@ -135,6 +135,15 @@ F:	modules/guestfs/
 F:	playbooks/guestfs.yml
 F:	playbooks/roles/guestfs/
 
+MONITORING
+M:	Daniel Gomez <da.gomez@samsung.com>
+L:	kdevops@lists.linux.dev
+S:	Maintained
+T:	git https://github.com/linux-kdevops/kdevops.git
+F:	modules/monitoring/
+F:	playbooks/monitoring.yml
+F:	playbooks/roles/monitoring/
+
 KDEVOPS CI
 M:	Daniel Gomez <da.gomez@samsung.com>
 L:	kdevops@lists.linux.dev

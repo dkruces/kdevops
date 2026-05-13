@@ -1,0 +1,78 @@
+---
+- name: Create the fragmentation scripts directory on the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: /opt/fragmentation
+    state: directory
+    mode: "0755"
+
+- name: Copy the fragmentation scripts to the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/fragmentation/{{ item }}"
+    mode: "0755"
+  loop:
+    - fragmentation_tracker.py
+    - fragmentation_visualizer.py
+
+- name: Create the fragmentation output directory on the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    state: directory
+    mode: "0755"
+
+- name: Start the fragmentation tracker in the background
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    cd /opt/fragmentation
+    duration="{{ monitor_memory_fragmentation_duration | default(0) }}"
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+
+    if [ "$duration" -eq "0" ]; then
+      nohup python3 fragmentation_tracker.py -o "${output_dir}/fragmentation_data.json" > "${output_dir}/fragmentation_tracker.log" 2>&1 &
+    else
+      nohup timeout ${duration} python3 fragmentation_tracker.py -o "${output_dir}/fragmentation_data.json" > "${output_dir}/fragmentation_tracker.log" 2>&1 &
+    fi
+    echo $! > "${output_dir}/fragmentation_tracker.pid"
+
+    date +"%Y-%m-%d %H:%M:%S" > "${output_dir}/start_time.txt"
+  async: 86400
+  poll: 0
+  register: monitoring_fragmentation_monitor
+  changed_when: true
+
+- name: Save the fragmentation tracker async job ID
+  ansible.builtin.set_fact:
+    monitoring_fragmentation_monitor_job: "{{ monitoring_fragmentation_monitor.ansible_job_id }}"
+  when: monitoring_fragmentation_monitor is defined
+
+- name: Verify the fragmentation tracker started successfully
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    if [ -f "${output_dir}/fragmentation_tracker.pid" ]; then
+      pid=$(cat "${output_dir}/fragmentation_tracker.pid")
+      if ps -p $pid > /dev/null 2>&1; then
+        echo "Fragmentation monitoring process $pid is running"
+      else
+        echo "ERROR: Fragmentation monitoring process $pid is not running" >&2
+        exit 1
+      fi
+    else
+      echo "ERROR: PID file not found" >&2
+      exit 1
+    fi
+  register: monitoring_fragmentation_monitor_status
+  changed_when: false
+
+- name: Show the fragmentation tracker startup status
+  ansible.builtin.debug:
+    msg: "{{ monitoring_fragmentation_monitor_status.stdout }}"
+  when: monitoring_fragmentation_monitor_status is defined

@@ -1,0 +1,68 @@
+---
+- name: Check whether the fragmentation tracker is still running
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.shell: |
+    output_dir="{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
+    if [ -f "${output_dir}/fragmentation_tracker.pid" ]; then
+      pid=$(cat "${output_dir}/fragmentation_tracker.pid")
+      if ps -p $pid > /dev/null 2>&1; then
+        echo "running"
+      else
+        echo "not_running"
+      fi
+    else
+      echo "no_pid_file"
+    fi
+  register: monitoring_fragmentation_tracker_status
+  changed_when: false
+
+- name: Copy the fragmentation snapshot script to the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.copy:
+    src: fragmentation_snapshot.py
+    dest: /opt/fragmentation/fragmentation_snapshot.py
+    mode: "0755"
+
+- name: Take a fragmentation data snapshot
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.command:
+    cmd: python3 /opt/fragmentation/fragmentation_snapshot.py {{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}
+  register: monitoring_fragmentation_snapshot_creation
+  changed_when: true
+  when:
+    - monitoring_fragmentation_tracker_status is defined
+    - monitoring_fragmentation_tracker_status.stdout is defined
+    - monitoring_fragmentation_tracker_status.stdout == "running"
+
+- name: Show the fragmentation snapshot status
+  ansible.builtin.debug:
+    msg: "Fragmentation snapshot: {{ monitoring_fragmentation_snapshot_creation.stdout | default('No snapshot created') }}"
+  when: monitoring_fragmentation_snapshot_creation is defined
+
+- name: Check whether the fragmentation snapshot file was created
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.stat:
+    path: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_snapshot.json"
+  register: monitoring_fragmentation_snapshot_file
+
+- name: Fetch the fragmentation snapshot to localhost
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.fetch:
+    src: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_snapshot.json"
+    dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_fragmentation_data_interim.json"
+    flat: true
+    validate_checksum: false
+  when: monitoring_fragmentation_snapshot_file.stat.exists | default(false)
+
+- name: Remove the fragmentation snapshot file from the target
+  become: true
+  become_method: ansible.builtin.sudo
+  ansible.builtin.file:
+    path: "{{ monitor_memory_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_snapshot.json"
+    state: absent
+  failed_when: false

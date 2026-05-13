@@ -3,28 +3,28 @@
   become: true
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
-  delegate_to: "{{ server_host }}"
+  delegate_to: "{{ nfsd_add_export_server_host }}"
   community.general.lvol:
     vg: exports
-    lv: "{{ export_volname }}"
-    size: "{{ export_size }}"
+    lv: "{{ nfsd_add_export_volname }}"
+    size: "{{ nfsd_add_export_size }}"
 
-- name: Format new volume for {{ export_fstype }}
+- name: Format new volume for {{ nfsd_add_export_fstype }}
   become: true
   become_method: ansible.builtin.sudo
-  delegate_to: "{{ server_host }}"
+  delegate_to: "{{ nfsd_add_export_server_host }}"
   community.general.filesystem:
-    fstype: "{{ export_fstype }}"
-    dev: "/dev/exports/{{ export_volname }}"
+    fstype: "{{ nfsd_add_export_fstype }}"
+    dev: "/dev/exports/{{ nfsd_add_export_volname }}"
 
 - name: Mount volume under {{ nfsd_export_path }}
   become: true
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
-  delegate_to: "{{ server_host }}"
+  delegate_to: "{{ nfsd_add_export_server_host }}"
   throttle: 1 # running this in parallel can clobber fstab changes
   ansible.posix.mount:
-    path: "{{ nfsd_export_path }}/{{ export_volname }}"
-    src: "/dev/exports/{{ export_volname }}"
-    fstype: "{{ export_fstype }}"
+    path: "{{ nfsd_export_path }}/{{ nfsd_add_export_volname }}"
+    src: "/dev/exports/{{ nfsd_add_export_volname }}"
+    fstype: "{{ nfsd_add_export_fstype }}"
     state: mounted

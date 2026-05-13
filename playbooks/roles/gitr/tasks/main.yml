@@ -96,12 +96,12 @@
   ansible.builtin.include_role:
     name: create_partition
   vars: # noqa: var-naming[no-role-prefix]
-    disk_setup_device: "{{ gitr_device }}"
-    disk_setup_fstype: "{{ gitr_fstype }}"
-    disk_setup_label: "{{ gitr_label }}"
-    disk_setup_fs_opts: "-L {{ gitr_label }}"
-    disk_setup_path: "{{ gitr_mnt }}"
-    disk_setup_mount_opts: "{{ gitr_mount_opts }}"
+    create_partition_disk_device: "{{ gitr_device }}"
+    create_partition_disk_fstype: "{{ gitr_fstype }}"
+    create_partition_disk_label: "{{ gitr_label }}"
+    create_partition_disk_fs_opts: "-L {{ gitr_label }}"
+    create_partition_disk_path: "{{ gitr_mnt }}"
+    create_partition_disk_mount_opts: "{{ gitr_mount_opts }}"
   when:
     - not gitr_uses_no_devices|bool
 

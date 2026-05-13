@@ -3,10 +3,10 @@
   become: true
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
-  delegate_to: "{{ server_host }}"
+  delegate_to: "{{ nfsd_add_export_server_host }}"
   throttle: 1 # running this in parallel can clobber fstab changes
   ansible.posix.mount:
-    path: "{{ nfsd_export_path }}/{{ export_volname }}"
+    path: "{{ nfsd_export_path }}/{{ nfsd_add_export_volname }}"
     src: "tmpfs"
     fstype: "tmpfs"
     state: mounted

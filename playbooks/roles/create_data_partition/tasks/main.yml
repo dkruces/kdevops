@@ -44,11 +44,11 @@
   ansible.builtin.include_role:
     name: create_partition
   vars:
-    disk_setup_device: "{{ data_device }}"
-    disk_setup_fstype: "{{ data_fstype }}"
-    disk_setup_label: "{{ data_label }}"
-    disk_setup_fs_opts: "{{ data_fs_opts }}"
-    disk_setup_path: "{{ data_path }}"
-    disk_setup_user: "{{ data_user }}"
-    disk_setup_group: "{{ data_group }}"
+    create_partition_disk_device: "{{ data_device }}"
+    create_partition_disk_fstype: "{{ data_fstype }}"
+    create_partition_disk_label: "{{ data_label }}"
+    create_partition_disk_fs_opts: "{{ data_fs_opts }}"
+    create_partition_disk_path: "{{ data_path }}"
+    create_partition_disk_user: "{{ data_user }}"
+    create_partition_disk_group: "{{ data_group }}"
   tags: ["data_partition"]

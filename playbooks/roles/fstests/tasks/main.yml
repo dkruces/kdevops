@@ -192,13 +192,13 @@
   ansible.builtin.include_role:
     name: create_partition
   vars:
-    disk_setup_device: "{{ fstests_sparsefiles_device }}"
-    disk_setup_fstype: "{{ fstests_sparsefiles_fstype }}"
-    disk_setup_label: "{{ fstests_sparsefiles_label }}"
-    disk_setup_fs_opts: "{{ fstests_sparsefiles_fs_opts }}"
-    disk_setup_path: "{{ fstests_sparsefiles_path }}"
-    disk_setup_user: "{{ data_user }}"
-    disk_setup_group: "{{ data_group }}"
+    create_partition_disk_device: "{{ fstests_sparsefiles_device }}"
+    create_partition_disk_fstype: "{{ fstests_sparsefiles_fstype }}"
+    create_partition_disk_label: "{{ fstests_sparsefiles_label }}"
+    create_partition_disk_fs_opts: "{{ fstests_sparsefiles_fs_opts }}"
+    create_partition_disk_path: "{{ fstests_sparsefiles_path }}"
+    create_partition_disk_user: "{{ data_user }}"
+    create_partition_disk_group: "{{ data_group }}"
   tags: ["oscheck", "sparse_partition"]
   when:
     - fstests_testdev_sparsefile_generation|bool
@@ -779,12 +779,12 @@
   ansible.builtin.include_role:
     name: nfsd_add_export
   vars:
-    fstests_server_host: "{{ fstests_nfs_server_host }}"
-    fstests_export_volname: "{{ fstests_volname_prefix }}-t"
-    fstests_export_options: "{{ nfsd_export_options }}"
-    fstests_export_fstype: "{{ fstests_nfs_export_fstype }}"
-    fstests_export_size: 20g
-    fstests_export_pnfs: false
+    nfsd_add_export_server_host: "{{ fstests_nfs_server_host }}"
+    nfsd_add_export_volname: "{{ fstests_volname_prefix }}-t"
+    nfsd_add_export_options: "{{ nfsd_export_options }}"
+    nfsd_add_export_fstype: "{{ fstests_nfs_export_fstype }}"
+    nfsd_add_export_size: 20g
+    nfsd_add_export_pnfs: false
   when:
     - fstests_fstyp == "nfs"
     - fstests_nfs_use_kdevops_nfsd|bool
@@ -793,12 +793,12 @@
   ansible.builtin.include_role:
     name: nfsd_add_export
   vars:
-    fstests_server_host: "{{ fstests_nfs_server_host }}"
-    fstests_export_volname: "{{ fstests_volname_prefix }}-s"
-    fstests_export_options: "{{ nfsd_export_options }}"
-    fstests_export_fstype: "{{ fstests_nfs_export_fstype }}"
-    fstests_export_size: 30g
-    fstests_export_pnfs: false
+    nfsd_add_export_server_host: "{{ fstests_nfs_server_host }}"
+    nfsd_add_export_volname: "{{ fstests_volname_prefix }}-s"
+    nfsd_add_export_options: "{{ nfsd_export_options }}"
+    nfsd_add_export_fstype: "{{ fstests_nfs_export_fstype }}"
+    nfsd_add_export_size: 30g
+    nfsd_add_export_pnfs: false
   when:
     - fstests_fstyp == "nfs"
     - fstests_nfs_use_kdevops_nfsd|bool
@@ -864,10 +864,10 @@
   ansible.builtin.include_role:
     name: smbd_add_share
   vars:
-    fstests_server_host: "{{ fstests_smb_server_host }}"
-    fstests_share_volname: "{{ fstests_volname_prefix }}-t"
-    fstests_share_fstype: "{{ smbd_share_fstype }}"
-    fstests_share_size: 20g
+    smbd_add_share_server_host: "{{ fstests_smb_server_host }}"
+    smbd_add_share_volname: "{{ fstests_volname_prefix }}-t"
+    smbd_add_share_fstype: "{{ smbd_share_fstype }}"
+    smbd_add_share_size: 20g
   when:
     - fstests_fstyp == "cifs"
     - fstests_cifs_use_kdevops_smbd|bool
@@ -876,10 +876,10 @@
   ansible.builtin.include_role:
     name: smbd_add_share
   vars:
-    fstests_server_host: "{{ fstests_smb_server_host }}"
-    fstests_share_volname: "{{ fstests_volname_prefix }}-s"
-    fstests_share_fstype: "{{ smbd_share_fstype }}"
-    fstests_share_size: 30g
+    smbd_add_share_server_host: "{{ fstests_smb_server_host }}"
+    smbd_add_share_volname: "{{ fstests_volname_prefix }}-s"
+    smbd_add_share_fstype: "{{ smbd_share_fstype }}"
+    smbd_add_share_size: 30g
   when:
     - fstests_fstyp == "cifs"
     - fstests_cifs_use_kdevops_smbd|bool

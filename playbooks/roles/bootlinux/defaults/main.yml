@@ -10,7 +10,7 @@ data_group: "root"
 data_device: "/dev/disk/by-id/nvme-QEMU_NVMe_Ctrl_kdevops0"
 data_fstype: "xfs"
 data_label: "data"
-data_fs_opts: "-L {{ disk_setup_label }}"
+data_fs_opts: "-L {{ create_partition_disk_label }}"
 
 # Linux target defaults
 target_linux_admin_name: "Hacker Amanda"

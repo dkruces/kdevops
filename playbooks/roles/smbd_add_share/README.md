@@ -15,14 +15,14 @@ Role Variables
 
   * server_host: the hostname or IP address of the SMB server where
     the new share is to be created
-  * share_volname: the name of the new share, to be created under
+  * smbd_add_share_volname: the name of the new share, to be created under
     the /shares directory on the SMB server
   * share_options: the share options for the new share (currently not used)
-  * share_fstype: the file system type of the new share
-  * share_size: the maximum size of the new share
-  * share_user: the owner of the new share
-  * share_group: the owner group of the new share
-  * share_mode: the mode bits for the new share's root directory
+  * smbd_add_share_fstype: the file system type of the new share
+  * smbd_add_share_size: the maximum size of the new share
+  * smbd_add_share_user: the owner of the new share
+  * smbd_add_share_group: the owner group of the new share
+  * smbd_add_share_mode: the mode bits for the new share's root directory
 
 Dependencies
 ------------
@@ -40,9 +40,9 @@ Below is an example playbook task:
     name: smbd_add_share
   vars:
     server_host: "kdevops-smbd"
-    share_volname: "test"
-    share_fstype: "btrfs"
-    share_size: 20g
+    smbd_add_share_volname: "test"
+    smbd_add_share_fstype: "btrfs"
+    smbd_add_share_size: 20g
   when:
     - test_fstype == "cifs"
     - test_cifs_use_kdevops_smbd|bool

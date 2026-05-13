@@ -21,17 +21,17 @@ specify 'foo' as your filesystem type, then you must have 'mkfs.foo'.
 Role Variables
 --------------
 
-  * disk_setup_device: the target device to use
-  * disk_setup_fstype: the filesystem type to use
-  * disk_setup_mount_opts: extra mount options to use for /etc/fstab, should
+  * create_partition_disk_device: the target device to use
+  * create_partition_disk_fstype: the filesystem type to use
+  * create_partition_disk_mount_opts: extra mount options to use for /etc/fstab, should
     never be empty, if you want to use the default just do not override
     the defaults which is "defaults"
-  * disk_setup_label: the filesystem label to use
-  * disk_setup_fs_opts: additional filesystem options to pass
-  * disk_setup_path: the path to mount the filesystem
-  * disk_setup_user: the user to assign the directory path to
-  * disk_setup_group: the group to assign the directory path to
-  * disk_setup_mode: the mode of the root directory of the new filesystem
+  * create_partition_disk_label: the filesystem label to use
+  * create_partition_disk_fs_opts: additional filesystem options to pass
+  * create_partition_disk_path: the path to mount the filesystem
+  * create_partition_disk_user: the user to assign the directory path to
+  * create_partition_disk_group: the group to assign the directory path to
+  * create_partition_disk_mode: the mode of the root directory of the new filesystem
 
 Dependencies
 ------------
@@ -48,13 +48,13 @@ Below is an example playbook task:
   include_role:
     name: create_partition
   vars:
-    disk_setup_device: "/dev/nvme2n1"
-    disk_setup_fstype: "xfs"
-    disk_setup_label : "truncated"
-    disk_setup_fs_opts: "-L {{ disk_setup_label }}"
-    disk_setup_path: "/media/truncated"
-    disk_setup_user: "vagrant"
-    disk_setup_group: "vagrant"
+    create_partition_disk_device: "/dev/nvme2n1"
+    create_partition_disk_fstype: "xfs"
+    create_partition_disk_label : "truncated"
+    create_partition_disk_fs_opts: "-L {{ create_partition_disk_label }}"
+    create_partition_disk_path: "/media/truncated"
+    create_partition_disk_user: "vagrant"
+    create_partition_disk_group: "vagrant"
   tags: [ 'oscheck', 'truncated_partition' ]
 ```
 

@@ -15,17 +15,17 @@ kdevops NFS server automatically.
 Role Variables
 --------------
 
-  * server_host: the hostname or IP address of the NFS server where
+  * nfsd_add_export_server_host: the hostname or IP address of the NFS server where
     the new export is to be created
-  * export_volname: the name of the new export, to be created under
+  * nfsd_add_export_volname: the name of the new export, to be created under
     the /exports directory on the NFS server
-  * export_options: the export options for the new export
-  * export_fstype: the file system type of the new export
-  * export_size: the maximum size of the new export
-  * export_user: the owner of the new export
-  * export_group: the owner group of the new export
-  * export_mode: the mode bits for the new export's root directory
-  * export_pnfs: enable pNFS access to the new export
+  * nfsd_add_export_options: the export options for the new export
+  * nfsd_add_export_fstype: the file system type of the new export
+  * nfsd_add_export_size: the maximum size of the new export
+  * nfsd_add_export_user: the owner of the new export
+  * nfsd_add_export_group: the owner group of the new export
+  * nfsd_add_export_mode: the mode bits for the new export's root directory
+  * nfsd_add_export_pnfs: enable pNFS access to the new export
 
 Dependencies
 ------------
@@ -42,10 +42,10 @@ Below is an example playbook task:
   include_role:
     name: nfsd_add_export
   vars:
-    server_host: "kdevops-nfsd"
-    export_volname: "test"
-    export_fstype: "btrfs"
-    export_size: 20g
+    nfsd_add_export_server_host: "kdevops-nfsd"
+    nfsd_add_export_volname: "test"
+    nfsd_add_export_fstype: "btrfs"
+    nfsd_add_export_size: 20g
   when:
     - test_fstype == "nfs"
     - test_nfs_use_kdevops_nfsd|bool

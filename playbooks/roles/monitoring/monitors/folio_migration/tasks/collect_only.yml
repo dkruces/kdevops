@@ -80,7 +80,7 @@
 
 - name: Generate folio migration interim plots on localhost
   ansible.builtin.command: |
-    python3 {{ playbook_dir }}/roles/monitoring/files/plot_folio_migration_stats.py
+    python3 {{ role_path }}/files/plot_migration_stats.py
       -o {{ monitoring_results_path }}/interim_folio_migration_plot.png
       {{ monitoring_interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | map(attribute='path') | join(' ') }}
   delegate_to: localhost

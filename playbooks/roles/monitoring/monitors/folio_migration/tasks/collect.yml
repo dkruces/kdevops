@@ -45,7 +45,7 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/roles/monitoring/files/plot_migration_stats.py"
+    src: plot_migration_stats.py
     dest: /root/monitoring/plot_migration_stats.py
     mode: "0755"
   when: monitoring_folio_migration_data_file.stat.exists | default(false)
@@ -130,7 +130,7 @@
 
 - name: Generate folio migration plots on localhost
   ansible.builtin.command: |
-    python3 {{ playbook_dir }}/roles/monitoring/files/plot_migration_stats.py
+    python3 {{ role_path }}/files/plot_migration_stats.py
       -o {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_plot.png
       {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats.txt
   delegate_to: localhost

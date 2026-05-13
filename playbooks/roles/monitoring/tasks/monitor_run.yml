@@ -1,8 +1,10 @@
 ---
 # Monitoring orchestrator - includes individual monitor modules
 
-- name: Import folio migration monitoring tasks
-  ansible.builtin.import_tasks: monitors/folio_migration/run.yml
+- name: Run the folio_migration sub-role (start phase)
+  ansible.builtin.include_role:
+    name: monitoring/monitors/folio_migration
+    tasks_from: run
   when:
     - monitor_developmental_stats | default(false) | bool
     - monitor_folio_migration | default(false) | bool

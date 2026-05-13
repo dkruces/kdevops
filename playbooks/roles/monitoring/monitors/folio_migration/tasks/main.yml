@@ -1,0 +1,8 @@
+---
+- name: Start the folio_migration sampler
+  ansible.builtin.include_tasks: run.yml
+  tags: [do_run]
+
+- name: Collect the folio_migration end snapshot and render plot
+  ansible.builtin.include_tasks: collect.yml
+  tags: [do_collect]

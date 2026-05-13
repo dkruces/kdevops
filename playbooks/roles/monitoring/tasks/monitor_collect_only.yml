@@ -7,8 +7,10 @@
   when:
     - enable_monitoring | default(false) | bool
 
-- name: Import folio migration interim collection tasks
-  ansible.builtin.import_tasks: monitors/folio_migration/collect_only.yml
+- name: Run the folio_migration sub-role (interim collect)
+  ansible.builtin.include_role:
+    name: monitoring/monitors/folio_migration
+    tasks_from: collect_only
   when:
     - monitor_developmental_stats | default(false) | bool
     - monitor_folio_migration | default(false) | bool

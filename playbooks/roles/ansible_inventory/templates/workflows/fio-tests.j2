@@ -1,5 +1,5 @@
 {# Workflow template for fio-tests #}
-{% if fio_tests_multi_filesystem|default(false)|bool %}
+{% if fio_tests_multi_filesystem | default(false) | bool %}
 {# Multi-filesystem section-based hosts #}
 [all]
 localhost ansible_connection=local

@@ -13,13 +13,13 @@
   ansible.builtin.set_fact:
     kdevops_results_repo_url: "{{ kdevops_results_repo_url_demo }}"
   when:
-    - "kdevops_archive_demo|bool"
+    - "kdevops_archive_demo | bool"
 
 - name: Notify this is a kdevops-results-archive demo
   ansible.builtin.debug:
     msg: "This is a kdevops archive demo: {{ kdevops_results_repo_url }}"
   when:
-    - "kdevops_archive_demo|bool"
+    - "kdevops_archive_demo | bool"
 
 - name: Check if kdevops archive/ directory exists
   ansible.builtin.stat:
@@ -217,7 +217,7 @@
 - name: Committing to kdevops-results-archive not possible
   ansible.builtin.meta: end_play
   when:
-    - not kdevops_archive_mirror_present|bool
+    - not kdevops_archive_mirror_present | bool
 
 - name: Clone kdevops-results-archive repository with git LFS and use the local mirror
   ansible.builtin.git:
@@ -235,7 +235,7 @@
   ansible.builtin.debug:
     msg: "This is a kdevops archive demo, throw away results"
   when:
-    - "kdevops_archive_demo|bool"
+    - "kdevops_archive_demo | bool"
 
 - name: Check if ci.trigger file exists
   ansible.builtin.stat:

@@ -250,7 +250,7 @@
   ansible.builtin.command: "test -e {{ verify_dev_list }}"
   when:
     - kdevops_run_blktests | default(false) | bool
-    - blktests_test_devs|length != 0
+    - blktests_test_devs | length != 0
   changed_when: false
 
 - name: Verify target test devices are block devices {{ blktests_test_devs }}
@@ -264,7 +264,7 @@
   when:
     - kdevops_run_blktests | default(false) | bool
     - blktests_test_devs is defined
-    - blktests_test_devs|length != 0
+    - blktests_test_devs | length != 0
   changed_when: false
 
 - name: Hint to watchdog tests are about to kick off
@@ -282,7 +282,7 @@
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
     - kdevops_run_blktests | default(false) | bool
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["blktests", "run_tests", "monitoring", "monitor_run"]
 
 - name: Enable low-level messages on console
@@ -413,7 +413,7 @@
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
     - kdevops_run_blktests | default(false) | bool
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["blktests", "run_tests", "monitoring", "monitor_collect"]
 
 - name: Clean up our localhost results/last-run directory

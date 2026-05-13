@@ -21,7 +21,7 @@
     is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
     is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - is_sle|bool
+    - is_sle | bool
 
 - name: Set SLE specific version labels to make checks easier when not SLE
   ansible.builtin.set_fact:
@@ -39,7 +39,7 @@
     is_sle15sp3: false
     is_sle15sp4: false
   when:
-    - not is_sle|bool
+    - not is_sle | bool
 
 - name: Install every single selftest build dependencies
   become: true
@@ -57,4 +57,4 @@
       - perf
     state: present
   when:
-    - repos_present|bool
+    - repos_present | bool

@@ -21,7 +21,7 @@
     blktests_is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
     blktests_is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - blktests_is_sle|bool
+    - blktests_is_sle | bool
 
 - name: Set SLE specific version labels to make checks easier when not SLE
   ansible.builtin.set_fact:
@@ -39,7 +39,7 @@
     blktests_is_sle15sp3: false
     blktests_is_sle15sp4: false
   when:
-    - not blktests_is_sle|bool
+    - not blktests_is_sle | bool
 
 - name: By default we assume we have figured out how to add repos on a release
   ansible.builtin.set_fact:
@@ -49,8 +49,8 @@
   ansible.builtin.set_fact:
     blktests_repos_present: false
   when:
-    - blktests_is_sle|bool
-    - blktests_is_sle10|bool or blktests_is_sle11|bool
+    - blktests_is_sle | bool
+    - blktests_is_sle10 | bool or blktests_is_sle11 | bool
 
 - name: The default is to assume all distros supports nvme-utils
   ansible.builtin.set_fact:
@@ -60,8 +60,8 @@
   ansible.builtin.set_fact:
     blktests_lacks_nvme_utils: true
   when:
-    - blktests_is_sle|bool
-    - blktests_is_sle10|bool or blktests_is_sle11|bool or blktests_is_sle12sp1|bool
+    - blktests_is_sle | bool
+    - blktests_is_sle10 | bool or blktests_is_sle11 | bool or blktests_is_sle12sp1 | bool
 
 - name: Install NVMe tools
   become: true
@@ -71,8 +71,8 @@
       - nvme-cli
     state: present
   when:
-    - blktests_repos_present|bool
-    - not blktests_lacks_nvme_utils|bool
+    - blktests_repos_present | bool
+    - not blktests_lacks_nvme_utils | bool
 
 - name: Install build dependencies for blktests
   become: true
@@ -117,7 +117,7 @@
       - libnl-config
     state: present
   when:
-    - blktests_repos_present|bool
+    - blktests_repos_present | bool
 
 - name: Install tumblweed packages
   become: true
@@ -128,7 +128,7 @@
       - dbench
     state: present
   when:
-    - blktests_is_tumbleweed|bool
+    - blktests_is_tumbleweed | bool
 
 - name: Install leap packages
   become: true
@@ -140,7 +140,7 @@
       - dbench4
     state: present
   when:
-    - blktests_is_tumbleweed|bool
+    - blktests_is_tumbleweed | bool
 
 - name: Install libgdbm4
   become: true
@@ -150,7 +150,7 @@
       - libgdbm4
     state: present
   when:
-    - blktests_is_sle15sp2|bool or blktests_is_sle15sp3|bool or sle15sp4|bool
+    - blktests_is_sle15sp2 | bool or blktests_is_sle15sp3 | bool or sle15sp4 | bool
 
 # If we ever upgrade the git for nbd we'll need
 # to find way to get autoconf-archive for sles15sp4
@@ -163,8 +163,8 @@
       - autoconf-archive
     state: present
   when:
-    - not sle15sp4|bool
-    - blktests_is_sle15sp2|bool or blktests_is_sle15sp3|bool
+    - not sle15sp4 | bool
+    - blktests_is_sle15sp2 | bool or blktests_is_sle15sp3 | bool
 
 - name: The default is to assume we do not want to add the benchmark repo
   ansible.builtin.set_fact:
@@ -174,7 +174,7 @@
   ansible.builtin.set_fact:
     blktests_add_benchmark_repo: true
   when:
-    - blktests_is_sle15sp2|bool or blktests_is_sle15sp3|bool or blktests_is_sle15sp4|bool or blktests_is_sle12sp5|bool
+    - blktests_is_sle15sp2 | bool or blktests_is_sle15sp3 | bool or blktests_is_sle15sp4 | bool or blktests_is_sle12sp5 | bool
 
 - name: Add benchmark sles12sp5 opensuse repo when needed
   become: true
@@ -182,7 +182,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_12_SP5/ benchmark benchmark"
   when:
-    - blktests_is_sle12sp5|bool
+    - blktests_is_sle12sp5 | bool
 
 - name: Add benchmark sles15sp2 opensuse repo when needed
   become: true
@@ -190,7 +190,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP2/ benchmark benchmark"
   when:
-    - blktests_is_sle15sp2|bool
+    - blktests_is_sle15sp2 | bool
 
 - name: Add benchmark sles15sp3 opensuse repo when needed
   become: true
@@ -198,7 +198,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP3/ benchmark benchmark"
   when:
-    - blktests_is_sle15sp3|bool or blktests_is_sle15sp4|bool
+    - blktests_is_sle15sp3 | bool or blktests_is_sle15sp4 | bool
 
 - name: Install dbench when needed
   become: true
@@ -208,7 +208,7 @@
       - dbench
     state: present
   when:
-    - blktests_add_benchmark_repo|bool
+    - blktests_add_benchmark_repo | bool
 
 - name: The default is to assume we do not want to to compile nbd manually
   ansible.builtin.set_fact:
@@ -218,7 +218,7 @@
   ansible.builtin.set_fact:
     blktests_compile_nbd: true
   when:
-    - blktests_is_sle15sp2|bool or blktests_is_sle15sp3|bool or blktests_is_sle15sp4|bool or blktests_is_leap|bool
+    - blktests_is_sle15sp2 | bool or blktests_is_sle15sp3 | bool or blktests_is_sle15sp4 | bool or blktests_is_leap | bool
 
 - name: Install build dependencies for nbd
   become: true
@@ -228,8 +228,8 @@
       - glib2-devel
     state: present
   when:
-    - blktests_repos_present|bool
-    - blktests_compile_nbd|bool
+    - blktests_repos_present | bool
+    - blktests_compile_nbd | bool
 
 - name: Git clone nbd
   ansible.builtin.git:
@@ -238,8 +238,8 @@
     update: true
     version: "{{ nbd_version }}"
   when:
-    - blktests_repos_present|bool
-    - blktests_compile_nbd|bool
+    - blktests_repos_present | bool
+    - blktests_compile_nbd | bool
   tags: ["git", "blktests", "nbd"]
 
 - name: Skip documentation for nbd as we lack the requirement of docbook2man
@@ -257,8 +257,8 @@
     label: "Faking generation of documentation for nbd{{ item }}"
   tags: ["blktests", "nbd"]
   when:
-    - blktests_repos_present|bool
-    - blktests_compile_nbd|bool
+    - blktests_repos_present | bool
+    - blktests_compile_nbd | bool
 
 - name: Run autogen for nbd
   ansible.builtin.command: "./autogen.sh"

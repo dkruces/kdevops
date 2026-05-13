@@ -8,7 +8,7 @@
   include_role:
     name: common
   when:
-    - infer_uid_and_group|bool
+    - infer_uid_and_group | bool
 
 - name: Ensure data_dir has correct ownership
   tags: ['setup']

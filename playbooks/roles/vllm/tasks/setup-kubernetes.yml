@@ -242,7 +242,7 @@
               --memory={{ [(ansible_memtotal_mb * 0.75) | int, 49152] | min }}
               --disk-size=50g
               --delete-on-failure=true
-              {{ '--gpus all' if not vllm_use_cpu_inference|default(false) else '' }}
+              {{ '--gpus all' if not vllm_use_cpu_inference | default(false) else '' }}
           environment:
             MINIKUBE_HOME: /data/minikube
           register: minikube_start

@@ -37,7 +37,7 @@
   run_once: true
   delegate_to: localhost
   when:
-    - bootlinux_tree_set_by_cli|bool
+    - bootlinux_tree_set_by_cli | bool
 
 - name: Fail if target directory does not exist when using 9p and Linux CLI was set
   ansible.builtin.fail:
@@ -45,7 +45,7 @@
   run_once: true
   delegate_to: localhost
   when:
-    - bootlinux_tree_set_by_cli|bool
+    - bootlinux_tree_set_by_cli | bool
     - not target_directory_stat.stat.exists
 
 - name: Git clone {{ target_linux_tree }} on the control node
@@ -61,7 +61,7 @@
   until: not result.failed
   tags: ["clone"]
   when:
-    - not bootlinux_tree_set_by_cli|bool
+    - not bootlinux_tree_set_by_cli | bool
   run_once: true
   delegate_to: localhost
 
@@ -101,7 +101,7 @@
   when:
     - target_linux_apply_patch_message_id is defined
     - target_linux_apply_patch_message_id | length > 0
-    - bootlinux_b4_am_this_host|bool
+    - bootlinux_b4_am_this_host | bool
   run_once: true
   delegate_to: localhost
   vars:
@@ -113,7 +113,7 @@
   community.general.make:
     chdir: "{{ bootlinux_9p_host_path }}"
     target: "mrproper"
-  when: bootlinux_clean_before_build|default(false)|bool
+  when: bootlinux_clean_before_build | default(false) | bool
   run_once: true
   delegate_to: localhost
   tags: ["build-linux"]
@@ -125,7 +125,7 @@
     mode: "0644"
   run_once: true
   delegate_to: localhost
-  when: not bootlinux_use_config_fragments|default(false)|bool
+  when: not bootlinux_use_config_fragments | default(false) | bool
 
 - name: Use configuration fragments for Linux {{ target_linux_tree }} on the control node
   ansible.builtin.import_tasks: ../config-fragments.yml
@@ -134,7 +134,7 @@
   vars:
     target_linux_dir_path: "{{ bootlinux_9p_host_path }}"
   when:
-    - bootlinux_use_config_fragments|default(false)|bool
+    - bootlinux_use_config_fragments | default(false) | bool
 
 - name: Set kernel localversion if requested on the control node
   ansible.builtin.shell: "echo {{ active_linux_localversion | default(target_linux_localversion) }} > {{ bootlinux_9p_host_path }}/localversion"
@@ -160,7 +160,7 @@
     executable: /bin/bash
   run_once: true
   delegate_to: localhost
-  when: not bootlinux_use_config_fragments|default(false)|bool
+  when: not bootlinux_use_config_fragments | default(false) | bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: |
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
@@ -184,10 +184,10 @@
       build_jobs: {{ nproc_9p.stdout }}
       bootlinux_make_params: {{ bootlinux_make_params }}
       bootlinux_build_environment: {{ bootlinux_build_environment }}
-      bootlinux_ccache: {{ bootlinux_ccache|default(false) }}
-      bootlinux_compiler_clang: {{ bootlinux_compiler_clang|default(false) }}
-      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds|default(false) }}
-      bootlinux_ccache_kdevops_managed: {{ bootlinux_ccache_kdevops_managed|default(false) }}
+      bootlinux_ccache: {{ bootlinux_ccache | default(false) }}
+      bootlinux_compiler_clang: {{ bootlinux_compiler_clang | default(false) }}
+      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds | default(false) }}
+      bootlinux_ccache_kdevops_managed: {{ bootlinux_ccache_kdevops_managed | default(false) }}
   run_once: true
   delegate_to: localhost
   vars:
@@ -266,7 +266,7 @@
   environment: "{{ bootlinux_build_environment }}"
   tags: ["build-linux", "cxl-build"]
   when:
-    - bootlinux_cxl_test|bool
+    - bootlinux_cxl_test | bool
   run_once: true
   delegate_to: localhost
 

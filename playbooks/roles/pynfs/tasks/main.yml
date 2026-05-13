@@ -62,7 +62,7 @@
   register: result
   until: not result.failed
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
 
 - name: Clone the full pynfs source code tree from {{ pynfs_git }}
   tags: ["git", "pynfs"]
@@ -76,7 +76,7 @@
   register: result
   until: not result.failed
   when:
-    - not kdevops_workflows_dedicated_workflow|bool
+    - not kdevops_workflows_dedicated_workflow | bool
 
 - name: Build pynfs
   tags: ["pynfs"]
@@ -124,7 +124,7 @@
     export_size: 10g
     export_pnfs: true
   when:
-    - pynfs_pnfs_block|bool
+    - pynfs_pnfs_block | bool
 
 - name: Wait until nfsd grace period ends
   tags: ["run_tests"]
@@ -167,7 +167,7 @@
     EXPORT_BASE: "{{ nfsd_hostname }}:{{ nfsd_export_path }}/{{ volname_base }}"
     ANSIBLE_HOST: "{{ ansible_host }}"
   when:
-    - pynfs_pnfs_block|bool
+    - pynfs_pnfs_block | bool
 
 - name: Get used target kernel version
   tags: ["copy_results"]
@@ -211,7 +211,7 @@
   with_items:
     - block
   when:
-    - pynfs_pnfs_block|bool
+    - pynfs_pnfs_block | bool
 
 - name: Verify last-run kernel directory exists
   tags: ["copy_results"]

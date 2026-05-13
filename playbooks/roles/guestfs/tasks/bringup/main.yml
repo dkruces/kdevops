@@ -62,7 +62,7 @@
         cmd: "cp --reflink=auto {{ guestfs_base_image }} {{ guestfs_root_image }}"
       delegate_to: localhost
       when:
-        - libvirt_uri_system|bool
+        - libvirt_uri_system | bool
       changed_when: true
       tags: do_install
 
@@ -71,7 +71,7 @@
         cmd: "cp --reflink=auto {{ guestfs_base_image }} {{ guestfs_root_image }}"
       delegate_to: localhost
       when:
-        - not libvirt_uri_system|bool
+        - not libvirt_uri_system | bool
       changed_when: true
       tags: do_install
 
@@ -111,7 +111,7 @@
               if ansible_config_ssh_port | int != 22 else []
             ) + (
               ["--no-selinux-relabel"]
-              if (guestfs_fedora is defined and guestfs_fedora|bool and ansible_distribution|lower in ['debian', 'ubuntu'])
+              if (guestfs_fedora is defined and guestfs_fedora | bool and ansible_distribution | lower in ['debian', 'ubuntu'])
               else []
             )
           }}
@@ -122,7 +122,7 @@
       ansible.builtin.command:
         argv: "{{ guestfs_virt_sysprep_args }}"
       when:
-        - libvirt_uri_system|bool
+        - libvirt_uri_system | bool
       changed_when: true
       tags: do_install
 
@@ -130,7 +130,7 @@
       ansible.builtin.command:
         argv: "{{ guestfs_virt_sysprep_args }}"
       when:
-        - not libvirt_uri_system|bool
+        - not libvirt_uri_system | bool
       changed_when: true
       tags: do_install
 
@@ -195,7 +195,7 @@
   run_once: true
   delegate_to: localhost
   when:
-    - bootlinux_9p|bool
+    - bootlinux_9p | bool
 
 - name: Boot each target node
   community.libvirt.virt:

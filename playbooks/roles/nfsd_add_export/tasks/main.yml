@@ -3,14 +3,14 @@
   ansible.builtin.include_tasks:
     file: storage/local.yml
   when:
-    - nfsd_export_storage_local|bool
+    - nfsd_export_storage_local | bool
     - nfsd_add_export_fstype != "tmpfs"
 
 - name: Add an iSCSI LUN for the new export
   ansible.builtin.include_tasks:
     file: storage/iscsi.yml
   when:
-    - nfsd_export_storage_iscsi|bool
+    - nfsd_export_storage_iscsi | bool
     - nfsd_add_export_fstype != "tmpfs"
 
 - name: Add a tmpfs for the new export
@@ -73,20 +73,20 @@
   register: export_fsid
   when:
     - nfsd_add_export_fstype == "tmpfs"
-    - not fsid_is_present|bool
+    - not fsid_is_present | bool
 
 - name: Add an fsid= export option
   ansible.builtin.set_fact:
     template_export_options: "{{ nfsd_add_export_options }},fsid={{ export_fsid.stdout }}"
   when:
     - nfsd_add_export_fstype == "tmpfs"
-    - not fsid_is_present|bool
+    - not fsid_is_present | bool
 
 - name: Enable pNFS for the new export
   ansible.builtin.set_fact:
     template_export_options: "{{ nfsd_add_export_options }},pnfs"
   when:
-    - nfsd_add_export_pnfs|bool
+    - nfsd_add_export_pnfs | bool
 
 - name: Create an exports.d file for the new fs
   become: true

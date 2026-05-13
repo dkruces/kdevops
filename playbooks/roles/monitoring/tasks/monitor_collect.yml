@@ -2,13 +2,13 @@
 - name: Import common monitoring setup tasks
   ansible.builtin.import_tasks: common/setup.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
 
 - name: Import folio migration collection tasks
   ansible.builtin.import_tasks: monitors/folio_migration/collect.yml
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
 
 # Set monitoring results path with support for multiple workflows
 - name: Set monitoring results path
@@ -16,17 +16,17 @@
     monitoring_results_path: >-
       {%- if monitoring_results_base_path is defined -%}
         {{ monitoring_results_base_path }}
-      {%- elif kdevops_run_fstests|default(false)|bool -%}
+      {%- elif kdevops_run_fstests | default(false) | bool -%}
         {{ topdir_path }}/workflows/fstests/results/monitoring
-      {%- elif kdevops_workflow_enable_mmtests|default(false)|bool -%}
+      {%- elif kdevops_workflow_enable_mmtests | default(false) | bool -%}
         {{ topdir_path }}/workflows/mmtests/results/monitoring
-      {%- elif kdevops_workflow_enable_sysbench|default(false)|bool -%}
+      {%- elif kdevops_workflow_enable_sysbench | default(false) | bool -%}
         {{ topdir_path }}/workflows/sysbench/results/monitoring
-      {%- elif kdevops_workflow_enable_ai|default(false)|bool -%}
+      {%- elif kdevops_workflow_enable_ai | default(false) | bool -%}
         {{ topdir_path }}/workflows/ai/results/monitoring
-      {%- elif kdevops_workflow_enable_minio|default(false)|bool -%}
+      {%- elif kdevops_workflow_enable_minio | default(false) | bool -%}
         {{ topdir_path }}/workflows/minio/results/monitoring
-      {%- elif kdevops_workflow_enable_build_linux|default(false)|bool -%}
+      {%- elif kdevops_workflow_enable_build_linux | default(false) | bool -%}
         {{ topdir_path }}/workflows/build-linux/results/monitoring
       {%- else -%}
         {{ topdir_path }}/results/monitoring
@@ -36,17 +36,17 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.stat:
-    path: "{{ monitor_fragmentation_output_dir|default('/root/monitoring/fragmentation') }}/fragmentation_tracker.pid"
+    path: "{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}/fragmentation_tracker.pid"
   register: monitoring_fragmentation_pid_file
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
 
 - name: Stop fragmentation monitoring
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.shell: |
-    output_dir="{{ monitor_fragmentation_output_dir|default('/root/monitoring/fragmentation') }}"
+    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     if [ -f "${output_dir}/fragmentation_tracker.pid" ]; then
       pid=$(cat "${output_dir}/fragmentation_tracker.pid")
       if ps -p $pid > /dev/null 2>&1; then
@@ -68,19 +68,19 @@
     date +"%Y-%m-%d %H:%M:%S" > "${output_dir}/end_time.txt"
   register: monitoring_stop_fragmentation_monitor
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
-    - monitoring_fragmentation_pid_file.stat.exists|default(false)
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
+    - monitoring_fragmentation_pid_file.stat.exists | default(false)
   changed_when: true
 
 - name: Display stop fragmentation monitoring status
   ansible.builtin.debug:
     msg: "{{ monitoring_stop_fragmentation_monitor.stdout }}"
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
     - monitoring_stop_fragmentation_monitor is defined
-    - monitoring_stop_fragmentation_monitor.changed|default(false)
+    - monitoring_stop_fragmentation_monitor.changed | default(false)
 
 - name: Generate fragmentation visualization
   become: true
@@ -88,7 +88,7 @@
   ansible.builtin.shell: |
     set -o pipefail
     cd /opt/fragmentation
-    output_dir="{{ monitor_fragmentation_output_dir|default('/root/monitoring/fragmentation') }}"
+    output_dir="{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
 
     # Run the visualizer if data exists - it can handle corrupted JSON
     if [ -f "${output_dir}/fragmentation_data.json" ]; then
@@ -108,8 +108,8 @@
   register: monitoring_generate_fragmentation_plot
   failed_when: false
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
   changed_when: true
 
 - name: Set monitoring results path
@@ -120,13 +120,13 @@
   become: true
   become_method: ansible.builtin.sudo
   ansible.builtin.find:
-    paths: "{{ monitor_fragmentation_output_dir|default('/root/monitoring/fragmentation') }}"
+    paths: "{{ monitor_fragmentation_output_dir | default('/root/monitoring/fragmentation') }}"
     patterns: "*"
     file_type: file
   register: monitoring_fragmentation_output_files
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
 
 - name: Create local fragmentation results directory
   ansible.builtin.file:
@@ -136,8 +136,8 @@
   delegate_to: localhost
   run_once: true
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
     - monitoring_fragmentation_output_files.files is defined
     - monitoring_fragmentation_output_files.files | length > 0
 
@@ -151,8 +151,8 @@
     validate_checksum: false
   loop: "{{ monitoring_fragmentation_output_files.files | default([]) }}"
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
     - monitoring_fragmentation_output_files.files is defined
 
 - name: Display fragmentation monitoring collection summary
@@ -170,8 +170,8 @@
       No fragmentation data was collected.
       {% endif %}
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
 
 # Generate fragmentation comparison plots for multi-filesystem and XFS block size testing
 - name: Check if fragmentation JSON files exist for comparison
@@ -183,8 +183,8 @@
   run_once: true
   register: monitoring_fragmentation_json_files
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
 
 - name: Generate fragmentation comparison plots
   ansible.builtin.command:
@@ -197,8 +197,8 @@
   register: monitoring_comparison_generation
   failed_when: false
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
     - monitoring_fragmentation_json_files.files is defined
     - monitoring_fragmentation_json_files.files | length > 1
   changed_when: true
@@ -207,10 +207,10 @@
   ansible.builtin.debug:
     msg: "{{ monitoring_comparison_generation.stdout }}"
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool
     - monitoring_comparison_generation is defined
-    - monitoring_comparison_generation.changed|default(false)
+    - monitoring_comparison_generation.changed | default(false)
 
 # Generate comprehensive visualizations using monitoring role scripts
 - name: Generate monitoring visualizations
@@ -218,5 +218,5 @@
   vars:
     monitoring_results_dir: "{{ monitoring_results_path }}"
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - (monitor_folio_migration|default(false)|bool or monitor_memory_fragmentation|default(false)|bool)
+    - monitor_developmental_stats | default(false) | bool
+    - (monitor_folio_migration | default(false) | bool or monitor_memory_fragmentation | default(false) | bool)

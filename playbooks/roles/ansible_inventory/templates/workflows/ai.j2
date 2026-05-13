@@ -1,5 +1,5 @@
 {# Workflow template for AI #}
-{% if ai_enable_multifs_testing|default(false)|bool %}
+{% if ai_enable_multifs_testing | default(false) | bool %}
 {# Multi-filesystem section-based hosts #}
 [all]
 localhost ansible_connection=local

@@ -10,6 +10,6 @@
   ansible.builtin.set_fact:
     pkg_libaio: "libaio1"
   when: >
-    is_buster|bool or
-    is_bullseye|bool or
-    is_bookworm|bool
+    is_buster | bool or
+    is_bullseye | bool or
+    is_bookworm | bool

@@ -60,7 +60,7 @@
   ansible.builtin.import_tasks:
     file: "{{ role_path }}/tasks/bringup/console-permissions.yml"
   when:
-    - libvirt_uri_system|bool
+    - libvirt_uri_system | bool
   delegate_to: localhost
 
 - name: Shut down and destroy each target node

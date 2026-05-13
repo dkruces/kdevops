@@ -22,7 +22,7 @@
     is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
     is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - is_sle|bool
+    - is_sle | bool
   tags: ["vars"]
 
 - name: Set SLE specific version labels to make checks easier when not SLE
@@ -41,7 +41,7 @@
     is_sle15sp3: false
     is_sle15sp4: false
   when:
-    - not is_sle|bool
+    - not is_sle | bool
   tags: ["vars"]
 
 - name: The default is to assume we have figured out how to add repos for each
@@ -53,9 +53,9 @@
   ansible.builtin.set_fact:
     repos_will_be_added: false
   when:
-    - not devconfig_repos_addon|bool
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - not devconfig_repos_addon | bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
   tags: ["vars"]
 
 - name: The default is to assume we are not on sle11 or sle10
@@ -67,8 +67,8 @@
   ansible.builtin.set_fact:
     sle10_or_11: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
   tags: ["vars"]
 
 - name: The default is to assume all distros supports nvme-utils
@@ -80,8 +80,8 @@
   ansible.builtin.set_fact:
     lacks_nvme_utils: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool or is_sle12sp1|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool or is_sle12sp1 | bool
   tags: ["vars"]
 
 - name: The default is to assume all distros supports git-core
@@ -93,8 +93,8 @@
   ansible.builtin.set_fact:
     lacks_git_core: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool or is_sle12sp1|bool or is_sle12sp3|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool or is_sle12sp1 | bool or is_sle12sp3 | bool
   tags: ["vars"]
 
 - name: Does this release use the package name git assume false
@@ -107,8 +107,8 @@
   ansible.builtin.set_fact:
     use_git_package: true
   when:
-    - is_sle|bool
-    - is_sle12sp3|bool
+    - is_sle | bool
+    - is_sle12sp3 | bool
     - false
   tags: ["vars"]
 
@@ -121,8 +121,8 @@
   ansible.builtin.set_fact:
     lacks_xfsdump: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
   tags: ["vars"]
 
 - name: The default is to assume all distros have fio on the main repo
@@ -138,18 +138,18 @@
   ansible.builtin.set_fact:
     lacks_fio_main_repo: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool or is_sle12sp1|bool or is_sle12sp3|bool or is_sle12sp5|bool
-    - suse_register_system|bool or devconfig_repos_addon|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool or is_sle12sp1 | bool or is_sle12sp3 | bool or is_sle12sp5 | bool
+    - suse_register_system | bool or devconfig_repos_addon | bool
   tags: ["vars"]
 
 - name: Verify SLE/SLED systems are being registered
   ansible.builtin.fail:
     msg: "System is SLE/SLED, must include SUSE registration info on playbooks/secret.yml with suse_register_system and suse_registration_code variables set."
   when:
-    - not devconfig_repos_addon|bool
-    - "is_sle|bool"
-    - "not suse_register_system|bool"
+    - not devconfig_repos_addon | bool
+    - "is_sle | bool"
+    - "not suse_register_system | bool"
 
 - name: Prepare packages source list and register machine
   become: true
@@ -157,29 +157,29 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/prepare_suse_repos.sh --register-system-code {{ suse_registration_code }}"
   when:
-    - suse_register_system|bool
-    - repos_will_be_added|bool
+    - suse_register_system | bool
+    - repos_will_be_added | bool
     - suse_registration_code != 0
 
 - name: Assume we have the python2 product for sles15sp first
   ansible.builtin.set_fact:
     sle15_has_python2_product: true
   when:
-    - suse_register_system|bool
-    - repos_will_be_added|bool
+    - suse_register_system | bool
+    - repos_will_be_added | bool
     - suse_registration_code != 0
-    - is_sle15|bool
+    - is_sle15 | bool
   tags: ["vars"]
 
 - name: Disable the python2 product for sles15sp4
   ansible.builtin.set_fact:
     sle15_has_python2_product: false
   when:
-    - suse_register_system|bool
-    - repos_will_be_added|bool
+    - suse_register_system | bool
+    - repos_will_be_added | bool
     - suse_registration_code != 0
-    - is_sle15|bool
-    - is_sle15sp4|bool
+    - is_sle15 | bool
+    - is_sle15sp4 | bool
   tags: ["vars"]
 
 
@@ -188,11 +188,11 @@
   become_method: sudo
   ansible.builtin.command: "SUSEConnect -p sle-module-python2/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
   when:
-    - suse_register_system|bool
-    - repos_will_be_added|bool
+    - suse_register_system | bool
+    - repos_will_be_added | bool
     - suse_registration_code != 0
-    - is_sle15|bool
-    - sle15_has_python2_product|bool
+    - is_sle15 | bool
+    - sle15_has_python2_product | bool
 
 - name: Add extra addon repositories when enabled
   become: true
@@ -204,7 +204,7 @@
   loop_control:
     label: "Adding repo"
   when:
-    - devconfig_repos_addon|bool
+    - devconfig_repos_addon | bool
 
 - name: Install missing python-xml for releases that need it manually
   become: true
@@ -213,10 +213,10 @@
     cmd: "zypper in -y python-xml"
     warn: false
   when:
-    - (suse_register_system|bool and suse_registration_code != 0) or devconfig_repos_addon|bool
-    - repos_will_be_added|bool
-    - not is_sle15sp4|bool
-    - is_sle15|bool
+    - (suse_register_system | bool and suse_registration_code != 0) or devconfig_repos_addon | bool
+    - repos_will_be_added | bool
+    - not is_sle15sp4 | bool
+    - is_sle15 | bool
 
 - name: Prepare packages source list
   become: true
@@ -224,9 +224,9 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/prepare_suse_repos.sh"
   when:
-    - not suse_register_system|bool
-    - not is_sle|bool
-    - repos_will_be_added|bool
+    - not suse_register_system | bool
+    - not is_sle | bool
+    - repos_will_be_added | bool
 
 - name: Do full upgrade
   become: true
@@ -235,16 +235,16 @@
     state: dist-upgrade
     name: "*"
   when:
-    - repos_will_be_added|bool
-    - devconfig_try_upgrade|bool
+    - repos_will_be_added | bool
+    - devconfig_try_upgrade | bool
 
 - name: Reboot system to make the new kernel and modules take effect
   become: true
   become_method: sudo
   ansible.builtin.reboot:
   when:
-    - repos_will_be_added|bool
-    - devconfig_try_upgrade|bool
+    - repos_will_be_added | bool
+    - devconfig_try_upgrade | bool
 
 - name: Install nvme tools
   become: true
@@ -254,9 +254,9 @@
       - nvme-cli
     state: present
   when:
-    - repos_will_be_added|bool
-    - not lacks_nvme_utils|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not lacks_nvme_utils | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install fio when possible
   become: true
@@ -266,9 +266,9 @@
       - fio
     state: present
   when:
-    - repos_will_be_added|bool
-    - not lacks_fio_main_repo|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not lacks_fio_main_repo | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install git-core when possible
   become: true
@@ -278,9 +278,9 @@
       - git-core
     state: present
   when:
-    - repos_will_be_added|bool
-    - not lacks_git_core|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not lacks_git_core | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install git when possible
   become: true
@@ -290,9 +290,9 @@
       - git
     state: present
   when:
-    - repos_will_be_added|bool
-    - use_git_package|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - use_git_package | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install xfsdump when possible
   become: true
@@ -302,9 +302,9 @@
       - xfsdump
     state: present
   when:
-    - repos_will_be_added|bool
-    - not lacks_xfsdump|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not lacks_xfsdump | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install packages on newer distro when possible
   become: true
@@ -316,9 +316,9 @@
       - gcc
     state: present
   when:
-    - repos_will_be_added|bool
-    - not lacks_git_core|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not lacks_git_core | bool
+    - devconfig_try_install_kdevtools | bool
 
 # sle12sp3 needs m4 to install flex, fix that first
 - name: Install packages not available on sle11 or sle10
@@ -331,10 +331,10 @@
       - ncurses-devel
     state: present
   when:
-    - repos_will_be_added|bool
-    - not sle10_or_11|bool
-    - not is_sle12sp3|bool
-    - devconfig_try_install_kdevtools|bool
+    - repos_will_be_added | bool
+    - not sle10_or_11 | bool
+    - not is_sle12sp3 | bool
+    - devconfig_try_install_kdevtools | bool
 
 # fix this for sle12sp3
 - name: Install packages we typically care about
@@ -362,9 +362,9 @@
       - perf
     state: present
   when:
-    - not is_sle12sp3|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - not is_sle12sp3 | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Set default values for if we install snmp / kdump
   ansible.builtin.set_fact:
@@ -377,7 +377,7 @@
     install_snmp: true
     install_kdump: true
   when:
-    - is_sle15|bool or is_tumbleweed
+    - is_sle15 | bool or is_tumbleweed
   tags: ["vars"]
 
 - name: Install snmp
@@ -387,9 +387,9 @@
     name:
       - net-snmp
   when:
-    - install_snmp|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_snmp | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Set up snmp
@@ -399,9 +399,9 @@
     src: snmpd.conf
     dest: /etc/snmp/snmpd.conf
   when:
-    - install_snmp|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_snmp | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Enable snmpd service
@@ -412,9 +412,9 @@
     enabled: true
     masked: false
   when:
-    - install_snmp|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_snmp | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Start snmpd service
@@ -424,9 +424,9 @@
     name: snmpd
     state: restarted
   when:
-    - install_snmp|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_snmp | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Install kdump
@@ -436,9 +436,9 @@
     name:
       - kdump
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Get kdump calibration high
@@ -448,9 +448,9 @@
   ansible.builtin.shell: kdumptool calibrate | grep ^High | awk '{print $2}'
   register: kdump_high
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Get kdump calibration low
@@ -460,9 +460,9 @@
   ansible.builtin.shell: kdumptool calibrate | grep ^Low | awk '{print $2}'
   register: kdump_low
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Check to see if kdump is configured on your GRUB config
@@ -476,9 +476,9 @@
     line: ""
   check_mode: true
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: ["kdump"]
 
 - name: Update GRUB configuration to add kdump knobs
@@ -492,18 +492,18 @@
     line: '\1\2 crashkernel={{ kdump_high.stdout }}M,high crashkernel={{ kdump_low.stdout }}M,low"'
   when:
     - not kdump_grep.changed
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: ["kdump"]
 
 - name: Update your boot GRUB file if necessary
   ansible.builtin.import_tasks: update-grub/main.yml
   when:
     - not kdump_grep.changed
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Reboot system to ensure kdump is effective
   become: true
@@ -519,9 +519,9 @@
     enabled: true
     masked: false
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Start kdump service
@@ -531,9 +531,9 @@
     name: kdump
     state: restarted
   when:
-    - install_kdump|bool
-    - repos_will_be_added|bool
-    - devconfig_try_install_kdevtools|bool
+    - install_kdump | bool
+    - repos_will_be_added | bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Install systemd-journal-remote
@@ -543,8 +543,8 @@
     name:
       - systemd-journal-remote
   when:
-    - devconfig_enable_systemd_journal_remote|bool
-    - repos_will_be_added|bool
+    - devconfig_enable_systemd_journal_remote | bool
+    - repos_will_be_added | bool
   tags: journal
 
 - name: Install systemd-timesyncd
@@ -554,6 +554,6 @@
     name:
       - systemd-timesyncd
   when:
-    - devconfig_enable_systemd_timesyncd|bool
-    - repos_will_be_added|bool
+    - devconfig_enable_systemd_timesyncd | bool
+    - repos_will_be_added | bool
   tags: timesyncd

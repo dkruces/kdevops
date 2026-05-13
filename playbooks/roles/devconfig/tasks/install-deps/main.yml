@@ -29,19 +29,19 @@
   ansible.builtin.include_tasks: debian/main.yml
   when:
     - ansible_os_family == "Debian"
-    - devconfig_try_refresh_repos|bool or devconfig_try_install_kdevtools|bool or kdevops_cli_install|bool
+    - devconfig_try_refresh_repos | bool or devconfig_try_install_kdevtools | bool or kdevops_cli_install | bool
   tags: vars_simple
 
 - name: SuSE-specific setup
   ansible.builtin.include_tasks: suse/main.yml
   when:
     - ansible_os_family == "Suse"
-    - devconfig_try_refresh_repos|bool or devconfig_try_install_kdevtools|bool or kdevops_cli_install|bool
+    - devconfig_try_refresh_repos | bool or devconfig_try_install_kdevtools | bool or kdevops_cli_install | bool
   tags: vars_simple
 
 - name: Red Hat-specific setup
   ansible.builtin.include_tasks: redhat/main.yml
   when:
     - ansible_os_family == "RedHat"
-    - devconfig_try_refresh_repos|bool or devconfig_try_install_kdevtools|bool or kdevops_cli_install|bool
+    - devconfig_try_refresh_repos | bool or devconfig_try_install_kdevtools | bool or kdevops_cli_install | bool
   tags: vars_simple

@@ -46,7 +46,7 @@
   when:
     - target_linux_apply_patch_message_id is defined
     - target_linux_apply_patch_message_id | length > 0
-    - bootlinux_b4_am_this_host|bool
+    - bootlinux_b4_am_this_host | bool
   block:
     - name: Get the user's git config info
       community.general.git_config_info:
@@ -86,7 +86,7 @@
   when:
     - target_linux_apply_patch_message_id is defined
     - target_linux_apply_patch_message_id | length > 0
-    - bootlinux_b4_am_this_host|bool
+    - bootlinux_b4_am_this_host | bool
 
 - name: Copy the configuration for kernel {{ target_linux_tree }}
   ansible.builtin.template:
@@ -112,14 +112,14 @@
     target: "olddefconfig"
   register: olddefconfig_output
   when:
-    - bootlinux_compiler_gcc|bool
-    - not bootlinux_use_config_fragments|default(false)|bool
+    - bootlinux_compiler_gcc | bool
+    - not bootlinux_use_config_fragments | default(false) | bool
 
 - name: Report unexpected Kconfig setting changes
   ansible.builtin.debug:
     var: olddefconfig_output.stderr_lines
   when:
-    - bootlinux_compiler_gcc|bool
+    - bootlinux_compiler_gcc | bool
     - "'warning:' in olddefconfig_output.stderr"
 
 - name: Build {{ target_linux_tree }}
@@ -128,7 +128,7 @@
     jobs: "{{ ansible_processor_nproc }}"
     target: "all"
   when:
-    - bootlinux_compiler_gcc|bool
+    - bootlinux_compiler_gcc | bool
 
 - name: Configure kernel {{ target_linux_tree }}
   community.general.make:
@@ -138,14 +138,14 @@
     target: "olddefconfig"
   register: olddefconfig_llvm_output
   when:
-    - bootlinux_compiler_clang|bool
-    - not bootlinux_use_config_fragments|default(false)|bool
+    - bootlinux_compiler_clang | bool
+    - not bootlinux_use_config_fragments | default(false) | bool
 
 - name: Report unexpected Kconfig setting changes
   ansible.builtin.debug:
     var: olddefconfig_output.stderr_lines
   when:
-    - bootlinux_compiler_clang|bool
+    - bootlinux_compiler_clang | bool
     - "'warning:' in olddefconfig_llvm_output.stderr"
 
 - name: Build {{ target_linux_tree }}
@@ -156,7 +156,7 @@
       LLVM: 1
     target: "all"
   when:
-    - bootlinux_compiler_clang|bool
+    - bootlinux_compiler_clang | bool
 
 - name: Remove the old artifacts directory on the control host
   delegate_to: localhost
@@ -239,7 +239,7 @@
         params:
           RPMOPTS: "--without devel"
       when:
-        - bootlinux_compiler_gcc|bool
+        - bootlinux_compiler_gcc | bool
 
     - name: Make the binrpm-pkg target
       community.general.make:
@@ -250,7 +250,7 @@
           RPMOPTS: "--without devel"
           LLVM: 1
       when:
-        - bootlinux_compiler_clang|bool
+        - bootlinux_compiler_clang | bool
 
     - name: Find the build artifacts
       ansible.builtin.find:

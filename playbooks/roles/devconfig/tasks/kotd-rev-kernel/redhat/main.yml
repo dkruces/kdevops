@@ -6,8 +6,8 @@
     url: "{{ devconfig_kotd_repo }}"
     dest: /etc/yum.repos.d
   when:
-    - devconfig_enable_kotd|bool
-    - devconfig_has_kotd_repo|bool
+    - devconfig_enable_kotd | bool
+    - devconfig_has_kotd_repo | bool
 
 - name: Parse repository id from repo file
   become: true
@@ -18,8 +18,8 @@
   register: result
   changed_when: false
   when:
-    - devconfig_enable_kotd|bool
-    - devconfig_has_kotd_repo|bool
+    - devconfig_enable_kotd | bool
+    - devconfig_has_kotd_repo | bool
 
 - name: Get kernel version from repository-packages
   become: true
@@ -30,8 +30,8 @@
   register: result
   changed_when: false
   when:
-    - devconfig_enable_kotd|bool
-    - devconfig_has_kotd_repo|bool
+    - devconfig_enable_kotd | bool
+    - devconfig_has_kotd_repo | bool
 
 - name: Install KOTD
   become: true
@@ -46,12 +46,12 @@
     sslverify: false
     state: present
   when:
-    - devconfig_enable_kotd|bool
-    - devconfig_has_kotd_repo|bool
+    - devconfig_enable_kotd | bool
+    - devconfig_has_kotd_repo | bool
 
 - name: Reboot system to make the new kernel and modules take effect
   become: true
   become_method: sudo
   ansible.builtin.reboot:
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool

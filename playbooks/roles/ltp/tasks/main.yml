@@ -126,7 +126,7 @@
   register: result
   until: not result.failed
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
 
 - name: Clone the full ltp source code tree from {{ ltp_repo }}
   tags: ["build", "clone", "git", "ltp"]
@@ -140,7 +140,7 @@
   register: result
   until: not result.failed
   when:
-    - not kdevops_workflows_dedicated_workflow|bool
+    - not kdevops_workflows_dedicated_workflow | bool
 
 - name: Initialize autotools in the build directory
   tags: ["build", "ltp"]

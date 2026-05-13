@@ -7,8 +7,8 @@
     path: /root/monitoring/folio_migration_stats.txt
   register: monitoring_folio_migration_data_file
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
 
 - name: Create folio migration snapshot for interim collection
   become: true
@@ -16,9 +16,9 @@
   ansible.builtin.shell: |
     cp /root/monitoring/folio_migration_stats.txt /root/monitoring/folio_migration_stats_snapshot.txt
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
-    - monitoring_folio_migration_data_file.stat.exists|default(false)
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
+    - monitoring_folio_migration_data_file.stat.exists | default(false)
   changed_when: true
 
 - name: Copy folio migration interim data to localhost
@@ -30,9 +30,9 @@
     flat: true
     validate_checksum: false
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
-    - monitoring_folio_migration_data_file.stat.exists|default(false)
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
+    - monitoring_folio_migration_data_file.stat.exists | default(false)
 
 - name: Clean up folio migration snapshot
   become: true
@@ -41,20 +41,20 @@
     path: /root/monitoring/folio_migration_stats_snapshot.txt
     state: absent
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
   failed_when: false
 
 - name: Display folio migration interim collection status
   ansible.builtin.debug:
     msg: |
-      Folio migration interim data {% if monitoring_folio_migration_data_file.stat.exists|default(false) %}collected{% else %}not available{% endif %}.
-      {% if monitoring_folio_migration_data_file.stat.exists|default(false) %}
+      Folio migration interim data {% if monitoring_folio_migration_data_file.stat.exists | default(false) %}collected{% else %}not available{% endif %}.
+      {% if monitoring_folio_migration_data_file.stat.exists | default(false) %}
       Data saved to: {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats_interim.txt
       {% endif %}
   when:
-    - monitor_developmental_stats|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
+    - monitor_developmental_stats | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
 
 # Generate plots from interim data on localhost
 - name: Check if matplotlib is available on localhost
@@ -64,7 +64,7 @@
   failed_when: false
   run_once: true
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   changed_when: false
 
 - name: Find interim monitoring data files for plotting
@@ -75,7 +75,7 @@
   register: monitoring_interim_monitoring_files
   run_once: true
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
     - monitoring_localhost_matplotlib_check.rc == 0
 
 - name: Generate folio migration interim plots on localhost
@@ -88,7 +88,7 @@
   failed_when: false
   run_once: true
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
     - monitoring_localhost_matplotlib_check.rc == 0
     - monitoring_interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | list | length > 0
   changed_when: true

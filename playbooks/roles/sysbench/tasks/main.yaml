@@ -33,7 +33,7 @@
 # Start monitoring services before running tests
 - ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["sysbench", "run_sysbench", "monitoring", "monitor_run"]
 
 - name: MySQL Docker
@@ -47,5 +47,5 @@
 # Stop monitoring services and collect data after running tests
 - ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["sysbench", "results", "run_sysbench", "monitoring", "monitor_collect"]

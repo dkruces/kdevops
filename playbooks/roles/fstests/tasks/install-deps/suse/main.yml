@@ -21,7 +21,7 @@
     fstests_is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
     fstests_is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - fstests_is_sle|bool
+    - fstests_is_sle | bool
 
 - name: Set SLE specific version labels to make checks easier when not SLE
   ansible.builtin.set_fact:
@@ -39,7 +39,7 @@
     fstests_is_sle15sp3: false
     fstests_is_sle15sp4: false
   when:
-    - not fstests_is_sle|bool
+    - not fstests_is_sle | bool
 
 - name: By default we assume we have figured out how to add repos on a release
   ansible.builtin.set_fact:
@@ -49,8 +49,8 @@
   ansible.builtin.set_fact:
     fstests_repos_present: false
   when:
-    - fstests_is_sle|bool
-    - fstests_is_sle10|bool or fstests_is_sle11|bool
+    - fstests_is_sle | bool
+    - fstests_is_sle10 | bool or fstests_is_sle11 | bool
 
 - name: The default is to assume all distros have the indent package
   ansible.builtin.set_fact:
@@ -60,8 +60,8 @@
   ansible.builtin.set_fact:
     fstests_has_indent: false
   when:
-    - fstests_is_sle|bool
-    - fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
+    - fstests_is_sle | bool
+    - fstests_is_sle15sp3 | bool or fstests_is_sle15sp4 | bool
 
 - name: The default is to assume all distros supports nvme-utils
   ansible.builtin.set_fact:
@@ -71,8 +71,8 @@
   ansible.builtin.set_fact:
     fstests_lacks_nvme_utils: true
   when:
-    - fstests_is_sle|bool
-    - fstests_is_sle10|bool or fstests_is_sle11|bool or fstests_is_sle12sp1|bool
+    - fstests_is_sle | bool
+    - fstests_is_sle10 | bool or fstests_is_sle11 | bool or fstests_is_sle12sp1 | bool
 
 - name: Install nvme tools
   become: true
@@ -82,8 +82,8 @@
       - nvme-cli
     state: present
   when:
-    - fstests_repos_present|bool
-    - not fstests_lacks_nvme_utils|bool
+    - fstests_repos_present | bool
+    - not fstests_lacks_nvme_utils | bool
 
 - name: Install build dependencies for fstests
   become: true
@@ -127,7 +127,7 @@
       - python3-bcc
     state: present
   when:
-    - fstests_repos_present|bool
+    - fstests_repos_present | bool
 
 - name: Install indent when we have it
   become: true
@@ -137,8 +137,8 @@
       - indent
     state: present
   when:
-    - fstests_repos_present|bool
-    - fstests_has_indent|bool
+    - fstests_repos_present | bool
+    - fstests_has_indent | bool
 
 - name: Install tumblweed packages
   become: true
@@ -149,7 +149,7 @@
       - dbench
     state: present
   when:
-    - fstests_is_tumbleweed|bool
+    - fstests_is_tumbleweed | bool
 
 - name: Install leap packages
   become: true
@@ -161,7 +161,7 @@
       - dbench4
     state: present
   when:
-    - fstests_is_leap|bool
+    - fstests_is_leap | bool
 
 - name: Install sle15 sp2 and sp3 packages
   become: true
@@ -171,7 +171,7 @@
       - libgdbm4
     state: present
   when:
-    - fstests_is_sle15sp2|bool or fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
+    - fstests_is_sle15sp2 | bool or fstests_is_sle15sp3 | bool or fstests_is_sle15sp4 | bool
 
 - name: The default is to assume we do not want to add the benchmark repo
   ansible.builtin.set_fact:
@@ -181,7 +181,7 @@
   ansible.builtin.set_fact:
     fstests_add_benchmark_repo: true
   when:
-    - fstests_is_sle15sp2|bool or fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool or fstests_is_sle12sp5|bool
+    - fstests_is_sle15sp2 | bool or fstests_is_sle15sp3 | bool or fstests_is_sle15sp4 | bool or fstests_is_sle12sp5 | bool
 
 - name: Add benchmark sles12sp5 openSUSE repo when needed
   become: true
@@ -189,7 +189,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_12_SP5/ benchmark benchmark"
   when:
-    - fstests_is_sle12sp5|bool
+    - fstests_is_sle12sp5 | bool
 
 - name: Add benchmark sles15sp2 openSUSE repo when needed
   become: true
@@ -197,7 +197,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP2/ benchmark benchmark"
   when:
-    - fstests_is_sle15sp2|bool
+    - fstests_is_sle15sp2 | bool
 
 - name: Add benchmark sles15sp3 openSUSE repo when needed
   become: true
@@ -205,7 +205,7 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP3/ benchmark benchmark"
   when:
-    - fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
+    - fstests_is_sle15sp3 | bool or fstests_is_sle15sp4 | bool
 
 - name: Install dbench for sles15-sp2
   become: true
@@ -215,7 +215,7 @@
       - dbench
     state: present
   when:
-    - fstests_add_benchmark_repo|bool
+    - fstests_add_benchmark_repo | bool
 
 - name: Install nfs-utils
   become: true
@@ -225,7 +225,7 @@
       - nfs-utils
     state: present
   when:
-    - fstests_repos_present|bool
+    - fstests_repos_present | bool
     - fstests_fstyp == "nfs"
 
 - name: Ensure nfs-client.target is enabled
@@ -246,7 +246,7 @@
       - cifs-utils
     state: present
   when:
-    - fstests_repos_present|bool
+    - fstests_repos_present | bool
     - fstests_fstyp == "cifs"
 
 - name: Set the "--badname" arg

@@ -26,20 +26,20 @@
     path: "{{ fstests_xfs_xfsprogs_data }}"
   register: fstests_xfsprogs_dir
   tags: ["oscheck", "git", "fstests"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Set up an iSCSI initiator on target nodes
   ansible.builtin.include_role:
     name: iscsi
     tasks_from: add_initiator
   when:
-    - fstests_nfs_section_pnfs|bool
+    - fstests_nfs_section_pnfs | bool
 
 - name: Infer the data user and group from the common role
   ansible.builtin.include_role:
     name: common
   when:
-    - fstests_infer_uid_and_group|bool
+    - fstests_infer_uid_and_group | bool
 
 - name: Get fstests_nproc
   tags: ["oscheck", "fstests", "build"]
@@ -61,7 +61,7 @@
     mode: "0755"
   tags: ["oscheck", "git", "fstests", "do_deploy"]
   when:
-    - fstests_xfs_build_custom_xfsprogs|bool
+    - fstests_xfs_build_custom_xfsprogs | bool
     - fstests_xfsprogs_dir.stat.exists
 
 - name: Clean old xfsprogs build
@@ -70,7 +70,7 @@
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
   tags: ["oscheck", "git", "fstests"]
   when:
-    - fstests_xfs_build_custom_xfsprogs|bool
+    - fstests_xfs_build_custom_xfsprogs | bool
     - fstests_xfsprogs_dir.stat.exists
   changed_when: true
 
@@ -85,21 +85,21 @@
   register: fstests_result
   until: not fstests_result.failed
   tags: ["oscheck", "git", "fstests", "do_fetch"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Configure xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     target: configure
   tags: ["oscheck", "fstests", "build", "do_configure"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Build xfsprogs
   community.general.make:
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
     jobs: "{{ fstests_nproc.stdout }}"
   tags: ["oscheck", "fstests", "build", "do_compile"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Install xfsprogs
   become: true
@@ -111,7 +111,7 @@
       DIST_ROOT: "{{ fstests_xfs_xfsprogs_install_path }}"
     chdir: "{{ fstests_xfs_xfsprogs_data }}"
   tags: ["oscheck", "fstests", "build", "do_compile"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Check if there's an existing xfsdump directory
   become: true
@@ -122,7 +122,7 @@
   register: fstests_xfdump_dir
   tags: ["oscheck", "git", "fstests"]
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
 
 - name: Ensure xfsdump is not root owned
   become: true
@@ -136,7 +136,7 @@
     mode: "0644"
   tags: ["fstests", "deps"]
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
     - fstests_xfdump_dir.stat.exists
 
 - name: Clean old xfsdump build
@@ -145,7 +145,7 @@
     chdir: "{{ fstests_xfsdump_data }}"
   tags: ["oscheck", "git", "fstests"]
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
     - fstests_xfdump_dir.stat.exists
   changed_when: true
 
@@ -157,7 +157,7 @@
     version: "{{ fstests_xfsdump_commit }}"
   tags: ["fstests", "deps", "do_fetch"]
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
 
 - name: Build xfsdump
   tags: ["fstests", "deps", "do_compile"]
@@ -165,7 +165,7 @@
     chdir: "{{ fstests_xfsdump_data }}"
     jobs: "{{ fstests_nproc.stdout }}"
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
 
 - name: Install xfsdump
   become: true
@@ -175,7 +175,7 @@
     chdir: "{{ fstests_xfsdump_data }}"
     target: install
   when:
-    - fstests_xfsdump_build|bool
+    - fstests_xfsdump_build | bool
 
 - name: Setup $PATH environment variable to access custom xfsprogs binaries
   become: true
@@ -186,7 +186,7 @@
     line: "export PATH={{ fstests_xfs_xfsprogs_install_path }}/usr/sbin/:$PATH"
     state: present
   tags: ["oscheck", "fstests", "build", "do_configure"]
-  when: "fstests_xfs_build_custom_xfsprogs|bool"
+  when: "fstests_xfs_build_custom_xfsprogs | bool"
 
 - name: Set up the fstests sparsefiles partition
   ansible.builtin.include_role:
@@ -201,7 +201,7 @@
     create_partition_disk_group: "{{ data_group }}"
   tags: ["oscheck", "sparse_partition"]
   when:
-    - fstests_testdev_sparsefile_generation|bool
+    - fstests_testdev_sparsefile_generation | bool
 
 - name: Git clone kdevops
   environment:
@@ -417,7 +417,7 @@
   with_items:
     - "{{ fstests_sparsefiles_path }}"
   when:
-    - fstests_testdev_sparsefile_generation|bool
+    - fstests_testdev_sparsefile_generation | bool
 
 - name: Create a few directories which kdevops uses for fstests if they do not exist
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config", "do_deploy"]
@@ -448,8 +448,8 @@
     force: true
     mode: "0644"
   when:
-    - fstests_generate_simple_config_enable|bool
-    - fstests_debug_localhost|bool
+    - fstests_generate_simple_config_enable | bool
+    - fstests_debug_localhost | bool
     - fstests_host_specific_fstests_config.stat.exists
 
 - name: Generate filesystem configuration file for debugging purposes using generic config {{ target_config }}
@@ -462,8 +462,8 @@
     force: true
     mode: "0644"
   when:
-    - fstests_generate_simple_config_enable|bool
-    - fstests_debug_localhost|bool
+    - fstests_generate_simple_config_enable | bool
+    - fstests_debug_localhost | bool
     - not fstests_host_specific_fstests_config.stat.exists
 
 - name: Copy and force overwrite of the host specific fstests configuration
@@ -477,8 +477,8 @@
     force: true
     mode: "0644"
   when:
-    - fstests_generate_simple_config_enable|bool
-    - not fstests_debug_localhost|bool
+    - fstests_generate_simple_config_enable | bool
+    - not fstests_debug_localhost | bool
     - fstests_host_specific_fstests_config.stat.exists
 
 - name: Copy and force overwrite of the target filesystem fstests configuration
@@ -492,8 +492,8 @@
     force: true
     mode: "0644"
   when:
-    - fstests_generate_simple_config_enable|bool
-    - not fstests_debug_localhost|bool
+    - fstests_generate_simple_config_enable | bool
+    - not fstests_debug_localhost | bool
     - not fstests_host_specific_fstests_config.stat.exists
 
 - name: Try to see if NVMe EUIs exist on /dev/disk/by-id/nvme-eui.*
@@ -507,7 +507,7 @@
   register: fstests_real_nvme_euis
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config"]
   when:
-    - fstests_generate_nvme_live_config_enable|bool
+    - fstests_generate_nvme_live_config_enable | bool
 
 - name: End if no NVMe EUIs found per node and no fallback mechanism is provided
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config"]
@@ -518,8 +518,8 @@
     msg:
       - "You need at least one NVMe drive with its EUI defined per node, try enabling CONFIG_FSTESTS_TESTDEV_NVME_FALLBACK_MODEL_SERIAL"
   when:
-    - fstests_testdev_nvme_partition_euis|bool
-    - not fstests_testdev_nvme_fallback_model_serial|bool
+    - fstests_testdev_nvme_partition_euis | bool
+    - not fstests_testdev_nvme_fallback_model_serial | bool
     - fstests_real_nvme_euis is success
     - fstests_real_nvme_euis.files is defined
     - fstests_real_nvme_euis.files | length == 0
@@ -528,7 +528,7 @@
   ansible.builtin.set_fact:
     fstests_nvmes: "{{ fstests_real_nvme_euis }}"
   when:
-    - fstests_generate_nvme_live_config_enable|bool
+    - fstests_generate_nvme_live_config_enable | bool
     - fstests_real_nvme_euis is success
     - fstests_real_nvme_euis.files is defined
     - fstests_real_nvme_euis.files | length > 0
@@ -549,18 +549,18 @@
     - fstests_real_nvme_euis is success
     - fstests_real_nvme_euis.files is defined
     - fstests_real_nvme_euis.files | length == 0
-    - fstests_generate_nvme_live_config_enable|bool
-    - fstests_testdev_nvme_fallback_model_serial|bool
+    - fstests_generate_nvme_live_config_enable | bool
+    - fstests_testdev_nvme_fallback_model_serial | bool
 
 - name: Set real fstests_nvmes to fallback list if one found
   ansible.builtin.set_fact:
     fstests_nvmes: "{{ fstests_fallback_nvmes }}"
   when:
-    - fstests_generate_nvme_live_config_enable|bool
+    - fstests_generate_nvme_live_config_enable | bool
     - fstests_real_nvme_euis is success
     - fstests_real_nvme_euis.files is defined
     - fstests_real_nvme_euis.files | length == 0
-    - fstests_testdev_nvme_fallback_model_serial|bool
+    - fstests_testdev_nvme_fallback_model_serial | bool
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config"]
 
 - name: Get NVMe drives we can use for testing
@@ -572,7 +572,7 @@
       {%- endfor -%}
       {{ x }}
   when:
-    - fstests_generate_nvme_live_config_enable|bool
+    - fstests_generate_nvme_live_config_enable | bool
     - fstests_nvmes is defined
     - fstests_nvmes is success
     - fstests_nvmes.files is defined
@@ -588,7 +588,7 @@
     unit: MiB
   register: fstests_nvme_info
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
 
 - name: Remove all partitions from the first real NVMe drive with an EUI
@@ -602,7 +602,7 @@
     state: absent
   loop: "{{ fstests_nvme_info.partitions }}"
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length > 1
     - fstests_nvme_info.partitions | length != 13
 
@@ -617,7 +617,7 @@
     state: present
     part_type: "extended"
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
     - fstests_nvme_info.partitions | length < 13
 
@@ -638,7 +638,7 @@
     part_end: "{{ ((item - 4) * test_partsize) }}GiB"
   loop: "{{ range(5, 17) | list }}"
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
     - fstests_nvme_info.partitions | length < 13
 
@@ -655,7 +655,7 @@
   register: fstests_part_symlinks
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config"]
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
 
 - name: Get new partition NVMe symlinks
@@ -667,7 +667,7 @@
       {%- endfor -%}
       {{ x }}
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_part_symlinks is success
     - fstests_part_symlinks.files is defined
     - fstests_nvme_symlinks | length >= 1
@@ -683,7 +683,7 @@
       You need at least one extended partition and 12 logical partitions NVMe drives
       per guest. Detected {{ fstests_nvme_parts | length }} NVMe drives. Bailing test.
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
     - fstests_nvme_parts | length < 13
 
@@ -712,7 +712,7 @@
     force: true
     mode: "0644"
   when:
-    - fstests_testdev_nvme_partition_euis|bool
+    - fstests_testdev_nvme_partition_euis | bool
     - fstests_nvme_symlinks | length >= 1
     - fstests_nvme_parts | length >= 13
 
@@ -727,7 +727,7 @@
     msg:
       - "You need at least 7 NVMe drives per guest. Detected {{ fstests_nvme_symlinks | length }} NVMe drives. Bailing test."
   when:
-    - fstests_testdev_nvme_euis|bool
+    - fstests_testdev_nvme_euis | bool
     - fstests_nvme_symlinks | length < 7
 
 - name: Copy and force overwrite of the target filesystem fstests configuration using NVMe euis
@@ -750,7 +750,7 @@
     force: true
     mode: "0644"
   when:
-    - fstests_testdev_nvme_euis|bool
+    - fstests_testdev_nvme_euis | bool
     - fstests_nvme_symlinks | length >= 7
 
 - name: Set the export volname prefix
@@ -765,7 +765,7 @@
   ansible.builtin.set_fact:
     fstests_nfs_export_fstype: "{{ nfsd_export_fstype | default('xfs') }}"
   when:
-    - not fstests_nfs_section_pnfs|bool
+    - not fstests_nfs_section_pnfs | bool
 
 - name: Set the NFS export's fstype
   tags: vars
@@ -773,7 +773,7 @@
     fstests_nfs_export_fstype: "xfs"
   when:
     - fstests_fstyp == "nfs"
-    - fstests_nfs_section_pnfs|bool
+    - fstests_nfs_section_pnfs | bool
 
 - name: Create NFS export for test vol
   ansible.builtin.include_role:
@@ -787,7 +787,7 @@
     nfsd_add_export_pnfs: false
   when:
     - fstests_fstyp == "nfs"
-    - fstests_nfs_use_kdevops_nfsd|bool
+    - fstests_nfs_use_kdevops_nfsd | bool
 
 - name: Create NFS export for scratch vol
   ansible.builtin.include_role:
@@ -801,7 +801,7 @@
     nfsd_add_export_pnfs: false
   when:
     - fstests_fstyp == "nfs"
-    - fstests_nfs_use_kdevops_nfsd|bool
+    - fstests_nfs_use_kdevops_nfsd | bool
 
 - name: Copy and force overwrite of the target filesystem fstests configuration for NFS
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config", "do_deploy"]
@@ -870,7 +870,7 @@
     smbd_add_share_size: 20g
   when:
     - fstests_fstyp == "cifs"
-    - fstests_cifs_use_kdevops_smbd|bool
+    - fstests_cifs_use_kdevops_smbd | bool
 
 - name: Create SMB share for scratch vol
   ansible.builtin.include_role:
@@ -882,7 +882,7 @@
     smbd_add_share_size: 30g
   when:
     - fstests_fstyp == "cifs"
-    - fstests_cifs_use_kdevops_smbd|bool
+    - fstests_cifs_use_kdevops_smbd | bool
 
 - name: Copy and force overwrite of the target filesystem fstests configuration for CIFS
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config", "do_deploy"]
@@ -990,7 +990,7 @@
     TEST_DEV: "{{ fstests_test_dev }}"
     TEST_DIR: "{{ fstests_test_dir }}"
   when:
-    - fstests_testdev_sparsefile_generation|bool
+    - fstests_testdev_sparsefile_generation | bool
   changed_when: true
 
 - name: Capture gendisk output
@@ -999,8 +999,8 @@
     msg: "{{ fstests_gendisk_cmd.stdout_lines }}"
   when:
     - kdevops_run_fstests | default(false) | bool
-    - fstests_debug|bool
-    - fstests_testdev_sparsefile_generation|bool
+    - fstests_debug | bool
+    - fstests_testdev_sparsefile_generation | bool
 
 - name: Check and verify fstests dependencies are met prior to running fstests
   vars:
@@ -1030,7 +1030,7 @@
     TEST_DIR: "{{ fstests_test_dir }}"
   when:
     - kdevops_run_fstests | default(false) | bool
-    - fstests_testdev_sparsefile_generation|bool
+    - fstests_testdev_sparsefile_generation | bool
   changed_when: false
 
 - name: Set the path where we collect our fstests results
@@ -1080,21 +1080,21 @@
     - fstests_checktime_files is success
     - fstests_checktime_files.files is defined
     - fstests_checktime_files.files | length > 0
-    - fstests_initial_baseline|bool
+    - fstests_initial_baseline | bool
   tags: ["oscheck", "fstests", "run_tests", "checktime"]
 
 - name: Expand tests to skip for initial baseline
   ansible.builtin.set_fact:
     fstests_initial_baseline_args: "--start-after {{ fstests_start_after_test }}"
   when:
-    - fstests_start_after|bool
+    - fstests_start_after | bool
   tags: ["oscheck", "fstests", "run_tests", "checktime"]
 
 - name: Expand tests to skip tests dynamically passed on the command line
   ansible.builtin.set_fact:
     fstests_skip_tests_args: "-e {{ fstests_skip_tests }}"
   when:
-    - fstests_skip_tests_enable|bool
+    - fstests_skip_tests_enable | bool
   tags: ["oscheck", "fstests", "run_tests", "checktime"]
 
 - name: Verify use of START_AFTER
@@ -1103,7 +1103,7 @@
     msg:
       - "You used START_AFTER={{ fstests_start_after_test }} and it must not be empty"
   when:
-    - fstests_start_after|bool
+    - fstests_start_after | bool
     - fstests_start_after_test == ""
 
 - name: Clear out old results directory
@@ -1116,7 +1116,7 @@
     mode: "0644"
   tags: ["oscheck", "fstests", "run_tests", "clean_results", "do_clean"]
   when:
-    - not fstests_initial_baseline|bool
+    - not fstests_initial_baseline | bool
 
 - name: Print uname for each host
   tags: ["oscheck", "fstests", "run_tests"]
@@ -1290,13 +1290,13 @@
   ansible.builtin.meta: end_play
   tags: ["oscheck", "fstests", "run_tests", "vars", "limit-tests"]
   when:
-    - fstests_skip_run|bool
+    - fstests_skip_run | bool
 
 - name: Start the monitoring services on the test hosts
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
     - kdevops_run_fstests | default(false) | bool
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["oscheck", "fstests", "run_tests", "monitoring", "monitor_run"]
 
 # Recent environments runs are showing that environment variables
@@ -1353,7 +1353,7 @@
   ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
     - kdevops_run_fstests | default(false) | bool
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["oscheck", "fstests", "run_tests", "monitoring", "monitor_collect"]
 
 - name: Remove watchdog hint that tests have started
@@ -1472,7 +1472,7 @@
     excludes: "*.xml,*.md"
   register: fstests_tfb_reg
   when:
-    - fstests_tfp_copy_enable_list|bool or fstests_tfp_copy_enable|bool
+    - fstests_tfp_copy_enable_list | bool or fstests_tfp_copy_enable | bool
 
 - name: Show TFB results files
   tags: ["copy_results", "fstests_failed_tests", "tfb"]
@@ -1482,14 +1482,14 @@
   loop_control:
     label: "{{ item.path }} {{ item.size | human_readable(true) }}"
   when:
-    - fstests_tfp_copy_enable_list|bool
+    - fstests_tfp_copy_enable_list | bool
 
 - name: Show TFB results total files greater than {{ fstests_tfp_copy_size_limit_bytes | human_readable(true) }}
   tags: ["copy_results", "fstests_failed_tests", "tfb"]
   ansible.builtin.debug:
     msg: "Examined {{ fstests_tfb_reg.examined }} files and TFB number of files: {{ fstests_tfb_reg.matched }}"
   when:
-    - fstests_tfp_copy_enable_list|bool
+    - fstests_tfp_copy_enable_list | bool
 
 - name: Truncate TFB files
   tags: ["copy_results", "fstests_failed_tests", "tfb", "do_deploy"]
@@ -1504,7 +1504,7 @@
   loop_control:
     label: "{{ item.path }} {{ item.size | human_readable(true) }}"
   when:
-    - fstests_tfp_copy_enable|bool
+    - fstests_tfp_copy_enable | bool
 
 # If we want to later add support to copy *all* results file we may
 # want to consider removing *.md TFB files. Use 'future' tag for these
@@ -1522,7 +1522,7 @@
   register: fstests_tfb_reg
   when:
     - false
-    - fstests_tfp_copy_enable_list|bool or fstests_tfp_copy_enable|bool
+    - fstests_tfp_copy_enable_list | bool or fstests_tfp_copy_enable | bool
 
 - name: Remove TFB results *.md files
   tags: ["copy_results", "fstests_failed_tests", "tfb", "future"]
@@ -1538,7 +1538,7 @@
     label: "{{ item.path }} {{ item.size | human_readable(true) }}"
   when:
     - false
-    - fstests_tfp_copy_enable_list|bool or fstests_tfp_copy_enable|bool
+    - fstests_tfp_copy_enable_list | bool or fstests_tfp_copy_enable | bool
 
 - name: Copy over all *.bad files which represent failed tests
   tags: ["oscheck", "fstests", "copy_results", "copy_final", "fstests_failed_tests", "tfb"]
@@ -1554,7 +1554,7 @@
   loop_control:
     label: "{{ item.path | regex_replace(fstests_data_target | regex_escape()) | regex_replace('^/', '') }}"
   when:
-    - not fstests_tfp_copy_enable_list|bool
+    - not fstests_tfp_copy_enable_list | bool
     - fstests_failed_tests.matched > 0
 
 - name: Check if respective bad full file exists

@@ -25,7 +25,7 @@
     trim_blocks: true
     lstrip_blocks: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: Use custom systemd-journal-remote.service to disable SSL
   tags: ["journal"]
@@ -39,8 +39,8 @@
     trim_blocks: true
     lstrip_blocks: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
-    - devconfig_systemd_journal_use_http|bool
+    - devconfig_enable_systemd_journal_remote | bool
+    - devconfig_systemd_journal_use_http | bool
 
 - name: Ensure our user is part of the systemd-journal-remote group
   tags: ["journal"]
@@ -52,7 +52,7 @@
     groups: systemd-journal-remote
     append: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: Restart systemd-journal-remote on the server
   become: true
@@ -64,7 +64,7 @@
     enabled: true
     state: restarted
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: Ensure systemd-journal-remote.service is running on the server
   become: true
@@ -74,7 +74,7 @@
     name: systemd-journal-remote.service
     state: started
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: Set group sticky bit for /var/log/journal/remote/
   tags: ["journal"]
@@ -89,4 +89,4 @@
     recurse: true
     state: directory
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool

@@ -11,8 +11,8 @@
 
 - name: Detect filesystem configuration from node name
   when:
-    - build_linux_enable_multifs_testing|default(false)|bool
-    - build_linux_multifs_use_node_fs|default(false)|bool
+    - build_linux_enable_multifs_testing | default(false) | bool
+    - build_linux_multifs_use_node_fs | default(false) | bool
   block:
     - name: Set filesystem type based on node name
       set_fact:
@@ -21,7 +21,7 @@
           {%- elif 'ext4' in ansible_hostname -%}ext4
           {%- elif 'btrfs' in ansible_hostname -%}btrfs
           {%- elif 'tmpfs' in ansible_hostname -%}tmpfs
-          {%- else -%}{{ build_linux_fstype|default('xfs') }}{%- endif -%}
+          {%- else -%}{{ build_linux_fstype | default('xfs') }}{%- endif -%}
 
     - name: Set XFS block and sector sizes from node name
       when: node_fstype == 'xfs'
@@ -64,9 +64,9 @@
           - mkfs.xfs
           - -f
           - -b
-          - "size={{ node_xfs_blocksize|default(4096) }}"
+          - "size={{ node_xfs_blocksize | default(4096) }}"
           - -s
-          - "size={{ node_xfs_sectorsize|default(4096) }}"
+          - "size={{ node_xfs_sectorsize | default(4096) }}"
           - "{{ build_linux_device }}"
       when: node_fstype == 'xfs'
 

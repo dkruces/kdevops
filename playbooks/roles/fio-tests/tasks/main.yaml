@@ -11,7 +11,7 @@
 - include_role:
     name: common
   when:
-    - infer_uid_and_group|bool
+    - infer_uid_and_group | bool
 
 - name: Ensure data_dir has correct ownership
   tags: [ 'setup' ]
@@ -73,45 +73,45 @@
   set_fact:
     fio_tests_block_sizes: >-
       {{
-        (['4k'] if fio_tests_bs_4k|default(true) else []) +
-        (['8k'] if fio_tests_bs_8k|default(true) else []) +
-        (['16k'] if fio_tests_bs_16k|default(true) else []) +
-        (['32k'] if fio_tests_bs_32k|default(true) else []) +
-        (['64k'] if fio_tests_bs_64k|default(true) else []) +
-        (['128k'] if fio_tests_bs_128k|default(true) else [])
+        (['4k'] if fio_tests_bs_4k | default(true) else []) +
+        (['8k'] if fio_tests_bs_8k | default(true) else []) +
+        (['16k'] if fio_tests_bs_16k | default(true) else []) +
+        (['32k'] if fio_tests_bs_32k | default(true) else []) +
+        (['64k'] if fio_tests_bs_64k | default(true) else []) +
+        (['128k'] if fio_tests_bs_128k | default(true) else [])
       }}
     fio_tests_block_ranges: >-
       {{
-        (['4k-16k'] if fio_tests_bs_range_4k_16k|default(false) else []) +
-        (['8k-32k'] if fio_tests_bs_range_8k_32k|default(false) else []) +
-        (['16k-64k'] if fio_tests_bs_range_16k_64k|default(false) else []) +
-        (['32k-128k'] if fio_tests_bs_range_32k_128k|default(false) else [])
+        (['4k-16k'] if fio_tests_bs_range_4k_16k | default(false) else []) +
+        (['8k-32k'] if fio_tests_bs_range_8k_32k | default(false) else []) +
+        (['16k-64k'] if fio_tests_bs_range_16k_64k | default(false) else []) +
+        (['32k-128k'] if fio_tests_bs_range_32k_128k | default(false) else [])
       }}
     fio_tests_io_depths: >-
       {{
-        ([1] if fio_tests_iodepth_1|default(true) else []) +
-        ([4] if fio_tests_iodepth_4|default(true) else []) +
-        ([8] if fio_tests_iodepth_8|default(true) else []) +
-        ([16] if fio_tests_iodepth_16|default(true) else []) +
-        ([32] if fio_tests_iodepth_32|default(true) else []) +
-        ([64] if fio_tests_iodepth_64|default(true) else [])
+        ([1] if fio_tests_iodepth_1 | default(true) else []) +
+        ([4] if fio_tests_iodepth_4 | default(true) else []) +
+        ([8] if fio_tests_iodepth_8 | default(true) else []) +
+        ([16] if fio_tests_iodepth_16 | default(true) else []) +
+        ([32] if fio_tests_iodepth_32 | default(true) else []) +
+        ([64] if fio_tests_iodepth_64 | default(true) else [])
       }}
     fio_tests_num_jobs: >-
       {{
-        ([1] if fio_tests_numjobs_1|default(true) else []) +
-        ([2] if fio_tests_numjobs_2|default(true) else []) +
-        ([4] if fio_tests_numjobs_4|default(true) else []) +
-        ([8] if fio_tests_numjobs_8|default(true) else []) +
-        ([16] if fio_tests_numjobs_16|default(true) else [])
+        ([1] if fio_tests_numjobs_1 | default(true) else []) +
+        ([2] if fio_tests_numjobs_2 | default(true) else []) +
+        ([4] if fio_tests_numjobs_4 | default(true) else []) +
+        ([8] if fio_tests_numjobs_8 | default(true) else []) +
+        ([16] if fio_tests_numjobs_16 | default(true) else [])
       }}
     fio_tests_patterns: >-
       {{
-        ([{'name': 'randread', 'rw': 'randread', 'rwmixread': 100}] if fio_tests_pattern_rand_read|default(true) else []) +
-        ([{'name': 'randwrite', 'rw': 'randwrite', 'rwmixread': 0}] if fio_tests_pattern_rand_write|default(true) else []) +
-        ([{'name': 'seqread', 'rw': 'read', 'rwmixread': 100}] if fio_tests_pattern_seq_read|default(true) else []) +
-        ([{'name': 'seqwrite', 'rw': 'write', 'rwmixread': 0}] if fio_tests_pattern_seq_write|default(true) else []) +
-        ([{'name': 'mixed_75_25', 'rw': 'randrw', 'rwmixread': 75}] if fio_tests_pattern_mixed_75_25|default(true) else []) +
-        ([{'name': 'mixed_50_50', 'rw': 'randrw', 'rwmixread': 50}] if fio_tests_pattern_mixed_50_50|default(true) else [])
+        ([{'name': 'randread', 'rw': 'randread', 'rwmixread': 100}] if fio_tests_pattern_rand_read | default(true) else []) +
+        ([{'name': 'randwrite', 'rw': 'randwrite', 'rwmixread': 0}] if fio_tests_pattern_rand_write | default(true) else []) +
+        ([{'name': 'seqread', 'rw': 'read', 'rwmixread': 100}] if fio_tests_pattern_seq_read | default(true) else []) +
+        ([{'name': 'seqwrite', 'rw': 'write', 'rwmixread': 0}] if fio_tests_pattern_seq_write | default(true) else []) +
+        ([{'name': 'mixed_75_25', 'rw': 'randrw', 'rwmixread': 75}] if fio_tests_pattern_mixed_75_25 | default(true) else []) +
+        ([{'name': 'mixed_50_50', 'rw': 'randrw', 'rwmixread': 50}] if fio_tests_pattern_mixed_50_50 | default(true) else [])
       }}
     # Set effective block sizes based on whether ranges are enabled
     fio_tests_effective_block_sizes: "{{ fio_tests_block_sizes }}"
@@ -205,22 +205,22 @@
       fio_tests_num_jobs: {{ fio_tests_num_jobs }}
       fio_tests_block_sizes: {{ fio_tests_block_sizes }}
       fio_tests_block_ranges: {{ fio_tests_block_ranges }}
-      fio_tests_enable_bs_ranges: {{ fio_tests_enable_bs_ranges|default(false) }}
+      fio_tests_enable_bs_ranges: {{ fio_tests_enable_bs_ranges | default(false) }}
 - name: Debug effective block sizes calculation
   tags: [ 'setup' ]
   debug:
     msg: |
       Calculating effective_block_sizes:
-      fio_tests_enable_bs_ranges = {{ fio_tests_enable_bs_ranges|default(false) }}
-      not fio_tests_enable_bs_ranges = {{ not (fio_tests_enable_bs_ranges|default(false)) }}
-      Should use block_sizes: {{ not (fio_tests_enable_bs_ranges|default(false)) }}
-      Result: {{ fio_tests_block_sizes if not (fio_tests_enable_bs_ranges|default(false)) else fio_tests_block_ranges }}
+      fio_tests_enable_bs_ranges = {{ fio_tests_enable_bs_ranges | default(false) }}
+      not fio_tests_enable_bs_ranges = {{ not (fio_tests_enable_bs_ranges | default(false)) }}
+      Should use block_sizes: {{ not (fio_tests_enable_bs_ranges | default(false)) }}
+      Result: {{ fio_tests_block_sizes if not (fio_tests_enable_bs_ranges | default(false)) else fio_tests_block_ranges }}
 
 - name: Ensure effective block sizes is set correctly
   tags: [ 'setup' ]
   set_fact:
     fio_tests_effective_block_sizes: "{{ fio_tests_block_sizes }}"
-  when: fio_tests_effective_block_sizes|length == 0
+  when: fio_tests_effective_block_sizes | length == 0
 
 - name: Generate fio job files
   tags: [ 'setup' ]
@@ -284,7 +284,7 @@
   tags: [ 'run_tests' ]
   fail:
     msg: "No fio job files found in {{ fio_tests_results_dir }}/jobs/. Check test parameter configuration."
-  when: job_file_count.stdout|int == 0
+  when: job_file_count.stdout | int == 0
 
 - name: Run fio tests in background
   tags: [ 'run_tests' ]

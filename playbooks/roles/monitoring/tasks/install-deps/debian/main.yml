@@ -19,7 +19,7 @@
       - python3-bpfcc
     state: present
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
 
 - name: Install folio migration monitoring dependencies
   become: true
@@ -29,8 +29,8 @@
       - python3-psutil
     state: present
   when:
-    - enable_monitoring|default(false)|bool
-    - monitor_folio_migration|default(false)|bool
+    - enable_monitoring | default(false) | bool
+    - monitor_folio_migration | default(false) | bool
 
 - name: Install memory fragmentation monitoring dependencies
   become: true
@@ -40,5 +40,5 @@
       - python3-scipy
     state: present
   when:
-    - enable_monitoring|default(false)|bool
-    - monitor_memory_fragmentation|default(false)|bool
+    - enable_monitoring | default(false) | bool
+    - monitor_memory_fragmentation | default(false) | bool

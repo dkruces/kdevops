@@ -9,7 +9,7 @@
         - "../extra_vars.json"
       skip: true
   when:
-    - hypervisor_tunning_enabled|bool
+    - hypervisor_tunning_enabled | bool
   tags: ["vars", "hypervisor"]
 
 - name: Check to see if ksm file exists /sys/kernel/mm/ksm/run
@@ -28,7 +28,7 @@
   tags: ["hypervisor"]
   when:
     - ksm_enable_file.stat.exists
-    - hypervisor_tunning_enabled|bool
+    - hypervisor_tunning_enabled | bool
 
 - name: Check to see if zswap enable file exists /sys/module/zswap/parameters/enabled
   become: true
@@ -47,7 +47,7 @@
     path: /sys/module/zswap/parameters/max_pool_percent
   register: zswap_max_pool_percent_file
   when:
-    - hypervisor_tunning_zswap_enable|bool
+    - hypervisor_tunning_zswap_enable | bool
   tags: ["hypervisor"]
 
 - name: Configure zswap max pool percent to desired setting
@@ -57,7 +57,7 @@
   ansible.builtin.shell: echo {{ hypervisor_tunning_zswap_max_pool_percent }} > /sys/module/zswap/parameters/max_pool_percent
   register: zswap_max_pool_percent_file
   when:
-    - hypervisor_tunning_zswap_enable|bool
+    - hypervisor_tunning_zswap_enable | bool
     - zswap_max_pool_percent_file.stat.exists
   tags: ["hypervisor"]
 
@@ -68,4 +68,4 @@
   tags: ["hypervisor"]
   when:
     - zswap_enable_file.stat.exists
-    - hypervisor_tunning_zswap_enable|bool
+    - hypervisor_tunning_zswap_enable | bool

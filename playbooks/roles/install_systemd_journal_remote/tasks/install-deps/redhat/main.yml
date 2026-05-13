@@ -10,5 +10,5 @@
   register: result
   until: result is succeeded
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
   tags: journal

@@ -88,7 +88,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {# Add per-section groups if needed #}
-{% for section in ansible_inventory_fstests_enabled_test_types|default([]) %}
+{% for section in ansible_inventory_fstests_enabled_test_types | default([]) %}
 [fstests_{{ section | replace('-', '_') }}]
 {% for host in parsed_hosts %}
 {{ host }}
@@ -134,7 +134,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [sysbench:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% elif kdevops_workflow_enable_ai|default(false)|bool %}
+{% elif kdevops_workflow_enable_ai | default(false) | bool %}
 [ai]
 {% for host in parsed_hosts %}
 {{ host }}
@@ -143,7 +143,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [ai:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
-{% elif kdevops_workflow_enable_minio|default(false)|bool %}
+{% elif kdevops_workflow_enable_minio | default(false) | bool %}
 [minio]
 {% for host in parsed_hosts %}
 {{ host }}
@@ -219,7 +219,7 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {# Add per-section groups if needed #}
-{% for section in ansible_inventory_fstests_enabled_test_types|default([]) %}
+{% for section in ansible_inventory_fstests_enabled_test_types | default([]) %}
 [fstests_{{ section | replace('-', '_') }}]
 {% for host in parsed_hosts %}
 {{ host }}

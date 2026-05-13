@@ -14,38 +14,38 @@
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/config.yml"
   when:
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
 
 # Install generic Rust toolchain dependencies
 - name: Install Rust build dependencies
   ansible.builtin.include_role:
     name: install-rust-deps
   when:
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
 
 # Distro specific
 - name: Install dependencies to build and install the Linux kernel
   ansible.builtin.import_tasks:
     file: install-deps/main.yml
   when:
-    - not bootlinux_9p|bool
-    - not workflow_linux_packaged|bool
+    - not bootlinux_9p | bool
+    - not workflow_linux_packaged | bool
 
 # When using 9P builds, we still need make on the guest for modules_install
 - name: Install essential build tools for 9P builds
   ansible.builtin.import_tasks:
     file: install-minimal-deps/main.yml
   when:
-    - bootlinux_9p|bool
-    - not workflow_linux_packaged|bool
+    - bootlinux_9p | bool
+    - not workflow_linux_packaged | bool
 
 # Setup ccache configuration
 - name: Setup ccache configuration
   ansible.builtin.import_tasks:
     file: ccache.yml
   when:
-    - bootlinux_ccache|default(false)|bool
-    - not workflow_linux_packaged|bool
+    - bootlinux_ccache | default(false) | bool
+    - not workflow_linux_packaged | bool
   tags: ['ccache']
 
 # We do this regardless of what distro you use
@@ -59,46 +59,46 @@
     - target_linux_install_b4 is defined
     - target_linux_install_b4
     - ansible_facts['os_family']|lower != 'debian'
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
 
 - name: Set bootlinux_b4_am_this_host as a fact for dev hosts only
   ansible.builtin.set_fact:
     bootlinux_b4_am_this_host: "{{ ansible_hostname | regex_search('^.*-dev$') is not none }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - not workflow_linux_packaged|bool
+    - kdevops_baseline_and_dev | bool
+    - not workflow_linux_packaged | bool
 
 - name: Enable b4 am all hosts if not deploying dev and baseline nodes
   ansible.builtin.set_fact:
     bootlinux_b4_am_this_host: true
   when:
-    - not kdevops_baseline_and_dev|bool
-    - not workflow_linux_packaged|bool
+    - not kdevops_baseline_and_dev | bool
+    - not workflow_linux_packaged | bool
 
 - name: Determine if this is a dev node for A/B testing
   ansible.builtin.set_fact:
     bootlinux_is_dev_node: "{{ ansible_hostname | regex_search('^.*-dev$') is not none }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
 
 - name: Set development group full custom kernel release
   ansible.builtin.set_fact:
     target_linux_kernelrelease: "{{ target_linux_dev_kernelrelease if target_linux_dev_kernelrelease != '' else target_linux_kernelrelease }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
-    - bootlinux_tree_custom_kernelrelease|bool
-    - bootlinux_is_dev_node|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
+    - bootlinux_tree_custom_kernelrelease | bool
+    - bootlinux_is_dev_node | bool
 
 - name: Set development group local append version
   ansible.builtin.set_fact:
     target_linux_localversion: "{{ target_linux_dev_localversion if target_linux_dev_localversion != '' else target_linux_localversion }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
-    - bootlinux_tree_custom_localversion|bool
-    - bootlinux_is_dev_node|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
+    - bootlinux_tree_custom_localversion | bool
+    - bootlinux_is_dev_node | bool
 
 - name: Set development kernel parameters for dev nodes
   ansible.builtin.set_fact:
@@ -106,9 +106,9 @@
     target_linux_ref: "{{ target_linux_dev_ref }}"
     target_linux_config: "config-{{ target_linux_dev_ref }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
-    - bootlinux_is_dev_node|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
+    - bootlinux_is_dev_node | bool
 
 # A/B testing support for 9P builds
 # When using A/B testing with different kernel refs and 9P builds, we need to
@@ -121,8 +121,8 @@
   run_once: true
   delegate_to: localhost
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
 
 - name: Determine active kernel parameters for A/B testing with 9P
   ansible.builtin.set_fact:
@@ -134,17 +134,17 @@
       target_linux_localversion }}"
     target_linux_config: "config-{{ target_linux_dev_ref }}"
   when:
-    - kdevops_baseline_and_dev|bool
-    - bootlinux_ab_different_ref|bool
-    - bootlinux_9p|bool
+    - kdevops_baseline_and_dev | bool
+    - bootlinux_ab_different_ref | bool
+    - bootlinux_9p | bool
   run_once: true
   delegate_to: localhost
 
 - name: Debug kernel ref settings for 9P builds
   delegate_to: localhost
   when:
-    - bootlinux_debug_ref|bool
-    - bootlinux_9p|bool
+    - bootlinux_debug_ref | bool
+    - bootlinux_9p | bool
   run_once: true
 
   block:
@@ -167,8 +167,8 @@
       ansible.builtin.meta: end_play
 - name: Debug kernel ref settings for non-9P builds
   when:
-    - bootlinux_debug_ref|bool
-    - not bootlinux_9p|bool
+    - bootlinux_debug_ref | bool
+    - not bootlinux_9p | bool
 
   block:
     - name: Print kernel ref settings for non-9P debug (per-node context)
@@ -193,7 +193,7 @@
   ansible.builtin.include_role:
     name: create_data_partition
   when:
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
 
 - name: Mount bootlinux 9p on each target node
   become: true
@@ -207,7 +207,7 @@
     state: "mounted"
   tags: ["data_partition", "9p_mount"]
   when:
-    - bootlinux_9p|bool
+    - bootlinux_9p | bool
 
 - name: Debug kernel build command configuration
   ansible.builtin.debug:
@@ -216,11 +216,11 @@
       build_jobs: {{ ansible_processor_vcpus }}
       bootlinux_make_params: {{ bootlinux_make_params }}
       bootlinux_build_environment: {{ bootlinux_build_environment }}
-      bootlinux_compiler_clang: {{ bootlinux_compiler_clang|default(false) }}
-      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds|default(false) }}
+      bootlinux_compiler_clang: {{ bootlinux_compiler_clang | default(false) }}
+      bootlinux_reproducible_builds: {{ bootlinux_reproducible_builds | default(false) }}
   when:
-    - not workflow_linux_packaged|bool
-    - not bootlinux_9p|bool
+    - not workflow_linux_packaged | bool
+    - not bootlinux_9p | bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
   tags: ["install-linux", "debug"]
@@ -229,19 +229,19 @@
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/build/9p.yml"
   when:
-    - bootlinux_9p|bool
+    - bootlinux_9p | bool
 
 - name: Build the Linux kernel on the target nodes
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/build/targets.yml"
   when:
-    - bootlinux_targets|bool
+    - bootlinux_targets | bool
 
 - name: Build kernel on the builder node
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/build/builder.yml"
   when:
-    - bootlinux_builder|bool
+    - bootlinux_builder | bool
 
 - name: Run uname before
   ansible.builtin.command: "uname -r"
@@ -264,7 +264,7 @@
     uninstall_kernel_ver: "{{ uname_cmd_before.stdout_lines.0 }}"
   tags: ["uninstall-linux"]
   when:
-    - uninstall_kernel_enable|bool
+    - uninstall_kernel_enable | bool
     - uninstall_kernel_ver is not defined
 
 - name: Check if files for old kernel exist
@@ -293,7 +293,7 @@
   register: found_uninstall_kfiles
   tags: ["uninstall-linux"]
   when:
-    - uninstall_kernel_enable|bool
+    - uninstall_kernel_enable | bool
     - uninstall_kernel_ver is defined
 
 - name: Remove an old version of Linux manually specified
@@ -309,7 +309,7 @@
   loop_control:
     label: "Removing found {{ item.path }}"
   when:
-    - uninstall_kernel_enable|bool
+    - uninstall_kernel_enable | bool
     - uninstall_kernel_ver is defined
 
 # We use "console serial" so to enable real consoles to be
@@ -344,7 +344,7 @@
   ansible.builtin.import_tasks:
     file: "{{ role_path }}/tasks/install/packages.yml"
   when:
-    - workflow_linux_packaged|bool
+    - workflow_linux_packaged | bool
 
 - name: Install {{ target_linux_tree }} on the target nodes
   become: true
@@ -358,7 +358,7 @@
   environment: "{{ bootlinux_build_environment }}"
   tags: ["install-linux"]
   when:
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: |
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
@@ -376,8 +376,8 @@
   environment: "{{ bootlinux_build_environment }}"
   tags: ["install-linux", "cxl-install"]
   when:
-    - kdevops_workflow_enable_cxl|bool
-    - not workflow_linux_packaged|bool
+    - kdevops_workflow_enable_cxl | bool
+    - not workflow_linux_packaged | bool
   vars:
     ansible_callback_diy_runner_on_ok_msg: |
       $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}

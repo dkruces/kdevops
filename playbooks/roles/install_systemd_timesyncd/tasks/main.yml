@@ -25,7 +25,7 @@
     trim_blocks: true
     lstrip_blocks: true
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
 
 - name: Enable NTP
   become: true
@@ -33,7 +33,7 @@
   become_method: sudo
   ansible.builtin.command: "timedatectl set-ntp true"
   when:
-    - devconfig_enable_systemd_timesyncd_ntp|bool
+    - devconfig_enable_systemd_timesyncd_ntp | bool
 
 - name: Restart systemd-timesyncd.service on the server
   become: true
@@ -45,7 +45,7 @@
     enabled: true
     state: restarted
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
 
 - name: Ensure systemd-timesyncd.service is running on the server
   become: true
@@ -53,4 +53,4 @@
   become_method: sudo
   ansible.builtin.command: "timedatectl status"
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool

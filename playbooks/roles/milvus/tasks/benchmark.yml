@@ -56,6 +56,6 @@
       ansible.builtin.debug:
         msg: "{{ benchmark_result.stdout_lines[-20:] }}"
       when:
-        - ai_vector_db_milvus_benchmark_enable|bool
+        - ai_vector_db_milvus_benchmark_enable | bool
         - benchmark_result is defined
   when: milvus_is_available

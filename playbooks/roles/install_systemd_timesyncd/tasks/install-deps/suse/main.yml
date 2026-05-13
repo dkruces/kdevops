@@ -7,5 +7,5 @@
       - systemd-timesyncd
     state: present
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
   tags: timesyncd

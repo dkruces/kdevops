@@ -103,7 +103,7 @@
     create_partition_disk_path: "{{ gitr_mnt }}"
     create_partition_disk_mount_opts: "{{ gitr_mount_opts }}"
   when:
-    - not gitr_uses_no_devices|bool
+    - not gitr_uses_no_devices | bool
 
 - name: Create the tmpfs file system under test
   tags: gitr
@@ -120,7 +120,7 @@
   ansible.builtin.set_fact:
     gitr_nfs_server_export: "{{ gitr_test_group }}-gitr"
   when:
-    - gitr_nfs_use_kdevops_nfsd|bool
+    - gitr_nfs_use_kdevops_nfsd | bool
     - gitr_fstype == "nfs"
 
 - name: Set the NFS export's fstype
@@ -149,7 +149,7 @@
     export_size: 10g
     export_pnfs: "{{ (gitr_test_group == 'nfs-pnfs') | bool }}"
   when:
-    - gitr_nfs_use_kdevops_nfsd|bool
+    - gitr_nfs_use_kdevops_nfsd | bool
     - gitr_fstype == "nfs"
 
 - name: Form the list of NFS mount options to use
@@ -158,7 +158,7 @@
     gitr_nfs_vers: "{{ gitr_nfs_vers_dict[gitr_test_group] }}"
     gitr_nfs_mount_opts: "{{ gitr_mount_opts | ansible.builtin.split(',') }}"
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
     - gitr_fstype == "nfs"
 
 - name: Create the NFS mount under test, if needed
@@ -171,7 +171,7 @@
     nfs_server_export: "{{ nfsd_export_path }}/{{ gitr_nfs_server_export }}"
     nfs_mount_options: "{{ (gitr_nfs_vers + gitr_nfs_mount_opts) | join(',') }}"
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
     - gitr_fstype == "nfs"
 
 - name: Create the NFS mount under test, if needed
@@ -184,7 +184,7 @@
     nfs_server_export: "{{ nfsd_export_path }}/{{ gitr_nfs_server_export }}"
     nfs_mount_options: "{{ gitr_mount_opts }}"
   when:
-    - not kdevops_workflows_dedicated_workflow|bool
+    - not kdevops_workflows_dedicated_workflow | bool
     - gitr_fstype == "nfs"
 
 - name: Remove existing git build directory
@@ -209,7 +209,7 @@
   register: result
   until: not result.failed
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
 
 - name: Clone the full git source code tree from {{ gitr_repo }}
   tags: gitr
@@ -223,7 +223,7 @@
   register: result
   until: not result.failed
   when:
-    - not kdevops_workflows_dedicated_workflow|bool
+    - not kdevops_workflows_dedicated_workflow | bool
 
 - name: Build git on the target nodes
   tags: ["gitr", "build"]
@@ -236,28 +236,28 @@
   ansible.builtin.set_fact:
     gitr_test_thread_count: "1"
   when:
-    - gitr_thread_single|bool
+    - gitr_thread_single | bool
 
 - name: Set the test thread count (fast)
   tags: run_tests
   ansible.builtin.set_fact:
     gitr_test_thread_count: "{{ ansible_processor_nproc }}"
   when:
-    - gitr_thread_fast|bool
+    - gitr_thread_fast | bool
 
 - name: Set the test thread count (stress)
   tags: run_tests
   ansible.builtin.set_fact:
     gitr_test_thread_count: "{{ ansible_processor_nproc * 2 }}"
   when:
-    - gitr_thread_stress|bool
+    - gitr_thread_stress | bool
 
 - name: Set the test thread count (custom)
   tags: run_tests
   ansible.builtin.set_fact:
     gitr_test_thread_count: "{{ gitr_thread_count }}"
   when:
-    - gitr_thread_custom|bool
+    - gitr_thread_custom | bool
 
 - name: Run the full git regression suite
   tags: run_tests
@@ -300,14 +300,14 @@
 - name: Save test summary output to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ gitr_results.stdout_lines|join('\n') }}\n"
+    content: "{{ gitr_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.summary"
     mode: "u=rw,g=r,o=r"
 
 - name: Save standard error to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ gitr_results.stderr_lines|join('\n') }}\n"
+    content: "{{ gitr_results.stderr_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.stderr"
     mode: "u=rw,g=r,o=r"
   when: gitr_results.rc != 0
@@ -315,7 +315,7 @@
 - name: Save RPC statistics to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ rpc_results.stdout_lines|join('\n') }}\n"
+    content: "{{ rpc_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.rpc"
     mode: "u=rw,g=r,o=r"
   when:
@@ -325,7 +325,7 @@
 - name: Save RPC transport statistics to a file
   tags: copy_results
   ansible.builtin.copy:
-    content: "{{ xprt_results.stdout_lines|join('\n') }}\n"
+    content: "{{ xprt_results.stdout_lines | join('\n') }}\n"
     dest: "{{ gitr_mnt }}/{{ gitr_run_uniqifier }}.xprt"
     mode: "u=rw,g=r,o=r"
   when:

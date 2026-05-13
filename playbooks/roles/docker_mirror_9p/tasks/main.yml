@@ -8,7 +8,7 @@
     path: "{{ docker_mirror_9p_host_path }}"
     state: directory
     mode: '0755'
-  when: docker_mirror_9p|bool
+  when: docker_mirror_9p | bool
   delegate_to: localhost
   run_once: true
 
@@ -17,7 +17,7 @@
     path: "{{ docker_mirror_9p_guest_mount_point }}"
     state: directory
     mode: '0755'
-  when: docker_mirror_9p|bool
+  when: docker_mirror_9p | bool
 
 - name: Mount Docker mirror 9P filesystem in guest
   mount:
@@ -26,13 +26,13 @@
     fstype: "9p"
     opts: "trans=virtio,version=9p2000.L,rw"
     state: mounted
-  when: docker_mirror_9p|bool
+  when: docker_mirror_9p | bool
   tags: ['docker_mirror_9p_mount']
 
 - name: Verify Docker mirror 9P mount is active
   command: mountpoint -q "{{ docker_mirror_9p_guest_mount_point }}"
   changed_when: false
-  when: docker_mirror_9p|bool
+  when: docker_mirror_9p | bool
   register: mount_check
   failed_when: mount_check.rc != 0
   tags: ['docker_mirror_9p_mount']

@@ -40,6 +40,6 @@
       when: dhcp_mechanism == 'unknown'
 
   when:
-    - dhclient_cache_enabled|bool
+    - dhclient_cache_enabled | bool
     - kdevops_enable_terraform is defined
-    - kdevops_enable_terraform|bool
+    - kdevops_enable_terraform | bool

@@ -13,11 +13,11 @@
 - name: Include monitor_run tasks
   ansible.builtin.include_tasks: monitor_run.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["monitoring", "monitor_run"]
 
 - name: Include monitor_collect tasks
   ansible.builtin.include_tasks: monitor_collect.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["monitoring", "monitor_collect"]

@@ -83,7 +83,7 @@
   register: clang_result
   until: clang_result is succeeded
   when:
-    - bootlinux_compiler_clang|bool
+    - bootlinux_compiler_clang | bool
 
 - name: Install rpmbuild
   become: true
@@ -101,7 +101,7 @@
   register: rpmbuild_result
   until: rpmbuild_result is succeeded
   when:
-    - bootlinux_builder|bool
+    - bootlinux_builder | bool
 
 - name: Remove packages that mess with initramfs
   become: true

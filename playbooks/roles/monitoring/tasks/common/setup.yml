@@ -16,7 +16,7 @@
   ansible.builtin.set_fact:
     monitoring_results_path: "{{ topdir_path }}/workflows/{{ kdevops_workflow_name | default('unknown') }}/results/monitoring"
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
     - monitoring_results_path is not defined
 
 - name: Create local monitoring results directory

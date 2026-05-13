@@ -62,7 +62,7 @@
   ansible.builtin.set_fact:
     nfstest_nfs_server_export: "nfs-{{ nfstest_test_group }}"
   when:
-    - nfstest_nfs_use_kdevops_nfsd|bool
+    - nfstest_nfs_use_kdevops_nfsd | bool
   tags: vars
 
 - name: Create the NFS export on the kdevops NFS server
@@ -75,7 +75,7 @@
     export_fstype: "{{ nfsd_export_fstype }}"
     export_size: 10g
   when:
-    - nfstest_nfs_use_kdevops_nfsd|bool
+    - nfstest_nfs_use_kdevops_nfsd | bool
   tags: nfstest
 
 - name: Create the test mount point on the target node
@@ -102,7 +102,7 @@
   register: clone_result
   until: not clone_result.failed
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags: nfstest
 
 - name: Clone the full nfstest source code tree from {{ nfstest_repo }}
@@ -117,7 +117,7 @@
   register: clone_result
   until: not clone_result.failed
   when:
-    - not kdevops_workflows_dedicated_workflow|bool
+    - not kdevops_workflows_dedicated_workflow | bool
   tags: nfstest
 
 - name: Copy the test group script to the target node
@@ -127,7 +127,7 @@
     force: true
     mode: "u=rwx,g=rx,o=rx"
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags:
     - run_tests
 
@@ -136,7 +136,7 @@
     nfstest_results_full_path: "{{ topdir_path }}/workflows/nfstest/results"
     nfstest_results_target: "../workflows/nfstest/results/last-run"
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags: copy_results
 
 - name: Clean up our localhost results/last-run directory
@@ -159,7 +159,7 @@
   ansible.builtin.command:
     cmd: "/tmp/runtest.sh"
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags: run_tests
 
 - name: Get used target kernel version
@@ -186,7 +186,7 @@
     mode: "u=rwx,g=rx,o=rx"
   delegate_to: localhost
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags: copy_results
 
 - name: Look for output logs on the target node
@@ -196,7 +196,7 @@
     file_type: file
   register: nfstest_logs
   when:
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   tags: copy_results
 
 - name: Copy the output logs to the control node
@@ -209,7 +209,7 @@
     label: "Copying {{ item.path | basename }} ..."
   when:
     - nfstest_logs.matched > 0
-    - kdevops_workflows_dedicated_workflow|bool
+    - kdevops_workflows_dedicated_workflow | bool
   changed_when: false
   tags: copy_results
 

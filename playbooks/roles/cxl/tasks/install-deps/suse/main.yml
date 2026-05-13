@@ -21,7 +21,7 @@
     is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
     is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - is_sle|bool
+    - is_sle | bool
 
 - name: Set SLE specific version labels to make checks easier when not SLE
   ansible.builtin.set_fact:
@@ -39,7 +39,7 @@
     is_sle15sp3: false
     is_sle15sp4: false
   when:
-    - not is_sle|bool
+    - not is_sle | bool
 
 - name: By default we assume we have figured out how to add repos on a release
   ansible.builtin.set_fact:
@@ -49,8 +49,8 @@
   ansible.builtin.set_fact:
     repos_present: false
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
 
 - name: Install build dependencies for ndctl
   become: true
@@ -79,4 +79,4 @@
     state: present
     replacefiles: true
   when:
-    - repos_present|bool
+    - repos_present | bool

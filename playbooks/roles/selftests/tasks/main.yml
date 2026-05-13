@@ -22,7 +22,7 @@
   ansible.builtin.import_tasks: install-deps/main-localhost.yml
   delegate_to: localhost
   when:
-    - bootlinux_9p|bool
+    - bootlinux_9p | bool
 
 - name: Check if this node is in charge of running kernel or userspace tests
   vars:
@@ -84,7 +84,7 @@
     path: "/lib/udev/rules.d/50-firmware.rules"
     state: absent
   when:
-    - selftests_section_firmware|bool
+    - selftests_section_firmware | bool
 
 - name: Create /lib/firmware directory
   tags: ["selftests", "deps"]
@@ -96,7 +96,7 @@
     state: directory
     mode: "0755"
   when:
-    - selftests_section_firmware|bool
+    - selftests_section_firmware | bool
 
 - ansible.builtin.include_role:
     name: create_data_partition
@@ -112,7 +112,7 @@
   tags: ["selftests", "build"]
   register: nproc_host
   when:
-    - bootlinux_9p|bool
+    - bootlinux_9p | bool
 
 - name: Set the target selftest
   vars:
@@ -138,8 +138,8 @@
       TARGETS: "{{ target_selftest }}"
       FORCE_TARGETS: "1"
   when:
-    - not bootlinux_9p|bool
-    - selftests_build_selftests_dir|bool
+    - not bootlinux_9p | bool
+    - selftests_build_selftests_dir | bool
 
 - name: Build selftests
   tags: ["selftests", "build"]
@@ -150,8 +150,8 @@
       TARGETS: "{{ target_selftest }}"
       FORCE_TARGETS: "1"
   when:
-    - not bootlinux_9p|bool
-    - selftests_build_selftests_dir|bool
+    - not bootlinux_9p | bool
+    - selftests_build_selftests_dir | bool
 
 - name: Build radix tree tools/testing/radix-tree
   tags: ["selftests", "build"]
@@ -159,8 +159,8 @@
     chdir: "{{ target_linux_dir_path }}/tools/testing/radix-tree"
     jobs: "{{ nproc.stdout }}"
   when:
-    - not bootlinux_9p|bool
-    - selftests_build_radix_tree|bool
+    - not bootlinux_9p | bool
+    - selftests_build_radix_tree | bool
 
 # We build only what we need. This means if building on the host we peg all
 # the targets we want together so we can build all of them.
@@ -179,8 +179,8 @@
   run_once: true
   delegate_to: localhost
   when:
-    - bootlinux_9p|bool
-    - selftests_build_selftests_dir|bool
+    - bootlinux_9p | bool
+    - selftests_build_selftests_dir | bool
 
 - name: Build radix tree tools/testing/radix-tree on host
   tags: ["selftests", "build"]
@@ -190,8 +190,8 @@
   delegate_to: localhost
   run_once: true
   when:
-    - bootlinux_9p|bool
-    - selftests_build_radix_tree|bool
+    - bootlinux_9p | bool
+    - selftests_build_radix_tree | bool
 
 - name: Build VMA tools/testing/vma
   tags: ["selftests", "build"]
@@ -199,8 +199,8 @@
     chdir: "{{ target_linux_dir_path }}/tools/testing/vma"
     jobs: "{{ nproc.stdout }}"
   when:
-    - not bootlinux_9p|bool
-    - selftest_vma|bool
+    - not bootlinux_9p | bool
+    - selftest_vma | bool
 
 - name: Build VMA tools/testing/vma on host
   tags: ["selftests", "build"]
@@ -210,8 +210,8 @@
   delegate_to: localhost
   run_once: true
   when:
-    - bootlinux_9p|bool
-    - selftest_vma|bool
+    - bootlinux_9p | bool
+    - selftest_vma | bool
 
 # We use the target node only, not the host as if you've enaabled
 # 9p the path will be available and everything will have been built
@@ -229,7 +229,7 @@
       O: "{{ selftests_data_target }}"
       TARGETS: "{{ target_selftest }}"
   when:
-    - selftest_kernelspace|bool
+    - selftest_kernelspace | bool
 
 - name: Reboot system before our test so we know everything is sane
   tags: ["selftests", "run_tests", "reboot"]
@@ -238,7 +238,7 @@
   ansible.builtin.reboot:
     post_reboot_delay: 10
   when:
-    - not selftests_skip_reboot|bool
+    - not selftests_skip_reboot | bool
 
 - name: Set the path to selftests workflow
   ansible.builtin.set_fact:
@@ -274,7 +274,7 @@
   become_method: sudo
   ansible.builtin.command: "modprobe configfs"
   when:
-    - kdevops_run_selftests|bool
+    - kdevops_run_selftests | bool
 
 - name: Clear out old results directory on target hosts
   become: true
@@ -292,7 +292,7 @@
   delegate_to: localhost
   tags: ["selftests", "run_tests"]
   when:
-    - kdevops_run_selftests|bool
+    - kdevops_run_selftests | bool
   run_once: true
 
 - name: Enable low-level messages on console
@@ -304,7 +304,7 @@
   ansible.builtin.meta: end_play
   tags: ["selftests", "run_tests", "vars"]
   when:
-    - selftests_skip_run|bool
+    - selftests_skip_run | bool
 
 - name: Set variable we'd use for an override for a timeout for this test
   vars:
@@ -317,7 +317,7 @@
   ansible.builtin.set_fact:
     selftest_timeout_argument: "{{ '--override-timeout ' + (lookup('vars', selftest_timeout_variable, default='') | string) }}"
   when:
-    - selftest_kernelspace|bool
+    - selftest_kernelspace | bool
     - lookup('vars', selftest_timeout_variable, default='') != ""
   tags: ["vars"]
 
@@ -326,7 +326,7 @@
     msg: "{{ ansible_host }} could use {{ selftest_timeout_variable }} : using timeout argument {{ selftest_timeout_argument }}"
   tags: ["vars"]
   when:
-    - selftest_kernelspace|bool
+    - selftest_kernelspace | bool
 
 - name: Run kernel-side tests for special tests not in selftests
   tags: ["selftests", "run_tests"]
@@ -338,10 +338,10 @@
     chdir: "{{ target_linux_dir_path }}/tools/testing/radix-tree"
   register: selftests_module_out
   when:
-    - kdevops_run_selftests|bool
-    - selftests_build_radix_tree|bool
-    - selftest_userspace|bool
-    - not selftest_vma|bool
+    - kdevops_run_selftests | bool
+    - selftests_build_radix_tree | bool
+    - selftest_userspace | bool
+    - not selftest_vma | bool
   vars:
     command_to_run: >
       {%- if selftest_xarray -%} modprobe test_xarray{%- elif selftest_maple -%} modprobe test_maple_tree{%- else -%} echo missing command{%- endif -%}
@@ -356,8 +356,8 @@
     chdir: "{{ test_target_dir }}"
   register: selftests_userspace_out
   when:
-    - kdevops_run_selftests|bool
-    - (selftests_build_radix_tree|bool and selftest_userspace|bool and not selftest_vma|bool) or selftest_vma|bool
+    - kdevops_run_selftests | bool
+    - (selftests_build_radix_tree | bool and selftest_userspace | bool and not selftest_vma | bool) or selftest_vma | bool
   vars:
     test_target_dir: >-
       {%- if selftest_vma -%} {{ target_linux_dir_path }}/tools/testing/vma{%- else -%} {{ target_linux_dir_path }}/tools/testing/radix-tree{%- endif -%}
@@ -375,8 +375,8 @@
     chdir: "{{ selftests_workdir }}"
   register: selftests_out
   when:
-    - kdevops_run_selftests|bool
-    - selftest_kernelspace|bool
+    - kdevops_run_selftests | bool
+    - selftest_kernelspace | bool
 
 - name: Create empty directory for log collection for non-standard tests
   tags: ["selftests", "run_tests"]
@@ -397,7 +397,7 @@
   delegate_to: localhost
   tags: ["selftests", "run_tests"]
   when:
-    - kdevops_run_selftests|bool
+    - kdevops_run_selftests | bool
   run_once: true
 
 - name: Clean up our localhost results/last-run directory
@@ -448,11 +448,11 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.copy:
-    content: "{{ selftests_out.stdout_lines|join('\n') }}"
+    content: "{{ selftests_out.stdout_lines | join('\n') }}"
     dest: "{{ selftests_workdir }}/tap.log"
   when:
-    - kdevops_run_selftests|bool
-    - selftest_kernelspace|bool
+    - kdevops_run_selftests | bool
+    - selftest_kernelspace | bool
 
 - name: Save userspace test output
   tags: ["selftests", "run_tests"]
@@ -460,10 +460,10 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.copy:
-    content: "{{ selftests_userspace_out.stdout_lines|join('\n') }}"
+    content: "{{ selftests_userspace_out.stdout_lines | join('\n') }}"
     dest: "{{ selftests_workdir }}/userspace.log"
   when:
-    - selftest_userspace|bool
+    - selftest_userspace | bool
 
 - name: Save module load test output
   tags: ["selftests", "run_tests"]
@@ -471,11 +471,11 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.copy:
-    content: "{{ selftests_module_out.stdout_lines|join('\n') }}"
+    content: "{{ selftests_module_out.stdout_lines | join('\n') }}"
     dest: "{{ selftests_workdir }}/module.log"
   when:
-    - selftest_userspace|bool
-    - not selftest_vma|bool
+    - selftest_userspace | bool
+    - not selftest_vma | bool
 
 - name: Look for the test output logs files on {{ selftests_workdir }}
   tags: ["selftests", "copy_results"]

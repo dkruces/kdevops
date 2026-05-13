@@ -66,7 +66,7 @@
     path: "{{ ansible_inventory_fs_config_path }}"
   register: ansible_inventory_fstests_config_stat
   when:
-    - ansible_inventory_is_fstests|bool
+    - ansible_inventory_is_fstests | bool
 
 - name: Infer enabled fstests test section types
   tags: ["hosts", "do_configure"]
@@ -183,7 +183,7 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_ai | default(false) | bool
-    - ai_enable_multifs_testing|default(false)|bool
+    - ai_enable_multifs_testing | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
 
 - name: Extract AI node names for multi-filesystem setup
@@ -192,7 +192,7 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_ai | default(false) | bool
-    - ai_enable_multifs_testing|default(false)|bool
+    - ai_enable_multifs_testing | default(false) | bool
     - guestfs_nodes is defined
 
 - name: Load Build-linux nodes configuration for multi-filesystem setup
@@ -201,8 +201,8 @@
     name: build_linux_nodes
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_build_linux|default(false)|bool
-    - build_linux_enable_multifs_testing|default(false)|bool
+    - kdevops_workflow_enable_build_linux | default(false) | bool
+    - build_linux_enable_multifs_testing | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
 
 - name: Extract Build-linux node names for multi-filesystem setup
@@ -210,8 +210,8 @@
     ansible_inventory_build_linux_enabled_section_types: "{{ build_linux_nodes.guestfs_nodes | map(attribute='name') | list }}"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_build_linux|default(false)|bool
-    - build_linux_enable_multifs_testing|default(false)|bool
+    - kdevops_workflow_enable_build_linux | default(false) | bool
+    - build_linux_enable_multifs_testing | default(false) | bool
     - build_linux_nodes is defined
 
 - name: Generate the Ansible inventory file
@@ -250,7 +250,7 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests | default(false) | bool
-    - fio_tests_multi_filesystem|default(false)|bool
+    - fio_tests_multi_filesystem | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
 
 - name: Extract node names for multi-filesystem setup
@@ -259,7 +259,7 @@
   when:
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests | default(false) | bool
-    - fio_tests_multi_filesystem|default(false)|bool
+    - fio_tests_multi_filesystem | default(false) | bool
     - guestfs_nodes is defined
     - ansible_inventory_template_stat.stat.exists
 
@@ -286,7 +286,7 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
-    - not fio_tests_multi_filesystem|default(false)|bool
+    - not fio_tests_multi_filesystem | default(false) | bool
 
 - name: Generate the Ansible hosts file for a dedicated fio-tests setup (multi-filesystem)
   tags: ["hosts", "do_configure"]
@@ -303,7 +303,7 @@
     - kdevops_workflows_dedicated_workflow
     - kdevops_workflow_enable_fio_tests | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
-    - fio_tests_multi_filesystem|default(false)|bool
+    - fio_tests_multi_filesystem | default(false) | bool
     - ansible_inventory_fio_tests_node_names is defined
 
 - name: Generate the Ansible hosts file for a dedicated MinIO setup
@@ -317,9 +317,9 @@
     mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_minio|default(false)|bool
+    - kdevops_workflow_enable_minio | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
-    - not kdevops_use_declared_hosts|default(false)|bool
+    - not kdevops_use_declared_hosts | default(false) | bool
 
 - name: Generate the Ansible hosts file for a dedicated Build-linux setup
   tags: ["hosts", "do_configure"]
@@ -332,9 +332,9 @@
     mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_build_linux|default(false)|bool
+    - kdevops_workflow_enable_build_linux | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
-    - not kdevops_use_declared_hosts|default(false)|bool
+    - not kdevops_use_declared_hosts | default(false) | bool
 
 - name: Generate the Ansible hosts file for a dedicated vLLM setup
   tags: ["hosts", "do_configure"]
@@ -347,9 +347,9 @@
     mode: "0644"
   when:
     - kdevops_workflows_dedicated_workflow
-    - kdevops_workflow_enable_vllm|default(false)|bool
+    - kdevops_workflow_enable_vllm | default(false) | bool
     - ansible_inventory_template_stat.stat.exists
-    - not kdevops_use_declared_hosts|default(false)|bool
+    - not kdevops_use_declared_hosts | default(false) | bool
 
 - name: Verify if final host file exists
   ansible.builtin.stat:

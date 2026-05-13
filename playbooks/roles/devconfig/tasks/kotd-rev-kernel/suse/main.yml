@@ -21,7 +21,7 @@
     is_sle15sp2: '{{ ansible_distribution_version == "15.2" }}'
     is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
   when:
-    - is_sle|bool
+    - is_sle | bool
   tags: ["vars"]
 
 - name: Set SLE specific version labels to make checks easier when not SLE
@@ -39,7 +39,7 @@
     is_sle15sp2: false
     is_sle15sp3: false
   when:
-    - not is_sle|bool
+    - not is_sle | bool
   tags: ["vars"]
 
 - name: The default is to assume we can add repos for a release
@@ -51,8 +51,8 @@
   ansible.builtin.set_fact:
     repos_can_be_added: false
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
   tags: ["vars"]
 
 - name: The default is to assume we are not on sle11 or sle10
@@ -64,8 +64,8 @@
   ansible.builtin.set_fact:
     sle10_or_11: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - is_sle | bool
+    - is_sle10 | bool or is_sle11 | bool
   tags: ["vars"]
 
 - name: Add extra addon repositories when enabled
@@ -74,9 +74,9 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh {{ devconfig_kotd_repo }} {{ devconfig_kotd_repo_name }}"
   when:
-    - devconfig_enable_kotd|bool
-    - repos_can_be_added|bool
-    - devconfig_has_kotd_repo|bool
+    - devconfig_enable_kotd | bool
+    - repos_can_be_added | bool
+    - devconfig_has_kotd_repo | bool
   tags: ["kotd"]
 
 - name: Install kotd
@@ -92,7 +92,7 @@
     state: latest
     force: true
   when:
-    - devconfig_enable_kotd|bool
+    - devconfig_enable_kotd | bool
   tags: ["kotd"]
 
 - name: Reboot into kotd

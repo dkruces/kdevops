@@ -27,7 +27,7 @@
     name: iscsi
     tasks_from: add_initiator
   when:
-    - nfsd_export_storage_iscsi|bool
+    - nfsd_export_storage_iscsi | bool
     - nfsd_export_fstype != "tmpfs"
 
 - name: Set up a volume group on local block devices
@@ -36,7 +36,7 @@
   vars:
     volume_group_name: "exports"
   when:
-    - nfsd_export_storage_local|bool
+    - nfsd_export_storage_local | bool
     - nfsd_export_fstype != "tmpfs"
 
 - name: Create {{ nfsd_export_path }}

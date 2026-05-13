@@ -8,7 +8,7 @@
       - time  # Required for timing statistics
     state: present
   when:
-    - kdevops_workflow_enable_build_linux|default(false)|bool
+    - kdevops_workflow_enable_build_linux | default(false) | bool
 
 # Dependencies for build-linux workflow visualization
 - name: Install build-linux visualization dependencies
@@ -20,4 +20,4 @@
       - python3-numpy
     state: present
   when:
-    - kdevops_workflow_enable_build_linux|default(false)|bool
+    - kdevops_workflow_enable_build_linux | default(false) | bool

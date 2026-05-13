@@ -3,8 +3,8 @@
 # Uses Kconfig distro variables instead of ansible_facts to detect control host OS
 - name: Debian-specific setup for localhost
   ansible.builtin.import_tasks: tasks/install-deps/debian/main.yml
-  when: distro_debian_based|bool
+  when: distro_debian_based | bool
 - ansible.builtin.import_tasks: tasks/install-deps/suse/main.yml
-  when: distro_suse_based|bool
+  when: distro_suse_based | bool
 - ansible.builtin.import_tasks: tasks/install-deps/redhat/main.yml
-  when: distro_redhat_based|bool
+  when: distro_redhat_based | bool

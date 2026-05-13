@@ -3,12 +3,12 @@
   ansible.builtin.include_role:
     name: common
   when:
-    - infer_uid_and_group|bool
+    - infer_uid_and_group | bool
 
 - name: Establish the fixed device name of the data device
   tags: ["data_partition"]
   when:
-    - kdevops_enable_terraform|bool
+    - kdevops_enable_terraform | bool
     - kdevops_terraform_provider == "aws"
   block:
     - name: Retrieve the block_device_map from terraform

@@ -56,13 +56,13 @@
   ansible.builtin.include_tasks: cxl-mem-setup/main.yml
   tags: ["cxl-mem-setup"]
   when:
-    - not kdevops_enable_cxl_dcd|bool
+    - not kdevops_enable_cxl_dcd | bool
 
 - name: Create a dynamic capacity region for further dc extent add operations
   ansible.builtin.include_tasks: cxl-create-dc-region/main.yml
   tags: ["cxl-create-dc-region"]
   when:
-    - kdevops_enable_cxl_dcd|bool
+    - kdevops_enable_cxl_dcd | bool
 
 - name: Setup CXL DCD device as system ram
   ansible.builtin.include_tasks: cxl-dcd-setup/main.yml
@@ -70,7 +70,7 @@
     qmp_port_str: "{{ kdevops_qmp_str }}"
   tags: ["cxl-dcd-setup"]
   when:
-    - kdevops_enable_cxl_dcd|bool
+    - kdevops_enable_cxl_dcd | bool
 
 - name: Set the path to cxl workflow
   ansible.builtin.set_fact:
@@ -115,7 +115,7 @@
   become_method: sudo
   ansible.builtin.command: "modprobe configfs"
   when:
-    - kdevops_run_cxl_tests|bool
+    - kdevops_run_cxl_tests | bool
 
 - name: Enable low-level messages on console
   become: true
@@ -124,7 +124,7 @@
   ansible.builtin.command: sysctl kernel.printk="8 8 1 7"
   tags: ["ndctl", "cxl-test-prep", "run_tests"]
   when:
-    - kdevops_run_cxl_tests|bool
+    - kdevops_run_cxl_tests | bool
 
 - name: Modprobe cxl_test
   become: true
@@ -135,7 +135,7 @@
   args:
     chdir: "{{ ndctl_data }}"
   when:
-    - kdevops_run_cxl_tests|bool
+    - kdevops_run_cxl_tests | bool
 
 - name: Modprobe -r cxl_test
   become: true
@@ -146,7 +146,7 @@
   args:
     chdir: "{{ ndctl_data }}"
   when:
-    - kdevops_run_cxl_tests|bool
+    - kdevops_run_cxl_tests | bool
 
 - name: Run meson cxl unit test suite
   become: true
@@ -159,7 +159,7 @@
   args:
     chdir: "{{ ndctl_data }}"
   when:
-    - kdevops_run_cxl_tests|bool
+    - kdevops_run_cxl_tests | bool
 
 - name: Clean up our localhost results/last-run directory
   ansible.builtin.file:

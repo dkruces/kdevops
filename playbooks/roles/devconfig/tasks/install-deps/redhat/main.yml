@@ -41,7 +41,7 @@
     path: "/etc/dnf/dnf.conf"
     state: present
   when:
-    - not kdevops_enable_terraform|bool
+    - not kdevops_enable_terraform | bool
 
 - name: Increase the maximum number of concurrent package downloads
   become: true
@@ -52,7 +52,7 @@
     path: "/etc/dnf/dnf.conf"
     state: present
   when:
-    - not kdevops_enable_terraform|bool
+    - not kdevops_enable_terraform | bool
 
 - name: Refresh cache and upgrade all present packages
   become: true
@@ -66,14 +66,14 @@
   register: result
   until: result is succeeded
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool
 
 - name: Reboot system to make the new kernel and modules take effect
   become: true
   become_method: sudo
   ansible.builtin.reboot:
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool
 
 - name: Enable installation of packages from EPEL
   ansible.builtin.include_role:
@@ -109,27 +109,27 @@
       - trace-cmd
       - perf
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Add btrfs-progs to install package list
   ansible.builtin.set_fact:
     packages: "{{ packages + ['btrfs-progs'] }}"
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
     - ansible_distribution == 'Fedora'
 
 - name: Add GNU screen to install package list
   ansible.builtin.set_fact:
     packages: "{{ packages + ['screen'] }}"
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
     - ansible_facts['os_family']|lower != 'redhat' or ansible_facts['distribution_major_version'] | int < 8
 
 - name: Add Tmux to install package list
   ansible.builtin.set_fact:
     packages: "{{ packages + ['tmux'] }}"
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
     - ansible_facts['os_family']|lower == 'redhat' or ansible_facts['distribution_major_version'] | int >= 8
 
 - name: Install packages we typically care about
@@ -143,7 +143,7 @@
   register: result
   until: result is succeeded
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Set up snmp
   become: true
@@ -152,7 +152,7 @@
     src: snmpd.conf
     dest: /etc/snmp/snmpd.conf
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Enable snmpd service
@@ -164,7 +164,7 @@
     masked: false
   tags: snmpd
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Start snmpd service
   become: true
@@ -174,7 +174,7 @@
     state: restarted
   tags: snmpd
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install systemd-journal-remote
   become: true
@@ -187,7 +187,7 @@
   register: result
   until: result is succeeded
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
     - ansible_facts['os_family']|lower == 'redhat' or ansible_facts['distribution_major_version'] | int >= 8
   tags: journal
 
@@ -202,5 +202,5 @@
   register: result
   until: result is succeeded
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
   tags: timesyncd

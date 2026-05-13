@@ -36,8 +36,8 @@
     chdir: "{{ target_linux_dir_path }}"
     target: "mrproper"
   when:
-    - bootlinux_clean_before_build|default(false)|bool
-    - not bootlinux_9p|bool
+    - bootlinux_clean_before_build | default(false) | bool
+    - not bootlinux_9p | bool
 
 - name: Set the .config file for building the test kernel
   ansible.builtin.set_fact:

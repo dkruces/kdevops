@@ -97,7 +97,7 @@
   tags:
     - vars
   when:
-    - not workflow_linux_packaged|bool
+    - not workflow_linux_packaged | bool
   block:
     - name: Set the pathname used to extract the kernel release
       ansible.builtin.set_fact:
@@ -194,7 +194,7 @@
 
 - name: Get the name of the kernel release to install (package)
   when:
-    - workflow_linux_packaged|bool
+    - workflow_linux_packaged | bool
   block:
     - name: Set the pathname used to extract the kernel release
       ansible.builtin.set_fact:

@@ -11,7 +11,7 @@
 - ansible.builtin.include_role:
     name: common
   when:
-    - infer_uid_and_group|bool
+    - infer_uid_and_group | bool
 
 - name: Ensure data_dir has correct ownership
   tags: ["setup"]
@@ -220,7 +220,7 @@
 # Start monitoring services before running tests
 - ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["run_tests", "monitoring", "monitor_run"]
 
 - name: Run mmtests in background
@@ -248,7 +248,7 @@
 # Collect monitoring data after tests complete
 - ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
-    - enable_monitoring|default(false)|bool
+    - enable_monitoring | default(false) | bool
   tags: ["run_tests", "monitoring", "monitor_collect"]
 
 - name: Create local results directory

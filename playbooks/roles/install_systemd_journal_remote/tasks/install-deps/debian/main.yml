@@ -6,5 +6,5 @@
     name:
       - systemd-journal-remote
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
   tags: journal

@@ -24,7 +24,7 @@
       rm -f /root/monitoring/folio_migration.pid
     fi
   register: monitoring_stop_monitor
-  when: monitoring_folio_migration_pid_file.stat.exists|default(false)
+  when: monitoring_folio_migration_pid_file.stat.exists | default(false)
   changed_when: true
 
 - name: Display stop monitoring status
@@ -32,7 +32,7 @@
     msg: "{{ monitoring_stop_monitor.stdout }}"
   when:
     - monitoring_stop_monitor is defined
-    - monitoring_stop_monitor.changed|default(false)
+    - monitoring_stop_monitor.changed | default(false)
 
 - name: Check if monitoring data was collected
   become: true
@@ -48,7 +48,7 @@
     src: "{{ playbook_dir }}/roles/monitoring/files/plot_migration_stats.py"
     dest: /root/monitoring/plot_migration_stats.py
     mode: "0755"
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)
 
 - name: Check if matplotlib is available for plotting
   become: true
@@ -56,7 +56,7 @@
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
   register: monitoring_matplotlib_check
   failed_when: false
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)
   changed_when: false
 
 - name: Generate folio migration plots
@@ -71,7 +71,7 @@
   register: monitoring_plot_generation
   failed_when: false
   when:
-    - monitoring_folio_migration_data_file.stat.exists|default(false)
+    - monitoring_folio_migration_data_file.stat.exists | default(false)
     - monitoring_matplotlib_check.rc == 0
   changed_when: true
 
@@ -79,7 +79,7 @@
   ansible.builtin.debug:
     msg: "Skipping plot generation - matplotlib not available on target system"
   when:
-    - monitoring_folio_migration_data_file.stat.exists|default(false)
+    - monitoring_folio_migration_data_file.stat.exists | default(false)
     - monitoring_matplotlib_check.rc != 0
 
 - name: Copy folio migration stats data to localhost
@@ -90,7 +90,7 @@
     dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats.txt"
     flat: true
     validate_checksum: false
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)
 
 - name: Check if plot was generated
   become: true
@@ -107,7 +107,7 @@
     dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_plot.png"
     flat: true
     validate_checksum: false
-  when: monitoring_folio_migration_plot_file.stat.exists|default(false)
+  when: monitoring_folio_migration_plot_file.stat.exists | default(false)
 
 - name: Display monitoring data collection summary
   ansible.builtin.debug:
@@ -117,7 +117,7 @@
       {% if monitoring_folio_migration_plot_file.stat.exists | default(false) %}
       Plot saved to: {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_plot.png
       {% endif %}
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)
 
 - name: Check if matplotlib is available on localhost for folio migration
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
@@ -125,7 +125,7 @@
   register: monitoring_folio_localhost_matplotlib_check
   failed_when: false
   run_once: true
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)
   changed_when: false
 
 - name: Generate folio migration plots on localhost
@@ -137,7 +137,7 @@
   register: monitoring_localhost_plot_generation
   failed_when: false
   when:
-    - monitoring_folio_migration_data_file.stat.exists|default(false)
+    - monitoring_folio_migration_data_file.stat.exists | default(false)
     - monitoring_folio_localhost_matplotlib_check.rc == 0
   changed_when: true
 
@@ -149,4 +149,4 @@
       {% else %}
       Plot generated: {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_plot.png
       {% endif %}
-  when: monitoring_folio_migration_data_file.stat.exists|default(false)
+  when: monitoring_folio_migration_data_file.stat.exists | default(false)

@@ -10,7 +10,7 @@
   ansible.builtin.set_fact:
     unattended_upgrades_installed: "{{ 'install ok installed' in unattended_upgrade_status.stdout }}"
   when:
-    - kdevops_enable_guestfs|bool
+    - kdevops_enable_guestfs | bool
 
 - name: Verify unattended-upgrades is not installed
   ansible.builtin.fail:
@@ -22,8 +22,8 @@
       make cleancache
       make bringup
   when:
-    - kdevops_enable_guestfs|bool
-    - unattended_upgrades_installed|bool
+    - kdevops_enable_guestfs | bool
+    - unattended_upgrades_installed | bool
   tags: firstconfig
 
 - name: Stop and disable unattended-upgrades related services
@@ -124,7 +124,7 @@
   changed_when: release_info_changed.rc == 0
   tags: ["apt", "release-info-change"]
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool
 
 - name: Check for UNAVAIL in /etc/nsswitch.conf hosts line
   ansible.builtin.shell: grep -E '^hosts:.*UNAVAIL' /etc/nsswitch.conf
@@ -132,8 +132,8 @@
   changed_when: false
   failed_when: false
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
 
 - name: Write custom nsswitch.conf for hop1 mirror heuristic
   become: true
@@ -158,8 +158,8 @@
     group: root
     mode: "0644"
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
     - nsswitch_check.rc == 0
 
 - name: Configure APT to ignore `Valid-Until` timestamps on the host
@@ -175,8 +175,8 @@
       Acquire::MaxDate "10";
     dest: /etc/apt/apt.conf.d/99ignore-release-date
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
 
 - name: Configure APT to ignore `Valid-Until` timestamps on the target node
   become: true
@@ -189,8 +189,8 @@
       Acquire::MaxDate "10";
     dest: /etc/apt/apt.conf.d/99ignore-release-date
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
 
 - name: Ensure we make Valid-Until trick take effect on host
   delegate_to: localhost
@@ -200,8 +200,8 @@
   ansible.builtin.apt:
     update_cache: true
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
 
 - name: Ensure we make Valid-Until trick take effect on target node
   become: true
@@ -210,8 +210,8 @@
   ansible.builtin.apt:
     update_cache: true
   when:
-    - distro_debian_has_hop1_sources|bool
-    - guestfs_copy_sources_from_host_to_guest|bool
+    - distro_debian_has_hop1_sources | bool
+    - guestfs_copy_sources_from_host_to_guest | bool
 
 - name: Update apt cache and do dist-upgrade
   become: true
@@ -221,14 +221,14 @@
     upgrade: full
   tags: ["apt", "cache"]
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool
 
 - name: Reboot system to make the new kernel and modules take effect
   become: true
   become_method: sudo
   ansible.builtin.reboot:
   when:
-    - devconfig_try_upgrade|bool
+    - devconfig_try_upgrade | bool
 
 - name: Install our generic dependencies
   become: true
@@ -268,7 +268,7 @@
     update_cache: true
   tags: ["kdevops", "deps"]
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Set up snmp
   become: true
@@ -277,7 +277,7 @@
     src: snmpd.conf
     dest: /etc/snmp/snmpd.conf
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
   tags: snmpd
 
 - name: Enable snmpd service
@@ -289,7 +289,7 @@
     masked: false
   tags: snmpd
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Start snmpd service
   become: true
@@ -299,7 +299,7 @@
     state: restarted
   tags: snmpd
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
 
 - name: Install and sets up kdump
   become: true
@@ -308,7 +308,7 @@
     name:
       - kdump-tools
   when:
-    - devconfig_try_install_kdevtools|bool
+    - devconfig_try_install_kdevtools | bool
   tags: kdump
 
 - name: Install systemd-journal-remote
@@ -319,7 +319,7 @@
       - systemd-journal-remote
     update_cache: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
   tags: journal
 
 - name: Install systemd-timesyncd
@@ -329,5 +329,5 @@
     name:
       - systemd-timesyncd
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
   tags: timesyncd

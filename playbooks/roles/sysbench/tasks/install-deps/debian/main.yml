@@ -29,7 +29,7 @@
     state: present
     update_cache: true
   tags: ["deps"]
-  when: "sysbench_type_mysql_docker|bool"
+  when: "sysbench_type_mysql_docker | bool"
 
 - name: Install PosgreSQL build deps
   tags: ["deps"]
@@ -48,7 +48,7 @@
       - zlib1g-dev
     state: present
     update_cache: true
-  when: "sysbench_type_postgresql_native|bool"
+  when: "sysbench_type_postgresql_native | bool"
 
 # acl - Required for running Ansible with unpriviledge user (sysbench_postgresql_user)
 # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-an-unprivileged-user
@@ -63,7 +63,7 @@
       - nvme-cli
     state: present
     update_cache: true
-  when: "sysbench_type_postgresql_native|bool"
+  when: "sysbench_type_postgresql_native | bool"
 
 - name: Install sysbench deps
   tags: ["deps"]
@@ -76,7 +76,7 @@
       - python3-bpfcc
     state: present
     update_cache: true
-  when: "sysbench_type_postgresql_native|bool"
+  when: "sysbench_type_postgresql_native | bool"
 
 - name: Install plot deps
   tags: ["deps"]
@@ -89,4 +89,4 @@
       - python3-seaborn
     state: present
     update_cache: true
-  when: "sysbench_type_postgresql_native|bool"
+  when: "sysbench_type_postgresql_native | bool"

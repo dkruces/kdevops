@@ -70,7 +70,7 @@
   become_method: sudo
   ansible.builtin.command: "systemctl is-system-running --wait"
   when:
-    - reboot_limit_enable_systemd_analyze|bool
+    - reboot_limit_enable_systemd_analyze | bool
   tags: ["run_tests"]
 
 - name: Collect systemctl-analyze results for {{ reboot_type }}
@@ -79,7 +79,7 @@
   ansible.builtin.command: "systemd-analyze"
   register: systemd_analyze_cmd
   when:
-    - reboot_limit_enable_systemd_analyze|bool
+    - reboot_limit_enable_systemd_analyze | bool
   tags: ["run_tests"]
 
 - name: Append systemctl-analyze output for {{ reboot_type }}
@@ -91,4 +91,4 @@
     line: "{{ systemd_analyze_cmd.stdout }}"
     create: true
   when:
-    - reboot_limit_enable_systemd_analyze|bool
+    - reboot_limit_enable_systemd_analyze | bool

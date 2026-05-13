@@ -254,7 +254,7 @@
     path: /etc/default/grub.d/15_timeout.cfg
   register: stupid_cloud_grub_timeout
   when:
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Remove stupid cloud /etc/default/grub.d/15_timeout.cfg
@@ -265,7 +265,7 @@
     path: /etc/default/grub.d/15_timeout.cfg
     state: absent
   when:
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Check to see if the GRUB GRUB_CMDLINE_LINUX is present
@@ -280,7 +280,7 @@
   check_mode: true
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Check to see if the GRUB GRUB_CMDLINE_LINUX is empty
@@ -296,7 +296,7 @@
   when:
     - grub2_config_file.stat.exists
     - grub_cmdline_linux_grep.changed
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Check to see if the consoleblank is used
@@ -312,7 +312,7 @@
   when:
     - grub2_config_file.stat.exists
     - grub_cmdline_linux_grep.changed
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Check to see if the console is already configured on your GRUB config
@@ -328,7 +328,7 @@
   when:
     - grub2_config_file.stat.exists
     - grub_cmdline_linux_grep.changed
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Update GRUB configuration to add console kernel parameters
@@ -342,7 +342,7 @@
     line: '\1\2 {{ devconfig_kernel_console }}"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - not console_grep.changed
     - not cmdline_linux_empty_grep.changed
   tags: ["console"]
@@ -358,8 +358,8 @@
     line: '\1 {{ devconfig_kernel_console }}"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
-    - console_blank_grep.changed|bool
+    - devconfig_enable_console | bool
+    - console_blank_grep.changed | bool
     - not cmdline_linux_empty_grep.changed
   tags: ["console"]
 
@@ -375,7 +375,7 @@
     - grub2_config_file.stat.exists
     - grub_cmdline_linux_grep.changed
     - cmdline_linux_empty_grep.changed
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - cmdline_linux_empty_grep.changed
     - not console_grep.changed
   tags: ["console"]
@@ -392,7 +392,7 @@
   when:
     - grub2_config_file.stat.exists
     - not grub_cmdline_linux_grep.changed
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Check to see if the GRUB timeout is defined in your configuration
@@ -407,7 +407,7 @@
   check_mode: true
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Update GRUB timeout
@@ -420,7 +420,7 @@
     line: "GRUB_TIMEOUT={{ devconfig_grub_timeout }}"
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - grub_timeout_grep.changed
   tags: ["console"]
 
@@ -435,7 +435,7 @@
     line: "GRUB_TIMEOUT={{ devconfig_grub_timeout }}"
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - not grub_timeout_grep
   tags: ["console"]
 
@@ -451,7 +451,7 @@
   check_mode: true
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 - name: Update GRUB configuration to add GRUB console parameters if set
@@ -465,7 +465,7 @@
     line: '\1{{ devconfig_grub_console }}"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - serial_command_grep.changed
   tags: ["console"]
 
@@ -480,7 +480,7 @@
     line: 'GRUB_SERIAL_COMMAND="{{ devconfig_grub_console }}"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - not serial_command_grep.changed
   tags: ["console"]
 
@@ -496,7 +496,7 @@
   check_mode: true
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
   tags: ["console"]
 
 # We use "console serial" so to enable real consoles to be
@@ -514,7 +514,7 @@
     line: '\1"console serial"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - grub_terminal_grep.changed
   tags: ["console"]
 
@@ -529,7 +529,7 @@
     line: 'GRUB_TERMINAL="console serial"'
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - not grub_terminal_grep.changed
   tags: ["console"]
 
@@ -537,7 +537,7 @@
   ansible.builtin.import_tasks: update-grub/main.yml
   when:
     - grub2_config_file.stat.exists
-    - devconfig_enable_console|bool
+    - devconfig_enable_console | bool
     - not console_grep.changed or console_blank_grep.changed
 
 - name: Set up the client /etc/systemd/journal-upload.conf
@@ -552,7 +552,7 @@
     trim_blocks: true
     lstrip_blocks: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
     - "'nfsd' not in group_names"
 
 - name: Enable and restart systemd-journal-upload.service on the client
@@ -566,7 +566,7 @@
     state: restarted
     daemon_reload: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
     - "'nfsd' not in group_names"
 
 - name: Ensure systemd-journal-remote.service is running on the server
@@ -580,7 +580,7 @@
     state: started
   run_once: true
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: Ensure systemd-journal-upload.service is running
   tags: ["journal-status"]
@@ -591,7 +591,7 @@
     name: systemd-journal-upload.service
     state: started
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
     - "'nfsd' not in group_names"
 
 - name: Set up the client /etc/systemd/timesyncd.conf
@@ -606,7 +606,7 @@
     trim_blocks: true
     lstrip_blocks: true
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
 
 - name: Enable NTP on client
   become: true
@@ -614,7 +614,7 @@
   become_method: sudo
   ansible.builtin.command: "timedatectl set-ntp true"
   when:
-    - devconfig_enable_systemd_timesyncd_ntp|bool
+    - devconfig_enable_systemd_timesyncd_ntp | bool
 
 - name: Restart systemd-timesyncd.service on the client
   become: true
@@ -626,7 +626,7 @@
     enabled: true
     state: restarted
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
 
 - name: Ensure systemd-timesyncd.service is running on the client
   become: true
@@ -634,7 +634,7 @@
   become_method: sudo
   ansible.builtin.command: "timedatectl status"
   when:
-    - devconfig_enable_systemd_timesyncd|bool
+    - devconfig_enable_systemd_timesyncd | bool
 
 - name: Gather ipv4 address
   tags: ["journal_ln", "vars_extra"]
@@ -642,14 +642,14 @@
     gather_subset:
       - "all_ipv4_addresses"
   when:
-    - devconfig_enable_systemd_journal_remote|bool
+    - devconfig_enable_systemd_journal_remote | bool
 
 - name: "Group up facts we'll give to the host"
   tags: ["journal_ln"]
   ansible.builtin.set_fact:
     node_host_ip: "{{ ansible_ssh_host }} {{ ansible_default_ipv4.address }}"
   delegate_facts: true
-  when: devconfig_enable_systemd_journal_remote|bool
+  when: devconfig_enable_systemd_journal_remote | bool
 
 - name: Set up symlinks for journals
   tags: ["journal_ln"]
@@ -658,7 +658,7 @@
   become_flags: "su - -c"
   become_method: sudo
   ansible.builtin.command: "{{ topdir_path }}/workflows/kdevops/scripts/jounal-ln.sh {{ devconfig_systemd_journal_remote_path }} {{ node_host_ip }}"
-  when: devconfig_enable_systemd_journal_remote|bool
+  when: devconfig_enable_systemd_journal_remote | bool
 
 - name: Enables systemd's watchdog
   ansible.builtin.stat:
@@ -677,7 +677,7 @@
     line: "RuntimeWatchdogSec={{ devconfig_systemd_watchdog_runtime_timeout }}"
   when:
     - systemd_config_file.stat.exists
-    - devconfig_enable_systemd_watchdog|bool
+    - devconfig_enable_systemd_watchdog | bool
   tags: ["systemd_watchdog"]
 
 - name: Add systemd watchdog RebootWatchdogSec setting
@@ -691,7 +691,7 @@
     line: "RebootWatchdogSec={{ devconfig_systemd_watchdog_reboot_timeout }}"
   when:
     - systemd_config_file.stat.exists
-    - devconfig_enable_systemd_watchdog|bool
+    - devconfig_enable_systemd_watchdog | bool
   tags: ["systemd_watchdog"]
 
 - name: Add systemd watchdog KExecWatchdogSec setting
@@ -705,7 +705,7 @@
     line: "KExecWatchdogSec={{ devconfig_systemd_watchdog_kexec_timeout }}"
   when:
     - systemd_config_file.stat.exists
-    - devconfig_enable_systemd_watchdog|bool
+    - devconfig_enable_systemd_watchdog | bool
   tags: ["systemd_watchdog"]
 
 - name: Set sysctl vm.overcommit_memory={{ devconfig_sysctl_mm_overcommit_memory }}
@@ -727,5 +727,5 @@
 - name: Rev the kernel to the latest distribution kotd
   ansible.builtin.import_tasks: kotd-rev-kernel/main.yml
   when:
-    - devconfig_enable_kotd|bool
+    - devconfig_enable_kotd | bool
   tags: ["kotd"]

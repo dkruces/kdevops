@@ -20,7 +20,7 @@
     update: true
   tags: ["git", "dbench"]
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool
 
 - name: Run autogen for dbench
   ansible.builtin.command: "./autogen.sh"
@@ -28,7 +28,7 @@
   args:
     chdir: "{{ compile_dbench_dbench_data }}"
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool
 
 - name: Run configure for dbench
   ansible.builtin.command: "./configure"
@@ -36,14 +36,14 @@
   args:
     chdir: "{{ compile_dbench_dbench_data }}"
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool
 
 - name: Get nproc
   ansible.builtin.command: "{{ num_jobs }}"
   tags: ["git", "dbench"]
   register: nproc
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool
 
 - name: Build dbench
   tags: ["git", "dbench"]
@@ -51,7 +51,7 @@
     chdir: "{{ compile_dbench_dbench_data }}"
     jobs: "{{ nproc.stdout }}"
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool
 
 - name: Install dbench
   become: true
@@ -62,4 +62,4 @@
   args:
     chdir: "{{ compile_dbench_dbench_data }}"
   when:
-    - compile_dbench|bool
+    - compile_dbench | bool

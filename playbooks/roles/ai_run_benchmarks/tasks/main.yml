@@ -52,7 +52,7 @@
     state: absent
   when:
     - lock_file.stat.exists
-    - lock_is_stale|default(false)|bool
+    - lock_is_stale | default(false) | bool
 
 - name: Fail if recent benchmark lock exists
   ansible.builtin.fail:
@@ -63,7 +63,7 @@
       If you're sure no benchmark is running, remove the lock file manually.
   when:
     - lock_file.stat.exists
-    - not lock_is_stale|default(false)|bool
+    - not lock_is_stale | default(false) | bool
 
 - name: Run benchmark with lock management
   block:

@@ -44,12 +44,12 @@
   register: custom_image_download
   when:
     - not custom_image_stat.stat.exists
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
 
 - name: Verify custom image checksum immediately after download
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_sha512sums|bool
+    - guestfs_has_custom_raw_image_sha512sums | bool
   block:
     - name: Get the base name of the sha512sums file for verification
       ansible.builtin.set_fact:
@@ -77,7 +77,7 @@
   changed_when: true
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
 
 - name: Create temporary file for partition-expanded image
   become: true
@@ -88,7 +88,7 @@
   register: temp_resized_image
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
 
 - name: Pre-allocate space for the resized image
   become: true
@@ -98,7 +98,7 @@
   changed_when: true
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
     - temp_resized_image.path is defined
 
 - name: Expand root partition to use full disk
@@ -109,7 +109,7 @@
   changed_when: true
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
 
 - name: Replace original image with partition-expanded one
   become: true
@@ -119,7 +119,7 @@
   changed_when: true
   when:
     - custom_image_download is changed
-    - guestfs_has_custom_raw_image_url|bool
+    - guestfs_has_custom_raw_image_url | bool
 
 - name: Check if the custom image sentinel file already exists
   ansible.builtin.stat:
@@ -183,10 +183,10 @@
           - "--commands-from-file"
           - "{{ custom_command_file.path }}"
       when:
-        - libvirt_uri_system|bool
+        - libvirt_uri_system | bool
         - not sentinel_stat.stat.exists
-        - not (target_arch_arm64|default(false) and ansible_facts['architecture'] != 'aarch64')
-        - not (target_arch_x86_64|default(false) and ansible_facts['architecture'] == 'aarch64')
+        - not (target_arch_arm64 | default(false) and ansible_facts['architecture'] != 'aarch64')
+        - not (target_arch_x86_64 | default(false) and ansible_facts['architecture'] == 'aarch64')
 
     - name: Customize the downloaded image with kdevops user and settings (cross-architecture using firstboot only)
       become: true
@@ -201,11 +201,11 @@
           - "--firstboot-command"
           - "apt update && apt upgrade --yes || yum update -y || true"
       when:
-        - libvirt_uri_system|bool
+        - libvirt_uri_system | bool
         - not sentinel_stat.stat.exists
         - >-
-          (target_arch_arm64|default(false) and ansible_facts['architecture'] != 'aarch64') or
-          (target_arch_x86_64|default(false) and ansible_facts['architecture'] == 'aarch64')
+          (target_arch_arm64 | default(false) and ansible_facts['architecture'] != 'aarch64') or
+          (target_arch_x86_64 | default(false) and ansible_facts['architecture'] == 'aarch64')
       vars:
         ansible_callback_diy_runner_on_ok_msg: |
           $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
@@ -220,10 +220,10 @@
           - "--commands-from-file"
           - "{{ custom_command_file.path }}"
       when:
-        - not libvirt_uri_system|bool
+        - not libvirt_uri_system | bool
         - not sentinel_stat.stat.exists
-        - not (target_arch_arm64|default(false) and ansible_facts['architecture'] != 'aarch64')
-        - not (target_arch_x86_64|default(false) and ansible_facts['architecture'] == 'aarch64')
+        - not (target_arch_arm64 | default(false) and ansible_facts['architecture'] != 'aarch64')
+        - not (target_arch_x86_64 | default(false) and ansible_facts['architecture'] == 'aarch64')
 
     - name: Customize the downloaded image with kdevops user and settings (non-root, cross-architecture)
       ansible.builtin.command:
@@ -236,11 +236,11 @@
           - "--firstboot-command"
           - "apt update && apt upgrade --yes || yum update -y || true"
       when:
-        - not libvirt_uri_system|bool
+        - not libvirt_uri_system | bool
         - not sentinel_stat.stat.exists
         - >-
-          (target_arch_arm64|default(false) and ansible_facts['architecture'] != 'aarch64') or
-          (target_arch_x86_64|default(false) and ansible_facts['architecture'] == 'aarch64')
+          (target_arch_arm64 | default(false) and ansible_facts['architecture'] != 'aarch64') or
+          (target_arch_x86_64 | default(false) and ansible_facts['architecture'] == 'aarch64')
       vars:
         ansible_callback_diy_runner_on_ok_msg: |
           $ {{ ansible_callback_diy.result.output.cmd | join(' ') }}
@@ -317,7 +317,7 @@
   vars:
     ansible_callback_diy_runner_on_ok_msg: "{{ ansible_callback_diy.result.output.msg }}"
   when:
-    - guestfs_has_custom_raw_image_rolling|bool
+    - guestfs_has_custom_raw_image_rolling | bool
 
 - name: Show the custom virt-builder database
   ansible.builtin.debug:

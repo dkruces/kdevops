@@ -4,11 +4,11 @@
   ansible.builtin.set_fact:
     sysbench_device: >-
       {{
-        sysbench_device_dev if (kdevops_baseline_and_dev|bool and 'dev' in group_names)
-        else sysbench_device_baseline if (kdevops_baseline_and_dev|bool and 'baseline' in group_names)
+        sysbench_device_dev if (kdevops_baseline_and_dev | bool and 'dev' in group_names)
+        else sysbench_device_baseline if (kdevops_baseline_and_dev | bool and 'baseline' in group_names)
         else sysbench_device
       }}
-  when: kdevops_baseline_and_dev|default(false)|bool
+  when: kdevops_baseline_and_dev | default(false) | bool
 
 - name: Get the latest PostgreSQL ref
   tags: ["setup"]
@@ -77,7 +77,7 @@
   register: _sysbench_postgresql_clean
   changed_when: _sysbench_postgresql_clean.rc != 0
   when:
-    - _sysbench_postgresql_cleanup.stat.exists|bool
+    - _sysbench_postgresql_cleanup.stat.exists | bool
   ignore_errors: true
 
 - name: Configure PostgreSQL
@@ -269,14 +269,14 @@
     sysbench_host_is_baseline: "{{ False if ansible_host is search('-dev$') else True }}"
     sysbench_postgresql_full_page_writes: "{{ 'off' if ansible_host is search('-dev$') else 'on' }}"
   when:
-    - sysbench_disable_full_page_writes_auto|bool
+    - sysbench_disable_full_page_writes_auto | bool
 
 - name: Set sysbench_postgresql_full_page_writes based on ansible_host
   tags: ["vars"]
   ansible.builtin.set_fact:
     sysbench_postgresql_full_page_writes: "off"
   when:
-    - sysbench_disable_full_page_writes_always|bool
+    - sysbench_disable_full_page_writes_always | bool
 
 - name: Generate PostgreSQL configuration file from template
   tags: ["setup"]
@@ -722,8 +722,8 @@
   with_items:
     - "{{ hostvars[inventory_hostname]['groups']['baseline'] }}"
   when:
-    - "kdevops_baseline_and_dev|bool"
-    - "sysbench_host_is_baseline|bool"
+    - "kdevops_baseline_and_dev | bool"
+    - "sysbench_host_is_baseline | bool"
 
 - name: Plot sysbench TPS variance
   tags: ["plot"]
@@ -748,5 +748,5 @@
   with_items:
     - "{{ hostvars[inventory_hostname]['groups']['baseline'] }}"
   when:
-    - "kdevops_baseline_and_dev|bool"
-    - "sysbench_host_is_baseline|bool"
+    - "kdevops_baseline_and_dev | bool"
+    - "sysbench_host_is_baseline | bool"

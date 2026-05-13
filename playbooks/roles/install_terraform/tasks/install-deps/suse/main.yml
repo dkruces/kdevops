@@ -17,7 +17,7 @@
   register: terraform_present
   changed_when: terraform_present.rc == 1
   failed_when: terraform_present.rc != 0 and terraform_present.rc != 1
-  when: terraform_use_terraform|bool
+  when: terraform_use_terraform | bool
   tags: ["terraform", "verify"]
 
 - name: Verify OpenTofu installation
@@ -25,7 +25,7 @@
   register: opentofu_present
   changed_when: opentofu_present.rc == 1
   failed_when: opentofu_present.rc != 0 and opentofu_present.rc != 1
-  when: terraform_use_opentofu|bool
+  when: terraform_use_opentofu | bool
   tags: ["terraform", "verify"]
 
 - name: Download Terraform from the latest release and install locally
@@ -36,9 +36,9 @@
     dest: /usr/local/bin
     remote_src: true
   when:
-    - terraform_use_terraform|bool
-    - force_install_zip|bool
-    - force_install_if_present|bool or (is_sle or is_leap and terraform_present.rc != 0)
+    - terraform_use_terraform | bool
+    - force_install_zip | bool
+    - force_install_if_present | bool or (is_sle or is_leap and terraform_present.rc != 0)
 
 - name: Download OpenTofu from the latest release and install locally
   become: true
@@ -48,9 +48,9 @@
     dest: /usr/local/bin
     remote_src: true
   when:
-    - terraform_use_opentofu|bool
-    - force_install_zip|bool
-    - force_install_if_present|bool or (is_sle or is_leap and opentofu_present.rc != 0)
+    - terraform_use_opentofu | bool
+    - force_install_zip | bool
+    - force_install_if_present | bool or (is_sle or is_leap and opentofu_present.rc != 0)
 
 - name: Install terraform from your tumbleweed repository
   become: true
@@ -60,8 +60,8 @@
       - terraform
     state: present
   when:
-    - terraform_use_terraform|bool
-    - not force_install_zip|bool
-    - not force_install_if_present|bool
+    - terraform_use_terraform | bool
+    - not force_install_zip | bool
+    - not force_install_if_present | bool
     - terraform_present.rc != 0
     - is_tumbleweed

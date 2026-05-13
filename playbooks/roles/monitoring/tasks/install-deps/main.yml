@@ -2,7 +2,7 @@
 # Install monitoring dependencies based on distro
 - name: Set the distro group
   ansible.builtin.set_fact:
-    kdevops_target_distro_group: '{{ ansible_distribution | lower }}'
+    monitoring_kdevops_target_distro_group: '{{ ansible_distribution | lower }}'
 
 - name: Import install-deps task for {{ ansible_distribution | lower }}
-  ansible.builtin.include_tasks: "{{ kdevops_target_distro_group }}/main.yml"
+  ansible.builtin.include_tasks: "{{ monitoring_kdevops_target_distro_group }}/main.yml"

@@ -3,8 +3,8 @@
 
 - name: Install monitoring Python dependencies
   become: true
-  become_method: sudo
-  ansible.builtin.yum:
+  become_method: ansible.builtin.sudo
+  ansible.builtin.dnf:
     name:
       - python3-matplotlib
       - python3-packaging
@@ -16,8 +16,8 @@
 
 - name: Install folio migration monitoring dependencies
   become: true
-  become_method: sudo
-  ansible.builtin.yum:
+  become_method: ansible.builtin.sudo
+  ansible.builtin.dnf:
     name:
       - python3-psutil
     state: present
@@ -27,8 +27,8 @@
 
 - name: Install memory fragmentation monitoring dependencies
   become: true
-  become_method: sudo
-  ansible.builtin.yum:
+  become_method: ansible.builtin.sudo
+  ansible.builtin.dnf:
     name:
       - python3-scipy
     state: present

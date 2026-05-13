@@ -17,38 +17,38 @@
     - name: Generate folio migration comparison plots
       ansible.builtin.command:
         cmd: "python3 {{ role_path }}/scripts/folio_migration_compare.py {{ monitoring_results_dir }}"
-      register: folio_result
+      register: monitoring_folio_result
       failed_when: false
       changed_when: false
 
     - name: Display folio migration visualization results
       ansible.builtin.debug:
-        msg: "{{ folio_result.stdout_lines }}"
-      when: folio_result.stdout_lines is defined and folio_result.stdout_lines | length > 0
+        msg: "{{ monitoring_folio_result.stdout_lines }}"
+      when: monitoring_folio_result.stdout_lines is defined and monitoring_folio_result.stdout_lines | length > 0
 
     - name: Generate fragmentation comparison plots
       ansible.builtin.command:
         cmd: "python3 {{ role_path }}/scripts/fragmentation_compare.py {{ monitoring_results_dir }}"
-      register: frag_result
+      register: monitoring_frag_result
       failed_when: false
       changed_when: false
 
     - name: Display fragmentation visualization results
       ansible.builtin.debug:
-        msg: "{{ frag_result.stdout_lines }}"
-      when: frag_result.stdout_lines is defined and frag_result.stdout_lines | length > 0
+        msg: "{{ monitoring_frag_result.stdout_lines }}"
+      when: monitoring_frag_result.stdout_lines is defined and monitoring_frag_result.stdout_lines | length > 0
 
     - name: Generate A/B fragmentation comparison plots
       ansible.builtin.command:
         cmd: "python3 {{ role_path }}/scripts/fragmentation_ab_compare.py {{ monitoring_results_dir }}"
-      register: frag_ab_result
+      register: monitoring_frag_ab_result
       failed_when: false
       changed_when: false
 
     - name: Display A/B fragmentation visualization results
       ansible.builtin.debug:
-        msg: "{{ frag_ab_result.stdout_lines }}"
-      when: frag_ab_result.stdout_lines is defined and frag_ab_result.stdout_lines | length > 0
+        msg: "{{ monitoring_frag_ab_result.stdout_lines }}"
+      when: monitoring_frag_ab_result.stdout_lines is defined and monitoring_frag_ab_result.stdout_lines | length > 0
 
     - name: List generated visualization files
       ansible.builtin.find:
@@ -58,14 +58,14 @@
         patterns:
           - "*.png"
           - "*.html"
-        recurse: yes
-      register: visualization_files
+        recurse: true
+      register: monitoring_visualization_files
 
     - name: Display generated visualization files
       ansible.builtin.debug:
         msg: |
           Generated monitoring visualizations:
-          {% for file in visualization_files.files %}
+          {% for file in monitoring_visualization_files.files %}
           - {{ file.path | basename }}
           {% endfor %}
-      when: visualization_files.files | length > 0
+      when: monitoring_visualization_files.files | length > 0

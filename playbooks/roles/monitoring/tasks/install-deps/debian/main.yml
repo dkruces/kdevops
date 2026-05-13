@@ -3,14 +3,14 @@
 
 - name: Update apt cache
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
 - name: Install monitoring Python dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - python3-matplotlib
@@ -23,7 +23,7 @@
 
 - name: Install folio migration monitoring dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - python3-psutil
@@ -34,7 +34,7 @@
 
 - name: Install memory fragmentation monitoring dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - python3-scipy

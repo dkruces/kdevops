@@ -2,27 +2,28 @@
 # Folio migration interim data collection (without stopping monitoring)
 - name: Check if folio migration monitoring data exists
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.stat:
     path: /root/monitoring/folio_migration_stats.txt
-  register: folio_migration_data_file
+  register: monitoring_folio_migration_data_file
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
 
 - name: Create folio migration snapshot for interim collection
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.shell: |
     cp /root/monitoring/folio_migration_stats.txt /root/monitoring/folio_migration_stats_snapshot.txt
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
-    - folio_migration_data_file.stat.exists|default(false)
+    - monitoring_folio_migration_data_file.stat.exists|default(false)
+  changed_when: true
 
 - name: Copy folio migration interim data to localhost
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.fetch:
     src: /root/monitoring/folio_migration_stats_snapshot.txt
     dest: "{{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats_interim.txt"
@@ -31,24 +32,24 @@
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
-    - folio_migration_data_file.stat.exists|default(false)
+    - monitoring_folio_migration_data_file.stat.exists|default(false)
 
 - name: Clean up folio migration snapshot
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     path: /root/monitoring/folio_migration_stats_snapshot.txt
     state: absent
   when:
     - monitor_developmental_stats|default(false)|bool
     - monitor_folio_migration|default(false)|bool
-  ignore_errors: true
+  failed_when: false
 
 - name: Display folio migration interim collection status
   ansible.builtin.debug:
     msg: |
-      Folio migration interim data {% if folio_migration_data_file.stat.exists|default(false) %}collected{% else %}not available{% endif %}.
-      {% if folio_migration_data_file.stat.exists|default(false) %}
+      Folio migration interim data {% if monitoring_folio_migration_data_file.stat.exists|default(false) %}collected{% else %}not available{% endif %}.
+      {% if monitoring_folio_migration_data_file.stat.exists|default(false) %}
       Data saved to: {{ monitoring_results_path }}/{{ ansible_hostname }}_folio_migration_stats_interim.txt
       {% endif %}
   when:
@@ -59,33 +60,35 @@
 - name: Check if matplotlib is available on localhost
   ansible.builtin.command: python3 -c "import matplotlib.pyplot"
   delegate_to: localhost
-  register: localhost_matplotlib_check
-  ignore_errors: true
+  register: monitoring_localhost_matplotlib_check
+  failed_when: false
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
+  changed_when: false
 
 - name: Find interim monitoring data files for plotting
   ansible.builtin.find:
     paths: "{{ monitoring_results_path }}"
     patterns: "*_interim.txt"
   delegate_to: localhost
-  register: interim_monitoring_files
+  register: monitoring_interim_monitoring_files
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - localhost_matplotlib_check.rc == 0
+    - monitoring_localhost_matplotlib_check.rc == 0
 
 - name: Generate folio migration interim plots on localhost
   ansible.builtin.command: |
     python3 {{ playbook_dir }}/roles/monitoring/files/plot_folio_migration_stats.py
       -o {{ monitoring_results_path }}/interim_folio_migration_plot.png
-      {{ interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | map(attribute='path') | join(' ') }}
+      {{ monitoring_interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | map(attribute='path') | join(' ') }}
   delegate_to: localhost
-  register: folio_interim_plot_generation
-  ignore_errors: true
+  register: monitoring_folio_interim_plot_generation
+  failed_when: false
   run_once: true
   when:
     - enable_monitoring|default(false)|bool
-    - localhost_matplotlib_check.rc == 0
-    - interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | list | length > 0
+    - monitoring_localhost_matplotlib_check.rc == 0
+    - monitoring_interim_monitoring_files.files | selectattr('path', 'match', '.*folio_migration.*') | list | length > 0
+  changed_when: true

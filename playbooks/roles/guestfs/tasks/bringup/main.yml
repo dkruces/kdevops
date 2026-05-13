@@ -138,7 +138,7 @@
       ansible.builtin.include_tasks:
         file: "{{ role_path }}/tasks/bringup/largeio.yml"
       when:
-        - libvirt_enable_largeio|bool
+        - libvirt_enable_largeio | default(false) | bool
 
     - name: Create extra disks
       vars:
@@ -147,7 +147,7 @@
         file: "{{ role_path }}/tasks/bringup/extra-disks.yml"
       loop: "{{ range(0, libvirt_extra_storage_drive_count) | list }}"
       when:
-        - not libvirt_enable_largeio|bool
+        - not libvirt_enable_largeio | default(false) | bool
 
     - name: Define each target node
       vars:

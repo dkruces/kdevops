@@ -168,11 +168,11 @@
 
 - name: The default is to assume we do not want to add the benchmark repo
   ansible.builtin.set_fact:
-    add_benchmark_repo: false
+    blktests_add_benchmark_repo: false
 
 - name: Does this release require the benchmark repo
   ansible.builtin.set_fact:
-    add_benchmark_repo: true
+    blktests_add_benchmark_repo: true
   when:
     - blktests_is_sle15sp2|bool or blktests_is_sle15sp3|bool or blktests_is_sle15sp4|bool or blktests_is_sle12sp5|bool
 
@@ -208,7 +208,7 @@
       - dbench
     state: present
   when:
-    - add_benchmark_repo|bool
+    - blktests_add_benchmark_repo|bool
 
 - name: The default is to assume we do not want to to compile nbd manually
   ansible.builtin.set_fact:
@@ -272,16 +272,16 @@
   args:
     chdir: "{{ nbd_data }}"
 
-- name: Get nproc
+- name: Get blktests_nproc
   ansible.builtin.command: "{{ num_jobs }}"
   tags: ["git", "blktests", "nbd"]
-  register: nproc
+  register: blktests_nproc
 
 - name: Build nbd
   tags: ["git", "blktests", "nbd"]
   community.general.make:
     chdir: "{{ nbd_data }}"
-    jobs: "{{ nproc.stdout }}"
+    jobs: "{{ blktests_nproc.stdout }}"
 
 - name: Install nbd
   become: true

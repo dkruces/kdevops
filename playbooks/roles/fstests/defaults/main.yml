@@ -3,16 +3,13 @@
 # Our sensible defaults for the fstests role.
 #
 # We default to not run tests.
-kdevops_run_fstests: false
 fstests_skip_run: false
-infer_uid_and_group: false
+fstests_infer_uid_and_group: false
 
 # Ror instance you can use "-g quick" but note that this may produce
 # not results as all quick tests may be expunded.
-oscheck_extra_args: ""
-limit_tests: ""
-dynamic_limit_tests:
-badname_arg: ""
+fstests_dynamic_limit_tests:
+fstests_badname_arg: ""
 
 fstests_start_after: false
 fstests_start_after_test: ""
@@ -52,19 +49,18 @@ fstests_testdev_nvme_euis: false
 
 fstests_testdev_nvme_fallback_model_serial: false
 
-nvmes:
-nvme_symlinks: []
-sparsefiles_generation: false
-sparsefiles_size: 0
-sparsefiles_filename_prefix: "sparse-disk"
+fstests_nvmes:
+fstests_nvme_symlinks: []
+fstests_sparsefiles_generation: false
+fstests_sparsefiles_size: 0
+fstests_sparsefiles_filename_prefix: "sparse-disk"
 fstests_test_dir: "/media/test"
 
 fstests_debug: false
 
-compile_dbench: false
-run_large_disk_tests:
-kdevops_fstests_setup_name: "kdevops_fstests_setup"
-kdevops_fstests_setup: ".{{ kdevops_fstests_setup_name }}"
+fstests_run_large_disk_tests:
+fstests_setup_name: "fstests_setup"
+fstests_setup: ".{{ fstests_setup_name }}"
 
 fstests_perf_config: "kdevops"
 fstests_scratch_mnt: "/media/scratch"
@@ -77,13 +73,11 @@ fstests_scratch_devpool: "/dev/loop5 /dev/loop6 /dev/loop7 /dev/loop8 /dev/loop9
 fstests_scratch_devpool_rtlogdev: "/dev/loop5 /dev/loop6 /dev/loop7 /dev/loop8 /dev/loop9 /dev/loop10 /dev/loop11"
 fstests_scratch_devpool_zns: "/dev/nvme5n1 /dev/nvme6n1 /dev/nvme7n1 /dev/nvme8n1 /dev/nvme9n1 /dev/nvme10n1 /dev/nvme11n1 /dev/nvme12n1"
 
-run_auto_group_tests: "n"
-run_custom_group_tests: ""
-exclude_test_groups: ""
-run_tests_on_failures: false
+fstests_run_auto_group_tests: "n"
+fstests_run_custom_group_tests: ""
+fstests_exclude_test_groups: ""
 fstests_debug_localhost: false
 
-kdevops_bootlinux: false
 
 fstests_tfp_copy_enable: false
 fstests_tfp_copy_enable_list: false
@@ -191,10 +185,8 @@ fstests_tmpfs_section_huge_always: false
 fstests_tmpfs_section_huge_within_size: false
 fstests_tmpfs_section_huge_advise: false
 
-devconfig_enable_systemd_journal_remote: false
 
 fstests_xfsdump_build: false
 fstests_xfsdump_git: "https://github.com/linux-kdevops/xfsdump-dev.git"
 fstests_xfsdump_data: "{{ data_path }}/xfsdump"
 
-nfsd_export_fstype: "xfs"

@@ -1,7 +1,7 @@
 ---
 - name: Import optional extra_args file
   ansible.builtin.include_vars: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
   with_first_found:
     - files:
         - "../extra_vars.yml"
@@ -12,21 +12,21 @@
 
 - name: Update apt cache
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     update_cache: true
   tags: linux
 
 - name: Install NVMe tools
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - nvme-cli
 
 - name: Install fstests build dependencies
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - bison
@@ -80,7 +80,7 @@
 
 - name: Install dependencies for building xfsprogs
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.apt:
     name:
       - libinih-dev

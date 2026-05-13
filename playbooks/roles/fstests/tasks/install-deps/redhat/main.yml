@@ -11,14 +11,14 @@
 
 - name: Install build dependencies for fstests
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ packages }}"
   retries: 3
   delay: 5
-  register: result
-  until: result is succeeded
+  register: fstests_result
+  until: fstests_result is succeeded
   vars:
     packages:
       - bison
@@ -76,14 +76,14 @@
 
 - name: Install xfsprogs-xfs_scrub
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ packages }}"
   retries: 3
   delay: 5
-  register: result
-  until: result is succeeded
+  register: fstests_result
+  until: fstests_result is succeeded
   vars:
     packages:
       - xfsprogs-xfs_scrub
@@ -92,14 +92,14 @@
 
 - name: Install btrfs-progs
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ packages }}"
   retries: 3
   delay: 5
-  register: result
-  until: result is succeeded
+  register: fstests_result
+  until: fstests_result is succeeded
   vars:
     packages:
       - btrfs-progs
@@ -108,14 +108,14 @@
 - name: Install dependencies for building xfsprogs
   become: true
   become_flags: "su - -c"
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.dnf:
     name: "{{ packages }}"
     enablerepo: "*"
   retries: 3
   delay: 5
-  register: result
-  until: result is succeeded
+  register: fstests_result
+  until: fstests_result is succeeded
   vars:
     packages:
       - inih-devel

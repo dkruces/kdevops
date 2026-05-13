@@ -1,7 +1,7 @@
 ---
 - name: Ensure required /media/ directories are created
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.file:
     state: directory
     path: "/media/{{ item }}"

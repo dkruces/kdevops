@@ -9,7 +9,7 @@
     cmd: python3 -c "import junitparser"
   changed_when: false
   failed_when: false
-  register: junitparser_check
+  register: fstests_junitparser_check
 
 - name: Fail with a structured diagnostic when junitparser is missing
   ansible.builtin.fail:
@@ -22,4 +22,4 @@
           make fstests-localhost-prep-setup
 
       See docs/fstests-localhost_prep.md.
-  when: junitparser_check.rc != 0
+  when: fstests_junitparser_check.rc != 0

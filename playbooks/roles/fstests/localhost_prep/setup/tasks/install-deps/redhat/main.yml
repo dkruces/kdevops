@@ -9,8 +9,8 @@
       - python-pip
   retries: 3
   delay: 5
-  register: result
-  until: result is succeeded
+  register: fstests_result
+  until: fstests_result is succeeded
   tags: do_install
 
 - name: Install junitparser via pip on the controller (RedHat)

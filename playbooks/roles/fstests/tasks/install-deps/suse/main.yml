@@ -1,93 +1,93 @@
 ---
 - name: Set generic SUSE specific distro facts
   ansible.builtin.set_fact:
-    is_sle: '{{ (ansible_distribution == "SLES") or (ansible_distribution == "SLED") }}'
-    is_leap: '{{ "Leap" in ansible_distribution }}'
-    is_tumbleweed: '{{ "openSUSE Tumbleweed" == ansible_distribution }}'
+    fstests_is_sle: '{{ (ansible_distribution == "SLES") or (ansible_distribution == "SLED") }}'
+    fstests_is_leap: '{{ "Leap" in ansible_distribution }}'
+    fstests_is_tumbleweed: '{{ "openSUSE Tumbleweed" == ansible_distribution }}'
 
 - name: Set SLE specific version labels to make checks easier
   ansible.builtin.set_fact:
-    is_sle10: '{{ ansible_distribution_major_version == "10" }}'
-    is_sle11: '{{ ansible_distribution_major_version == "11" }}'
-    is_sle12: '{{ ansible_distribution_major_version == "12" }}'
-    is_sle15: '{{ ansible_distribution_major_version == "15" }}'
-    is_sle10sp3: '{{ ansible_distribution_version == "10.3" }}'
-    is_sle11sp1: '{{ ansible_distribution_version == "11.1" }}'
-    is_sle11sp4: '{{ ansible_distribution_version == "11.4" }}'
-    is_sle12sp1: '{{ ansible_distribution_version == "12.1" }}'
-    is_sle12sp3: '{{ ansible_distribution_version == "12.3" }}'
-    is_sle12sp5: '{{ ansible_distribution_version == "12.5" }}'
-    is_sle15sp2: '{{ ansible_distribution_version == "15.2" }}'
-    is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
-    is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
+    fstests_is_sle10: '{{ ansible_distribution_major_version == "10" }}'
+    fstests_is_sle11: '{{ ansible_distribution_major_version == "11" }}'
+    fstests_is_sle12: '{{ ansible_distribution_major_version == "12" }}'
+    fstests_is_sle15: '{{ ansible_distribution_major_version == "15" }}'
+    fstests_is_sle10sp3: '{{ ansible_distribution_version == "10.3" }}'
+    fstests_is_sle11sp1: '{{ ansible_distribution_version == "11.1" }}'
+    fstests_is_sle11sp4: '{{ ansible_distribution_version == "11.4" }}'
+    fstests_is_sle12sp1: '{{ ansible_distribution_version == "12.1" }}'
+    fstests_is_sle12sp3: '{{ ansible_distribution_version == "12.3" }}'
+    fstests_is_sle12sp5: '{{ ansible_distribution_version == "12.5" }}'
+    fstests_is_sle15sp2: '{{ ansible_distribution_version == "15.2" }}'
+    fstests_is_sle15sp3: '{{ ansible_distribution_version == "15.3" }}'
+    fstests_is_sle15sp4: '{{ ansible_distribution_version == "15.4" }}'
   when:
-    - is_sle|bool
+    - fstests_is_sle|bool
 
 - name: Set SLE specific version labels to make checks easier when not SLE
   ansible.builtin.set_fact:
-    is_sle10: false
-    is_sle11: false
-    is_sle12: false
-    is_sle15: false
-    is_sle10sp3: false
-    is_sle11sp1: false
-    is_sle11sp4: false
-    is_sle12sp1: false
-    is_sle12sp3: false
-    is_sle12sp5: false
-    is_sle15sp2: false
-    is_sle15sp3: false
-    is_sle15sp4: false
+    fstests_is_sle10: false
+    fstests_is_sle11: false
+    fstests_is_sle12: false
+    fstests_is_sle15: false
+    fstests_is_sle10sp3: false
+    fstests_is_sle11sp1: false
+    fstests_is_sle11sp4: false
+    fstests_is_sle12sp1: false
+    fstests_is_sle12sp3: false
+    fstests_is_sle12sp5: false
+    fstests_is_sle15sp2: false
+    fstests_is_sle15sp3: false
+    fstests_is_sle15sp4: false
   when:
-    - not is_sle|bool
+    - not fstests_is_sle|bool
 
 - name: By default we assume we have figured out how to add repos on a release
   ansible.builtin.set_fact:
-    repos_present: true
+    fstests_repos_present: true
 
 - name: Lets us disable things which require a zypper repo present
   ansible.builtin.set_fact:
-    repos_present: false
+    fstests_repos_present: false
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool
+    - fstests_is_sle|bool
+    - fstests_is_sle10|bool or fstests_is_sle11|bool
 
 - name: The default is to assume all distros have the indent package
   ansible.builtin.set_fact:
-    has_indent: true
+    fstests_has_indent: true
 
 - name: Does this release lack indent
   ansible.builtin.set_fact:
-    has_indent: false
+    fstests_has_indent: false
   when:
-    - is_sle|bool
-    - is_sle15sp3|bool or is_sle15sp4|bool
+    - fstests_is_sle|bool
+    - fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
 
 - name: The default is to assume all distros supports nvme-utils
   ansible.builtin.set_fact:
-    lacks_nvme_utils: false
+    fstests_lacks_nvme_utils: false
 
 - name: Does this release lack nvme-utils
   ansible.builtin.set_fact:
-    lacks_nvme_utils: true
+    fstests_lacks_nvme_utils: true
   when:
-    - is_sle|bool
-    - is_sle10|bool or is_sle11|bool or is_sle12sp1|bool
+    - fstests_is_sle|bool
+    - fstests_is_sle10|bool or fstests_is_sle11|bool or fstests_is_sle12sp1|bool
 
 - name: Install nvme tools
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - nvme-cli
     state: present
   when:
-    - repos_present|bool
-    - not lacks_nvme_utils|bool
+    - fstests_repos_present|bool
+    - not fstests_lacks_nvme_utils|bool
 
 - name: Install build dependencies for fstests
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - bison
@@ -127,33 +127,33 @@
       - python3-bcc
     state: present
   when:
-    - repos_present|bool
+    - fstests_repos_present|bool
 
 - name: Install indent when we have it
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - indent
     state: present
   when:
-    - repos_present|bool
-    - has_indent|bool
+    - fstests_repos_present|bool
+    - fstests_has_indent|bool
 
 - name: Install tumblweed packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm6
       - dbench
     state: present
   when:
-    - is_tumbleweed|bool
+    - fstests_is_tumbleweed|bool
 
 - name: Install leap packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm4
@@ -161,76 +161,76 @@
       - dbench4
     state: present
   when:
-    - is_leap|bool
+    - fstests_is_leap|bool
 
 - name: Install sle15 sp2 and sp3 packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - libgdbm4
     state: present
   when:
-    - is_sle15sp2|bool or is_sle15sp3|bool or is_sle15sp4|bool
+    - fstests_is_sle15sp2|bool or fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
 
 - name: The default is to assume we do not want to add the benchmark repo
   ansible.builtin.set_fact:
-    add_benchmark_repo: false
+    fstests_add_benchmark_repo: false
 
 - name: Does this release require the benchmark repo
   ansible.builtin.set_fact:
-    add_benchmark_repo: true
+    fstests_add_benchmark_repo: true
   when:
-    - is_sle15sp2|bool or is_sle15sp3|bool or is_sle15sp4|bool or is_sle12sp5|bool
+    - fstests_is_sle15sp2|bool or fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool or fstests_is_sle12sp5|bool
 
 - name: Add benchmark sles12sp5 openSUSE repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_12_SP5/ benchmark benchmark"
   when:
-    - is_sle12sp5|bool
+    - fstests_is_sle12sp5|bool
 
 - name: Add benchmark sles15sp2 openSUSE repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP2/ benchmark benchmark"
   when:
-    - is_sle15sp2|bool
+    - fstests_is_sle15sp2|bool
 
 - name: Add benchmark sles15sp3 openSUSE repo when needed
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.script:
     cmd: "{{ role_path }}/scripts/add-suse-repo-if-not-found.sh http://download.opensuse.org/repositories/benchmark/SLE_15_SP3/ benchmark benchmark"
   when:
-    - is_sle15sp3|bool or is_sle15sp4|bool
+    - fstests_is_sle15sp3|bool or fstests_is_sle15sp4|bool
 
 - name: Install dbench for sles15-sp2
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - dbench
     state: present
   when:
-    - add_benchmark_repo|bool
+    - fstests_add_benchmark_repo|bool
 
 - name: Install nfs-utils
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - nfs-utils
     state: present
   when:
-    - repos_present|bool
+    - fstests_repos_present|bool
     - fstests_fstyp == "nfs"
 
 - name: Ensure nfs-client.target is enabled
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: nfs-client.target
     enabled: true
@@ -240,15 +240,15 @@
 
 - name: Install cifs-utils
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.package:
     name:
       - cifs-utils
     state: present
   when:
-    - repos_present|bool
+    - fstests_repos_present|bool
     - fstests_fstyp == "cifs"
 
 - name: Set the "--badname" arg
   ansible.builtin.set_fact:
-    badname_arg: "--badname"
+    fstests_badname_arg: "--badname"

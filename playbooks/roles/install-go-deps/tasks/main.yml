@@ -12,4 +12,4 @@
 
 # Install Go build dependencies
 - name: Install Go build dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml

@@ -16,7 +16,7 @@
   tags: ["data_partition"]
 
 - name: Install blktests build and runtime dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 
 - name: Git clone kdevops
   environment:

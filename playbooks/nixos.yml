@@ -4,7 +4,7 @@
 - name: Install NixOS dependencies on localhost
   hosts: localhost
   gather_facts: true
-  tags: install-deps
+  tags: install_deps
   tasks:
     - name: Check if nix is installed
       ansible.builtin.command: which nix

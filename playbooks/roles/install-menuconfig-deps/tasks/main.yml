@@ -12,6 +12,6 @@
 
 # Distro specific
 - name: Install kdevops deps to run make menuconfig
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   when:
     - kdevops_first_run | bool

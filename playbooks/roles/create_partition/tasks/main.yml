@@ -11,8 +11,8 @@
   tags: vars
 
 # Distro specific
-- name: Include install-deps task
-  ansible.builtin.import_tasks: install-deps/main.yml
+- name: Include install_deps task
+  ansible.builtin.import_tasks: install_deps/main.yml
 - name: Check if {{ create_partition_disk_path }} is mounted
   become: true
   become_method: sudo

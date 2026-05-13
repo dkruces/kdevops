@@ -2,7 +2,7 @@
 # Main tasks for build_linux role
 
 - name: Install build-linux dependencies
-  ansible.builtin.import_tasks: install-deps/main.yml
+  ansible.builtin.import_tasks: install_deps/main.yml
   tags: ["install_deps"]
 
 - name: Set initial filesystem type

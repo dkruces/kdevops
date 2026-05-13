@@ -27,9 +27,9 @@ This drives `playbooks/libvirt.yml` with the
 performs two distinct operations:
 
 1. **Install libvirt and supporting packages** — distro-specific
-   package list, see `setup/tasks/install-deps/`.
+   package list, see `setup/tasks/install_deps/`.
 2. **Add the running user to the libvirt groups** — see
-   `setup/tasks/enable-user/`.
+   `setup/tasks/enable_user/`.
 
 After the run you must log out and log back in (or open a fresh
 session with `newgrp libvirt`) for the new group memberships to

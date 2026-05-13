@@ -3,7 +3,7 @@
   delegate_to: localhost
   run_once: true
   ansible.builtin.import_tasks:
-    file: install-deps/main.yml
+    file: install_deps/main.yml
 
 - name: Install b4 on host
   become: true

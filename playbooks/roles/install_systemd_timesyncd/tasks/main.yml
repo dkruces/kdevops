@@ -12,7 +12,7 @@
 
 # Distro specific
 - name: Install systemd-timesyncd
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - name: Set up the server /etc/systemd/timesyncd.conf
   tags: ["timesyncd"]
   become: true

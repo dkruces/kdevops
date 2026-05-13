@@ -25,7 +25,7 @@
 
 # Distro specific
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - ansible.builtin.include_role:
     name: create_data_partition
   tags: ["mkfs"]

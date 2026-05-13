@@ -10,7 +10,7 @@
       skip: true
 
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - name: Construct the path to the CA directory
   delegate_to: localhost
   ansible.builtin.set_fact:

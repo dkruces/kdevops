@@ -51,7 +51,7 @@ install_nixos_deps:
 		--limit 'localhost' \
 		playbooks/nixos.yml \
 		--extra-vars=@./extra_vars.yaml \
-		--tags install-deps
+		--tags install_deps
 
 generate_nixos_configs:
 	$(Q)ansible-playbook \

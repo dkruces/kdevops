@@ -1,7 +1,7 @@
 ---
 # Install distribution-specific dependencies
 - name: Install dependencies
-  include_tasks: install-deps/main.yml
+  include_tasks: install_deps/main.yml
   tags: [ 'setup', 'deps' ]
 
 - include_role:

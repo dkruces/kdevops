@@ -1,0 +1,16 @@
+---
+- ansible.builtin.include_role:
+    name: pkg
+
+# Distribution-specific setup for mmtests dependencies
+- name: Debian/Ubuntu distribution specific setup
+  ansible.builtin.import_tasks: tasks/install_deps/debian/main.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+- name: SUSE distribution specific setup
+  ansible.builtin.import_tasks: tasks/install_deps/suse/main.yml
+  when: ansible_facts['os_family']|lower == 'suse'
+
+- name: RedHat distribution specific setup
+  ansible.builtin.import_tasks: tasks/install_deps/redhat/main.yml
+  when: ansible_facts['os_family']|lower == 'redhat'

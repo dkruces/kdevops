@@ -1,0 +1,10 @@
+---
+- ansible.builtin.include_role:
+    name: pkg
+
+# tasks to install dependencies for dbench
+- name: Dbench distribution ospecific setup
+  ansible.builtin.import_tasks: tasks/install_deps/debian/main.yml
+  when: ansible_facts['os_family']|lower == 'debian'
+
+# Other distros can be added on a need basis here

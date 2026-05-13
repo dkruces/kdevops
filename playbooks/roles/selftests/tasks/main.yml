@@ -15,11 +15,11 @@
 # the target node and the localhost because we first need to build
 # the target selftests for the nodes and then actually use them.
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - name: Install dependencies to build Linux selftests on host
   tags: ["deps"]
   run_once: true
-  ansible.builtin.import_tasks: install-deps/main-localhost.yml
+  ansible.builtin.import_tasks: install_deps/main-localhost.yml
   delegate_to: localhost
   when:
     - bootlinux_9p | bool

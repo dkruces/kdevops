@@ -1,11 +1,11 @@
 ---
 # libvirt/user/setup — controller-side sudo work for libvirt user
 # enablement. Invoked via `make libvirt-user-setup`. Runs the distro-
-# specific install-deps and enable-user task trees inherited from the
+# specific install_deps and enable_user task trees inherited from the
 # legacy libvirt_user role.
 
 - name: Install libvirt and supporting packages
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 
 - name: Add the controller user to the libvirt groups
-  ansible.builtin.include_tasks: enable-user/main.yml
+  ansible.builtin.include_tasks: enable_user/main.yml

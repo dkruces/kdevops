@@ -39,7 +39,7 @@
 
 # Distro specific
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - name: Remove old pynfs dir as we always clone a fresh tree
   tags: ["git", "pynfs"]
   become: true

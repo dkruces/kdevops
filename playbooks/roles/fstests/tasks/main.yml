@@ -17,7 +17,7 @@
 
 # Distro specific
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
 - name: Check if there's an existing xfsprogs directory
   become: true
   become_flags: "su - -c"

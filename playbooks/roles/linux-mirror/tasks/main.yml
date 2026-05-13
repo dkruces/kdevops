@@ -11,7 +11,7 @@
   tags: vars
 
 - name: Install dependencies for the linux-mirror role
-  ansible.builtin.include_tasks: install-deps/fedora/main.yml
+  ansible.builtin.include_tasks: install_deps/fedora/main.yml
   when:
     - ansible_distribution == 'Fedora'
   tags: ["mirror"]
@@ -271,7 +271,7 @@
   tags: ["mirror"]
 
 - name: Install NFS server dependencies
-  ansible.builtin.include_tasks: install-deps/nfs/main.yml
+  ansible.builtin.include_tasks: install_deps/nfs/main.yml
   when:
     - not install_only_git_daemon | bool
     - ansible_user_id == 'root'

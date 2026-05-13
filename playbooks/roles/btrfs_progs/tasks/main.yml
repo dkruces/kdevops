@@ -15,7 +15,7 @@
   tags: ["data_partition"]
 
 - name: Install build-deps for btrfs_progs as per each Linux distribution
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   when:
     - btrfs_progs_build | bool
 

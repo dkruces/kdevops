@@ -26,7 +26,7 @@
 # Distro specific
 - name: Install dependencies to build and install the Linux kernel
   ansible.builtin.import_tasks:
-    file: install-deps/main.yml
+    file: install_deps/main.yml
   when:
     - not bootlinux_9p | bool
     - not workflow_linux_packaged | bool

@@ -15,7 +15,7 @@
   tags: vars
 
 - name: Install vLLM dependencies
-  ansible.builtin.import_tasks: tasks/install-deps/main.yml
+  ansible.builtin.import_tasks: tasks/install_deps/main.yml
   tags: ["vllm", "deps"]
 
 # Configure Docker and storage to use /data partition BEFORE starting any containers

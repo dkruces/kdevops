@@ -15,7 +15,7 @@
   tags: ["data_partition"]
 
 - name: Install dependencies for reboot-limit
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   tags: ["install", "deps"]
 
 - name: Create the reboot-limit data collection directory for each host

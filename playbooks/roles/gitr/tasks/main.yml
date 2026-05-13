@@ -72,7 +72,7 @@
 - name: Install dependencies for the git regression tests
   tags: gitr
   ansible.builtin.include_tasks:
-    file: install-deps/main.yml
+    file: install_deps/main.yml
 
 - name: Set up an iSCSI initiator on the target node
   tags: gitr

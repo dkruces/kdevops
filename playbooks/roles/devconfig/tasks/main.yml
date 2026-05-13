@@ -64,7 +64,7 @@
     - devconfig_debian_testing | bool
 
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   tags: ["vars", "vars_simple"]
 
 - name: Configure custom repositories and install packages

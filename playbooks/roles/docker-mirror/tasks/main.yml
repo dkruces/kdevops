@@ -15,7 +15,7 @@
   tags: ["docker-mirror"]
 
 - name: Install Docker dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   when:
     - (install_docker_mirror | default(false) == 'y') or (install_docker_mirror | default(false) | bool)
     - docker_installed.rc != 0

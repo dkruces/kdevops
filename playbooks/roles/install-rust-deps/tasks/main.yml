@@ -12,4 +12,4 @@
 
 # Install Rust build dependencies
 - name: Install Rust build dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml

@@ -4,11 +4,11 @@
 
   pre_tasks:
     # Install bootlinux dependencies (for kernel building capabilities)
-    - ansible.builtin.import_tasks: roles/bootlinux/tasks/install-deps/main.yml
+    - ansible.builtin.import_tasks: roles/bootlinux/tasks/install_deps/main.yml
       tags: ["install_deps"]
 
     # Install monitoring dependencies if monitoring is enabled
-    - ansible.builtin.import_tasks: roles/monitoring/tasks/install-deps/main.yml
+    - ansible.builtin.import_tasks: roles/monitoring/tasks/install_deps/main.yml
       when:
         - enable_monitoring|default(false)|bool
       tags: ["monitoring", "install_deps"]

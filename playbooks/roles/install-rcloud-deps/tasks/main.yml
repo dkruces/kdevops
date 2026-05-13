@@ -22,4 +22,4 @@
 
 # Install rcloud-specific dependencies (libvirt development libraries)
 - name: Install rcloud-specific build dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml

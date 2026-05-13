@@ -8,4 +8,4 @@
 # install the runtime_deps sub-module per Yocto RDEPENDS semantics.
 
 - name: Distribution-specific guestfs runtime dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml

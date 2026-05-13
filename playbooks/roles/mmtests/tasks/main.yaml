@@ -1,7 +1,7 @@
 ---
 # Install distribution-specific dependencies
 - name: Install dependencies
-  ansible.builtin.include_tasks: install-deps/main.yml
+  ansible.builtin.include_tasks: install_deps/main.yml
   tags: ["setup", "deps"]
 
 - ansible.builtin.include_role:

@@ -1,0 +1,12 @@
+---
+- name: Debian user enablement
+  ansible.builtin.include_tasks: enable_user/debian/main.yml
+  when: ansible_os_family == 'Debian'
+
+- name: SuSE user enablement
+  ansible.builtin.include_tasks: enable_user/suse/main.yml
+  when: ansible_os_family == 'Suse'
+
+- name: Red Hat / Fedora user enablement
+  ansible.builtin.include_tasks: enable_user/redhat/main.yml
+  when: ansible_os_family == 'RedHat'

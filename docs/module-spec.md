@@ -136,6 +136,51 @@ A common use is splitting one sub-module into a non-sudo `verify/`
 sub-sub-module and an opt-in sudo `setup/` sub-sub-module — see
 "Controller-side sudo isolation" below.
 
+### Monitor sub-module factory
+
+Some modules host a fleet of independently-gated probes that share
+one orchestrator playbook, surface user options worth a place in
+`menuconfig`, but have no Make targets of their own and no
+controller-side sudo step. The only public switch for each probe
+is its `CONFIG_<PARENT>_<NAME>` Kconfig knob; selection at runtime
+flows through `output yaml` and ansible tags.
+
+Layout (a regular sub-module nested two levels deep under
+`monitors/`):
+
+```
+modules/<parent>/monitors/<name>/
+├── Kconfig             user options for this monitor
+└── README.md           required
+
+playbooks/roles/<parent>/monitors/<name>/
+└── tasks/
+    ├── main.yml        dispatches do_run / do_collect
+    ├── run.yml         tag: do_run
+    └── collect.yml     tag: do_collect
+```
+
+The parent's `Kconfig` sources each monitor's Kconfig. The parent
+role's `tasks/main.yml` invokes each monitor via slash-name
+`include_role: name: <parent>/monitors/<name>` (the resolver
+pattern from "Sub-sub-modules" above), gated on the monitor's
+`output yaml` knob and tagged with `monitor_<name>` for the
+sub-module-gate axis:
+
+```yaml
+- name: Run <name> monitor
+  ansible.builtin.include_role:
+    name: <parent>/monitors/<name>
+  when: <parent>_<name> | default(false) | bool
+  tags: [monitor_<name>]
+```
+
+A single parent Make target dispatches every enabled monitor at
+once; there is no `make <parent>-<name>` per monitor. The kdevops
+`monitoring` module is the anchor case; the pattern is reusable for
+any module that grows a similar factory of independently-configurable
+probes with no per-probe Make surface.
+
 ### Sub-roles (NOT sub-modules)
 
 A **sub-role** is internal role organization — a helper invoked via

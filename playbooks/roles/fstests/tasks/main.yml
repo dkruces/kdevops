@@ -10,7 +10,8 @@
       skip: true
   tags: vars
 
-- ansible.builtin.include_role:
+- name: Set up the /data partition the fstests workflow stores trees in
+  ansible.builtin.include_role:
     name: create_data_partition
   tags: ["oscheck", "data_partition"]
 
@@ -34,7 +35,8 @@
   when:
     - fstests_nfs_section_pnfs|bool
 
-- ansible.builtin.include_role:
+- name: Infer the data user and group from the common role
+  ansible.builtin.include_role:
     name: common
   when:
     - fstests_infer_uid_and_group|bool
@@ -186,7 +188,7 @@
   tags: ["oscheck", "fstests", "build", "do_configure"]
   when: "fstests_xfs_build_custom_xfsprogs|bool"
 
-- name: Create {{ truncated_path }} if needed
+- name: Set up the fstests sparsefiles partition
   ansible.builtin.include_role:
     name: create_partition
   vars:
@@ -203,7 +205,7 @@
 
 - name: Git clone kdevops
   environment:
-    GIT_SSL_NO_VERIFY: true
+    GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
     repo: "{{ kdevops_git }}"
     dest: "{{ kdevops_data }}"
@@ -271,7 +273,7 @@
   until: not fstests_result.failed
   tags: ["oscheck", "git", "fstests", "do_fetch"]
 
-- name: Create {{ fstests_data_prefix }} if it does not exist
+- name: Create the fstests data-prefix directory if it does not exist
   tags: ["oscheck", "fstests", "install", "root", "do_deploy"]
   become: true
   become_flags: "su - -c"
@@ -323,7 +325,7 @@
 
 - name: Git pull latest kdevops to ensure expunge lists and scripts are up to date
   environment:
-    GIT_SSL_NO_VERIFY: true
+    GIT_SSL_NO_VERIFY: "true"
   ansible.builtin.git:
     repo: "{{ kdevops_git }}"
     dest: "{{ kdevops_data }}"
@@ -429,7 +431,7 @@
   with_items:
     - "{{ fstests_data_target }}/configs"
 
-- name: Check if there's a host specific fstests at {{ fstests_fstyp }}/{{ inventory_hostname }}.config configuration
+- name: Check if a host-specific fstests config exists for this section
   tags: ["oscheck", "fstests", "run_tests", "fstests_setup", "install", "generate-fstests-config"]
   delegate_to: localhost
   ansible.builtin.stat:
@@ -677,8 +679,9 @@
   become_flags: "su - -c"
   become_method: ansible.builtin.sudo
   ansible.builtin.fail:
-    msg:
-      - "You need at least one extended partition and 12 logical partitions NVMe drives per guest. Detected {{ fstests_nvme_parts | length }} NVMe drives. Bailing test."
+    msg: >-
+      You need at least one extended partition and 12 logical partitions NVMe drives
+      per guest. Detected {{ fstests_nvme_parts | length }} NVMe drives. Bailing test.
   when:
     - fstests_testdev_nvme_partition_euis|bool
     - fstests_nvme_symlinks | length >= 1
@@ -944,9 +947,12 @@
   failed_when: fstests_useradd_result.rc != 0 and fstests_useradd_result.rc != 9
   changed_when: true
 
-- name: Verify section name {{ fstests_section }} exists on fstests config file
+- name: Verify the fstests section name exists in the rendered fstests config
   vars:
-    fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    fstests_section: >-
+      {{ (ansible_host | default(inventory_hostname))
+         | regex_replace(kdevops_host_prefix + '-')
+         | regex_replace('-dev') | regex_replace('-', '_') }}
   tags: ["oscheck", "fstests", "run_tests", "section", "do_configure"]
   become: true
   become_flags: "su - -c"
@@ -998,7 +1004,10 @@
 
 - name: Check and verify fstests dependencies are met prior to running fstests
   vars:
-    fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    fstests_section: >-
+      {{ (ansible_host | default(inventory_hostname))
+         | regex_replace(kdevops_host_prefix + '-')
+         | regex_replace('-dev') | regex_replace('-', '_') }}
   tags: ["oscheck", "fstests", "run_tests"]
   become: true
   become_flags: "su - -c"
@@ -1232,7 +1241,10 @@
 
 - name: Run oscheck-get-failures.sh to get list of known failed tests
   vars:
-    fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    fstests_section: >-
+      {{ (ansible_host | default(inventory_hostname))
+         | regex_replace(kdevops_host_prefix + '-')
+         | regex_replace('-dev') | regex_replace('-', '_') }}
   tags: ["oscheck", "fstests", "run_tests"]
   ansible.builtin.command: "{{ kdevops_data }}/workflows/fstests/scripts/oscheck-get-failures.sh --test-section {{ fstests_section }}"
   args:
@@ -1280,8 +1292,8 @@
   when:
     - fstests_skip_run|bool
 
-# Start monitoring services before running tests
-- ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
+- name: Start the monitoring services on the test hosts
+  ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_run.yml
   when:
     - kdevops_run_fstests | default(false) | bool
     - enable_monitoring|default(false)|bool
@@ -1290,10 +1302,12 @@
 # Recent environments runs are showing that environment variables
 # set below are not propagated. So best to stuff what you need
 # into the .fstests_setup file which is sourced by root.
-- name: Run fstests using ./oscheck.sh --print-start --journal {{ fstests_journal }} --print-done --test-section {{ fstests_section }} {{ oscheck_extra_args | default('') }} {{
-    fstests_all_limit_tests }}
+- name: Run fstests via oscheck.sh on the current section
   vars:
-    fstests_section: "{{ (ansible_host | default(inventory_hostname)) | regex_replace(kdevops_host_prefix + '-') | regex_replace('-dev') | regex_replace('-', '_') }}"
+    fstests_section: >-
+      {{ (ansible_host | default(inventory_hostname))
+         | regex_replace(kdevops_host_prefix + '-')
+         | regex_replace('-dev') | regex_replace('-', '_') }}
     initial_baseline_expunges: "{{ fstests_initial_baseline_args | trim }}"
     skip_tests_args: "{{ fstests_skip_tests_args | trim }}"
   tags: ["oscheck", "fstests", "run_tests"]
@@ -1335,8 +1349,8 @@
   when:
     - kdevops_run_fstests | default(false) | bool
 
-# Stop monitoring services and collect data after running tests
-- ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
+- name: Stop monitoring services and collect data
+  ansible.builtin.import_tasks: ../../monitoring/tasks/monitor_collect.yml
   when:
     - kdevops_run_fstests | default(false) | bool
     - enable_monitoring|default(false)|bool
@@ -1624,8 +1638,11 @@
     - item.stat.exists
 
 - name: Print fstests results to xunit_results.txt on localhost if xunit xml file was found
-  ansible.builtin.command: ./python/workflows/fstests/gen_results_summary --results_file result.xml  --print_section --output_file {{ fstests_results_target }}/{{
-    fstests_last_kernel }}/xunit_results.txt {{ fstests_results_target }}/
+  ansible.builtin.command: >-
+    ./python/workflows/fstests/gen_results_summary
+    --results_file result.xml --print_section
+    --output_file {{ fstests_results_target }}/{{ fstests_last_kernel }}/xunit_results.txt
+    {{ fstests_results_target }}/
   delegate_to: localhost
   tags: ["oscheck", "fstests", "copy_results", "print_results", "augment_expunge_list"]
   when:
@@ -1633,8 +1650,10 @@
   run_once: true
   changed_when: false
 
-- name: Print fstests bad results for {{ fstests_fstyp }} to bad_results.txt on localhost
-  ansible.builtin.shell: ./python/workflows/fstests/bad_files_summary.py {{ fstests_fstyp }} {{ fstests_results_target }}/ > {{ fstests_results_target }}/bad_results.txt
+- name: Print fstests bad results to bad_results.txt on localhost
+  ansible.builtin.shell: >-
+    ./python/workflows/fstests/bad_files_summary.py {{ fstests_fstyp }} {{ fstests_results_target }}/
+    > {{ fstests_results_target }}/bad_results.txt
   delegate_to: localhost
   tags: ["oscheck", "fstests", "copy_results", "print_results", "augment_expunge_list"]
   when:
@@ -1642,7 +1661,7 @@
   run_once: true
   changed_when: false
 
-- name: Create check.time.distribution files for {{ fstests_results_target }}/results
+- name: Create check.time.distribution files for the local fstests results
   ansible.builtin.command: ./python/workflows/fstests/fstests-checktime-distribution.py {{ fstests_results_target }}
   delegate_to: localhost
   tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list"]
@@ -1651,16 +1670,21 @@
     - fstests_checktime_files.matched > 0
   changed_when: true
 
-- name: Augment expunge list for {{ fstests_fstyp }}, just run git diff after this to see new failures found
-  ansible.builtin.command: ./python/workflows/fstests/augment_expunge_list.py {{ fstests_fstyp }} {{ fstests_results_target }}/ {{ fstests_workflow_dir }}/expunges/
+- name: Augment expunge list; run git diff after this to see new failures
+  ansible.builtin.command: >-
+    ./python/workflows/fstests/augment_expunge_list.py
+    {{ fstests_fstyp }} {{ fstests_results_target }}/
+    {{ fstests_workflow_dir }}/expunges/
   delegate_to: localhost
   tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list"]
   run_once: true
   changed_when: true
 
-- name: Print fstests new expunge files for {{ fstests_fstyp }} which are not yet committed
-  ansible.builtin.shell: ./python/workflows/fstests/get_new_expunge_files.py {{ fstests_fstyp }} {{ fstests_workflow_dir }}/expunges/ > {{ fstests_results_target
-    }}/new_expunge_files.txt
+- name: Print fstests new expunge files not yet committed
+  ansible.builtin.shell: >-
+    ./python/workflows/fstests/get_new_expunge_files.py
+    {{ fstests_fstyp }} {{ fstests_workflow_dir }}/expunges/
+    > {{ fstests_results_target }}/new_expunge_files.txt
   delegate_to: localhost
   tags: ["oscheck", "fstests", "copy_results", "print_results", "augment_expunge_list"]
   run_once: true
@@ -1711,11 +1735,12 @@
 
 # You are encouraged to commit the compressed results of failed tests
 # so we keep an archive
-- name: Compress results {{ fstests_results_full_path }}/{{ fstests_last_kernel }}.xz
+- name: Compress the per-kernel results archive
   community.general.archive:
     path: "{{ fstests_results_full_path }}/{{ fstests_last_kernel }}"
     dest: "{{ fstests_results_full_path }}/{{ fstests_last_kernel }}.xz"
     format: xz
+    mode: "0644"
   run_once: true
   tags: ["oscheck", "fstests", "copy_results", "augment_expunge_list"]
   delegate_to: localhost

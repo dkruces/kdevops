@@ -189,4 +189,3 @@ fstests_tmpfs_section_huge_advise: false
 fstests_xfsdump_build: false
 fstests_xfsdump_git: "https://github.com/linux-kdevops/xfsdump-dev.git"
 fstests_xfsdump_data: "{{ data_path }}/xfsdump"
-

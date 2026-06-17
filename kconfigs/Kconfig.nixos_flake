@@ -58,6 +58,48 @@ config NIXOSFI_CONFIG_DIR
 
 endif # NIXOSFI
 
+menu "Guest GPU driver"
+
+choice
+	prompt "GPU driver to load in the guest"
+	default NIXOS_FLAKE_GPU_VENDOR_NONE
+	help
+	  Selects the guest-side GPU driver stack when a physical GPU is
+	  passed into the guest (via QSU_PCI_PASSTHROUGH on NIXOSFI, or
+	  the libvirt equivalent on NIXOSFL). The qsu/libvirt VFIO wiring
+	  hands the device to the guest; this knob decides which driver
+	  the guest closure loads to talk to it.
+
+config NIXOS_FLAKE_GPU_VENDOR_NONE
+	bool "No GPU driver (default)"
+	help
+	  Don't load any GPU driver in the guest closure. Pick this when
+	  no GPU is passed through, or when the workload doesn't need a
+	  CUDA/ROCm stack.
+
+config NIXOS_FLAKE_GPU_VENDOR_NVIDIA
+	bool "NVIDIA (proprietary driver + CUDA)"
+	help
+	  Load the proprietary NVIDIA driver, allowUnfree, the CUDA
+	  toolkit and nvidia-container-toolkit. Required for vLLM,
+	  LMCache, and other CUDA-bound workloads.
+
+config NIXOS_FLAKE_GPU_VENDOR_AMD
+	bool "AMD (amdgpu + ROCm)"
+	help
+	  Load amdgpu and the ROCm clr runtime.
+
+endchoice
+
+config NIXOS_FLAKE_GPU_VENDOR
+	string
+	output yaml
+	default "nvidia" if NIXOS_FLAKE_GPU_VENDOR_NVIDIA
+	default "amd" if NIXOS_FLAKE_GPU_VENDOR_AMD
+	default "none"
+
+endmenu  # Guest GPU driver
+
 menu "Profiles"
 
 config NIXOS_FLAKE_PROFILE_DEVEL

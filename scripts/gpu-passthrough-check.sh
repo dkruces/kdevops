@@ -21,15 +21,15 @@ bad()  { printf '[FAIL] %s\n' "$*"; fail=1; }
 
 echo "== 1. IOMMU enabled on the host kernel =="
 if [ -d /sys/kernel/iommu_groups ] && \
-   [ "$(find /sys/kernel/iommu_groups -maxdepth 1 -type l 2>/dev/null | wc -l)" -gt 0 ] || \
-   [ "$(ls -1 /sys/kernel/iommu_groups 2>/dev/null | wc -l)" -gt 0 ]; then
+   [ "$(find /sys/kernel/iommu_groups -maxdepth 1 -type l 2>/dev/null | wc --lines)" -gt 0 ] || \
+   [ "$(ls --format=single-column /sys/kernel/iommu_groups 2>/dev/null | wc --lines)" -gt 0 ]; then
 	ok "IOMMU groups present"
 else
 	bad "No IOMMU groups. Add intel_iommu=on (or amd_iommu=on) iommu=pt to the host cmdline."
 fi
 
 echo "== 2. vfio-pci module available =="
-if modinfo vfio-pci >/dev/null 2>&1 || lsmod | grep -q '^vfio_pci'; then
+if modinfo vfio-pci >/dev/null 2>&1 || lsmod | grep --quiet '^vfio_pci'; then
 	ok "vfio-pci present"
 else
 	bad "vfio-pci module not found."
@@ -47,12 +47,12 @@ for addr in "$@"; do
 	# IOMMU group + group members
 	grp_link="/sys/bus/pci/devices/$addr/iommu_group"
 	if [ -e "$grp_link" ]; then
-		grp="$(basename "$(readlink -f "$grp_link")")"
+		grp="$(basename "$(readlink --canonicalize "$grp_link")")"
 		note "IOMMU group: $grp"
 		note "Group members (ALL must be passed through together):"
 		for d in /sys/kernel/iommu_groups/"$grp"/devices/*; do
 			b="$(basename "$d")"
-			note "    $b  $(lspci -nns "${b#0000:}" | cut -d' ' -f2-)"
+			note "    $b  $(lspci -nns "${b#0000:}" | cut --delimiter=' ' --fields=2-)"
 		done
 	else
 		bad "$addr: no iommu_group (IOMMU off?)"
@@ -61,7 +61,7 @@ for addr in "$@"; do
 	# Current kernel driver
 	drv_link="/sys/bus/pci/devices/$addr/driver"
 	if [ -e "$drv_link" ]; then
-		drv="$(basename "$(readlink -f "$drv_link")")"
+		drv="$(basename "$(readlink --canonicalize "$drv_link")")"
 		if [ "$drv" = "vfio-pci" ]; then
 			ok "$addr bound to vfio-pci"
 		else

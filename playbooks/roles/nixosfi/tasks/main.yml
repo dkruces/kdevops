@@ -23,6 +23,16 @@
       tags: [generate-configs]
   tags: [generate-configs]
 
+- name: Set up host VFIO when QSU_PCI_PASSTHROUGH=y
+  ansible.builtin.include_role:
+    name: qsu
+    tasks_from: setup-vfio
+    apply:
+      tags: [generate-configs]
+  when:
+    - qsu_pci_passthrough | default(false) | bool
+  tags: [generate-configs]
+
 - name: Generate the per-node imageless flakes
   ansible.builtin.import_tasks:
     file: "{{ role_path }}/tasks/generate-configs.yml"

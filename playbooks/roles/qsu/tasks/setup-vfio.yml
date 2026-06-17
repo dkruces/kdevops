@@ -1,0 +1,72 @@
+---
+# SPDX-License-Identifier: copyleft-next-0.3.1
+#
+# Host VFIO setup for QSU_PCI_PASSTHROUGH. Renders the four upstream
+# qsu artefacts (vfio-bind@.service, vfio-udev.rules, vfio-pci modprobe
+# config, plus the modprobe + udevadm reload) so that the per-VM
+# `Requires=vfio-bind@<addr>.service` and `-device vfio-pci,host=<addr>`
+# emitted elsewhere by the role actually resolve at boot. See
+# scripts/qemu-system-units/docs/usage.md "vfio".
+
+- name: Compose host-wide pci_passthrough device list for udev rules
+  ansible.builtin.set_fact:
+    qsu_pci_passthrough_host_list: >-
+      {{
+        (qsu_pci_passthrough_devices | default('')).split(',')
+        | map('trim') | select('match', '^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$')
+        | map('regex_replace', '^(.+)$', '{"addr": "\1"}')
+        | map('from_json') | list
+      }}
+
+- name: Render vfio-bind@.service template
+  ansible.builtin.template:
+    src: "{{ topdir_path }}/scripts/qemu-system-units/templates/vfio-bind@.service.j2"
+    dest: "{{ lookup('env', 'HOME') }}/.config/systemd/user/vfio-bind@.service"
+    mode: "0644"
+  vars:
+    service_scope: user
+
+- name: Install /etc/modules-load.d/vfio-pci.conf
+  become: true
+  ansible.builtin.copy:
+    src: "{{ topdir_path }}/scripts/qemu-system-units/files/vfio-pci.conf"
+    dest: /etc/modules-load.d/vfio-pci.conf
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Load the vfio-pci kernel module now
+  become: true
+  community.general.modprobe:
+    name: vfio-pci
+    state: present
+
+- name: Render vfio udev rules with the per-device sysfs permissions
+  become: true
+  ansible.builtin.template:
+    src: "{{ topdir_path }}/scripts/qemu-system-units/templates/vfio-udev.rules.j2"
+    dest: /etc/udev/rules.d/10-vfio-kvm.rules
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    pci_passthrough: "{{ qsu_pci_passthrough_host_list }}"
+  register: qsu_vfio_udev_rules
+
+- name: Reload udev rules so the new vfio permissions take effect
+  become: true
+  ansible.builtin.command: udevadm control --reload-rules
+  changed_when: false
+  when: qsu_vfio_udev_rules is changed
+
+- name: Trigger PCI subsystem so the per-device RUN+= rules fire
+  become: true
+  ansible.builtin.command: udevadm trigger --subsystem-match=pci
+  changed_when: false
+  when: qsu_vfio_udev_rules is changed
+
+- name: Reload user systemd so vfio-bind@.service is visible
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user

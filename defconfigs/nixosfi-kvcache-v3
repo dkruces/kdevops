@@ -41,8 +41,8 @@ CONFIG_QSU_IOMMU_INTEL=y
 # whole group has to be passed through together.
 CONFIG_QSU_PCI_PASSTHROUGH_DEVICES="0000:81:00.0,0000:81:00.1"
 
-# --- Guest-side GPU driver ---
-CONFIG_NIXOS_FLAKE_GPU_VENDOR_NVIDIA=y
+# --- Guest-side GPU driver profile ---
+CONFIG_NIXOS_FLAKE_PROFILE_GPU_NVIDIA=y
 
 # --- Workflow: vLLM bare-metal in-guest with LMCache + V3 benchmark ---
 CONFIG_WORKFLOWS=y

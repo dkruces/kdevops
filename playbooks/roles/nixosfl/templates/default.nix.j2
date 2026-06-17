@@ -21,6 +21,12 @@
 {% if nixos_flake_profile_monitoring is defined and nixos_flake_profile_monitoring %}
     nixos-flake.nixosModules.profiles.monitoring
 {% endif %}
+{% if nixos_flake_profile_gpu_nvidia is defined and nixos_flake_profile_gpu_nvidia %}
+    nixos-flake.nixosModules.profiles.gpu-nvidia
+{% endif %}
+{% if nixos_flake_profile_gpu_amd is defined and nixos_flake_profile_gpu_amd %}
+    nixos-flake.nixosModules.profiles.gpu-amd
+{% endif %}
 {% if nixos_flake_mount_shares is defined and nixos_flake_mount_shares %}
     nixos-flake.nixosModules.mounts.shares
 {% endif %}

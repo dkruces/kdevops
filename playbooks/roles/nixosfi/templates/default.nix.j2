@@ -21,6 +21,12 @@
 {% if nixos_flake_profile_monitoring is defined and nixos_flake_profile_monitoring %}
     nixos-flake.nixosModules.profiles.monitoring
 {% endif %}
+{% if nixos_flake_profile_gpu_nvidia is defined and nixos_flake_profile_gpu_nvidia %}
+    nixos-flake.nixosModules.profiles.gpu-nvidia
+{% endif %}
+{% if nixos_flake_profile_gpu_amd is defined and nixos_flake_profile_gpu_amd %}
+    nixos-flake.nixosModules.profiles.gpu-amd
+{% endif %}
 {% if nixos_flake_mount_shares is defined and nixos_flake_mount_shares %}
     nixos-flake.nixosModules.mounts.shares
 {% endif %}
@@ -77,27 +83,6 @@
   nixos-flake.shares."{{ qsu_shares_s0_mount }}" = { tag = "{{ qsu_shares_s0_tag }}";{% if not (qsu_shares_s0_readwrite | default(false)) %} options = [ "ro" ];{% endif %} };
 {% endif %}
 
-{% if nixos_flake_gpu_vendor | default('none') == 'nvidia' %}
-  # NVIDIA GPU visible to this guest via VFIO. Load the proprietary
-  # driver + CUDA so vLLM/LMCache can use the device.
-  nixpkgs.config.allowUnfree = true;
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia = {
-    modesetting.enable = true;
-    open = false;
-    nvidiaSettings = false;
-    package = config.boot.kernelPackages.nvidiaPackages.production;
-  };
-  hardware.graphics.enable = true;
-  hardware.nvidia-container-toolkit.enable = true;
-  environment.systemPackages = with pkgs; [ cudaPackages.cudatoolkit pciutils ];
-{% elif nixos_flake_gpu_vendor | default('none') == 'amd' %}
-  # AMD GPU pass-through: amdgpu + ROCm.
-  nixpkgs.config.allowUnfree = true;
-  services.xserver.videoDrivers = [ "amdgpu" ];
-  hardware.graphics.enable = true;
-  environment.systemPackages = with pkgs; [ rocmPackages.clr pciutils ];
-{% endif %}
 {% set override_pkgs = [
   ('fio',          nixos_flake_override_fio          | default(false), nixos_flake_override_fio_src          | default('')),
   ('xfstests',     nixos_flake_override_xfstests     | default(false), nixos_flake_override_xfstests_src     | default('')),

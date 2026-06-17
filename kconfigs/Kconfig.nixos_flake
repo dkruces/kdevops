@@ -58,47 +58,6 @@ config NIXOSFI_CONFIG_DIR
 
 endif # NIXOSFI
 
-menu "Guest GPU driver"
-
-choice
-	prompt "GPU driver to load in the guest"
-	default NIXOS_FLAKE_GPU_VENDOR_NONE
-	help
-	  Selects the guest-side GPU driver stack when a physical GPU is
-	  passed into the guest (via QSU_PCI_PASSTHROUGH on NIXOSFI, or
-	  the libvirt equivalent on NIXOSFL). The qsu/libvirt VFIO wiring
-	  hands the device to the guest; this knob decides which driver
-	  the guest closure loads to talk to it.
-
-config NIXOS_FLAKE_GPU_VENDOR_NONE
-	bool "No GPU driver (default)"
-	help
-	  Don't load any GPU driver in the guest closure. Pick this when
-	  no GPU is passed through, or when the workload doesn't need a
-	  CUDA/ROCm stack.
-
-config NIXOS_FLAKE_GPU_VENDOR_NVIDIA
-	bool "NVIDIA (proprietary driver + CUDA)"
-	help
-	  Load the proprietary NVIDIA driver, allowUnfree, the CUDA
-	  toolkit and nvidia-container-toolkit. Required for vLLM,
-	  LMCache, and other CUDA-bound workloads.
-
-config NIXOS_FLAKE_GPU_VENDOR_AMD
-	bool "AMD (amdgpu + ROCm)"
-	help
-	  Load amdgpu and the ROCm clr runtime.
-
-endchoice
-
-config NIXOS_FLAKE_GPU_VENDOR
-	string
-	output yaml
-	default "nvidia" if NIXOS_FLAKE_GPU_VENDOR_NVIDIA
-	default "amd" if NIXOS_FLAKE_GPU_VENDOR_AMD
-	default "none"
-
-endmenu  # Guest GPU driver
 
 menu "Profiles"
 
@@ -136,6 +95,30 @@ config NIXOS_FLAKE_PROFILE_MONITORING
 	  via sadc + libbpf-tools). Enabling this just bakes the systemd
 	  template units into the guest image; nothing in kdevops drives
 	  them today.
+
+config NIXOS_FLAKE_PROFILE_GPU_NVIDIA
+	bool "NVIDIA GPU driver + CUDA profile"
+	output yaml
+	default n
+	help
+	  Imports nixos-flake.nixosModules.profiles.gpu-nvidia. Loads
+	  the proprietary NVIDIA driver, allowUnfree, the CUDA toolkit
+	  and nvidia-container-toolkit inside the guest closure.
+	  Required when a physical NVIDIA GPU is passed through (via
+	  QSU_PCI_PASSTHROUGH on NIXOSFI, or libvirt VFIO on NIXOSFL)
+	  and the workload needs CUDA (vLLM, LMCache, ...).
+	  Mutually exclusive with NIXOS_FLAKE_PROFILE_GPU_AMD.
+
+config NIXOS_FLAKE_PROFILE_GPU_AMD
+	bool "AMD GPU driver + ROCm profile"
+	output yaml
+	default n
+	help
+	  Imports nixos-flake.nixosModules.profiles.gpu-amd. Loads the
+	  amdgpu driver and ROCm clr runtime inside the guest closure.
+	  Required when a physical AMD GPU is passed through and the
+	  workload needs ROCm.
+	  Mutually exclusive with NIXOS_FLAKE_PROFILE_GPU_NVIDIA.
 
 endmenu  # Profiles
 

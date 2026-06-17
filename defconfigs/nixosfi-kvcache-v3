@@ -1,0 +1,88 @@
+# nixos-flake imageless guest (qsu + systemd machine) running the
+# vLLM + LMCache KV-cache workload, replaying the TensorMesh V3
+# agentic-trace benchmark (sammshen/lmcache-agentic-traces: 787 sessions
+# / 24,881 iterations from SWE-bench, GAIA, WildClaw).
+#
+# GPU-dependent. vLLM + LMCache require a real CUDA device; qsu hands a
+# physical GPU to the guest via VFIO PCIe pass-through. The guest claims
+# the GPU exclusively (the host must release it: vfio-pci binding, IOMMU
+# on, GPU not used by the host display). Run
+# scripts/gpu-passthrough-check.sh on the hypervisor before make bringup.
+#
+# Override the PCI addresses for your host:
+#   make defconfig-nixosfi-kvcache-v3 \
+#     QSU_PCI_PASSTHROUGH_DEVICES=0000:81:00.0,0000:81:00.1
+
+CONFIG_NIXOSFI=y
+CONFIG_KDEVOPS_ENABLE_NIXOS_FLAKE=y
+
+# Direct-boot path: kdevops builds the kernel on the controller and qsu
+# hands it to the guest via -kernel. nixosfi requires it.
+CONFIG_BOOTLINUX=y
+CONFIG_BOOTLINUX_DIRECT_BOOT=y
+
+CONFIG_KDEVOPS_HOSTS_PREFIX="kvcache"
+
+# 128 GiB and 16 vCPUs. V3 SWE-bench contexts grow to ~35K tokens
+# (WildClaw to 130K+); size the guest for the model + KV cache that
+# will not fit purely in offload.
+CONFIG_QSU_RAM=131072
+CONFIG_QSU_CPUS=16
+
+# Two large NVMe drives for LMCache offload (HBM -> DRAM -> NVMe).
+CONFIG_QSU_NVME_DRIVE_COUNT=2
+CONFIG_QSU_NVME_DRIVE_SIZE_GB=200
+
+# --- GPU PCIe pass-through (VFIO) via qsu pci_passthrough ---
+CONFIG_QSU_PCI_PASSTHROUGH=y
+CONFIG_QSU_IOMMU_INTEL=y
+# Host PCI addresses. CHANGE THESE for your host. Include the .1 audio
+# function: discrete NVIDIA GPUs put it in the same IOMMU group and the
+# whole group has to be passed through together.
+CONFIG_QSU_PCI_PASSTHROUGH_DEVICES="0000:81:00.0,0000:81:00.1"
+
+# --- Guest-side GPU driver ---
+CONFIG_NIXOS_FLAKE_GPU_VENDOR_NVIDIA=y
+
+# --- Workflow: vLLM bare-metal in-guest with LMCache + V3 benchmark ---
+CONFIG_WORKFLOWS=y
+CONFIG_WORKFLOWS_DEDICATED_WORKFLOW=y
+CONFIG_KDEVOPS_WORKFLOW_DEDICATE_VLLM=y
+
+# Bare-metal (systemd) deployment inside the guest. Avoids the Kubernetes
+# / minikube path: that virtualization layer obscures the storage I/O we
+# want to characterise and complicates GPU device plumbing.
+CONFIG_VLLM_BARE_METAL=y
+CONFIG_VLLM_BARE_METAL_USE_CONTAINER=y
+CONFIG_VLLM_BARE_METAL_DOCKER=y
+
+# Real GPU inference now that the GPU is passed through.
+CONFIG_VLLM_USE_CPU_INFERENCE=n
+CONFIG_VLLM_REQUEST_GPU=1
+CONFIG_VLLM_TENSOR_PARALLEL_SIZE=1
+CONFIG_VLLM_GPU_MEMORY_UTILIZATION="0.85"
+
+# Model. opt-125m keeps the smoke test fast; swap for Qwen3-Coder-480B-AWQ
+# (8x TP) on a real multi-GPU host.
+CONFIG_VLLM_MODEL_URL="facebook/opt-125m"
+CONFIG_VLLM_MODEL_NAME="opt-125m"
+CONFIG_VLLM_MAX_MODEL_LEN=8192
+CONFIG_VLLM_DTYPE="auto"
+CONFIG_VLLM_ENABLE_PREFIX_CACHING=y
+
+# LMCache KV-cache offload to CPU/NVMe -- the thing under test.
+CONFIG_VLLM_LMCACHE_ENABLED=y
+CONFIG_VLLM_LMCACHE_CPU_BUFFER_SIZE="40"
+
+# TensorMesh V3 agentic-trace replay as the benchmark workload.
+CONFIG_VLLM_BENCHMARK_ENABLED=y
+CONFIG_VLLM_BENCHMARK_V3=y
+CONFIG_VLLM_BENCHMARK_V3_PRESET_SWEBENCH_REALISTIC=y
+CONFIG_VLLM_BENCHMARK_V3_DATASET="sammshen/lmcache-agentic-traces"
+CONFIG_VLLM_BENCHMARK_RESULTS_DIR="/data/vllm-benchmark"
+
+CONFIG_VLLM_OBSERVABILITY_ENABLED=y
+
+CONFIG_KDEVOPS_TRY_REFRESH_REPOS=y
+CONFIG_KDEVOPS_TRY_UPDATE_SYSTEMS=y
+CONFIG_KDEVOPS_TRY_INSTALL_KDEV_TOOLS=y

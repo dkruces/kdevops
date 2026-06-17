@@ -198,6 +198,83 @@ endif # QSU_SHARES_S0
 endmenu  # Virtiofs shares
 
 
+menu "PCIe pass-through (VFIO)"
+
+config QSU_PCI_PASSTHROUGH
+	bool "Hand physical PCI devices to the guest via VFIO"
+	output yaml
+	default n
+	help
+	  Pass one or more physical PCI devices from the host to the
+	  guest through VFIO. qsu maps each address listed in
+	  QSU_PCI_PASSTHROUGH_DEVICES into the vars schema's
+	  pci_passthrough list, which the templated qemu cmdline emits as
+	  `-device vfio-pci,host=<addr>`. The qemu-system@<vm>.service
+	  unit gains Requires=vfio-bind@<addr>.service for each device
+	  and LimitMEMLOCK is raised to ram+256M for VFIO DMA mapping.
+
+	  The host must be prepared independently: IOMMU enabled on the
+	  host kernel cmdline (intel_iommu=on or amd_iommu=on, plus
+	  iommu=pt), the target devices bound to vfio-pci on the host,
+	  and the full IOMMU group of each passed device assigned to the
+	  guest together. Run scripts/gpu-passthrough-check.sh on the
+	  hypervisor to verify each address before bringup.
+
+if QSU_PCI_PASSTHROUGH
+
+choice
+	prompt "IOMMU device model presented to the guest"
+	default QSU_IOMMU_INTEL
+	help
+	  qsu vm.env.j2 auto-appends caching-mode=on (intel-iommu) or
+	  dma-remap=on (amd-iommu) when pci_passthrough is also set, and
+	  switches the accelerator to kernel-irqchip=split as required
+	  for interrupt remapping.
+
+config QSU_IOMMU_INTEL
+	bool "Intel VT-d (intel-iommu)"
+	help
+	  Intel VT-d via -device intel-iommu,intremap=on. Requires
+	  machine_type q35.
+
+config QSU_IOMMU_AMD
+	bool "AMD-Vi (amd-iommu)"
+	help
+	  AMD-Vi via -device amd-iommu,intremap=on. Requires
+	  machine_type q35.
+
+config QSU_IOMMU_VIRTIO
+	bool "virtio-iommu (architecture-independent)"
+	help
+	  virtio-iommu-pci. No kernel-irqchip requirement; works with
+	  q35 (x86_64) and virt (aarch64).
+
+endchoice
+
+config QSU_IOMMU
+	string
+	output yaml
+	default "intel-iommu" if QSU_IOMMU_INTEL
+	default "amd-iommu" if QSU_IOMMU_AMD
+	default "virtio-iommu-pci" if QSU_IOMMU_VIRTIO
+
+config QSU_PCI_PASSTHROUGH_DEVICES
+	string "Host PCI addresses to pass through (comma-separated)"
+	output yaml
+	default ""
+	help
+	  Comma-separated host PCI addresses in domain:bus:slot.function
+	  notation, e.g. "0000:81:00.0,0000:81:00.1". Every device in the
+	  same IOMMU group has to be passed through together; discrete
+	  NVIDIA GPUs typically need both the graphics .0 function and
+	  the HDMI-audio .1 function or the group will not bind to
+	  vfio-pci.
+
+endif # QSU_PCI_PASSTHROUGH
+
+endmenu  # PCIe pass-through (VFIO)
+
+
 menu "NVMe storage"
 
 config QSU_NVME_DRIVE_COUNT

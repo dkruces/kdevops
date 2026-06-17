@@ -186,6 +186,19 @@
         else []
       }}
 
+# qsu vm.env consumes pci_passthrough as a list of {addr: ...} dicts.
+- name: Compose PCI pass-through device list for {{ qsu_vm_name }}
+  ansible.builtin.set_fact:
+    qsu_pci_passthrough_list: >-
+      {{
+        (qsu_pci_passthrough_devices | default('')).split(',')
+        | map('trim') | select
+        | map('regex_replace', '^(.+)$', '{"addr": "\1"}')
+        | map('from_json') | list
+        if (qsu_pci_passthrough | default(false) | bool)
+        else []
+      }}
+
 - name: Render vm.env for {{ qsu_vm_name }}
   ansible.builtin.template:
     src: "{{ topdir_path }}/scripts/qemu-system-units/templates/vm.env.j2"
@@ -208,6 +221,8 @@
     shares: "{{ qsu_shares }}"
     nvme:
       drives: "{{ qsu_nvme_drives }}"
+    iommu: "{{ qsu_iommu | default(omit) }}"
+    pci_passthrough: "{{ qsu_pci_passthrough_list | default([]) }}"
 
 - name: Render qsu debug vars snapshot for {{ qsu_vm_name }}
   ansible.builtin.template:
@@ -232,6 +247,8 @@
     shares: "{{ qsu_shares }}"
     nvme:
       drives: "{{ qsu_nvme_drives }}"
+    iommu: "{{ qsu_iommu | default(omit) }}"
+    pci_passthrough: "{{ qsu_pci_passthrough_list | default([]) }}"
 
 - name: Render per-VM service drop-in override.conf for {{ qsu_vm_name }}
   ansible.builtin.template:
@@ -246,6 +263,7 @@
     machine_type: "{{ qsu_machine_type }}"
     vsock_cid: "{{ qsu_vsock_cid_base | int + qsu_vm_idx }}"
     shares: "{{ qsu_shares }}"
+    pci_passthrough: "{{ qsu_pci_passthrough_list | default([]) }}"
 
 # Per-(VM, share) drop-in adding Before=qemu-system@<vm>.service so
 # virtiofsd outlives qemu's ExecStop= graceful shutdown. Without it,

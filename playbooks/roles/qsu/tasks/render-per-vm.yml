@@ -264,6 +264,16 @@
     vsock_cid: "{{ qsu_vsock_cid_base | int + qsu_vm_idx }}"
     shares: "{{ qsu_shares }}"
     pci_passthrough: "{{ qsu_pci_passthrough_list | default([]) }}"
+    # qsu service template sets DevicePolicy=closed, which blocks
+    # /dev/vfio/<iommu-group> nodes. Group numbers are not known at
+    # render time, so widen the policy for passthrough VMs and let the
+    # operator narrow it with explicit DeviceAllow= if they want.
+    service: >-
+      {{
+        {'DevicePolicy': 'auto'}
+        if (qsu_pci_passthrough | default(false) | bool)
+        else {}
+      }}
 
 # Per-(VM, share) drop-in adding Before=qemu-system@<vm>.service so
 # virtiofsd outlives qemu's ExecStop= graceful shutdown. Without it,

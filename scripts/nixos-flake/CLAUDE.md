@@ -41,6 +41,8 @@ nixos-flake/
 │   │   ├── build-tools.nix  Build toolchain (Autotools plus common headers)
 │   │   ├── controller.nix   Control-node profile: kernel build, Ansible, libvirt (options.nixos-flake.controller)
 │   │   ├── devel.nix        Development profile (kernel testing tools)
+│   │   ├── gpu-amd.nix      AMD GPU driver + ROCm runtime (composes on a VFIO-passthrough backend)
+│   │   ├── gpu-nvidia.nix   NVIDIA GPU driver + CUDA toolkit (composes on a VFIO-passthrough backend)
 │   │   └── monitoring.nix   Test-run-bracketed monitor units (options.nixos-flake.monitoring)
 │   ├── mounts/
 │   │   ├── shares.nix     Opt-in virtiofs shares (options.nixos-flake.shares)

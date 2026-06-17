@@ -64,6 +64,8 @@
           build-tools = ./modules/profiles/build-tools.nix;
           controller = ./modules/profiles/controller.nix;
           devel = ./modules/profiles/devel.nix;
+          gpu-amd = ./modules/profiles/gpu-amd.nix;
+          gpu-nvidia = ./modules/profiles/gpu-nvidia.nix;
           monitoring = ./modules/profiles/monitoring.nix;
         };
 
@@ -230,6 +232,22 @@
             imports = [
               self.nixosModules.backends.imageless
               self.nixosModules.profiles.devel
+            ];
+          };
+          # GPU driver profiles compose on top of any backend that
+          # supplies the device through VFIO PCIe passthrough; build
+          # them against imageless because that's the lighter path
+          # and exercises the same option set.
+          gpu-nvidia = buildBackend {
+            imports = [
+              self.nixosModules.backends.imageless
+              self.nixosModules.profiles.gpu-nvidia
+            ];
+          };
+          gpu-amd = buildBackend {
+            imports = [
+              self.nixosModules.backends.imageless
+              self.nixosModules.profiles.gpu-amd
             ];
           };
         }

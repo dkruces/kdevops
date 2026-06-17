@@ -61,6 +61,23 @@
         dest: "{{ vllm_local_path }}/benchmark.py"
         mode: '0755'
 
+    - name: Create V3 agentic-trace benchmark script
+      when: vllm_benchmark_v3 | default(false)
+      template:
+        src: vllm-benchmark-v3.py.j2
+        dest: "{{ vllm_local_path }}/benchmark_v3.py"
+        mode: '0755'
+
+    - name: Install V3 benchmark Python dependencies
+      when: vllm_benchmark_v3 | default(false)
+      become: yes
+      ansible.builtin.pip:
+        name:
+          - datasets
+          - pyarrow
+          - aiohttp
+        state: present
+
     - name: Create benchmark results directory
       become: yes
       ansible.builtin.file:
@@ -94,7 +111,7 @@
     - name: Run benchmark
       become: no
       ansible.builtin.command:
-        cmd: python3 benchmark.py
+        cmd: "{{ 'python3 benchmark_v3.py' if (vllm_benchmark_v3 | default(false)) else 'python3 benchmark.py' }}"
         chdir: "{{ vllm_local_path }}"
       register: benchmark_output
       ignore_errors: yes

@@ -485,6 +485,85 @@ config VLLM_BENCHMARK_ENABLED
 
 if VLLM_BENCHMARK_ENABLED
 
+config VLLM_BENCHMARK_V3
+	bool "Use the TensorMesh V3 agentic-trace replay as the benchmark"
+	output yaml
+	default n
+	help
+	  Replace the simple concurrent-user benchmark with the TensorMesh
+	  V3 workload generator, which replays real multi-turn agentic LLM
+	  sessions from the sammshen/lmcache-agentic-traces dataset
+	  (787 sessions / 24,881 iterations from SWE-bench, GAIA, WildClaw).
+
+	  V3 preserves the prefix-growth invariant within each session, so
+	  it exercises prefix-aware KV-cache reuse and LMCache offload the
+	  way real agent traffic does. This is the recommended workload for
+	  KV-cache storage characterisation.
+
+if VLLM_BENCHMARK_V3
+
+choice
+	prompt "V3 workload preset"
+	default VLLM_BENCHMARK_V3_PRESET_SWEBENCH_REALISTIC
+
+config VLLM_BENCHMARK_V3_PRESET_DEFAULT
+	bool "default (balanced mix, respect-gaps timing)"
+
+config VLLM_BENCHMARK_V3_PRESET_SWEBENCH_REALISTIC
+	bool "swebench-realistic (code-debug sessions, recorded gaps)"
+
+config VLLM_BENCHMARK_V3_PRESET_SWEBENCH_BURST
+	bool "swebench-burst (code-debug sessions, max pressure)"
+
+config VLLM_BENCHMARK_V3_PRESET_GAIA_BURST
+	bool "gaia-burst (research sessions, max pressure)"
+
+config VLLM_BENCHMARK_V3_PRESET_WILDCLAW_HEAVY
+	bool "wildclaw-heavy (130K+ token contexts)"
+
+config VLLM_BENCHMARK_V3_PRESET_MIXED_REALISTIC
+	bool "mixed-realistic (all three sources, recorded gaps)"
+
+endchoice
+
+config VLLM_BENCHMARK_V3_PRESET
+	string
+	output yaml
+	default "default" if VLLM_BENCHMARK_V3_PRESET_DEFAULT
+	default "swebench-realistic" if VLLM_BENCHMARK_V3_PRESET_SWEBENCH_REALISTIC
+	default "swebench-burst" if VLLM_BENCHMARK_V3_PRESET_SWEBENCH_BURST
+	default "gaia-burst" if VLLM_BENCHMARK_V3_PRESET_GAIA_BURST
+	default "wildclaw-heavy" if VLLM_BENCHMARK_V3_PRESET_WILDCLAW_HEAVY
+	default "mixed-realistic" if VLLM_BENCHMARK_V3_PRESET_MIXED_REALISTIC
+
+config VLLM_BENCHMARK_V3_DATASET
+	string "V3 trace dataset (HuggingFace ID or local path)"
+	output yaml
+	default "sammshen/lmcache-agentic-traces"
+	help
+	  HuggingFace dataset ID or a local path to the Parquet traces.
+
+config VLLM_BENCHMARK_V3_MAX_SESSIONS
+	int "Max sessions to replay (0 = all 787)"
+	output yaml
+	default 0
+	range 0 787
+	help
+	  Cap the number of agent sessions replayed. 0 replays the whole
+	  dataset; use a small number (e.g. 8) for a quick smoke test.
+
+config VLLM_BENCHMARK_V3_WORKERS
+	int "Concurrent session workers (worker-pool size)"
+	output yaml
+	default 4
+	range 1 256
+	help
+	  Number of sessions dispatched concurrently. Turns within a single
+	  session are always sequential to preserve the prefix-growth
+	  invariant; this controls inter-session concurrency only.
+
+endif # VLLM_BENCHMARK_V3
+
 config VLLM_BENCHMARK_DURATION
 	int "Benchmark duration (seconds)"
 	output yaml

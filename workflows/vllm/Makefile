@@ -24,6 +24,14 @@ vllm-benchmark:
 		--tags vars,vllm-benchmark \
 		--extra-vars=@./extra_vars.yaml
 
+vllm-benchmark-v3:
+	$(Q)ansible-playbook \
+		--limit 'baseline:dev' \
+		playbooks/vllm.yml \
+		--tags vars,vllm-benchmark \
+		--extra-vars=@./extra_vars.yaml \
+		--extra-vars='{"vllm_benchmark_v3": true}'
+
 vllm-monitor:
 	$(Q)ansible-playbook \
 		--limit 'baseline:dev' \
@@ -122,6 +130,7 @@ vllm-help-menu:
 	@echo "vllm                      - Deploy vLLM stack"
 	@echo "vllm-deploy               - Deploy vLLM stack (same as vllm)"
 	@echo "vllm-benchmark            - Run performance benchmarks and collect results"
+	@echo "vllm-benchmark-v3         - Run TensorMesh V3 agentic-trace replay benchmark"
 	@echo "vllm-monitor              - Display monitoring dashboard URLs"
 	@echo "vllm-status               - Check detailed deployment status (verbose)"
 	@echo "vllm-status-simplified    - Check deployment status (clean summary)"
@@ -134,4 +143,4 @@ vllm-help-menu:
 	@echo "vllm-visualize-results    - Generate HTML visualization of benchmark results"
 	@echo ""
 
-.PHONY: vllm vllm-deploy vllm-benchmark vllm-monitor vllm-status vllm-status-simplified vllm-quick-test vllm-teardown vllm-cleanup vllm-cleanup-full vllm-cleanup-purge vllm-results vllm-visualize-results vllm-help-menu
+.PHONY: vllm vllm-deploy vllm-benchmark vllm-benchmark-v3 vllm-monitor vllm-status vllm-status-simplified vllm-quick-test vllm-teardown vllm-cleanup vllm-cleanup-full vllm-cleanup-purge vllm-results vllm-visualize-results vllm-help-menu
